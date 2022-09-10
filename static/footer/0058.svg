@@ -1,0 +1,15 @@
+<svg width="256" height="256" xmlns="http://www.w3.org/2000/svg">
+<g stroke="black" fill="transparent" stroke-width="4">
+<path d="M 103 135 L 116 201"/>
+<path d="M 176 133 L 173 140 L 178 176"/>
+<path d="M 90 125 L 173 122 L 192 114 L 196 109 L 198 92 L 186 79 L 160 65 L 124 62 L 87 75 L 76 83 L 71 96 L 85 116 L 103 120 L 126 120 L 137 116"/>
+<path d="M 199 88 L 255 143"/>
+<path d="M 69 51 L 70 22 L 56 21 L 40 33 L 37 56 L 49 85 L 65 98 L 80 99 L 96 97 L 101 87 L 74 34 L 52 31"/>
+<path d="M 59 11 L 59 16 L 120 41 L 129 41 L 134 37 L 137 28 L 133 25"/>
+<path d="M 106 1 L 67 1 L 56 7"/>
+<path d="M 61 0 L 66 3 L 96 1 L 132 19 L 137 28"/>
+<path d="M 38 33 L 13 36 L 4 50 L 0 64 L 1 95 L 8 104 L 14 103 L 18 97 L 31 35"/>
+<path d="M 41 44 L 50 53"/>
+<path d="M 56 39 L 65 46"/>
+</g>
+</svg>

@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:title" content="Muxup implementation notes"/>
+<meta property="og:site_name" content="Muxup">
+<meta property="og:description" content="Notes on how the Muxup website is built"/>
+<meta property="og:type" content="article"/>
+<meta property="og:url" content="https://muxup.com/2022q3/muxup-implementation-notes"/>
+<meta property="og:image" content="https://v1.screenshot.11ty.dev/https%3A%2F%2Fmuxup.com%2F2022q3%2Fmuxup-implementation-notes/opengraph/ar/bigger"/>
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:site" content="@muxup">
+<meta property="twitter:creator" content="@asbradbury">
+<title>Muxup implementation notes - Muxup</title>
+<link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg xmlns='http:%2F%2Fwww.w3.org%2F2000%2Fsvg' viewBox='0 0 100 100'%3E%3Ctext y='80' font-size='110'%3E▨%3C%2Ftext%3E%3C%2Fsvg%3E">
+<meta name="description" content="Notes on how the Muxup website is built">
+<style>
+@font-face {
+font-family:'Nunito Var';
+src:url('/static/Nunito.var.woff2') format('woff2-variations');
+font-display:swap;
+font-weight: 200 1000;
+}
+*, *::before, *::after {
+box-sizing:border-box;
+}
+* {
+margin:0;
+}
+input, button, textarea, select {
+font:inherit;
+}
+img, picture, video, canvas, svg {
+display:block;
+max-width:100%;
+}
+html {
+font-family:'Nunito Var', sans-serif;
+height:100%;
+font-size:16px;
+}
+@media screen and (min-width:640px) {
+html {
+font-size:18px;
+}
+}
+body {
+line-height:1.5;
+color:#222;
+display:grid;
+height:100%;
+grid-template-rows:1fr auto;
+background:#fff no-repeat 0% 0% / 100% .7rem linear-gradient(120deg, #ffffe3 20%, #ddfffc 20%, #ddfffc 40%, #e2eeff 40%, #e2eeff 60%, #f2e2ff 60%, #f2e2ff 80%, #ffdef2 80%, #ffdef2 100%);
+tab-size:4;
+}
+h1, h2, h3, h4, h5, h6 {
+line-height:1.25;
+font-weight:600;
+overflow-wrap:break-word;
+letter-spacing:-.025em;
+margin:1.75rem 0 .75rem;
+}
+h1 {
+font-size:2.986rem
+}
+h2 {
+font-size:2.488rem
+}
+p {
+margin:.75rem 0;
+font-weight:400;
+overflow-wrap:break-word;
+}
+a {
+color:inherit;
+text-decoration:underline;
+text-decoration-color:#aaa;
+text-underline-offset:.15em;
+}
+a:hover {
+text-decoration-thickness:2px;
+}
+ol, ul {
+margin:0 0 0 1.5rem;
+padding-left:0;
+}
+li {
+margin:0 0 .25rem
+}
+::selection {
+background:#ffdac0;
+}
+footer {
+display:grid;
+grid-auto-flow:column;
+align-items:center;
+justify-content:center;
+white-space:pre-wrap;
+padding:.5rem 0;
+font-size:.833rem;
+color:#777;
+}
+@keyframes rotation {
+from {
+transform:rotate(0deg);
+}
+to {
+transform:rotate(359deg);
+}
+}
+#footer-image:hover {
+animation:rotation .6s infinite linear;
+cursor:pointer;
+}
+#article-logo {
+line-height:1.25;
+margin:.5rem 0 0;
+font-size:1.44rem;
+font-weight:700;
+position:relative;
+}
+#article-logo a {
+text-decoration:none;
+}
+#article-title {
+margin:1.5rem 0 0;
+position:relative;
+}
+#article-meta {
+font-size:.833rem;
+color:#777;
+}
+#article-container {
+margin:0 auto;
+padding:1rem;
+max-width:min(calc(750px + 2rem), calc(100vw - 1rem));
+width:100%;
+}
+.anchor {
+position: absolute;
+text-decoration: none;
+width:1.75ex;
+margin-left:-1.4ex;
+visibility:hidden;
+font-size:.8em;
+padding-top:.2em;
+color:#aaa;
+}
+h2:hover .anchor,
+h3:hover .anchor,
+h4:hover .anchor,
+h5:hover .anchor,
+h6:hover .anchor,
+summary:hover .anchor {
+visibility:visible;
+}
+.anchor::before {
+content:"#";
+}
+code {
+background:#f5f5f5;
+padding:.125rem .25rem;
+font-size:.833rem
+}
+pre > code {
+padding:0;
+background:#fff;
+}
+pre {
+word-wrap:break-word;
+overflow-x:auto;
+padding:.5rem 1rem;
+margin:1rem -1rem;
+border-radius:.4rem;
+border:1px solid #d2d2d2;
+}
+</style>
+<link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed.xml"/>
+<link rel="canonical" href="https://muxup.com/2022q3/muxup-implementation-notes"/>
+</head>
+<body>
+<div id="article-container">
+<div>
+<div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></a></div>
+</div>
+<h1 id="article-title"><span id="title-highlight">Muxup implementation notes</span></h1>
+<div id="article-meta"><span title="2022-09-10">2022Q3</span>.</div>
+<p>This article contains a few notes on various implementation decisions made
+when creating <a href="https://muxup.com">the Muxup website</a>. They&#x27;re intended primarily as a
+reference for myself, but some parts may be of wider interest. See
+<a href="/about">about</a> for more information about things like site
+structure.</p>
+<h2 id="site-generation"><a href="#site-generation" class="anchor" aria-hidden="true" tabindex="-1"></a>Site generation</h2>
+<p>I ended up writing my own script for generating the site pages from a tree of
+Markdown files. <a href="https://www.getzola.org/">Zola</a> seems like an excellent
+option, but as I had a very specific idea on how I wanted pages to be
+represented in source form and the format and structure of the output, writing
+my own was the easier option (see
+<a href="https://github.com/muxup/muxup-site/blob/main/build.py">build.py</a>). Plus,
+yak-shaving is fun.</p>
+<p>I opted to use <a href="https://github.com/miyuchina/mistletoe">mistletoe</a> for
+Markdown parsing. I found <a href="https://github.com/miyuchina/mistletoe/pull/157">a</a>
+<a href="https://github.com/miyuchina/mistletoe/pull/158">few</a>
+<a href="https://github.com/miyuchina/mistletoe/pull/159">bugs</a> in the <code>traverse</code>
+helper function when implementing some transformations on the generated AST,
+but upstream was very responsive about reviewing and merging my PRs. The main
+wart I&#x27;ve found is that <a href="https://github.com/miyuchina/mistletoe/issues/56">parsing and rendering aren&#x27;t fully
+separated</a>, although this
+doesn&#x27;t pose any real practical concern for my use case and will hopefully be
+fixed in the future. <a href="https://github.com/lepture/mistune">mistune</a> also seemed
+promising, but has <a href="https://github.com/lepture/mistune/issues/296">some conformance
+issues</a>.</p>
+<p>One goal was to keep everything possible in standard Markdown format. This
+means, for instance, avoiding custom frontmatter entries or link formats if
+the same information could be extracted from the file). Therefore:</p>
+<ul>
+<li>There is no <code>title</code> frontmatter entry - the title is extracted by grabbing
+the first level 1 heading from the Markdown AST (and erroring if it isn&#x27;t
+present).</li>
+<li>All internal links are written as <code>[foo](/relative/to/root/foo.md)</code>. The
+generator will error if the file can&#x27;t be found, and will otherwise
+translate the target to refer to the appropriate permalink.
+<ul>
+<li>This has the additional advantage that links are still usable if viewing
+the Markdown on GitHub, which can be handy if reviewing a previous
+revision of an article.</li>
+</ul>
+</li>
+<li>Article changelogs are just a standard Markdown list under the &quot;Article
+changelog&quot; heading, which is checked and transformed at the Markdown AST
+level in order to produce the desired output (emitting the list using a
+<code>&lt;details&gt;</code> and <code>&lt;summary&gt;</code>).</li>
+</ul>
+<p>All CSS was written through the usual mix of experimentation (see
+<a href="/simple-reload">simple-reload</a> for the page reloading solution I
+used to aid iterative development) and learning from the CSS used by other
+sites.</p>
+<h2 id="randomly-generated-title-highlights"><a href="#randomly-generated-title-highlights" class="anchor" aria-hidden="true" tabindex="-1"></a>Randomly generated title highlights</h2>
+<p>The main visual element throughout the site is the randomised, roughly drawn
+highlight used for the site name and article headings. This takes some
+inspiration from the <a href="https://roughnotation.com/">RoughNotation library</a> (see
+also the <a href="https://shihn.ca/posts/2020/roughjs-algorithms/">author&#x27;s description of the algorithms
+used</a>), but uses my own
+implementation that&#x27;s much more tightly linked to my use case.</p>
+<p>The core logic for drawing these highlights is based around drawing the SVG
+path:</p>
+<ul>
+<li>Determine the position and size of the text element to be highlight (keeping
+in mind it might be described by multiple rectangles if split across several
+lines).</li>
+<li>For each rectangle, draw a bezier curve starting from the middle of the left
+hand side through to the right hand side, with its two control points at
+between 20-40% and 40-80% of the width.</li>
+<li>Apply randomised offsets in the x and y directions for every point.
+<ul>
+<li>The range of the randomised offsets should depend on length of the text.
+Generally speaking, a smaller offsets should be used for a shorter piece
+of text.</li>
+</ul>
+</li>
+</ul>
+<p>This logic is implemented in
+<a href="https://github.com/muxup/muxup-site/blob/main/fragments/common.js"><code>preparePath</code></a>
+and reproduced below (with the knowledge the <code>offset(delta)</code> is a helper to
+return a random number between <code>delta</code> and <code>-delta</code>, hopefully it&#x27;s clear how
+this relates to the logic described above):</p>
+<div class="highlight" style="background: #ffffff"><pre style="line-height: 125%;"><span></span><code><span style="color: #A90D91">function</span> <span style="color: #000000">preparePath</span>(<span style="color: #000000">hlInfo</span>) {
+  <span style="color: #A90D91">const</span> <span style="color: #000000">parentRect</span> <span style="color: #000000">=</span> <span style="color: #000000">hlInfo</span>.<span style="color: #000000">svg</span>.<span style="color: #000000">getBoundingClientRect</span>();
+  <span style="color: #A90D91">const</span> <span style="color: #000000">rects</span> <span style="color: #000000">=</span> <span style="color: #000000">hlInfo</span>.<span style="color: #000000">hlEl</span>.<span style="color: #000000">getClientRects</span>();
+  <span style="color: #A90D91">let</span> <span style="color: #000000">pathD</span> <span style="color: #000000">=</span> <span style="color: #C41A16">&quot;&quot;</span>;
+  <span style="color: #A90D91">for</span> (<span style="color: #A90D91">const</span> <span style="color: #000000">rect</span> <span style="color: #A90D91">of</span> <span style="color: #000000">rects</span>) {
+    <span style="color: #A90D91">const</span> <span style="color: #000000">x</span> <span style="color: #000000">=</span> <span style="color: #000000">rect</span>.<span style="color: #000000">x</span> <span style="color: #000000">-</span> <span style="color: #000000">parentRect</span>.<span style="color: #000000">x</span>, <span style="color: #000000">y</span> <span style="color: #000000">=</span> <span style="color: #000000">rect</span>.<span style="color: #000000">y</span> <span style="color: #000000">-</span> <span style="color: #000000">parentRect</span>.<span style="color: #000000">y</span>,
+          <span style="color: #000000">w</span> <span style="color: #000000">=</span> <span style="color: #000000">rect</span>.<span style="color: #000000">width</span>, <span style="color: #000000">h</span> <span style="color: #000000">=</span> <span style="color: #000000">rect</span>.<span style="color: #000000">height</span>;
+    <span style="color: #A90D91">const</span> <span style="color: #000000">mid_y</span> <span style="color: #000000">=</span> <span style="color: #000000">y</span> <span style="color: #000000">+</span> <span style="color: #000000">h</span> <span style="color: #000000">/</span> <span style="color: #1C01CE">2</span>;
+    <span style="color: #A90D91">let</span> <span style="color: #000000">maxOff</span> <span style="color: #000000">=</span> <span style="color: #000000">w</span> <span style="color: #000000">&lt;</span> <span style="color: #1C01CE">75</span> <span style="color: #000000">?</span> <span style="color: #1C01CE">3</span> <span style="color: #000000">:</span> <span style="color: #000000">w</span> <span style="color: #000000">&lt;</span> <span style="color: #1C01CE">300</span> <span style="color: #000000">?</span> <span style="color: #1C01CE">6</span> <span style="color: #000000">:</span> <span style="color: #1C01CE">8</span>;
+    <span style="color: #A90D91">const</span> <span style="color: #000000">divergePoint</span> <span style="color: #000000">=</span> <span style="color: #1C01CE">.2</span> <span style="color: #000000">+</span> <span style="color: #1C01CE">.2</span> <span style="color: #000000">*</span> <span style="color: #A90D91">Math</span>.<span style="color: #000000">random</span>();
+    <span style="color: #000000">pathD</span> <span style="color: #000000">=</span> <span style="color: #C41A16">`${</span><span style="color: #000000">pathD</span><span style="color: #C41A16">}</span>
+<span style="color: #C41A16">      M${</span><span style="color: #000000">x+offset</span>(<span style="color: #000000">maxOff</span>)<span style="color: #C41A16">} ${</span><span style="color: #000000">mid_y+offset</span>(<span style="color: #000000">maxOff</span>)<span style="color: #C41A16">}</span>
+<span style="color: #C41A16">      C${</span><span style="color: #000000">x+w*divergePoint+offset</span>(<span style="color: #000000">maxOff</span>)<span style="color: #C41A16">} ${</span><span style="color: #000000">mid_y+offset</span>(<span style="color: #000000">maxOff</span>)<span style="color: #C41A16">},</span>
+<span style="color: #C41A16">       ${</span><span style="color: #000000">x+</span><span style="color: #1C01CE">2</span><span style="color: #000000">*w*divergePoint+offset</span>(<span style="color: #000000">maxOff</span>)<span style="color: #C41A16">} ${</span><span style="color: #000000">mid_y+offset</span>(<span style="color: #000000">maxOff</span>)<span style="color: #C41A16">}</span>
+<span style="color: #C41A16">       ${</span><span style="color: #000000">x+w+offset</span>(<span style="color: #000000">maxOff</span>)<span style="color: #C41A16">} ${</span><span style="color: #000000">mid_y+offset</span>(<span style="color: #000000">maxOff</span>)<span style="color: #C41A16">}`</span>;
+  }
+  <span style="color: #000000">hlInfo</span>.<span style="color: #000000">nextPathD</span> <span style="color: #000000">=</span> <span style="color: #000000">pathD</span>;
+  <span style="color: #000000">hlInfo</span>.<span style="color: #000000">strokeWidth</span> <span style="color: #000000">=</span> <span style="color: #1C01CE">0.85</span><span style="color: #000000">*rects</span>[<span style="color: #1C01CE">0</span>].<span style="color: #000000">height</span>;
+}
+</code></pre></div>
+
+<p>I took some care to avoid <a href="https://gist.github.com/paulirish/5d52fb081b3570c81e3a">forced
+layout/reflow</a> by
+batching together reads and writes of the DOM into separate phases when
+drawing the initial set of highlights for the page, which is why this function
+is generates the path but doesn&#x27;t modify the SVG directly. Separate logic adds
+handlers to links that are highlighted continuously redraw the highlight (I
+liked the visual effect).</p>
+<h2 id="minification-and-optimisation"><a href="#minification-and-optimisation" class="anchor" aria-hidden="true" tabindex="-1"></a>Minification and optimisation</h2>
+<p>I primarily targeted the low-hanging fruit here, and avoided adding in too
+many dependencies (e.g. separate HTML and CSS minifiers) during the build.
+muxup.com is a very lightweight site - the main extravagance I&#x27;ve allowed
+myself is the use of a webfont (Nunito) but that only weighs in at ~36KiB (the
+<a href="https://github.com/googlefonts/nunito/tree/main/fonts/variable">variable
+width</a> version
+converted to woff2 and subsetted using <code>pyftsubset</code> from
+<a href="https://github.com/fonttools/fonttools">fontTools</a>). As the CSS and JS
+payload is so small, it&#x27;s inlined into each page.</p>
+<p>The required JS for the article pages and the home page is assembled and then
+minified using <a href="https://github.com/terser/terser">terser</a>. This reduces the
+size of the JS required for the page you&#x27;re reading from 5077 bytes to 2620
+bytes uncompressed (1450 bytes to 991 bytes if compressing the result with
+Brotli, though in practice the impact will be a bit different when compressing
+the JS together with the rest of the page + CSS). When first published, the
+page you are reading (including inlined CSS and JS) was ~27.7KiB uncompressed
+(7.7KiB Brotli compressed), which compares to 14.4KiB for its source Markdown
+(4.9KiB Brotli compressed).</p>
+<p>Each page contains an embedded stylesheet with a conservative approximation of
+the minimal CSS needed. The total amount of CSS is small enough that it&#x27;s easy
+to manually split between the CSS that is common across the site, the CSS only
+needed for the home page, the CSS common to all articles, and then other CSS
+rules that may or may not be needed depending on the page content. For the
+latter case, CSS snippets to include are gated on matching a given string
+(e.g. <code>&lt;kbd</code> for use of the <code>&lt;kbd&gt;</code> tag). For my particular use case, this is
+more straight forward and faster than e.g. relying on
+<a href="https://purgecss.com/">PurgeCSS</a> as part of the build process.</p>
+<p>The final trick on the frontend is prefetching. Upon hovering on an internal
+link, it will be fetched (see the logic at the end of
+<a href="https://github.com/muxup/muxup-site/blob/main/fragments/common.js">common.js</a>
+for the implementation approach), meaning that in the common case any link you
+click will already have been loaded and cached. More complex approaches could
+be used to e.g. hook the mouse click event and directly update the DOM
+using the retrieved data. But this would require work to provide UI feedback
+during the load and the incremental benefit over prefetching to prime the
+cache seems small.</p>
+<h2 id="serving-using-caddy"><a href="#serving-using-caddy" class="anchor" aria-hidden="true" tabindex="-1"></a>Serving using Caddy</h2>
+<p>I had a few goals in setting up <a href="https://caddyserver.com/">Caddy</a> to serve
+this site:</p>
+<ul>
+<li>Enable new and shiny things like HTTP3 and serving Brotli compressed
+content.
+<ul>
+<li>Both are very widely supported on the browser side (and Brotli really
+isn&#x27;t &quot;new&quot; any more), but require non-standard modules or custom builds
+on Nginx.</li>
+</ul>
+</li>
+<li>Set appropriate <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control">Cache-Control
+headers</a>
+in order to avoid unnecessary re-fetching content. Set shorter lifetimes for
+served .html and 308 redirects vs other assets. Leave 404 responses with
+no Cache-Control header.</li>
+<li>Avoid serving the same content at multiple URLs (unless explicitly asked
+for) and don&#x27;t expose the internal filenames of content served via a
+different canonical URL. Also, prefer URLs without a trailing slash, but
+ensure not to issue a redirect if the target file doesn&#x27;t exist. This
+means (for example):
+<ul>
+<li><code>muxup.com/about/</code> should redirect to <code>muxup.com/about</code></li>
+<li><code>muxup.com/2022q3////muxup-implementation-notes</code> should 404 or redirect.</li>
+<li><code>muxup.com/about/./././</code> should 404 or redirect</li>
+<li><code>muxup.com/index.html</code> should 404.</li>
+<li><code>muxup.com/index.html.br</code> (referring to the precompressed brotli file)
+should 404.</li>
+<li><code>muxup.com/non-existing-path/</code> should 404.</li>
+<li>If there is a directory <code>foo</code> and a <code>foo.html</code> at the same level, serve
+<code>foo.html</code> for <code>GET /foo</code> (and redirect to it for <code>GET /foo/</code>).</li>
+</ul>
+</li>
+<li>Never try to serve <code>*/index.html</code> or similar (except in the special case of
+<code>GET /</code>).</li>
+</ul>
+<p>Perhaps because my requirements were so specific, this turned out to be a
+little more involved than I expected. If seeking to understand the <code>Caddyfile</code>
+format and Caddy configuration in general, I&#x27;d strongly recommend getting a
+good understanding of the key ideas by reading <a href="https://caddyserver.com/docs/caddyfile/concepts">Caddyfile
+concepts</a>, understanding <a href="https://caddyserver.com/docs/caddyfile/directives#directive-order">the
+order in which directives are handled by
+default</a>
+and how you might control the execution order of directives using the
+<a href="https://caddyserver.com/docs/caddyfile/directives/route">route</a> directive or
+use the <a href="https://caddyserver.com/docs/caddyfile/directives/handle">handle</a>
+directive to specify groups of directives in a mutually exclusive fashion
+based on different matchers. The <a href="https://caddy.community/t/composing-in-the-caddyfile/8291">Composing in the
+Caddyfile</a> article
+provides a good discussion of these options).</p>
+<p>Ultimately, I <a href="https://github.com/muxup/muxup-site/blob/main/utils/server_test.sh">wrote a quick test
+script</a>
+for the desired properties and came up with the following Caddyfile that meets
+almost all goals:</p>
+<pre><code>{
+	servers {
+		protocol {
+			experimental_http3
+		}
+	}
+	email asb@asbradbury.org
+}
+
+(muxup_file_server) {
+	file_server {
+		index &quot;&quot;
+		precompressed br
+		disable_canonical_uris
+	}
+}
+www.muxup.com {
+	redir https://muxup.com{uri}
+}
+muxup.com {
+	root * /var/www/muxup.com/htdocs
+	encode gzip
+	log {
+		output file /var/log/caddy/muxup.com.access.log
+	}
+
+	vars short_cache_control &quot;max-age=3600&quot;
+	vars long_cache_control &quot;max-age=2592000, stale-while-revalidate=2592000&quot;
+
+	@path_is_suffixed_with_html_or_br path *.html *.html/ *.br *.br/
+	@path_or_html_suffixed_path_exists file {path}.html {path}
+	@html_suffixed_path_exists file {path}.html
+	@path_or_html_suffixed_path_doesnt_exist not file {path}.html {path}
+	@path_is_root path /
+	@path_has_trailing_slash path_regexp ^/(.*)/$
+
+	handle @path_is_suffixed_with_html_or_br {
+		error 404
+	}
+	handle @path_has_trailing_slash {
+		route {
+			uri strip_suffix /
+			header @path_or_html_suffixed_path_exists Cache-Control &quot;{vars.long_cache_control}&quot;
+			redir @path_or_html_suffixed_path_exists {path} 308
+			error @path_or_html_suffixed_path_doesnt_exist 404
+		}
+	}
+	handle @path_is_root {
+		rewrite index.html
+		header Cache-Control &quot;{vars.short_cache_control}&quot;
+		import muxup_file_server
+	}
+	handle @html_suffixed_path_exists {
+		rewrite {path}.html
+		header Cache-Control &quot;{vars.short_cache_control}&quot;
+		import muxup_file_server
+	}
+	handle * {
+		header Cache-Control &quot;{vars.long_cache_control}&quot;
+		import muxup_file_server
+	}
+	handle_errors {
+		header -Cache-Control
+		respond &quot;{err.status_code} {err.status_text}&quot;
+	}
+}
+</code></pre>
+<p>A few notes on the above:</p>
+<ul>
+<li>It isn&#x27;t currently possible to match URLs with <code>//</code> due to the
+canonicalisation Caddy performs, but 2.6.0 including
+<a href="https://github.com/caddyserver/caddy/pull/4948">PR #4948</a> hopefully
+provides a solution. Hopefully to allow matching <code>/./</code> too.</li>
+<li>HTTP3 should <a href="https://github.com/caddyserver/caddy/pull/4707">enabled by
+default</a> in Caddy 2.6.0.</li>
+<li>Surprisingly, you need to explicitly opt in to enabling gzip compression
+(see <a href="https://news.ycombinator.com/item?id=32769612">this discussion</a> with
+the author of Caddy about that choice).</li>
+<li>The combination of <code>try_files</code> and <code>file_server</code> provides a large chunk of
+the basics, but something like the above handlers is needed to get the
+precise desired behaviour for things like redirects, <code>*.html</code> and <code>*.br</code>
+etc.</li>
+<li><code>route</code> is needed within <code>handle @path_has_trailing_slash</code> because the
+default execution order of directives has <code>uri</code> occurring some time after
+<code>redir</code> and <code>error</code>.</li>
+<li>Caddy doesn&#x27;t support dynamically brotli compressing responses, so the
+<code>precompressed br</code> option of <code>file_server</code> is used to serve pre-compressed
+files (as prepared by the <a href="https://github.com/muxup/muxup-site/blob/main/deploy.sh">deploy
+script</a>).</li>
+</ul>
+<h2 id="analytics"><a href="#analytics" class="anchor" aria-hidden="true" tabindex="-1"></a>Analytics</h2>
+<p>The simplest possible solution - don&#x27;t have any.</p>
+<h2 id="footer-images"><a href="#footer-images" class="anchor" aria-hidden="true" tabindex="-1"></a>Footer images</h2>
+<p>Last but by no means least, is the randomly selected doodle at the bottom of
+each page. I select images from the <a href="https://github.com/googlecreativelab/quickdraw-dataset">Quick, Draw!
+dataset</a> and export
+them to SVG to be randomly selected on each page load. A rather <a href="https://github.com/muxup/muxup-site/blob/main/utils/footer_image_helper.py">scrappy
+script</a>
+contains logic to generate SVGs from the dataset&#x27;s NDJSON format and contains
+a simple a Flask application that allows selecting desired images from
+randomly displayed batches from each dataset.</p>
+<p>With examples such as O&#x27;Reilly&#x27;s beautiful <a href="https://www.oreilly.com/content/a-short-history-of-the-oreilly-animals/">engravings of
+animals</a>
+on their book covers there&#x27;s a well established tradition of animal
+illustrations on technical content - and what better way to honour that
+tradition than with a hastily drawn doodle by a random person on the internet
+that spins when your mouse hovers over it?</p>
+
+</div>
+<footer class="footer">Curated by Alex Bradbury, &copy; <a href="/">Muxup</a> contributors. <a href="/about">About</a>. 
+<img id="footer-image" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E" width="50" height="50"/>
+</footer>
+<script>
+const t="http://www.w3.org/2000/svg";function o(t){return Math.random()*(2*t)-t}function n(t){const n=t.t.getBoundingClientRect();const e=t.o.getClientRects();let f="";for(const t of e){const e=t.x-n.x,c=t.y-n.y,s=t.width,r=t.height;const i=c+r/2;let u=s<75?3:s<300?6:8;const l=.2+.2*Math.random();f=`${f}\n      M${e+o(u)} ${i+o(u)}\n      C${e+s*l+o(u)} ${i+o(u)},\n       ${e+2*s*l+o(u)} ${i+o(u)}\n       ${e+s+o(u)} ${i+o(u)}`}t.i=f;t.strokeWidth=.85*e[0].height}const e=new Map;let f=new ResizeObserver((t=>{for(const o of t){const t=e.get(o.target);if(!t.i)n(t)}for(const o of t){s(e.get(o.target))}}));function c(o){const n=document.createElementNS(t,"svg");n.style.position="absolute";n.style.zIndex=-1;n.style.top="0";n.style.left="0";n.style.overflow="visible";const e=document.createElementNS(t,"path");e.setAttribute("fill","none");e.setAttribute("stroke",o.u);n.appendChild(e);o.o.insertAdjacentElement("beforebegin",n);o.t=n}function s(t){if(!t.i){n(t)}const o=t.t.children[0];o.setAttribute("stroke-width",t.strokeWidth);o.setAttribute("d",t.i);t.i=null}function r(){for(const t of e.values()){c(t)}for(const t of e.values()){n(t)}for(const t of e.keys()){f.observe(t)}document.fonts.ready.then((()=>i()))}function i(){for(const t of e.values()){n(t)}for(const t of e.values()){s(t)}}function u(t,o){let n;t.addEventListener("mouseover",(()=>{s(o);n=setInterval((()=>s(o)),240)}),false);t.addEventListener("mouseout",(()=>{clearInterval(n)}))}function l(t,o,n){let f={o:t,l:o,u:n};e.set(o,f);return f}let a=new Set([window.location.pathname]);const h=document.querySelector("#footer-image");let d=null;function g(){let t=Math.floor(Math.random()*94);d="/static/footer/"+String(t).padStart(4,"0")+".svg"}function m(t){h.src=d;g();if(!t)v()}function v(){if(a.has(d))return;a.add(d);fetch(d)}g();m(true);h.addEventListener("click",(()=>m()));h.addEventListener("mouseover",(()=>v()));h.addEventListener("touchstart",(()=>v()),{passive:true});function w(t){const o=t.currentTarget.getAttribute("href").split("#")[0];if(a.has(o))return;a.add(o);fetch(o)}const $=document.getElementsByTagName("a");for(const t of $){const o=(t.getAttribute("href")??"").split("#")[0];if(o.includes("?")||!o.startsWith("/")||o.slice(o.lastIndexOf("/")+1).includes(".")){continue}t.addEventListener("mouseover",w);t.addEventListener("touchstart",w,{passive:true})}const M=["#ffdef2","#f2e2ff","#e2eeff","#ddfffc","#ffffe3"];const p=document.querySelector("#title-highlight");l(p,p.parentNode,M[Math.floor(Math.random()*M.length)]);const b=document.querySelector("#logo-highlight");const k=l(b,b.parentNode,"#ffdac0");r();u(b,k);
+
+</script>
+</body>
+</html>

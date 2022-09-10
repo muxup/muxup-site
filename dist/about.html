@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:title" content="About"/>
+<meta property="og:site_name" content="Muxup">
+<meta property="og:description" content="About muxup.com"/>
+<meta property="og:type" content="article"/>
+<meta property="og:url" content="https://muxup.com/about"/>
+<meta property="og:image" content="https://v1.screenshot.11ty.dev/https%3A%2F%2Fmuxup.com%2Fabout/opengraph/ar/bigger"/>
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:site" content="@muxup">
+<meta property="twitter:creator" content="@asbradbury">
+<title>About - Muxup</title>
+<link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg xmlns='http:%2F%2Fwww.w3.org%2F2000%2Fsvg' viewBox='0 0 100 100'%3E%3Ctext y='80' font-size='110'%3E▨%3C%2Ftext%3E%3C%2Fsvg%3E">
+<meta name="description" content="About muxup.com">
+<style>
+@font-face {
+font-family:'Nunito Var';
+src:url('/static/Nunito.var.woff2') format('woff2-variations');
+font-display:swap;
+font-weight: 200 1000;
+}
+*, *::before, *::after {
+box-sizing:border-box;
+}
+* {
+margin:0;
+}
+input, button, textarea, select {
+font:inherit;
+}
+img, picture, video, canvas, svg {
+display:block;
+max-width:100%;
+}
+html {
+font-family:'Nunito Var', sans-serif;
+height:100%;
+font-size:16px;
+}
+@media screen and (min-width:640px) {
+html {
+font-size:18px;
+}
+}
+body {
+line-height:1.5;
+color:#222;
+display:grid;
+height:100%;
+grid-template-rows:1fr auto;
+background:#fff no-repeat 0% 0% / 100% .7rem linear-gradient(120deg, #ffffe3 20%, #ddfffc 20%, #ddfffc 40%, #e2eeff 40%, #e2eeff 60%, #f2e2ff 60%, #f2e2ff 80%, #ffdef2 80%, #ffdef2 100%);
+tab-size:4;
+}
+h1, h2, h3, h4, h5, h6 {
+line-height:1.25;
+font-weight:600;
+overflow-wrap:break-word;
+letter-spacing:-.025em;
+margin:1.75rem 0 .75rem;
+}
+h1 {
+font-size:2.986rem
+}
+h2 {
+font-size:2.488rem
+}
+p {
+margin:.75rem 0;
+font-weight:400;
+overflow-wrap:break-word;
+}
+a {
+color:inherit;
+text-decoration:underline;
+text-decoration-color:#aaa;
+text-underline-offset:.15em;
+}
+a:hover {
+text-decoration-thickness:2px;
+}
+ol, ul {
+margin:0 0 0 1.5rem;
+padding-left:0;
+}
+li {
+margin:0 0 .25rem
+}
+::selection {
+background:#ffdac0;
+}
+footer {
+display:grid;
+grid-auto-flow:column;
+align-items:center;
+justify-content:center;
+white-space:pre-wrap;
+padding:.5rem 0;
+font-size:.833rem;
+color:#777;
+}
+@keyframes rotation {
+from {
+transform:rotate(0deg);
+}
+to {
+transform:rotate(359deg);
+}
+}
+#footer-image:hover {
+animation:rotation .6s infinite linear;
+cursor:pointer;
+}
+#article-logo {
+line-height:1.25;
+margin:.5rem 0 0;
+font-size:1.44rem;
+font-weight:700;
+position:relative;
+}
+#article-logo a {
+text-decoration:none;
+}
+#article-title {
+margin:1.5rem 0 0;
+position:relative;
+}
+#article-meta {
+font-size:.833rem;
+color:#777;
+}
+#article-container {
+margin:0 auto;
+padding:1rem;
+max-width:min(calc(750px + 2rem), calc(100vw - 1rem));
+width:100%;
+}
+.anchor {
+position: absolute;
+text-decoration: none;
+width:1.75ex;
+margin-left:-1.4ex;
+visibility:hidden;
+font-size:.8em;
+padding-top:.2em;
+color:#aaa;
+}
+h2:hover .anchor,
+h3:hover .anchor,
+h4:hover .anchor,
+h5:hover .anchor,
+h6:hover .anchor,
+summary:hover .anchor {
+visibility:visible;
+}
+.anchor::before {
+content:"#";
+}
+hr {
+border-color:rgba(0,0,0,0.25)
+}
+code {
+background:#f5f5f5;
+padding:.125rem .25rem;
+font-size:.833rem
+}
+details {
+font-size:.833rem;
+}
+details summary {
+margin:.75rem 0 .5rem 0;
+font-weight:600;
+cursor:pointer;
+font-size:1.2rem;
+line-height:1.25;
+letter-spacing:-.025em;
+list-style:none;
+}
+details summary > * {
+display:inline;
+}
+summary::-webkit-details-marker {
+display:none;
+}
+summary::after {
+content: " ▸";
+}
+details[open] summary::after {
+content: " ▴";
+}
+
+</style>
+<link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed.xml"/>
+<link rel="canonical" href="https://muxup.com/about"/>
+</head>
+<body>
+<div id="article-container">
+<div>
+<div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></a></div>
+</div>
+<h1 id="article-title"><span id="title-highlight">About</span></h1>
+<div id="article-meta"><a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
+<p>Muxup.com is created and maintained by <a href="https://twitter.com/asbradbury">Alex
+Bradbury</a>. It aims to serve as a technical blog and
+index to my open source projects. See also: Muxup <a href="https://github.com/muxup">on
+Github</a> and <a href="https://twitter.com/muxup">on
+Twitter</a>.</p>
+<h2 id="copyright"><a href="#copyright" class="anchor" aria-hidden="true" tabindex="-1"></a>Copyright</h2>
+<p>Unless otherwise noted, all content is released under the <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons
+Attribution 4.0 International
+license</a>. The drawn images in
+the footer are taken from Google&#x27;s <a href="https://github.com/googlecreativelab/quickdraw-dataset">Quick, Draw!
+dataset</a> (also
+licensed under CC-BY 4.0).</p>
+<h2 id="site-structure"><a href="#site-structure" class="anchor" aria-hidden="true" tabindex="-1"></a>Site structure</h2>
+<p>Pages that are intended to be continually updated are at unprefixed paths
+(e.g. <code>/foo</code>), otherwise pages are placed in a sub-directory reflecting the
+date (year+quarter) they were published (e.g. <code>/2022q3/foo</code>).</p>
+<p>When a page receives updates after its initial publication, a short summary of
+the changes is displayed under the &quot;Article changelog&quot; heading. If the changes
+are not marked as being minor, the page will be moved to the top of the home
+page and RSS feed.</p>
+<h2 id="implementation-notes"><a href="#implementation-notes" class="anchor" aria-hidden="true" tabindex="-1"></a>Implementation notes</h2>
+<p>Muxup.com is a static site generated by a simple Python script and served
+using <a href="https://caddyserver.com/">Caddy</a>.
+I used <a href="https://github.com/miyuchina/mistletoe">Mistletoe</a> for Markdown
+parsing (with <a href="https://pygments.org/">Pygments</a> providing syntax highlighting
+for code blocks) but otherwise have very few dependencies outside of the
+standard library. The <a href="https://github.com/googlefonts/nunito/tree/main/fonts/variable">variable version of
+the Nunito
+font</a> is used
+throughout the site. I&#x27;ve written a small amount of JS (minified by
+<a href="https://github.com/terser/terser">terser</a> in order to provide
+prefetching of internal links and the highlighter effect used for titles.</p>
+<p>The design and CSS that implements it is my own and hopefully meets the goal
+of cleanly displaying primarily textual content without getting in the way,
+while adding a splash of colour and personality.</p>
+<p>See <a href="/2022q3/muxup-implementation-notes">Muxup implementation notes</a>
+for further implementation details.</p>
+<h2 id="why-the-doodlers-in-the-footer"><a href="#why-the-doodlers-in-the-footer" class="anchor" aria-hidden="true" tabindex="-1"></a>Why the doodlers in the footer?</h2>
+<p>Muxup is a hobby site and I wouldn&#x27;t want it to appear too corporate - crudely
+drawn doodles of animals are a well known method to avoid this risk. The
+<a href="https://github.com/googlecreativelab/quickdraw-dataset">Quick, Draw!
+dataset</a> provides a
+rich source of such images and means I don&#x27;t have to expose my own terrible
+drawing skills to the internet.</p>
+
+<hr/>
+<details id="article-changelog"><summary>Article changelog</summary>
+<ul>
+<li>2022-09-08: Initial publication date.</li>
+</ul>
+</div>
+<footer class="footer">Curated by Alex Bradbury, &copy; <a href="/">Muxup</a> contributors. <a href="/about">About</a>. 
+<img id="footer-image" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E" width="50" height="50"/>
+</footer>
+<script>
+const t="http://www.w3.org/2000/svg";function o(t){return Math.random()*(2*t)-t}function n(t){const n=t.t.getBoundingClientRect();const e=t.o.getClientRects();let f="";for(const t of e){const e=t.x-n.x,c=t.y-n.y,s=t.width,r=t.height;const i=c+r/2;let u=s<75?3:s<300?6:8;const l=.2+.2*Math.random();f=`${f}\n      M${e+o(u)} ${i+o(u)}\n      C${e+s*l+o(u)} ${i+o(u)},\n       ${e+2*s*l+o(u)} ${i+o(u)}\n       ${e+s+o(u)} ${i+o(u)}`}t.i=f;t.strokeWidth=.85*e[0].height}const e=new Map;let f=new ResizeObserver((t=>{for(const o of t){const t=e.get(o.target);if(!t.i)n(t)}for(const o of t){s(e.get(o.target))}}));function c(o){const n=document.createElementNS(t,"svg");n.style.position="absolute";n.style.zIndex=-1;n.style.top="0";n.style.left="0";n.style.overflow="visible";const e=document.createElementNS(t,"path");e.setAttribute("fill","none");e.setAttribute("stroke",o.u);n.appendChild(e);o.o.insertAdjacentElement("beforebegin",n);o.t=n}function s(t){if(!t.i){n(t)}const o=t.t.children[0];o.setAttribute("stroke-width",t.strokeWidth);o.setAttribute("d",t.i);t.i=null}function r(){for(const t of e.values()){c(t)}for(const t of e.values()){n(t)}for(const t of e.keys()){f.observe(t)}document.fonts.ready.then((()=>i()))}function i(){for(const t of e.values()){n(t)}for(const t of e.values()){s(t)}}function u(t,o){let n;t.addEventListener("mouseover",(()=>{s(o);n=setInterval((()=>s(o)),240)}),false);t.addEventListener("mouseout",(()=>{clearInterval(n)}))}function l(t,o,n){let f={o:t,l:o,u:n};e.set(o,f);return f}let a=new Set([window.location.pathname]);const h=document.querySelector("#footer-image");let d=null;function g(){let t=Math.floor(Math.random()*94);d="/static/footer/"+String(t).padStart(4,"0")+".svg"}function m(t){h.src=d;g();if(!t)v()}function v(){if(a.has(d))return;a.add(d);fetch(d)}g();m(true);h.addEventListener("click",(()=>m()));h.addEventListener("mouseover",(()=>v()));h.addEventListener("touchstart",(()=>v()),{passive:true});function w(t){const o=t.currentTarget.getAttribute("href").split("#")[0];if(a.has(o))return;a.add(o);fetch(o)}const $=document.getElementsByTagName("a");for(const t of $){const o=(t.getAttribute("href")??"").split("#")[0];if(o.includes("?")||!o.startsWith("/")||o.slice(o.lastIndexOf("/")+1).includes(".")){continue}t.addEventListener("mouseover",w);t.addEventListener("touchstart",w,{passive:true})}const M=["#ffdef2","#f2e2ff","#e2eeff","#ddfffc","#ffffe3"];const p=document.querySelector("#title-highlight");l(p,p.parentNode,M[Math.floor(Math.random()*M.length)]);const b=document.querySelector("#logo-highlight");const k=l(b,b.parentNode,"#ffdac0");r();u(b,k);
+
+</script>
+</body>
+</html>

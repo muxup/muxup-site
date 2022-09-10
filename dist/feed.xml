@@ -1,0 +1,449 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+<title>Muxup</title>
+<subtitle>Adventures in collaborative open source development</subtitle>
+<link href="https://muxup.com/feed.xml" rel="self" type="application/atom+xml"/>
+<link href="https://muxup.com"/>
+<updated>2022-09-10T12:00:00Z</updated>
+<id>https://muxup.com/feed.xml</id>
+<entry>
+<title>Muxup implementation notes</title>
+<published>2022-09-10T12:00:00Z</published>
+<updated>2022-09-10T12:00:00Z</updated>
+<link rel="alternate" href="https://muxup.com/2022q3/muxup-implementation-notes"/>
+<id>https://muxup.com/2022q3/muxup-implementation-notes</id>
+<content type="html">
+&lt;p&gt;This article contains a few notes on various implementation decisions made
+when creating &lt;a href=&quot;https://muxup.com&quot;&gt;the Muxup website&lt;/a&gt;. They&amp;#x27;re intended primarily as a
+reference for myself, but some parts may be of wider interest. See
+&lt;a href=&quot;/about&quot;&gt;about&lt;/a&gt; for more information about things like site
+structure.&lt;/p&gt;
+&lt;h2 id=&quot;site-generation&quot;&gt;&lt;a href=&quot;#site-generation&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Site generation&lt;/h2&gt;
+&lt;p&gt;I ended up writing my own script for generating the site pages from a tree of
+Markdown files. &lt;a href=&quot;https://www.getzola.org/&quot;&gt;Zola&lt;/a&gt; seems like an excellent
+option, but as I had a very specific idea on how I wanted pages to be
+represented in source form and the format and structure of the output, writing
+my own was the easier option (see
+&lt;a href=&quot;https://github.com/muxup/muxup-site/blob/main/build.py&quot;&gt;build.py&lt;/a&gt;). Plus,
+yak-shaving is fun.&lt;/p&gt;
+&lt;p&gt;I opted to use &lt;a href=&quot;https://github.com/miyuchina/mistletoe&quot;&gt;mistletoe&lt;/a&gt; for
+Markdown parsing. I found &lt;a href=&quot;https://github.com/miyuchina/mistletoe/pull/157&quot;&gt;a&lt;/a&gt;
+&lt;a href=&quot;https://github.com/miyuchina/mistletoe/pull/158&quot;&gt;few&lt;/a&gt;
+&lt;a href=&quot;https://github.com/miyuchina/mistletoe/pull/159&quot;&gt;bugs&lt;/a&gt; in the &lt;code&gt;traverse&lt;/code&gt;
+helper function when implementing some transformations on the generated AST,
+but upstream was very responsive about reviewing and merging my PRs. The main
+wart I&amp;#x27;ve found is that &lt;a href=&quot;https://github.com/miyuchina/mistletoe/issues/56&quot;&gt;parsing and rendering aren&amp;#x27;t fully
+separated&lt;/a&gt;, although this
+doesn&amp;#x27;t pose any real practical concern for my use case and will hopefully be
+fixed in the future. &lt;a href=&quot;https://github.com/lepture/mistune&quot;&gt;mistune&lt;/a&gt; also seemed
+promising, but has &lt;a href=&quot;https://github.com/lepture/mistune/issues/296&quot;&gt;some conformance
+issues&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;One goal was to keep everything possible in standard Markdown format. This
+means, for instance, avoiding custom frontmatter entries or link formats if
+the same information could be extracted from the file). Therefore:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;There is no &lt;code&gt;title&lt;/code&gt; frontmatter entry - the title is extracted by grabbing
+the first level 1 heading from the Markdown AST (and erroring if it isn&amp;#x27;t
+present).&lt;/li&gt;
+&lt;li&gt;All internal links are written as &lt;code&gt;[foo](/relative/to/root/foo.md)&lt;/code&gt;. The
+generator will error if the file can&amp;#x27;t be found, and will otherwise
+translate the target to refer to the appropriate permalink.
+&lt;ul&gt;
+&lt;li&gt;This has the additional advantage that links are still usable if viewing
+the Markdown on GitHub, which can be handy if reviewing a previous
+revision of an article.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Article changelogs are just a standard Markdown list under the &amp;quot;Article
+changelog&amp;quot; heading, which is checked and transformed at the Markdown AST
+level in order to produce the desired output (emitting the list using a
+&lt;code&gt;&amp;lt;details&amp;gt;&lt;/code&gt; and &lt;code&gt;&amp;lt;summary&amp;gt;&lt;/code&gt;).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;All CSS was written through the usual mix of experimentation (see
+&lt;a href=&quot;/simple-reload&quot;&gt;simple-reload&lt;/a&gt; for the page reloading solution I
+used to aid iterative development) and learning from the CSS used by other
+sites.&lt;/p&gt;
+&lt;h2 id=&quot;randomly-generated-title-highlights&quot;&gt;&lt;a href=&quot;#randomly-generated-title-highlights&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Randomly generated title highlights&lt;/h2&gt;
+&lt;p&gt;The main visual element throughout the site is the randomised, roughly drawn
+highlight used for the site name and article headings. This takes some
+inspiration from the &lt;a href=&quot;https://roughnotation.com/&quot;&gt;RoughNotation library&lt;/a&gt; (see
+also the &lt;a href=&quot;https://shihn.ca/posts/2020/roughjs-algorithms/&quot;&gt;author&amp;#x27;s description of the algorithms
+used&lt;/a&gt;), but uses my own
+implementation that&amp;#x27;s much more tightly linked to my use case.&lt;/p&gt;
+&lt;p&gt;The core logic for drawing these highlights is based around drawing the SVG
+path:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Determine the position and size of the text element to be highlight (keeping
+in mind it might be described by multiple rectangles if split across several
+lines).&lt;/li&gt;
+&lt;li&gt;For each rectangle, draw a bezier curve starting from the middle of the left
+hand side through to the right hand side, with its two control points at
+between 20-40% and 40-80% of the width.&lt;/li&gt;
+&lt;li&gt;Apply randomised offsets in the x and y directions for every point.
+&lt;ul&gt;
+&lt;li&gt;The range of the randomised offsets should depend on length of the text.
+Generally speaking, a smaller offsets should be used for a shorter piece
+of text.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This logic is implemented in
+&lt;a href=&quot;https://github.com/muxup/muxup-site/blob/main/fragments/common.js&quot;&gt;&lt;code&gt;preparePath&lt;/code&gt;&lt;/a&gt;
+and reproduced below (with the knowledge the &lt;code&gt;offset(delta)&lt;/code&gt; is a helper to
+return a random number between &lt;code&gt;delta&lt;/code&gt; and &lt;code&gt;-delta&lt;/code&gt;, hopefully it&amp;#x27;s clear how
+this relates to the logic described above):&lt;/p&gt;
+&lt;div class=&quot;highlight&quot; style=&quot;background: #ffffff&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span style=&quot;color: #A90D91&quot;&gt;function&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;preparePath&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;hlInfo&lt;/span&gt;) {
+  &lt;span style=&quot;color: #A90D91&quot;&gt;const&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;parentRect&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;hlInfo&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;svg&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;getBoundingClientRect&lt;/span&gt;();
+  &lt;span style=&quot;color: #A90D91&quot;&gt;const&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;rects&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;hlInfo&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;hlEl&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;getClientRects&lt;/span&gt;();
+  &lt;span style=&quot;color: #A90D91&quot;&gt;let&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;pathD&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&amp;quot;&lt;/span&gt;;
+  &lt;span style=&quot;color: #A90D91&quot;&gt;for&lt;/span&gt; (&lt;span style=&quot;color: #A90D91&quot;&gt;const&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;rect&lt;/span&gt; &lt;span style=&quot;color: #A90D91&quot;&gt;of&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;rects&lt;/span&gt;) {
+    &lt;span style=&quot;color: #A90D91&quot;&gt;const&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;x&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;rect&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;x&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;-&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;parentRect&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;x&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;y&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;rect&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;y&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;-&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;parentRect&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;y&lt;/span&gt;,
+          &lt;span style=&quot;color: #000000&quot;&gt;w&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;rect&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;width&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;h&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;rect&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;height&lt;/span&gt;;
+    &lt;span style=&quot;color: #A90D91&quot;&gt;const&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;mid_y&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;y&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;h&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;/&lt;/span&gt; &lt;span style=&quot;color: #1C01CE&quot;&gt;2&lt;/span&gt;;
+    &lt;span style=&quot;color: #A90D91&quot;&gt;let&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;maxOff&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;w&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span style=&quot;color: #1C01CE&quot;&gt;75&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;?&lt;/span&gt; &lt;span style=&quot;color: #1C01CE&quot;&gt;3&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;:&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;w&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span style=&quot;color: #1C01CE&quot;&gt;300&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;?&lt;/span&gt; &lt;span style=&quot;color: #1C01CE&quot;&gt;6&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;:&lt;/span&gt; &lt;span style=&quot;color: #1C01CE&quot;&gt;8&lt;/span&gt;;
+    &lt;span style=&quot;color: #A90D91&quot;&gt;const&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;divergePoint&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #1C01CE&quot;&gt;.2&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+&lt;/span&gt; &lt;span style=&quot;color: #1C01CE&quot;&gt;.2&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;*&lt;/span&gt; &lt;span style=&quot;color: #A90D91&quot;&gt;Math&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;random&lt;/span&gt;();
+    &lt;span style=&quot;color: #000000&quot;&gt;pathD&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;`${&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;pathD&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;}&lt;/span&gt;
+&lt;span style=&quot;color: #C41A16&quot;&gt;      M${&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;x+offset&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;maxOff&lt;/span&gt;)&lt;span style=&quot;color: #C41A16&quot;&gt;} ${&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;mid_y+offset&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;maxOff&lt;/span&gt;)&lt;span style=&quot;color: #C41A16&quot;&gt;}&lt;/span&gt;
+&lt;span style=&quot;color: #C41A16&quot;&gt;      C${&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;x+w*divergePoint+offset&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;maxOff&lt;/span&gt;)&lt;span style=&quot;color: #C41A16&quot;&gt;} ${&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;mid_y+offset&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;maxOff&lt;/span&gt;)&lt;span style=&quot;color: #C41A16&quot;&gt;},&lt;/span&gt;
+&lt;span style=&quot;color: #C41A16&quot;&gt;       ${&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;x+&lt;/span&gt;&lt;span style=&quot;color: #1C01CE&quot;&gt;2&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;*w*divergePoint+offset&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;maxOff&lt;/span&gt;)&lt;span style=&quot;color: #C41A16&quot;&gt;} ${&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;mid_y+offset&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;maxOff&lt;/span&gt;)&lt;span style=&quot;color: #C41A16&quot;&gt;}&lt;/span&gt;
+&lt;span style=&quot;color: #C41A16&quot;&gt;       ${&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;x+w+offset&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;maxOff&lt;/span&gt;)&lt;span style=&quot;color: #C41A16&quot;&gt;} ${&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;mid_y+offset&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;maxOff&lt;/span&gt;)&lt;span style=&quot;color: #C41A16&quot;&gt;}`&lt;/span&gt;;
+  }
+  &lt;span style=&quot;color: #000000&quot;&gt;hlInfo&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;nextPathD&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;pathD&lt;/span&gt;;
+  &lt;span style=&quot;color: #000000&quot;&gt;hlInfo&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;strokeWidth&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #1C01CE&quot;&gt;0.85&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;*rects&lt;/span&gt;[&lt;span style=&quot;color: #1C01CE&quot;&gt;0&lt;/span&gt;].&lt;span style=&quot;color: #000000&quot;&gt;height&lt;/span&gt;;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;I took some care to avoid &lt;a href=&quot;https://gist.github.com/paulirish/5d52fb081b3570c81e3a&quot;&gt;forced
+layout/reflow&lt;/a&gt; by
+batching together reads and writes of the DOM into separate phases when
+drawing the initial set of highlights for the page, which is why this function
+is generates the path but doesn&amp;#x27;t modify the SVG directly. Separate logic adds
+handlers to links that are highlighted continuously redraw the highlight (I
+liked the visual effect).&lt;/p&gt;
+&lt;h2 id=&quot;minification-and-optimisation&quot;&gt;&lt;a href=&quot;#minification-and-optimisation&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Minification and optimisation&lt;/h2&gt;
+&lt;p&gt;I primarily targeted the low-hanging fruit here, and avoided adding in too
+many dependencies (e.g. separate HTML and CSS minifiers) during the build.
+muxup.com is a very lightweight site - the main extravagance I&amp;#x27;ve allowed
+myself is the use of a webfont (Nunito) but that only weighs in at ~36KiB (the
+&lt;a href=&quot;https://github.com/googlefonts/nunito/tree/main/fonts/variable&quot;&gt;variable
+width&lt;/a&gt; version
+converted to woff2 and subsetted using &lt;code&gt;pyftsubset&lt;/code&gt; from
+&lt;a href=&quot;https://github.com/fonttools/fonttools&quot;&gt;fontTools&lt;/a&gt;). As the CSS and JS
+payload is so small, it&amp;#x27;s inlined into each page.&lt;/p&gt;
+&lt;p&gt;The required JS for the article pages and the home page is assembled and then
+minified using &lt;a href=&quot;https://github.com/terser/terser&quot;&gt;terser&lt;/a&gt;. This reduces the
+size of the JS required for the page you&amp;#x27;re reading from 5077 bytes to 2620
+bytes uncompressed (1450 bytes to 991 bytes if compressing the result with
+Brotli, though in practice the impact will be a bit different when compressing
+the JS together with the rest of the page + CSS). When first published, the
+page you are reading (including inlined CSS and JS) was ~27.7KiB uncompressed
+(7.7KiB Brotli compressed), which compares to 14.4KiB for its source Markdown
+(4.9KiB Brotli compressed).&lt;/p&gt;
+&lt;p&gt;Each page contains an embedded stylesheet with a conservative approximation of
+the minimal CSS needed. The total amount of CSS is small enough that it&amp;#x27;s easy
+to manually split between the CSS that is common across the site, the CSS only
+needed for the home page, the CSS common to all articles, and then other CSS
+rules that may or may not be needed depending on the page content. For the
+latter case, CSS snippets to include are gated on matching a given string
+(e.g. &lt;code&gt;&amp;lt;kbd&lt;/code&gt; for use of the &lt;code&gt;&amp;lt;kbd&amp;gt;&lt;/code&gt; tag). For my particular use case, this is
+more straight forward and faster than e.g. relying on
+&lt;a href=&quot;https://purgecss.com/&quot;&gt;PurgeCSS&lt;/a&gt; as part of the build process.&lt;/p&gt;
+&lt;p&gt;The final trick on the frontend is prefetching. Upon hovering on an internal
+link, it will be fetched (see the logic at the end of
+&lt;a href=&quot;https://github.com/muxup/muxup-site/blob/main/fragments/common.js&quot;&gt;common.js&lt;/a&gt;
+for the implementation approach), meaning that in the common case any link you
+click will already have been loaded and cached. More complex approaches could
+be used to e.g. hook the mouse click event and directly update the DOM
+using the retrieved data. But this would require work to provide UI feedback
+during the load and the incremental benefit over prefetching to prime the
+cache seems small.&lt;/p&gt;
+&lt;h2 id=&quot;serving-using-caddy&quot;&gt;&lt;a href=&quot;#serving-using-caddy&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Serving using Caddy&lt;/h2&gt;
+&lt;p&gt;I had a few goals in setting up &lt;a href=&quot;https://caddyserver.com/&quot;&gt;Caddy&lt;/a&gt; to serve
+this site:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Enable new and shiny things like HTTP3 and serving Brotli compressed
+content.
+&lt;ul&gt;
+&lt;li&gt;Both are very widely supported on the browser side (and Brotli really
+isn&amp;#x27;t &amp;quot;new&amp;quot; any more), but require non-standard modules or custom builds
+on Nginx.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Set appropriate &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control&quot;&gt;Cache-Control
+headers&lt;/a&gt;
+in order to avoid unnecessary re-fetching content. Set shorter lifetimes for
+served .html and 308 redirects vs other assets. Leave 404 responses with
+no Cache-Control header.&lt;/li&gt;
+&lt;li&gt;Avoid serving the same content at multiple URLs (unless explicitly asked
+for) and don&amp;#x27;t expose the internal filenames of content served via a
+different canonical URL. Also, prefer URLs without a trailing slash, but
+ensure not to issue a redirect if the target file doesn&amp;#x27;t exist. This
+means (for example):
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;muxup.com/about/&lt;/code&gt; should redirect to &lt;code&gt;muxup.com/about&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;muxup.com/2022q3////muxup-implementation-notes&lt;/code&gt; should 404 or redirect.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;muxup.com/about/./././&lt;/code&gt; should 404 or redirect&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;muxup.com/index.html&lt;/code&gt; should 404.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;muxup.com/index.html.br&lt;/code&gt; (referring to the precompressed brotli file)
+should 404.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;muxup.com/non-existing-path/&lt;/code&gt; should 404.&lt;/li&gt;
+&lt;li&gt;If there is a directory &lt;code&gt;foo&lt;/code&gt; and a &lt;code&gt;foo.html&lt;/code&gt; at the same level, serve
+&lt;code&gt;foo.html&lt;/code&gt; for &lt;code&gt;GET /foo&lt;/code&gt; (and redirect to it for &lt;code&gt;GET /foo/&lt;/code&gt;).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Never try to serve &lt;code&gt;*/index.html&lt;/code&gt; or similar (except in the special case of
+&lt;code&gt;GET /&lt;/code&gt;).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Perhaps because my requirements were so specific, this turned out to be a
+little more involved than I expected. If seeking to understand the &lt;code&gt;Caddyfile&lt;/code&gt;
+format and Caddy configuration in general, I&amp;#x27;d strongly recommend getting a
+good understanding of the key ideas by reading &lt;a href=&quot;https://caddyserver.com/docs/caddyfile/concepts&quot;&gt;Caddyfile
+concepts&lt;/a&gt;, understanding &lt;a href=&quot;https://caddyserver.com/docs/caddyfile/directives#directive-order&quot;&gt;the
+order in which directives are handled by
+default&lt;/a&gt;
+and how you might control the execution order of directives using the
+&lt;a href=&quot;https://caddyserver.com/docs/caddyfile/directives/route&quot;&gt;route&lt;/a&gt; directive or
+use the &lt;a href=&quot;https://caddyserver.com/docs/caddyfile/directives/handle&quot;&gt;handle&lt;/a&gt;
+directive to specify groups of directives in a mutually exclusive fashion
+based on different matchers. The &lt;a href=&quot;https://caddy.community/t/composing-in-the-caddyfile/8291&quot;&gt;Composing in the
+Caddyfile&lt;/a&gt; article
+provides a good discussion of these options).&lt;/p&gt;
+&lt;p&gt;Ultimately, I &lt;a href=&quot;https://github.com/muxup/muxup-site/blob/main/utils/server_test.sh&quot;&gt;wrote a quick test
+script&lt;/a&gt;
+for the desired properties and came up with the following Caddyfile that meets
+almost all goals:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;{
+	servers {
+		protocol {
+			experimental_http3
+		}
+	}
+	email asb@asbradbury.org
+}
+
+(muxup_file_server) {
+	file_server {
+		index &amp;quot;&amp;quot;
+		precompressed br
+		disable_canonical_uris
+	}
+}
+www.muxup.com {
+	redir https://muxup.com{uri}
+}
+muxup.com {
+	root * /var/www/muxup.com/htdocs
+	encode gzip
+	log {
+		output file /var/log/caddy/muxup.com.access.log
+	}
+
+	vars short_cache_control &amp;quot;max-age=3600&amp;quot;
+	vars long_cache_control &amp;quot;max-age=2592000, stale-while-revalidate=2592000&amp;quot;
+
+	@path_is_suffixed_with_html_or_br path *.html *.html/ *.br *.br/
+	@path_or_html_suffixed_path_exists file {path}.html {path}
+	@html_suffixed_path_exists file {path}.html
+	@path_or_html_suffixed_path_doesnt_exist not file {path}.html {path}
+	@path_is_root path /
+	@path_has_trailing_slash path_regexp ^/(.*)/$
+
+	handle @path_is_suffixed_with_html_or_br {
+		error 404
+	}
+	handle @path_has_trailing_slash {
+		route {
+			uri strip_suffix /
+			header @path_or_html_suffixed_path_exists Cache-Control &amp;quot;{vars.long_cache_control}&amp;quot;
+			redir @path_or_html_suffixed_path_exists {path} 308
+			error @path_or_html_suffixed_path_doesnt_exist 404
+		}
+	}
+	handle @path_is_root {
+		rewrite index.html
+		header Cache-Control &amp;quot;{vars.short_cache_control}&amp;quot;
+		import muxup_file_server
+	}
+	handle @html_suffixed_path_exists {
+		rewrite {path}.html
+		header Cache-Control &amp;quot;{vars.short_cache_control}&amp;quot;
+		import muxup_file_server
+	}
+	handle * {
+		header Cache-Control &amp;quot;{vars.long_cache_control}&amp;quot;
+		import muxup_file_server
+	}
+	handle_errors {
+		header -Cache-Control
+		respond &amp;quot;{err.status_code} {err.status_text}&amp;quot;
+	}
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;A few notes on the above:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;It isn&amp;#x27;t currently possible to match URLs with &lt;code&gt;//&lt;/code&gt; due to the
+canonicalisation Caddy performs, but 2.6.0 including
+&lt;a href=&quot;https://github.com/caddyserver/caddy/pull/4948&quot;&gt;PR #4948&lt;/a&gt; hopefully
+provides a solution. Hopefully to allow matching &lt;code&gt;/./&lt;/code&gt; too.&lt;/li&gt;
+&lt;li&gt;HTTP3 should &lt;a href=&quot;https://github.com/caddyserver/caddy/pull/4707&quot;&gt;enabled by
+default&lt;/a&gt; in Caddy 2.6.0.&lt;/li&gt;
+&lt;li&gt;Surprisingly, you need to explicitly opt in to enabling gzip compression
+(see &lt;a href=&quot;https://news.ycombinator.com/item?id=32769612&quot;&gt;this discussion&lt;/a&gt; with
+the author of Caddy about that choice).&lt;/li&gt;
+&lt;li&gt;The combination of &lt;code&gt;try_files&lt;/code&gt; and &lt;code&gt;file_server&lt;/code&gt; provides a large chunk of
+the basics, but something like the above handlers is needed to get the
+precise desired behaviour for things like redirects, &lt;code&gt;*.html&lt;/code&gt; and &lt;code&gt;*.br&lt;/code&gt;
+etc.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;route&lt;/code&gt; is needed within &lt;code&gt;handle @path_has_trailing_slash&lt;/code&gt; because the
+default execution order of directives has &lt;code&gt;uri&lt;/code&gt; occurring some time after
+&lt;code&gt;redir&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Caddy doesn&amp;#x27;t support dynamically brotli compressing responses, so the
+&lt;code&gt;precompressed br&lt;/code&gt; option of &lt;code&gt;file_server&lt;/code&gt; is used to serve pre-compressed
+files (as prepared by the &lt;a href=&quot;https://github.com/muxup/muxup-site/blob/main/deploy.sh&quot;&gt;deploy
+script&lt;/a&gt;).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;analytics&quot;&gt;&lt;a href=&quot;#analytics&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Analytics&lt;/h2&gt;
+&lt;p&gt;The simplest possible solution - don&amp;#x27;t have any.&lt;/p&gt;
+&lt;h2 id=&quot;footer-images&quot;&gt;&lt;a href=&quot;#footer-images&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Footer images&lt;/h2&gt;
+&lt;p&gt;Last but by no means least, is the randomly selected doodle at the bottom of
+each page. I select images from the &lt;a href=&quot;https://github.com/googlecreativelab/quickdraw-dataset&quot;&gt;Quick, Draw!
+dataset&lt;/a&gt; and export
+them to SVG to be randomly selected on each page load. A rather &lt;a href=&quot;https://github.com/muxup/muxup-site/blob/main/utils/footer_image_helper.py&quot;&gt;scrappy
+script&lt;/a&gt;
+contains logic to generate SVGs from the dataset&amp;#x27;s NDJSON format and contains
+a simple a Flask application that allows selecting desired images from
+randomly displayed batches from each dataset.&lt;/p&gt;
+&lt;p&gt;With examples such as O&amp;#x27;Reilly&amp;#x27;s beautiful &lt;a href=&quot;https://www.oreilly.com/content/a-short-history-of-the-oreilly-animals/&quot;&gt;engravings of
+animals&lt;/a&gt;
+on their book covers there&amp;#x27;s a well established tradition of animal
+illustrations on technical content - and what better way to honour that
+tradition than with a hastily drawn doodle by a random person on the internet
+that spins when your mouse hovers over it?&lt;/p&gt;
+</content>
+</entry>
+<entry>
+<title>simple-reload</title>
+<published>2022-09-10T12:00:00Z</published>
+<updated>2022-09-10T12:00:00Z</updated>
+<link rel="alternate" href="https://muxup.com/simple-reload"/>
+<id>https://muxup.com/simple-reload</id>
+<content type="html">
+&lt;h2 id=&quot;summary&quot;&gt;&lt;a href=&quot;#summary&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Summary&lt;/h2&gt;
+&lt;p&gt;simple-reload provides a straight-forward (~30 lines of JS and zero
+server-side requirements) way of reloading a web page as it is iteratively
+developed or modified. Once activated, a page will be reloaded
+whenever it regains focus.&lt;/p&gt;
+&lt;h2 id=&quot;trade-offs&quot;&gt;&lt;a href=&quot;#trade-offs&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Trade-offs&lt;/h2&gt;
+&lt;p&gt;Mature solutions like
+&lt;a href=&quot;https://github.com/livereload/livereload-js&quot;&gt;LiveReload&lt;/a&gt; are available, which
+makes a different set of trade-offs. Please read this section carefully to
+determine if simple-reload makes sense for you:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Cons&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Reload won&amp;#x27;t take place until the page is focused by the user, which
+requires manual interaction.
+&lt;ul&gt;
+&lt;li&gt;This is significantly less burdensome if using focus follows pointer in
+your window manager.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Reloads will occur even if there were no changes.
+&lt;ul&gt;
+&lt;li&gt;With e.g. LiveReload, a reload only happens when the server indicates
+there has been a change. This may be a big advantage for stateful pages or
+pages with lots of forms.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Pros&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Tiny, easy to modify implementation.&lt;/li&gt;
+&lt;li&gt;Can dynamically enable/disable reloading on a per-tab basis.
+&lt;ul&gt;
+&lt;li&gt;This can be helpful to keep a fixed revision of a page in one tab to
+compare against.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;No server-side requirements.
+&lt;ul&gt;
+&lt;li&gt;So works even from &lt;code&gt;file://&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Makes it easier if using with a remote server (e.g. no need to worry about
+exposing a port as for LiveReload).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;code&quot;&gt;&lt;a href=&quot;#code&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Code&lt;/h2&gt;
+&lt;div class=&quot;highlight&quot; style=&quot;background: #ffffff&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span style=&quot;color: #000000&quot;&gt;&amp;lt;script&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;type=&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;module&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span style=&quot;color: #177500&quot;&gt;// Set to true to enable reloading from first load.&lt;/span&gt;
+&lt;span style=&quot;color: #A90D91&quot;&gt;const&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;enableByDefault&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #A90D91&quot;&gt;false&lt;/span&gt;;
+&lt;span style=&quot;color: #177500&quot;&gt;// Firefox triggers blur/focus events when resizing, so we ignore a focus&lt;/span&gt;
+&lt;span style=&quot;color: #177500&quot;&gt;// following a blur within 200ms (assumed to be generated by resizing rather&lt;/span&gt;
+&lt;span style=&quot;color: #177500&quot;&gt;// than human interaction).&lt;/span&gt;
+&lt;span style=&quot;color: #A90D91&quot;&gt;let&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;blurTimeStamp&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #A90D91&quot;&gt;null&lt;/span&gt;;
+&lt;span style=&quot;color: #A90D91&quot;&gt;function&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;focusListener&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;ev&lt;/span&gt;) {
+  &lt;span style=&quot;color: #A90D91&quot;&gt;if&lt;/span&gt; (&lt;span style=&quot;color: #000000&quot;&gt;ev&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;timeStamp&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;-&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;blurTimeStamp&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;&amp;gt;=&lt;/span&gt; &lt;span style=&quot;color: #1C01CE&quot;&gt;200&lt;/span&gt;) {
+    &lt;span style=&quot;color: #000000&quot;&gt;location&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;reload&lt;/span&gt;();
+  }
+}
+&lt;span style=&quot;color: #A90D91&quot;&gt;function&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;blurListener&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;ev&lt;/span&gt;) {
+  &lt;span style=&quot;color: #A90D91&quot;&gt;if&lt;/span&gt; (&lt;span style=&quot;color: #000000&quot;&gt;blurTimeStamp&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;===&lt;/span&gt; &lt;span style=&quot;color: #A90D91&quot;&gt;null&lt;/span&gt;) {
+    &lt;span style=&quot;color: #A90D91&quot;&gt;window&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;addEventListener&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;focus&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;focusListener&lt;/span&gt;);
+  }
+  &lt;span style=&quot;color: #000000&quot;&gt;blurTimeStamp&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;ev&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;timeStamp&lt;/span&gt;;
+}
+&lt;span style=&quot;color: #A90D91&quot;&gt;function&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;deactivate&lt;/span&gt;() {
+  &lt;span style=&quot;color: #000000&quot;&gt;sessionStorage&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;removeItem&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;simple-reload&amp;quot;&lt;/span&gt;);
+  &lt;span style=&quot;color: #A90D91&quot;&gt;window&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;removeEventListener&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;focus&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;focusListener&lt;/span&gt;);
+  &lt;span style=&quot;color: #A90D91&quot;&gt;window&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;removeEventListener&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;blur&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;blurListener&lt;/span&gt;);
+  &lt;span style=&quot;color: #A90D91&quot;&gt;document&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;title&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #A90D91&quot;&gt;document&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;title&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;replace&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;/^\u27F3 /&lt;/span&gt;, &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&amp;quot;&lt;/span&gt;);
+  &lt;span style=&quot;color: #A90D91&quot;&gt;window&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;addEventListener&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;dblclick&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;activate&lt;/span&gt;, { &lt;span style=&quot;color: #000000&quot;&gt;once:&lt;/span&gt; &lt;span style=&quot;color: #A90D91&quot;&gt;true&lt;/span&gt; });
+}
+&lt;span style=&quot;color: #A90D91&quot;&gt;function&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;activate&lt;/span&gt;() {
+  &lt;span style=&quot;color: #000000&quot;&gt;sessionStorage&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;setItem&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;simple-reload&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;activated&amp;quot;&lt;/span&gt;);
+  &lt;span style=&quot;color: #000000&quot;&gt;location&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;reload&lt;/span&gt;();
+}
+&lt;span style=&quot;color: #A90D91&quot;&gt;if&lt;/span&gt; (&lt;span style=&quot;color: #000000&quot;&gt;enableByDefault&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;||&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;sessionStorage&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;getItem&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;simple-reload&amp;quot;&lt;/span&gt;) &lt;span style=&quot;color: #000000&quot;&gt;==&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;activated&amp;quot;&lt;/span&gt;) {
+  &lt;span style=&quot;color: #A90D91&quot;&gt;document&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;title&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;\u27F3 &amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+&lt;/span&gt; &lt;span style=&quot;color: #A90D91&quot;&gt;document&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;title&lt;/span&gt;;
+  &lt;span style=&quot;color: #000000&quot;&gt;sessionStorage&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;setItem&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;simple-reload&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;activated&amp;quot;&lt;/span&gt;);
+  &lt;span style=&quot;color: #A90D91&quot;&gt;window&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;addEventListener&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;blur&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;blurListener&lt;/span&gt;);
+  &lt;span style=&quot;color: #A90D91&quot;&gt;window&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;addEventListener&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;dblclick&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;deactivate&lt;/span&gt;, { &lt;span style=&quot;color: #000000&quot;&gt;once:&lt;/span&gt; &lt;span style=&quot;color: #A90D91&quot;&gt;true&lt;/span&gt; });
+} &lt;span style=&quot;color: #A90D91&quot;&gt;else&lt;/span&gt; {
+  &lt;span style=&quot;color: #A90D91&quot;&gt;window&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;addEventListener&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;dblclick&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;activate&lt;/span&gt;);
+}
+&lt;span style=&quot;color: #000000&quot;&gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;usage&quot;&gt;&lt;a href=&quot;#usage&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Usage&lt;/h2&gt;
+&lt;p&gt;Paste the above code into the &lt;code&gt;&amp;lt;head&amp;gt;&lt;/code&gt; or &lt;code&gt;&amp;lt;body&amp;gt;&lt;/code&gt; of a HTML file. You can
+then enable the reload behaviour by double-clicking on a page (double-click
+again to disable again). The title is prefixed with ⟳ while reload-on-focus is
+enabled. If you&amp;#x27;d like reload-on-focus enabled by default, just flip the
+&lt;code&gt;enableByDefault&lt;/code&gt; variable to &lt;code&gt;true&lt;/code&gt;. You could either modify
+whatever you&amp;#x27;re using to emit HTML to include this code when in development
+mode, or configure your web server of choice to inject it for you.&lt;/p&gt;
+&lt;p&gt;The enabled/disabled state of the reload logic is scoped to the current tab,
+so will be maintained if navigating to different pages within the same domain
+in that tab.&lt;/p&gt;
+&lt;p&gt;In terms of licensing, the implementation is so straight-forward it hardly
+feels copyrightable. Please consider it public domain, or MIT if you&amp;#x27;re more
+comfortable with an explicit license.&lt;/p&gt;
+&lt;h2 id=&quot;implementation-notes&quot;&gt;&lt;a href=&quot;#implementation-notes&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Implementation notes&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;In case it&amp;#x27;s not clear, &amp;quot;blur&amp;quot; events mentioned above are events fired when
+an element is no longer in focus.&lt;/li&gt;
+&lt;li&gt;As noted in the code comment, Firefox (under dwm in Linux at least) seems to
+trigger blur+focus events when resizing the window using a keybinding while
+Chrome doesn&amp;#x27;t. Being able to remove the logic to deal with this issue would
+be a good additional simplification.&lt;/li&gt;
+&lt;li&gt;The interaction with &lt;code&gt;sessionStorage&lt;/code&gt; is redundant if setting
+&lt;code&gt;enabledByDefault = true&lt;/code&gt;, but it doesn&amp;#x27;t seem worth adding additional
+code paths to avoid using it, or providing a second variant of the code.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr/&gt;
+&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;Article changelog&lt;/summary&gt;
+&lt;ul&gt;
+&lt;li&gt;2022-09-10: Initial publication date.&lt;/li&gt;
+&lt;/ul&gt;</content>
+</entry>
+</feed>
