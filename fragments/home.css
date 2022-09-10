@@ -1,0 +1,61 @@
+#home-container {
+margin:0 auto;
+padding:1rem;
+max-width:min(calc(1110px + 2rem), calc(100vw - 1rem));
+width:100%;
+}
+#hero {
+position:relative;
+margin:2.5rem 0;
+}
+#home-logo {
+font-weight:700;
+}
+#home-logo a {
+text-decoration:none;
+}
+.subtitle {
+margin-top:-.75rem;
+line-height:1.25;
+font-size:2.074rem;
+color:#555;
+letter-spacing:-.025em;
+}
+.card-grid {
+display:grid;
+gap:.75rem;
+margin:0 -1rem;
+}
+@media screen and (min-width:640px) {
+.card-grid {
+grid-auto-rows:1fr;
+grid-template-columns:repeat(auto-fill,minmax(320px,1fr))
+}
+}
+.card {
+position:relative;
+padding:.25rem 1rem 1rem 1rem;
+border-radius:.25rem;
+box-shadow:0 2px 6px rgba(0, 0, 0, .07)
+}
+.card:hover {
+box-shadow:0 2px 6px rgba(0, 0, 0, .12)
+}
+a.card {
+text-decoration:none;
+}
+.card-title {
+font-size:1.2rem;
+margin:.5rem 0 .1rem;
+}
+.card-date {
+position:absolute;
+bottom:0;
+right:0;
+margin:0;
+font-size:.694rem;
+color:#777;
+}
+.card-description {
+margin:0;
+}

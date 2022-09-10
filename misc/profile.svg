@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="1500px"
+   height="500px"
+   version="1.1"
+   id="svg5754"
+   sodipodi:docname="profile.svg"
+   inkscape:export-filename="profile_alt2.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   inkscape:version="1.2.1 (9c6d41e410, 2022-07-14, custom)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview5756"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="0.55013034"
+     inkscape:cx="691.65427"
+     inkscape:cy="302.65555"
+     inkscape:window-width="1534"
+     inkscape:window-height="1064"
+     inkscape:window-x="0"
+     inkscape:window-y="14"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg5754" />
+  <defs
+     id="defs5750">
+    <linearGradient
+       id="g1"
+       gradientUnits="userSpaceOnUse"
+       x1="5.28%"
+       y1="-27.45%"
+       x2="94.72%"
+       y2="127.45%">
+      <stop
+         offset=".2"
+         stop-color="#ffffe3"
+         id="stop5731" />
+      <stop
+         offset=".2"
+         stop-color="#ddfffc"
+         id="stop5733" />
+      <stop
+         offset=".4"
+         stop-color="#ddfffc"
+         id="stop5735" />
+      <stop
+         offset=".4"
+         stop-color="#e2eeff"
+         id="stop5737" />
+      <stop
+         offset=".6"
+         stop-color="#e2eeff"
+         id="stop5739" />
+      <stop
+         offset=".6"
+         stop-color="#f2e2ff"
+         id="stop5741" />
+      <stop
+         offset=".8"
+         stop-color="#f2e2ff"
+         id="stop5743" />
+      <stop
+         offset=".8"
+         stop-color="#ffdef2"
+         id="stop5745" />
+      <stop
+         offset="1"
+         stop-color="#ffdef2"
+         id="stop5747" />
+    </linearGradient>
+  </defs>
+  <rect
+     width="100%"
+     height="100%"
+     fill="url(#g1)"
+     id="rect5752" />
+  <rect
+     style="fill:#ffffff;fill-opacity:1;stroke-width:3.38062"
+     id="rect5898"
+     width="1500"
+     height="400"
+     x="0"
+     y="100" />
+  <path
+     style="color:#000000;fill:#ffdac0;stroke-width:2.77868;-inkscape-stroke:none"
+     d="m 838.73895,209.86279 -10.79454,152.72444 c 277.20479,19.59947 376.00189,7.96532 471.97989,4.30371 l -5.8396,-152.99036 c -104.0823,3.97076 -184.6963,15.09819 -455.34575,-4.03779 z"
+     id="path4328" />
+  <text
+     xml:space="preserve"
+     style="font-weight:bold;font-size:137.204px;font-family:Nunito;-inkscape-font-specification:'Nunito Bold';fill:#222222;fill-opacity:1;stroke-width:2.54082"
+     x="853.65332"
+     y="330.22195"
+     id="text6369"><tspan
+       sodipodi:role="line"
+       id="tspan6367"
+       x="853.65332"
+       y="330.22195"
+       style="stroke-width:2.54082">Muxup</tspan></text>
+</svg>

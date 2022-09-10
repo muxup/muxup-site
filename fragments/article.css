@@ -1,0 +1,45 @@
+#article-logo {
+  line-height:1.25;
+  margin:.5rem 0 0;
+  font-size:1.44rem;
+  font-weight:700;
+  position:relative;
+}
+#article-logo a {
+  text-decoration:none;
+}
+#article-title {
+  margin:1.5rem 0 0;
+  position:relative;
+}
+#article-meta {
+  font-size:.833rem;
+  color:#777;
+}
+#article-container {
+  margin:0 auto;
+  padding:1rem;
+  max-width:min(calc(750px + 2rem), calc(100vw - 1rem));
+  width:100%;
+}
+.anchor {
+  position: absolute;
+  text-decoration: none;
+  width:1.75ex;
+  margin-left:-1.4ex;
+  visibility:hidden;
+  font-size:.8em;
+  padding-top:.2em;
+  color:#aaa;
+}
+h2:hover .anchor,
+h3:hover .anchor,
+h4:hover .anchor,
+h5:hover .anchor,
+h6:hover .anchor,
+summary:hover .anchor {
+  visibility:visible;
+}
+.anchor::before {
+  content:"#";
+}
