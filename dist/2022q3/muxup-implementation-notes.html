@@ -343,6 +343,7 @@ isn&#x27;t &quot;new&quot; any more), but require non-standard modules or custom
 on Nginx.</li>
 </ul>
 </li>
+<li>Redirect <code>wwww.muxup.com/*</code> URLs to <code>muxup.com/*</code>.</li>
 <li>Set appropriate <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control">Cache-Control
 headers</a>
 in order to avoid unnecessary re-fetching content. Set shorter lifetimes for
@@ -403,7 +404,8 @@ almost all goals:</p>
 	}
 }
 www.muxup.com {
-	redir https://muxup.com{uri}
+	redir https://muxup.com{uri} 308
+	header Cache-Control &quot;max-age=2592000, stale-while-revalidate=2592000&quot;
 }
 muxup.com {
 	root * /var/www/muxup.com/htdocs
@@ -411,6 +413,7 @@ muxup.com {
 	log {
 		output file /var/log/caddy/muxup.com.access.log
 	}
+	header Strict-Transport-Security &quot;max-age=31536000; includeSubDomains; preload&quot;
 
 	vars short_cache_control &quot;max-age=3600&quot;
 	vars long_cache_control &quot;max-age=2592000, stale-while-revalidate=2592000&quot;
@@ -475,6 +478,9 @@ default execution order of directives has <code>uri</code> occurring some time a
 <code>precompressed br</code> option of <code>file_server</code> is used to serve pre-compressed
 files (as prepared by the <a href="https://github.com/muxup/muxup-site/blob/main/deploy.sh">deploy
 script</a>).</li>
+<li>I&#x27;ve <a href="https://caddy.community/t/suggestions-for-simplifying-my-caddyfile/17135">asked for
+advice</a>
+on improving the above Caddyfile on the Caddy Discourse.</li>
 </ul>
 <h2 id="analytics"><a href="#analytics" class="anchor" aria-hidden="true" tabindex="-1"></a>Analytics</h2>
 <p>The simplest possible solution - don&#x27;t have any.</p>
@@ -493,6 +499,11 @@ on their book covers there&#x27;s a well established tradition of animal
 illustrations on technical content - and what better way to honour that
 tradition than with a hastily drawn doodle by a random person on the internet
 that spins when your mouse hovers over it?</p>
+<h2 id="article-chnagelog"><a href="#article-chnagelog" class="anchor" aria-hidden="true" tabindex="-1"></a>Article chnagelog</h2>
+<ul>
+<li>2022-09-11: (minor) Add HSTS and tweak no-www redirect in Caddyfile. Link to
+thread about the Caddyfile on Caddy discourse.</li>
+</ul>
 
 </div>
 <footer class="footer">Curated by Alex Bradbury, &copy; <a href="/">Muxup</a> contributors. <a href="/about">About</a>. 

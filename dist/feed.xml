@@ -294,6 +294,7 @@ isn&amp;#x27;t &amp;quot;new&amp;quot; any more), but require non-standard modul
 on Nginx.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
+&lt;li&gt;Redirect &lt;code&gt;wwww.muxup.com/*&lt;/code&gt; URLs to &lt;code&gt;muxup.com/*&lt;/code&gt;.&lt;/li&gt;
 &lt;li&gt;Set appropriate &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control&quot;&gt;Cache-Control
 headers&lt;/a&gt;
 in order to avoid unnecessary re-fetching content. Set shorter lifetimes for
@@ -354,7 +355,8 @@ almost all goals:&lt;/p&gt;
 	}
 }
 www.muxup.com {
-	redir https://muxup.com{uri}
+	redir https://muxup.com{uri} 308
+	header Cache-Control &amp;quot;max-age=2592000, stale-while-revalidate=2592000&amp;quot;
 }
 muxup.com {
 	root * /var/www/muxup.com/htdocs
@@ -362,6 +364,7 @@ muxup.com {
 	log {
 		output file /var/log/caddy/muxup.com.access.log
 	}
+	header Strict-Transport-Security &amp;quot;max-age=31536000; includeSubDomains; preload&amp;quot;
 
 	vars short_cache_control &amp;quot;max-age=3600&amp;quot;
 	vars long_cache_control &amp;quot;max-age=2592000, stale-while-revalidate=2592000&amp;quot;
@@ -426,6 +429,9 @@ default execution order of directives has &lt;code&gt;uri&lt;/code&gt; occurring
 &lt;code&gt;precompressed br&lt;/code&gt; option of &lt;code&gt;file_server&lt;/code&gt; is used to serve pre-compressed
 files (as prepared by the &lt;a href=&quot;https://github.com/muxup/muxup-site/blob/main/deploy.sh&quot;&gt;deploy
 script&lt;/a&gt;).&lt;/li&gt;
+&lt;li&gt;I&amp;#x27;ve &lt;a href=&quot;https://caddy.community/t/suggestions-for-simplifying-my-caddyfile/17135&quot;&gt;asked for
+advice&lt;/a&gt;
+on improving the above Caddyfile on the Caddy Discourse.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&quot;analytics&quot;&gt;&lt;a href=&quot;#analytics&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Analytics&lt;/h2&gt;
 &lt;p&gt;The simplest possible solution - don&amp;#x27;t have any.&lt;/p&gt;
@@ -444,6 +450,11 @@ on their book covers there&amp;#x27;s a well established tradition of animal
 illustrations on technical content - and what better way to honour that
 tradition than with a hastily drawn doodle by a random person on the internet
 that spins when your mouse hovers over it?&lt;/p&gt;
+&lt;h2 id=&quot;article-chnagelog&quot;&gt;&lt;a href=&quot;#article-chnagelog&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article chnagelog&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;2022-09-11: (minor) Add HSTS and tweak no-www redirect in Caddyfile. Link to
+thread about the Caddyfile on Caddy discourse.&lt;/li&gt;
+&lt;/ul&gt;
 </content>
 </entry>
 </feed>
