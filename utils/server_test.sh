@@ -16,6 +16,15 @@ check_404() {
   fi
 }
 
+check_405() {
+  res=$(curl -X POST -sw ' - %{http_code}' "$BASE_URL$1")
+  if [ "$res" = "405 Method Not Allowed - 405" ]; then
+    printf "PASS: '%s' gives expected 405\n" "$BASE_URL$1"
+  else
+    printf "FAIL: '%s' doesn't give expected 405\n" "$BASE_URL$1"
+  fi
+}
+
 check_308() {
   res=$(curl -sw '%{http_code} %{redirect_url}' "$BASE_URL$1")
   if [ "$res" != "308 $BASE_URL$2" ]; then
@@ -65,6 +74,13 @@ check_long_cache_control() {
     printf "PASS: '%s' gives long cache-control header\n" "$BASE_URL$1"
   fi
 }
+
+# POST is disallowed.
+check_405 /about
+check_405 /non-existent
+check_405 /about/
+# TODO: fails. check_405 /index.html
+# TODO: fails. check_405 /
 
 # www redirects.
 check_www_to_no_www /
