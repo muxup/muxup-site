@@ -344,6 +344,7 @@ on Nginx.</li>
 </ul>
 </li>
 <li>Redirect <code>wwww.muxup.com/*</code> URLs to <code>muxup.com/*</code>.</li>
+<li>HTTP request methods other than <code>GET</code> or <code>HEAD</code> should return error 405.</li>
 <li>Set appropriate <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control">Cache-Control
 headers</a>
 in order to avoid unnecessary re-fetching content. Set shorter lifetimes for
@@ -418,6 +419,7 @@ muxup.com {
 	vars short_cache_control &quot;max-age=3600&quot;
 	vars long_cache_control &quot;max-age=2592000, stale-while-revalidate=2592000&quot;
 
+	@method_isnt_GET_or_HEAD not method GET HEAD
 	@path_is_suffixed_with_html_or_br path *.html *.html/ *.br *.br/
 	@path_or_html_suffixed_path_exists file {path}.html {path}
 	@html_suffixed_path_exists file {path}.html
@@ -425,6 +427,9 @@ muxup.com {
 	@path_is_root path /
 	@path_has_trailing_slash path_regexp ^/(.*)/$
 
+	handle @method_isnt_GET_or_HEAD {
+		error 405
+	}
 	handle @path_is_suffixed_with_html_or_br {
 		error 404
 	}
@@ -501,8 +506,9 @@ tradition than with a hastily drawn doodle by a random person on the internet
 that spins when your mouse hovers over it?</p>
 <h2 id="article-chnagelog"><a href="#article-chnagelog" class="anchor" aria-hidden="true" tabindex="-1"></a>Article chnagelog</h2>
 <ul>
-<li>2022-09-11: (minor) Add HSTS and tweak no-www redirect in Caddyfile. Link to
-thread about the Caddyfile on Caddy discourse.</li>
+<li>2022-09-11: (minor) Add HSTS, tweak no-www redirect, and reject HTTP methods
+other than GET or POST in Caddyfile. Also link to thread requesting
+suggestions for this Caddyfile on Caddy&#x27;s Discourse.</li>
 </ul>
 
 </div>

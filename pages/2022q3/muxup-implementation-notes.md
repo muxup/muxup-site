@@ -165,6 +165,7 @@ this site:
     isn't "new" any more), but require non-standard modules or custom builds
     on Nginx.
 * Redirect `wwww.muxup.com/*` URLs to `muxup.com/*`.
+* HTTP request methods other than `GET` or `HEAD` should return error 405.
 * Set appropriate [Cache-Control
   headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control)
   in order to avoid unnecessary re-fetching content. Set shorter lifetimes for
@@ -239,6 +240,7 @@ muxup.com {
 	vars short_cache_control "max-age=3600"
 	vars long_cache_control "max-age=2592000, stale-while-revalidate=2592000"
 
+	@method_isnt_GET_or_HEAD not method GET HEAD
 	@path_is_suffixed_with_html_or_br path *.html *.html/ *.br *.br/
 	@path_or_html_suffixed_path_exists file {path}.html {path}
 	@html_suffixed_path_exists file {path}.html
@@ -246,6 +248,9 @@ muxup.com {
 	@path_is_root path /
 	@path_has_trailing_slash path_regexp ^/(.*)/$
 
+	handle @method_isnt_GET_or_HEAD {
+		error 405
+	}
 	handle @path_is_suffixed_with_html_or_br {
 		error 404
 	}
@@ -327,5 +332,6 @@ that spins when your mouse hovers over it?
 
 ## Article chnagelog
 
-* 2022-09-11: (minor) Add HSTS and tweak no-www redirect in Caddyfile. Link to
-  thread about the Caddyfile on Caddy discourse.
+* 2022-09-11: (minor) Add HSTS, tweak no-www redirect, and reject HTTP methods
+  other than GET or POST in Caddyfile. Also link to thread requesting
+  suggestions for this Caddyfile on Caddy's Discourse.

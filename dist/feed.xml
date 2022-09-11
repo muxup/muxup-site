@@ -295,6 +295,7 @@ on Nginx.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;Redirect &lt;code&gt;wwww.muxup.com/*&lt;/code&gt; URLs to &lt;code&gt;muxup.com/*&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;HTTP request methods other than &lt;code&gt;GET&lt;/code&gt; or &lt;code&gt;HEAD&lt;/code&gt; should return error 405.&lt;/li&gt;
 &lt;li&gt;Set appropriate &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control&quot;&gt;Cache-Control
 headers&lt;/a&gt;
 in order to avoid unnecessary re-fetching content. Set shorter lifetimes for
@@ -369,6 +370,7 @@ muxup.com {
 	vars short_cache_control &amp;quot;max-age=3600&amp;quot;
 	vars long_cache_control &amp;quot;max-age=2592000, stale-while-revalidate=2592000&amp;quot;
 
+	@method_isnt_GET_or_HEAD not method GET HEAD
 	@path_is_suffixed_with_html_or_br path *.html *.html/ *.br *.br/
 	@path_or_html_suffixed_path_exists file {path}.html {path}
 	@html_suffixed_path_exists file {path}.html
@@ -376,6 +378,9 @@ muxup.com {
 	@path_is_root path /
 	@path_has_trailing_slash path_regexp ^/(.*)/$
 
+	handle @method_isnt_GET_or_HEAD {
+		error 405
+	}
 	handle @path_is_suffixed_with_html_or_br {
 		error 404
 	}
@@ -452,8 +457,9 @@ tradition than with a hastily drawn doodle by a random person on the internet
 that spins when your mouse hovers over it?&lt;/p&gt;
 &lt;h2 id=&quot;article-chnagelog&quot;&gt;&lt;a href=&quot;#article-chnagelog&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article chnagelog&lt;/h2&gt;
 &lt;ul&gt;
-&lt;li&gt;2022-09-11: (minor) Add HSTS and tweak no-www redirect in Caddyfile. Link to
-thread about the Caddyfile on Caddy discourse.&lt;/li&gt;
+&lt;li&gt;2022-09-11: (minor) Add HSTS, tweak no-www redirect, and reject HTTP methods
+other than GET or POST in Caddyfile. Also link to thread requesting
+suggestions for this Caddyfile on Caddy&amp;#x27;s Discourse.&lt;/li&gt;
 &lt;/ul&gt;
 </content>
 </entry>
