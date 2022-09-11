@@ -5,6 +5,7 @@
 # SPDX-License-Identifier: MIT
 
 BASE_URL="https://muxup.com"
+BASE_URL_WWW="https://www.muxup.com"
 
 check_404() {
   res=$(curl -sw ' - %{http_code}' "$BASE_URL$1")
@@ -21,6 +22,15 @@ check_308() {
     printf "FAIL: '%s' doesn't give 308 redirect to '%s'\n" "$BASE_URL$1" "$2"
   else
     printf "PASS: '%s' gives expected 308 redirect\n" "$BASE_URL$1"
+  fi
+}
+
+check_www_to_no_www() {
+  res=$(curl -sw '%{http_code} %{redirect_url}' "$BASE_URL_WWW$1")
+  if [ "$res" != "308 $BASE_URL$1" ]; then
+    printf "FAIL: '%s' doesn't give 308 redirect to '%s'\n" "$BASE_URL_WWW$1" "$BASE_URL$1"
+  else
+    printf "PASS: '%s' gives expected 308 redirect to no-www\n" "$BASE_URL_WWW$1"
   fi
 }
 
@@ -55,6 +65,16 @@ check_long_cache_control() {
     printf "PASS: '%s' gives long cache-control header\n" "$BASE_URL$1"
   fi
 }
+
+# www redirects.
+check_www_to_no_www /
+# Would be better to redirect directly to muxup.com/about
+check_www_to_no_www /about/
+check_www_to_no_www /about
+# Currently redirects, but I'd rather it 404s:
+check_www_to_no_www /non-existent
+check_www_to_no_www /index.html
+check_www_to_no_www /index.html.br
 
 # *.html and *.html.br files are hidden.
 check_404 /index.html
