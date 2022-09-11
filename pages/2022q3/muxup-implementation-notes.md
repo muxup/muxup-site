@@ -330,7 +330,7 @@ illustrations on technical content - and what better way to honour that
 tradition than with a hastily drawn doodle by a random person on the internet
 that spins when your mouse hovers over it?
 
-## Article chnagelog
+## Article changelog
 
 * 2022-09-11: (minor) Add HSTS, tweak no-www redirect, and reject HTTP methods
   other than GET or POST in Caddyfile. Also link to thread requesting
