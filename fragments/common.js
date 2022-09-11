@@ -92,6 +92,7 @@ function addRedrawOnMouseover(el, hlInfo) {
   let repeating_cb;
   el.addEventListener("mouseover", () => { drawPath(hlInfo); repeating_cb=setInterval(() => (drawPath(hlInfo)), 240); }, false);
   el.addEventListener("mouseout", () => { clearInterval(repeating_cb);})
+  el.addEventListener("click", () => { clearInterval(repeating_cb);})
 }
 
 function annotate(hlEl, parentBlockEl, strokeColor) {
