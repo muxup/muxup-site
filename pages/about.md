@@ -1,5 +1,5 @@
 +++
-published = 2022-09-08
+published = 2022-09-10
 description = "About muxup.com"
 hidden = true
 +++
