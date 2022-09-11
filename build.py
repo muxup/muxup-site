@@ -668,7 +668,7 @@ See also: <a href="https://twitter.com/muxup">Twitter</a> and <a href="https://g
 <div class="card-grid">
 """
 )
-pages_data.sort(key=lambda pd: pd.last_update(False), reverse=True)
+pages_data.sort(key=lambda pd: (pd.last_update(False), pd.permalink), reverse=True)
 for pd in filter(lambda pd: not pd.hidden, pages_data):
     home_html.append(
         f"""\
@@ -726,7 +726,7 @@ with atomic_write(out_path) as o:
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 """
     )
-    pages_data.sort(key=lambda pd: pd.last_update(), reverse=True)
+    pages_data.sort(key=lambda pd: (pd.last_update(), pd.permalink), reverse=True)
     for pd in pages_data:
         o.write(
             f"""\
@@ -741,7 +741,7 @@ with atomic_write(out_path) as o:
 # Generate feed.xml
 out_path = dest_path / "feed.xml"
 with atomic_write(out_path) as o:
-    pages_data.sort(key=lambda pd: pd.last_update(False), reverse=True)
+    pages_data.sort(key=lambda pd: (pd.last_update(False), pd.permalink), reverse=True)
     filtered_pages_data = list(filter(lambda pd: not pd.hidden, pages_data))
     o.write(
         f"""\
