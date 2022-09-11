@@ -164,6 +164,7 @@ this site:
   * Both are very widely supported on the browser side (and Brotli really
     isn't "new" any more), but require non-standard modules or custom builds
     on Nginx.
+* Redirect `wwww.muxup.com/*` URLs to `muxup.com/*`.
 * Set appropriate [Cache-Control
   headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control)
   in order to avoid unnecessary re-fetching content. Set shorter lifetimes for
@@ -224,7 +225,8 @@ almost all goals:
 	}
 }
 www.muxup.com {
-	redir https://muxup.com{uri}
+	redir https://muxup.com{uri} 308
+	header Cache-Control "max-age=2592000, stale-while-revalidate=2592000"
 }
 muxup.com {
 	root * /var/www/muxup.com/htdocs
@@ -232,6 +234,7 @@ muxup.com {
 	log {
 		output file /var/log/caddy/muxup.com.access.log
 	}
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 
 	vars short_cache_control "max-age=3600"
 	vars long_cache_control "max-age=2592000, stale-while-revalidate=2592000"
@@ -296,6 +299,9 @@ A few notes on the above:
   `precompressed br` option of `file_server` is used to serve pre-compressed
   files (as prepared by the [deploy
   script](https://github.com/muxup/muxup-site/blob/main/deploy.sh)).
+* I've [asked for
+  advice](https://caddy.community/t/suggestions-for-simplifying-my-caddyfile/17135)
+  on improving the above Caddyfile on the Caddy Discourse.
 
 ## Analytics
 
@@ -318,3 +324,8 @@ on their book covers there's a well established tradition of animal
 illustrations on technical content - and what better way to honour that
 tradition than with a hastily drawn doodle by a random person on the internet
 that spins when your mouse hovers over it?
+
+## Article chnagelog
+
+* 2022-09-11: (minor) Add HSTS and tweak no-www redirect in Caddyfile. Link to
+  thread about the Caddyfile on Caddy discourse.
