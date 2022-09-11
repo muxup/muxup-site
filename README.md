@@ -4,7 +4,7 @@
 
 This repository contains content, generator scripts, and produced artifacts
 for [muxup.com](https://muxup.com). See the associated [implementation notes
-blog post](http://muxup.com/2022q3/muxup-implementation-notes) for more
+blog post](https://muxup.com/2022q3/muxup-implementation-notes) for more
 information.
 
 ## Dependencies
