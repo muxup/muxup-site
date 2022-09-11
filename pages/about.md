@@ -61,4 +61,4 @@ drawing skills to the internet.
 
 ## Article changelog
 
-* 2022-09-11: Minor wording tweaks.
+* 2022-09-11: (minor) Minor wording tweaks.
