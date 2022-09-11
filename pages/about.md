@@ -1,6 +1,6 @@
 +++
 published = 2022-09-10
-description = "About muxup.com"
+description = "Information about Muxup's author, copyright, site structure, implementation, and more"
 hidden = true
 +++
 # About
