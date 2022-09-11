@@ -107,6 +107,9 @@ comfortable with an explicit license.
   trigger blur+focus events when resizing the window using a keybinding while
   Chrome doesn't. Being able to remove the logic to deal with this issue would
   be a good additional simplification.
-* The interaction with `sessionStorage` is redundant if setting
-  `enabledByDefault = true`, but it doesn't seem worth adding additional
-  code paths to avoid using it, or providing a second variant of the code.
+
+## Article changelog
+
+* 2022-09-11: (minor) Removed incorrect statement about `sessionStorage` usage being
+  redundant if `enableByDefault = true` (it does mean disabling reloading will
+  persist).
