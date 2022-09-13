@@ -69,7 +69,8 @@ blockquote {
 }""",
     "<hr": """\
 hr {
-  border-color:rgba(0,0,0,0.25)
+  border:none;
+  border-top:2px solid #dadee4;
 }""",
     "<code": """\
 code {
