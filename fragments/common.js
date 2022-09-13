@@ -122,7 +122,15 @@ function preloadFooterImage() {
 }
 calcNextFooterImageSrc();
 changeFooterImage(true);
-footerImage.addEventListener("click", () => changeFooterImage());
+footerImage.addEventListener("click", () => {
+  // Restart the animation if it completed.
+  if (footerImage.getAnimations().length == 0) {
+    footerImage.removeAttribute("id");
+    void footerImage.offsetWidth;
+    footerImage.setAttribute("id", "footer-image");
+  }
+  changeFooterImage();
+});
 footerImage.addEventListener("mouseover", () => preloadFooterImage());
 footerImage.addEventListener("touchstart", () => preloadFooterImage(), {passive: true});
 
