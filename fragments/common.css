@@ -93,6 +93,6 @@ footer {
   }
 }
 #footer-image:hover {
-  animation:rotation .6s infinite linear;
+  animation:rotation .6s 1 linear;
   cursor:pointer;
 }
