@@ -122,16 +122,19 @@ function preloadFooterImage() {
 }
 calcNextFooterImageSrc();
 changeFooterImage(true);
+let footerImageAnimation = null;
 footerImage.addEventListener("click", () => {
   // Restart the animation if it completed.
-  if (footerImage.getAnimations().length == 0) {
-    footerImage.removeAttribute("id");
-    void footerImage.offsetWidth;
-    footerImage.setAttribute("id", "footer-image");
-  }
+  if (footerImageAnimation)
+      footerImageAnimation.play();
   changeFooterImage();
 });
-footerImage.addEventListener("mouseover", () => preloadFooterImage());
+footerImage.addEventListener("mouseover", () => {
+  const anims = footerImage.getAnimations();
+  if (anims.length != 0)
+    footerImageAnimation = anims[0];
+  preloadFooterImage();
+});
 
 function fetchOnMouseOver(event) {
   const destination = event.currentTarget.getAttribute("href").split("#")[0];
