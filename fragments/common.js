@@ -132,7 +132,6 @@ footerImage.addEventListener("click", () => {
   changeFooterImage();
 });
 footerImage.addEventListener("mouseover", () => preloadFooterImage());
-footerImage.addEventListener("touchstart", () => preloadFooterImage(), {passive: true});
 
 function fetchOnMouseOver(event) {
   const destination = event.currentTarget.getAttribute("href").split("#")[0];
@@ -149,5 +148,4 @@ for (const e of links) {
     continue;
   }
   e.addEventListener("mouseover", fetchOnMouseOver);
-  e.addEventListener("touchstart", fetchOnMouseOver, {passive: true});
 }
