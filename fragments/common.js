@@ -124,9 +124,11 @@ calcNextFooterImageSrc();
 changeFooterImage(true);
 let footerImageAnimation = null;
 footerImage.addEventListener("click", () => {
-  // Restart the animation if it completed.
-  if (footerImageAnimation)
+  // Restart the animation if it completed. WebKit seems to need pause+play.
+  if (footerImageAnimation) {
+      footerImageAnimation.pause();
       footerImageAnimation.play();
+  }
   changeFooterImage();
 });
 footerImage.addEventListener("mouseover", () => {
