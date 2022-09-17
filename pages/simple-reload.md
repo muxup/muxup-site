@@ -11,6 +11,9 @@ server-side requirements) way of reloading a web page as it is iteratively
 developed or modified. Once activated, a page will be reloaded
 whenever it regains focus.
 
+If you encounter any problems, please file an issue on the [simple-reload
+GitHub repository](https://github.com/muxup/simple-reload).
+
 ## Trade-offs
 
 Mature solutions like
@@ -109,7 +112,8 @@ comfortable with an explicit license.
   be a good additional simplification.
 
 ## Article changelog
-
+* 2022-09-17: (minor) Added link to [simple-reload GitHub
+  repo](https://github.com/muxup/simple-reload).
 * 2022-09-11: (minor) Removed incorrect statement about `sessionStorage` usage being
   redundant if `enableByDefault = true` (it does mean disabling reloading will
   persist).

@@ -18,6 +18,8 @@
 server-side requirements) way of reloading a web page as it is iteratively
 developed or modified. Once activated, a page will be reloaded
 whenever it regains focus.&lt;/p&gt;
+&lt;p&gt;If you encounter any problems, please file an issue on the &lt;a href=&quot;https://github.com/muxup/simple-reload&quot;&gt;simple-reload
+GitHub repository&lt;/a&gt;.&lt;/p&gt;
 &lt;h2 id=&quot;trade-offs&quot;&gt;&lt;a href=&quot;#trade-offs&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Trade-offs&lt;/h2&gt;
 &lt;p&gt;Mature solutions like
 &lt;a href=&quot;https://github.com/livereload/livereload-js&quot;&gt;LiveReload&lt;/a&gt; are available, which
@@ -123,6 +125,8 @@ be a good additional simplification.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
 &lt;ul&gt;
+&lt;li&gt;2022-09-17: Added link to &lt;a href=&quot;https://github.com/muxup/simple-reload&quot;&gt;simple-reload GitHub
+repo&lt;/a&gt;.&lt;/li&gt;
 &lt;li&gt;2022-09-11: Removed incorrect statement about &lt;code&gt;sessionStorage&lt;/code&gt; usage being
 redundant if &lt;code&gt;enableByDefault = true&lt;/code&gt; (it does mean disabling reloading will
 persist).&lt;/li&gt;
