@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright Muxup Contributors.
+# Copyright Muxup contributors.
 # Distributed under the terms of the MIT license, see LICENSE for details.
 # SPDX-License-Identifier: MIT
 
