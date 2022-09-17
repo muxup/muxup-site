@@ -125,18 +125,20 @@ changeFooterImage(true);
 let footerImageAnimation = null;
 footerImage.addEventListener("click", () => {
   // Restart the animation if it completed. WebKit seems to need pause+play.
-  if (footerImageAnimation) {
+  if (footerImageAnimation && footerImageAnimation.playState != "running") {
       footerImageAnimation.pause();
       footerImageAnimation.play();
   }
   changeFooterImage();
 });
-footerImage.addEventListener("mouseover", () => {
+function footerImageMouseOver() {
   const anims = footerImage.getAnimations();
   if (anims.length != 0)
     footerImageAnimation = anims[0];
   preloadFooterImage();
-});
+}
+footerImage.addEventListener("mouseover", footerImageMouseOver);
+footerImage.addEventListener("touchstart", footerImageMouseOver, { passive: true });
 
 function fetchOnMouseOver(event) {
   const destination = event.currentTarget.getAttribute("href").split("#")[0];
@@ -153,4 +155,5 @@ for (const e of links) {
     continue;
   }
   e.addEventListener("mouseover", fetchOnMouseOver);
+  e.addEventListener("touchstart", fetchOnMouseOver, { passive: true });
 }
