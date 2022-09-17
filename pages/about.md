@@ -50,7 +50,7 @@ while adding a splash of colour and personality.
 See [Muxup implementation notes](/pages/2022q3/muxup-implementation-notes.md)
 for further implementation details.
 
-## Why the doodlers in the footer?
+## Why the doodles in the footer?
 
 Muxup is a hobby site and I wouldn't want it to appear too corporate - crudely
 drawn doodles of animals are a well known method to avoid this risk. The
@@ -61,4 +61,5 @@ drawing skills to the internet.
 
 ## Article changelog
 
+* 2022-09-17: (minor) Fix typo.
 * 2022-09-11: (minor) Minor wording tweaks.
