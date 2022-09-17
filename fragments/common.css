@@ -98,6 +98,6 @@ footer p {
   margin:0 auto;
 }
 #footer-image:hover {
-  animation:rotation .6s 1 linear;
+  animation:rotation .6s linear 0s 1;
   cursor:pointer;
 }
