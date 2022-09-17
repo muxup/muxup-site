@@ -75,15 +75,16 @@ li {
   background:#ffdac0;
 }
 footer {
-  display:grid;
-  grid-auto-flow:column;
-  align-items:center;
-  justify-content:center;
-  white-space:pre-wrap;
-  padding:.5rem 0;
   font-size:.833rem;
   color:#777;
-  min-height:75px;
+  padding:0 1rem;
+  width:100%;
+  max-width:min(calc(750px + 2rem), calc(100vw - 1rem));
+  margin:0 auto;
+}
+footer p {
+  text-align:center;
+  margin:0 0 .75rem;
 }
 @keyframes rotation {
   from {
@@ -92,6 +93,9 @@ footer {
   to {
     transform:rotate(359deg);
   }
+}
+#footer-image {
+  margin:0 auto;
 }
 #footer-image:hover {
   animation:rotation .6s 1 linear;
