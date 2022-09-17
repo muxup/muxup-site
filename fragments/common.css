@@ -86,18 +86,7 @@ footer p {
   text-align:center;
   margin:0 0 .75rem;
 }
-@keyframes rotation {
-  from {
-    transform:rotate(0deg);
-  }
-  to {
-    transform:rotate(359deg);
-  }
-}
 #footer-image {
   margin:0 auto;
-}
-#footer-image:hover {
-  animation:rotation .6s linear 0s 1;
   cursor:pointer;
 }

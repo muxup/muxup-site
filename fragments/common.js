@@ -122,19 +122,17 @@ function preloadFooterImage() {
 }
 calcNextFooterImageSrc();
 changeFooterImage(true);
-let footerImageAnimation = null;
+const rotation = [
+  { transform: 'rotate(0)' },
+  { transform: 'rotate(360deg)' }
+];
+const rotationTiming = { duration: 600, iterations: 1 };
 footerImage.addEventListener("click", () => {
-  // Restart the animation if it completed. WebKit seems to need pause+play.
-  if (footerImageAnimation && footerImageAnimation.playState != "running") {
-      footerImageAnimation.pause();
-      footerImageAnimation.play();
-  }
+  footerImage.animate(rotation, rotationTiming);
   changeFooterImage();
 });
 function footerImageMouseOver() {
-  const anims = footerImage.getAnimations();
-  if (anims.length != 0)
-    footerImageAnimation = anims[0];
+  footerImage.animate(rotation, rotationTiming);
   preloadFooterImage();
 }
 footerImage.addEventListener("mouseover", footerImageMouseOver);
