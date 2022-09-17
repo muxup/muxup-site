@@ -92,15 +92,16 @@ margin:0 0 .25rem
 background:#ffdac0;
 }
 footer {
-display:grid;
-grid-auto-flow:column;
-align-items:center;
-justify-content:center;
-white-space:pre-wrap;
-padding:.5rem 0;
 font-size:.833rem;
 color:#777;
-min-height:75px;
+padding:0 1rem;
+width:100%;
+max-width:min(calc(750px + 2rem), calc(100vw - 1rem));
+margin:0 auto;
+}
+footer p {
+text-align:center;
+margin:0 0 .75rem;
 }
 @keyframes rotation {
 from {
@@ -109,6 +110,9 @@ transform:rotate(0deg);
 to {
 transform:rotate(359deg);
 }
+}
+#footer-image {
+margin:0 auto;
 }
 #footer-image:hover {
 animation:rotation .6s 1 linear;
@@ -200,8 +204,9 @@ See also: <a href="https://twitter.com/muxup">Twitter</a> and <a href="https://g
 </a>
 </div>
 </div>
-<footer class="footer">Curated by Alex Bradbury, &copy; <a href="/">Muxup</a> contributors. <a href="/about">About</a>. 
+<footer class="footer">
 <img id="footer-image" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E" width="50" height="50"/>
+<p>Curated by Alex Bradbury | &copy; <a href="/">Muxup</a> contributors | <a href="/about">About</a> | <a href="https://github.com/muxup">GitHub</a> | <a href="https://twitter.com/muxup">Twitter</a></p>
 </footer>
 <script>
 const t="http://www.w3.org/2000/svg";function o(t){return Math.random()*(2*t)-t}function n(t){const n=t.t.getBoundingClientRect();const e=t.o.getClientRects();let f="";for(const t of e){const e=t.x-n.x,c=t.y-n.y,s=t.width,r=t.height;const i=c+r/2;let u=s<75?3:s<300?6:8;const l=.2+.2*Math.random();f=`${f}\n      M${e+o(u)} ${i+o(u)}\n      C${e+s*l+o(u)} ${i+o(u)},\n       ${e+2*s*l+o(u)} ${i+o(u)}\n       ${e+s+o(u)} ${i+o(u)}`}t.i=f;t.strokeWidth=.85*e[0].height}const e=new Map;let f=new ResizeObserver((t=>{for(const o of t){const t=e.get(o.target);if(!t.i)n(t)}for(const o of t){s(e.get(o.target))}}));function c(o){const n=document.createElementNS(t,"svg");n.style.position="absolute";n.style.zIndex=-1;n.style.top="0";n.style.left="0";n.style.overflow="visible";const e=document.createElementNS(t,"path");e.setAttribute("fill","none");e.setAttribute("stroke",o.u);n.appendChild(e);o.o.insertAdjacentElement("beforebegin",n);o.t=n}function s(t){if(!t.i){n(t)}const o=t.t.children[0];o.setAttribute("stroke-width",t.strokeWidth);o.setAttribute("d",t.i);t.i=null}function r(){for(const t of e.values()){c(t)}for(const t of e.values()){n(t)}for(const t of e.keys()){f.observe(t)}document.fonts.ready.then((()=>i()))}function i(){for(const t of e.values()){n(t)}for(const t of e.values()){s(t)}}function u(t,o){let n;t.addEventListener("mouseover",(()=>{s(o);n=setInterval((()=>s(o)),240)}),false);t.addEventListener("mouseout",(()=>{clearInterval(n)}));t.addEventListener("click",(()=>{clearInterval(n)}))}function l(t,o,n){let f={o:t,l:o,u:n};e.set(o,f);return f}let a=new Set([window.location.pathname]);const h=document.querySelector("#footer-image");let d=null;function m(){let t=Math.floor(Math.random()*94);d="/static/footer/"+String(t).padStart(4,"0")+".svg"}function v(t){h.src=d;m();if(!t)g()}function g(){if(a.has(d))return;a.add(d);fetch(d)}m();v(true);let w=null;h.addEventListener("click",(()=>{if(w&&w.playState!="running"){w.pause();w.play()}v()}));function $(){const t=h.getAnimations();if(t.length!=0)w=t[0];g()}h.addEventListener("mouseover",$);h.addEventListener("touchstart",$,{passive:true});function k(t){const o=t.currentTarget.getAttribute("href").split("#")[0];if(a.has(o))return;a.add(o);fetch(o)}const p=document.getElementsByTagName("a");for(const t of p){const o=(t.getAttribute("href")??"").split("#")[0];if(o.includes("?")||!o.startsWith("/")||o.slice(o.lastIndexOf("/")+1).includes(".")){continue}t.addEventListener("mouseover",k);t.addEventListener("touchstart",k,{passive:true})}const M=document.querySelectorAll(".highlight-title");const b=["#ffdef2","#f2e2ff","#e2eeff","#ddfffc","#ffffe3"];let I=0;for(const t of M){const o=l(t,t.parentNode,b[I%b.length]);u(t.parentNode.parentNode,o);I=I+1}const C=document.querySelector("#home-logo");const E=l(C,C.parentNode,"#ffdac0");r();u(C,E);

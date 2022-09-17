@@ -157,8 +157,9 @@ favicon_svg = (
 )
 
 standard_footer = """\
-<footer class="footer">Curated by Alex Bradbury, &copy; <a href="/">Muxup</a> contributors. <a href="/about">About</a>. 
+<footer class="footer">
 <img id="footer-image" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E" width="50" height="50"/>
+<p>Curated by Alex Bradbury | &copy; <a href="/">Muxup</a> contributors | <a href="/about">About</a> | <a href="https://github.com/muxup">GitHub</a> | <a href="https://twitter.com/muxup">Twitter</a></p>
 </footer>\
 """
 
