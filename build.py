@@ -70,7 +70,7 @@ blockquote {
     "<hr": """\
 hr {
   border:none;
-  border-top:2px solid #dadee4;
+  border-top:4px solid #f1f3f5;
 }""",
     "<code": """\
 code {
@@ -429,7 +429,7 @@ def render_markdown(
             .children[0]
         )
         doc.children[changelog_idx] = mistletoe.block_token.HTMLBlock(
-            '<hr/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor "aria-hidden="true" tabindex="-1"></a>Article changelog</summary>'
+            '<hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor "aria-hidden="true" tabindex="-1"></a>Article changelog</summary>'
         )
         doc.children.insert(
             changelog_idx + 2, mistletoe.block_token.HTMLBlock("</details>")
