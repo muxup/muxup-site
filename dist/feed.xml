@@ -4,8 +4,210 @@
 <subtitle>Adventures in collaborative open source development</subtitle>
 <link href="https://muxup.com/feed.xml" rel="self" type="application/atom+xml"/>
 <link href="https://muxup.com"/>
-<updated>2022-09-10T12:00:00Z</updated>
+<updated>2022-09-21T12:00:00Z</updated>
 <id>https://muxup.com/feed.xml</id>
+<entry>
+<title>What&#x27;s new for RISC-V in LLVM 15</title>
+<published>2022-09-21T12:00:00Z</published>
+<updated>2022-09-21T12:00:00Z</updated>
+<link rel="alternate" href="https://muxup.com/2022q3/whats-new-for-risc-v-in-llvm-15"/>
+<id>https://muxup.com/2022q3/whats-new-for-risc-v-in-llvm-15</id>
+<content type="html">
+&lt;p&gt;LLVM 15.0.0 was
+&lt;a href=&quot;https://discourse.llvm.org/t/llvm-15-0-0-release/65099&quot;&gt;released&lt;/a&gt; around
+about two weeks ago now, and I wanted to highlight some of RISC-V specific
+changes or improvements that were introduced while going into a little more
+detail than I was able to in the &lt;a href=&quot;https://releases.llvm.org/15.0.0/docs/ReleaseNotes.html#changes-to-the-risc-v-backend&quot;&gt;release
+notes&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;In case you&amp;#x27;re not familiar with LLVM&amp;#x27;s release schedule, it&amp;#x27;s worth noting
+that there are two major LLVM releases a year (i.e. one roughly every 6
+months) and these are timed releases as opposed to being cut when a pre-agreed
+set of feature targets have been met. We&amp;#x27;re very fortunate to benefit from an
+active and growing set of contributors working on RISC-V support in LLVM
+projects, who are responsible for the work I describe below - thank you!
+I coordinate biweekly sync-up calls for RISC-V LLVM contributors, so if you&amp;#x27;re
+working in this area please &lt;a href=&quot;https://discourse.llvm.org/c/code-generation/riscv/57&quot;&gt;consider dropping
+in&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&quot;linker-relaxation&quot;&gt;&lt;a href=&quot;#linker-relaxation&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Linker relaxation&lt;/h2&gt;
+&lt;p&gt;Linker relaxation is a mechanism for allowing the linker to optimise code
+sequences at link time. A code sequence to jump to a symbol might
+conservatively take two instructions, but once the target address is known at
+link-time it might be small enough to fit in the immediate of a single
+instruction, meaning the other can be deleted. Because a linker performing
+relaxation may delete bytes (rather than just patching them), offsets
+including those for jumps within a function may be changed. To allow this to
+happen without breaking program semantics, even local branches that might
+typically be resolved by the assembler must be emitted as a relocation when
+linker relaxation is enabled. See the &lt;a href=&quot;https://github.com/riscv-non-isa/riscv-elf-psabi-doc/blob/master/riscv-elf.adoc#linker-relaxation&quot;&gt;description in the RISC-V
+psABI&lt;/a&gt;
+or &lt;a href=&quot;https://www.sifive.com/blog/all-aboard-part-3-linker-relaxation-in-riscv-toolchain&quot;&gt;Palmer Dabbelt&amp;#x27;s blog post on linker
+relaxation&lt;/a&gt;
+for more background.&lt;/p&gt;
+&lt;p&gt;Although LLVM has supported codegen for linker relaxation for a long time, LLD
+(the LLVM linker) has until now lacked support for processing these
+relaxations. Relaxation is primarily an optimisation, but processing of
+&lt;code&gt;R_RISCV_ALIGN&lt;/code&gt; (the alignment relocation) is necessary for correctness when
+linker relaxation is enabled, meaning it&amp;#x27;s not possible to link such object
+files correctly without at least some minimal support. Fangrui Song
+implemented support for
+&lt;code&gt;R_RISCV_ALIGN/R_RISCV_CALL/R_RISCV_CALL_PLT/R_RISCV_TPREL_*&lt;/code&gt; relocations in
+LLVM 15 and wrote up a &lt;a href=&quot;https://maskray.me/blog/2022-07-10-riscv-linker-relaxation-in-lld&quot;&gt;blog post with more implementation
+details&lt;/a&gt;,
+which is a major step in bringing us to parity with the GCC/binutils
+toolchain.&lt;/p&gt;
+&lt;h2 id=&quot;optimisations&quot;&gt;&lt;a href=&quot;#optimisations&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Optimisations&lt;/h2&gt;
+&lt;p&gt;As with any release, there&amp;#x27;s been a large number of codegen improvements, both
+target-independent and target-dependent. One addition to highlight in the
+RISC-V backend is the new &lt;a href=&quot;https://github.com/llvm/llvm-project/blob/release/15.x/llvm/lib/Target/RISCV/RISCVCodeGenPrepare.cpp&quot;&gt;RISCVCodeGenPrepare
+pass&lt;/a&gt;.
+This is the latest piece of a long-running campaign (largely led by Craig
+Topper) to improve code generation related to sign/zero extensions on RV64.
+&lt;a href=&quot;https://llvm.org/docs/Passes.html#codegenprepare-optimize-for-code-generation&quot;&gt;CodeGenPrepare&lt;/a&gt;
+is a target-independent pass that performs some late-stage transformations to
+the input ahead of lowering to SelectionDAG. The RISC-V specific version looks
+for opportunities to convert zero-extension to i64 with a sign-extension
+(which is cheaper).&lt;/p&gt;
+&lt;p&gt;Another new pass that may be of interest is
+&lt;a href=&quot;https://github.com/llvm/llvm-project/blob/release/15.x/llvm/lib/Target/RISCV/RISCVMakeCompressible.cpp&quot;&gt;RISCVMakeCompressible&lt;/a&gt;
+(contributed by Lewis Revill and Craig Blackmore).  Rather than trying to
+improve generated code performance, this is solely focused on reducing code
+size, and may increase the static instruction count in order to do so (which
+is why it&amp;#x27;s currently only enabled at the &lt;code&gt;-Oz&lt;/code&gt; optimisation level). It looks
+for cases where an instruction has been selected which can&amp;#x27;t be represented by
+one of the compressed (16-bit as opposed to 32-bit wide) instruction forms.
+For instance due to the register not being one of the registers addressable
+from the compressed instruction, or the offset being out of range). It will
+then look for opportunities to transform the input to make the instructions
+compressible. Grabbing two examples from the header comment of the pass:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot; style=&quot;background: #ffffff&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span style=&quot;color: #177500&quot;&gt;; &amp;#39;zero&amp;#39; register not addressable in compressed store.&lt;/span&gt;
+                 &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;li&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;0&lt;/span&gt;
+&lt;span style=&quot;color: #000000&quot;&gt;sw&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;zero&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;0&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;)   &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;c.sw&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;0&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;)
+&lt;span style=&quot;color: #000000&quot;&gt;sw&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;zero&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;8&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;)   &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;c.sw&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;8&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;)
+&lt;span style=&quot;color: #000000&quot;&gt;sw&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;zero&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;4&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;)   &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;c.sw&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;4&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;)
+&lt;span style=&quot;color: #000000&quot;&gt;sw&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;zero&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;24&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;)  &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;c.sw&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;24&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;) 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;and&lt;/p&gt;
+&lt;div class=&quot;highlight&quot; style=&quot;background: #ffffff&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span style=&quot;color: #177500&quot;&gt;; compressed stores support limited offsets&lt;/span&gt;
+&lt;span style=&quot;color: #000000&quot;&gt;lui&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a2&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;983065&lt;/span&gt;     &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;lui&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a2&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;983065&lt;/span&gt; 
+                   &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;addi&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a3&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;a2&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;-256&lt;/span&gt;
+&lt;span style=&quot;color: #000000&quot;&gt;sw&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;-236&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a2&lt;/span&gt;)   &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;c.sw&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;20&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a3&lt;/span&gt;)
+&lt;span style=&quot;color: #000000&quot;&gt;sw&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;-240&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a2&lt;/span&gt;)   &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;c.sw&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;16&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a3&lt;/span&gt;)
+&lt;span style=&quot;color: #000000&quot;&gt;sw&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;-244&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a2&lt;/span&gt;)   &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;c.sw&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;12&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a3&lt;/span&gt;)
+&lt;span style=&quot;color: #000000&quot;&gt;sw&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;-248&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a2&lt;/span&gt;)   &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;c.sw&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;8&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a3&lt;/span&gt;)
+&lt;span style=&quot;color: #000000&quot;&gt;sw&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;-252&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a2&lt;/span&gt;)   &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;c.sw&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;4&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a3&lt;/span&gt;)
+&lt;span style=&quot;color: #000000&quot;&gt;sw&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;-256&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a2&lt;/span&gt;)   &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;c.sw&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;0&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a3&lt;/span&gt;)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;There&amp;#x27;s a whole range of other backend codegen improvements, including
+additions to existing RISC-V specific passes but unfortunately it&amp;#x27;s not
+feasible to enumerate them all.&lt;/p&gt;
+&lt;p&gt;One improvement to note from the Clang frontend is that &lt;a href=&quot;https://reviews.llvm.org/rG7a5cb15ea6fa&quot;&gt;the C intrinsics for
+the RISC-V Vector extension are now lazily
+generated&lt;/a&gt;, avoiding the need to
+parse a huge pre-generated header file and improving compile times.&lt;/p&gt;
+&lt;h2 id=&quot;support-for-new-instruction-set-extensions&quot;&gt;&lt;a href=&quot;#support-for-new-instruction-set-extensions&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Support for new instruction set extensions&lt;/h2&gt;
+&lt;p&gt;A batch of new instruction set extensions &lt;a href=&quot;https://riscv.org/announcements/2021/12/riscv-ratifies-15-new-specifications/&quot;&gt;were ratified at the end of last
+year&lt;/a&gt;
+(see also the &lt;a href=&quot;https://wiki.riscv.org/display/HOME/Recently+Ratified+Extensions&quot;&gt;recently ratified extension
+list&lt;/a&gt;.  LLVM
+14 already &lt;a href=&quot;https://releases.llvm.org/14.0.0/docs/ReleaseNotes.html#changes-to-the-risc-v-target&quot;&gt;featured a number of
+these&lt;/a&gt;
+(with the vector and ratified bit manipulation extensions no longer being
+marked as experimental). In LLVM 15 we were able to fill in some of the gaps,
+adding support for additional ratified extensions as well as some new
+experimental extensions.&lt;/p&gt;
+&lt;p&gt;In particular:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Assembler and disassembler support for the &lt;a href=&quot;https://github.com/riscv/riscv-zfinx/blob/main/zfinx-1.0.0.pdf&quot;&gt;Zdinx, Zfinx, Zhinx, and Zhinxmin
+extensions&lt;/a&gt;.
+Cores that implement these extensions store double/single/half precision
+floating point values in the integer register file (GPRs) as opposed to having a
+separate floating-point register file (FPRs).
+&lt;ul&gt;
+&lt;li&gt;The instructions defined in the conventional floating point extensions are
+defined to instead operate on the general purpose registers, and
+instructions that become redundant (namely those that involve moving
+values from FPRs to GPRs) are removed.&lt;/li&gt;
+&lt;li&gt;Cores might implement these extensions rather than the conventional
+floating-point in order to reduce the amount of architectural state that
+is needed, reducing area and context-switch cost. The downside is of
+course that register pressure for the GPRs will be increased.&lt;/li&gt;
+&lt;li&gt;Codegen for these extensions is not yet supported (i.e. the extensions are
+only supported for assembly input or inline assembly). A patch to provide
+this support &lt;a href=&quot;https://reviews.llvm.org/D122918&quot;&gt;is under review&lt;/a&gt; though.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Assembler and disassembler support for the &lt;a href=&quot;https://github.com/riscv/riscv-CMOs/blob/master/specifications/cmobase-v1.0.pdf&quot;&gt;Zicbom, Zicbop, and Zicboz
+extensions&lt;/a&gt;.
+These cache management operation (CMO) extensions add new instructions for
+invalidating, cleaning, and flushing cache blocks (Zicbom), zeroing cache
+blocks (Zicboz), and prefetching cache blocks (Zicbop).
+&lt;ul&gt;
+&lt;li&gt;These operations aren&amp;#x27;t currently exposed via C intrinsics, but these will
+be added once the appropriate naming has been agreed.&lt;/li&gt;
+&lt;li&gt;One of the questions raised during implementation was about the &lt;a href=&quot;https://github.com/riscv/riscv-CMOs/issues/47&quot;&gt;preferred
+textual format for the
+operands&lt;/a&gt;. Specifically,
+whether it should be e.g. &lt;code&gt;cbo.clean (a0)&lt;/code&gt;/&lt;code&gt;cbo.clean 0(a0)&lt;/code&gt; to match the
+format used for other memory operations, or &lt;code&gt;cbo.clean a0&lt;/code&gt; as was used in
+an early binutils patch. We were able to agree between the CMO working
+group, LLVM, and GCC developers on the former approach.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Assembler, disassembler, and codegen support for the &lt;a href=&quot;https://github.com/riscv/riscv-isa-manual/commit/f518c259c008f926eba4aba67804f62531b6e94b&quot;&gt;Zmmul
+extension&lt;/a&gt;.
+This extension is just a subset of the &amp;#x27;M&amp;#x27; extension providing just the
+multiplication instructions without the division instructions.&lt;/li&gt;
+&lt;li&gt;Assembler and disassembler support for the additional CSRs (control and
+status registers) and instructions introduced by the &lt;a href=&quot;https://github.com/riscv/riscv-isa-manual/commit/f518c259c008f926eba4aba67804f62531b6e94b&quot;&gt;hypervisor and
+Svinval additions to the privileged architecture
+specification&lt;/a&gt;.
+Svinval provides fine-grained address-translation cache invalidation and
+fencing, while the hypervisor extension provides support for efficiently
+virtualising the supervisor-level architecture (used to implement KVM for
+RISC-V).&lt;/li&gt;
+&lt;li&gt;Assembler and disassembler support for the
+&lt;a href=&quot;https://github.com/riscv/riscv-isa-manual/blob/266f3759c9c88b0ae18cfca70f875662d89b52db/src/zihintpause.tex&quot;&gt;Zihintpause
+extension&lt;/a&gt;.
+This adds the &lt;code&gt;pause&lt;/code&gt; instruction intended for use as a hint within
+spin-wait loops.
+&lt;ul&gt;
+&lt;li&gt;Zihintpause was actually the first extension to &lt;a href=&quot;https://riscv.org/announcements/2021/02/risc-v-international-unveils-fast-track-architecture-extension-process-and-ratifies-zihintpause-extension/&quot;&gt;go
+through&lt;/a&gt;
+RISC-V International&amp;#x27;s fast-track architecture extension process back in
+early 2021. We were clearly slow to add it to LLVM, but are trying to keep
+a closer eye on ratified extensions going forwards.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Support was added for the not yet ratified &lt;a href=&quot;https://github.com/riscv/riscv-v-spec/pull/780&quot;&gt;Zvfh
+extension&lt;/a&gt;, providing
+support for half precision floating point values in RISC-V vectors.
+&lt;ul&gt;
+&lt;li&gt;Unlike the extensions listed above, support for Zvfh is experimental. This
+is a status we use within the RISC-V backend for extensions that are not
+yet ratified and may change from release to release with no guarantees on
+backwards compatibility. Enabling support for such extensions requires
+passing &lt;code&gt;-menable-experimental-extensions&lt;/code&gt; to Clang and specifying the
+extension&amp;#x27;s version when listing it in the &lt;code&gt;-march&lt;/code&gt; string.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;It&amp;#x27;s not present in LLVM 15, but LLVM 16 onwards will feature a
+&lt;a href=&quot;https://github.com/llvm/llvm-project/blob/main/llvm/docs/RISCVUsage.rst&quot;&gt;user guide for the RISC-V
+target&lt;/a&gt;
+summarising the level of support for each extension (huge thanks to Philip
+Reames for kicking off this effort).&lt;/p&gt;
+&lt;h2 id=&quot;other-changes&quot;&gt;&lt;a href=&quot;#other-changes&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Other changes&lt;/h2&gt;
+&lt;p&gt;In case I haven&amp;#x27;t said it enough times, there&amp;#x27;s far more interesting changes
+than I could reasonably cover. Apologies if I&amp;#x27;ve missed your favourite new
+feature or improvement. In particular, I&amp;#x27;ve said relatively little about
+RISC-V Vector support. There&amp;#x27;s been a long series of improvements and
+correctness fixes in the LLVM 15 development window, after RVV was made
+non-experimental in LLVM 14 and there&amp;#x27;s much more to come in LLVM 16 (e.g.
+scalable vectorisation becoming enabled by default).&lt;/p&gt;
+</content>
+</entry>
 <entry>
 <title>simple-reload</title>
 <published>2022-09-10T12:00:00Z</published>
