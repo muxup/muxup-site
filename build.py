@@ -729,6 +729,15 @@ with atomic_write(out_path) as o:
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 """
     )
+    front_page_lastmod = max(pd.last_update(False) for pd in pages_data)
+    o.write(
+        f"""\
+<url>
+<loc>{base_url}</loc>
+<lastmod>{front_page_lastmod}</lastmod>
+</url>
+"""
+    )
     pages_data.sort(key=lambda pd: (pd.last_update(), pd.permalink), reverse=True)
     for pd in pages_data:
         o.write(
