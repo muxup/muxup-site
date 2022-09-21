@@ -325,7 +325,7 @@ trigger blur+focus events when resizing the window using a keybinding while
 Chrome doesn&amp;#x27;t. Being able to remove the logic to deal with this issue would
 be a good additional simplification.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;hr/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
+&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
 &lt;ul&gt;
 &lt;li&gt;2022-09-17: Added link to &lt;a href=&quot;https://github.com/muxup/simple-reload&quot;&gt;simple-reload GitHub
 repo&lt;/a&gt;.&lt;/li&gt;
@@ -661,7 +661,7 @@ on their book covers there&amp;#x27;s a well established tradition of animal
 illustrations on technical content - and what better way to honour that
 tradition than with a hastily drawn doodle by a random person on the internet
 that spins when your mouse hovers over it?&lt;/p&gt;
-&lt;hr/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
+&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
 &lt;ul&gt;
 &lt;li&gt;2022-09-11: Add HSTS, tweak no-www redirect, and reject HTTP methods
 other than GET or POST in Caddyfile. Also link to thread requesting
