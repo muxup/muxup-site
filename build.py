@@ -133,11 +133,10 @@ summary::-webkit-details-marker {
   display:none;
 }
 summary::after {
-  font-size:1rem;
-  content: " ≫";
+  content: " »";
 }
 details[open] summary::after {
-  content: " ≪";
+  content: " «";
 }
 """,
 }
