@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:title" content="2023Q1 week log"/>
+<meta property="og:site_name" content="Muxup">
+<meta property="og:description" content="What did I do last week?"/>
+<meta property="og:type" content="article"/>
+<meta property="og:url" content="https://muxup.com/2023q1/week-log"/>
+<meta property="og:image" content="https://v1.screenshot.11ty.dev/https%3A%2F%2Fmuxup.com%2F2023q1%2Fweek-log/opengraph/ar/bigger"/>
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:site" content="@muxup">
+<meta property="twitter:creator" content="@asbradbury">
+<title>2023Q1 week log - Muxup</title>
+<link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg xmlns='http:%2F%2Fwww.w3.org%2F2000%2Fsvg' viewBox='0 0 100 100'%3E%3Ctext y='80' font-size='110'%3E▨%3C%2Ftext%3E%3C%2Fsvg%3E">
+<meta name="description" content="What did I do last week?">
+<style>
+@font-face {
+font-family:'Nunito Var';
+src:url('/static/Nunito.var.v1.woff2') format('woff2-variations');
+font-display:swap;
+font-weight: 200 1000;
+}
+*, *::before, *::after {
+box-sizing:border-box;
+}
+* {
+margin:0;
+}
+input, button, textarea, select {
+font:inherit;
+}
+img, picture, video, canvas, svg {
+display:block;
+max-width:100%;
+}
+html {
+font-family:'Nunito Var', sans-serif;
+height:100%;
+font-size:16px;
+-webkit-tap-highlight-color:transparent;
+}
+@media screen and (min-width:640px) {
+html {
+font-size:18px;
+}
+}
+body {
+line-height:1.5;
+color:#222;
+display:grid;
+height:100%;
+grid-template-rows:1fr auto;
+background:#fff no-repeat 0% 0% / 100% .7rem linear-gradient(120deg, #ffffe3 20%, #ddfffc 20%, #ddfffc 40%, #e2eeff 40%, #e2eeff 60%, #f2e2ff 60%, #f2e2ff 80%, #ffdef2 80%, #ffdef2 100%);
+tab-size:4;
+}
+h1, h2, h3, h4, h5, h6 {
+line-height:1.25;
+font-weight:600;
+overflow-wrap:break-word;
+letter-spacing:-.025em;
+margin:1.75rem 0 .75rem;
+}
+h1 {
+font-size:2.986rem
+}
+h2 {
+font-size:2.488rem
+}
+p {
+margin:.75rem 0;
+font-weight:400;
+overflow-wrap:break-word;
+}
+a {
+color:inherit;
+text-decoration:underline;
+text-decoration-color:#aaa;
+text-underline-offset:.15em;
+}
+a:hover {
+text-decoration-thickness:2px;
+}
+ol, ul {
+margin:0 0 0 1.5rem;
+padding-left:0;
+}
+li {
+margin:0 0 .25rem
+}
+::selection {
+background:#ffdac0;
+}
+footer {
+font-size:.833rem;
+color:#777;
+padding:0 1rem;
+width:100%;
+max-width:min(calc(750px + 2rem), calc(100vw - 1rem));
+margin:0 auto;
+}
+footer p {
+text-align:center;
+margin:0 0 .75rem;
+}
+#footer-image {
+margin:0 auto;
+cursor:pointer;
+}
+#article-logo {
+line-height:1.25;
+margin:.5rem 0 0;
+font-size:1.44rem;
+font-weight:700;
+position:relative;
+}
+#article-logo a {
+text-decoration:none;
+}
+#article-title {
+margin:1.5rem 0 0;
+position:relative;
+}
+#article-meta {
+font-size:.833rem;
+color:#777;
+}
+#article-container {
+margin:0 auto;
+padding:1rem;
+max-width:min(calc(750px + 2rem), calc(100vw - 1rem));
+width:100%;
+}
+.anchor {
+position: absolute;
+text-decoration: none;
+width:1.75ex;
+margin-left:-1.4ex;
+visibility:hidden;
+font-size:.8em;
+padding-top:.2em;
+color:#aaa;
+}
+h2:hover .anchor,
+h3:hover .anchor,
+h4:hover .anchor,
+h5:hover .anchor,
+h6:hover .anchor,
+summary:hover .anchor {
+visibility:visible;
+}
+.anchor::before {
+content:"#";
+}
+code {
+background:#f5f5f5;
+padding:.125rem .25rem;
+font-size:.833rem
+}
+</style>
+<link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed.xml"/>
+<link rel="canonical" href="https://muxup.com/2023q1/week-log"/>
+</head>
+<body>
+<div id="article-container">
+<div>
+<div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></a></div>
+</div>
+<h1 id="article-title"><span id="title-highlight">2023Q1 week log</span></h1>
+<div id="article-meta"><span title="2023-02-27">2023Q1</span>.</div>
+<p>I tend to keep quite a lot of notes on the development related (sometimes at
+work, sometimes not) I do on a week-by-week basis, and thought it might be fun
+to write up the parts that were public. This
+may or may not be of wider interest, but it aims to be a useful aide-mémoire
+for my purposes at least. Weeks with few entries might be due to focusing on
+downstream work (or perhaps just a less productive week - I am only human!).</p>
+<h2 id="week-of-20th-february-2023"><a href="#week-of-20th-february-2023" class="anchor" aria-hidden="true" tabindex="-1"></a>Week of 20th February 2023</h2>
+<ul>
+<li>Iterated on <a href="https://reviews.llvm.org/D144353">D144353</a> (aiming to fix LLD
+regression related to merging RISC-V attributes) based on review feedback
+and committed it.
+<ul>
+<li>Created <a href="https://github.com/llvm/llvm-project/issues/60889">an issue to track this as a
+regression</a>, aiming for
+a backport into 16.0.0, and <a href="https://github.com/llvm/llvm-project-release-prs/pull/324#issuecomment-1445012422">requested that
+backport</a>.</li>
+<li>Also some related discussion in ClangBuiltLinux issues
+<a href="https://github.com/ClangBuiltLinux/linux/issues/1777">#1777</a> and
+<a href="https://github.com/ClangBuiltLinux/linux/issues/1808">#1808</a>.</li>
+</ul>
+</li>
+<li>Committed <a href="https://reviews.llvm.org/D143172">my llvm-zorg patch to add the qemu-user based RISC-V
+builder</a>, after finalising provisioning
+the machine to run it. The builder is live on the LLVM staging buildmaster
+<a href="https://lab.llvm.org/staging/#/builders/241">as
+clang-rv64gc-qemu-user-single-stage</a>.
+<ul>
+<li>Worked to resolve remaining test failures and stability issues. One
+recurrent issue was an assert in <code>___pthread_mutex_lock</code> when executing
+<code>ccache</code>. Setting <code>inode_cache=false</code> in the local <code>ccache</code> config seems
+to avoid this.</li>
+</ul>
+</li>
+<li>Chased for reviews and clarification about pre-commit test requirements for
+my libcxx RISC-V test fix patch,
+<a href="https://reviews.llvm.org/D143158">D134158</a>.</li>
+<li>Committed a couple of further test updates for Wasm in LLVM ahead of some
+upcoming patches. <a href="https://reviews.llvm.org/rG771261ff0128">771261f</a>
+<a href="https://reviews.llvm.org/rG1ae859753c06">1ae8597</a>.</li>
+<li>Left some quick notes on the <a href="https://discourse.llvm.org/t/rfc-rfc-shepherds/68666/8">LLVM RFC
+shepherds</a> proposal.</li>
+<li>A variety of upstream LLVM reviews, and received a <a href="https://reviews.llvm.org/D143115#4151994">useful clarification on
+the RISC-V psABI and the ratification
+lifecycle</a>.</li>
+<li><a href="https://llvmweekly.org/issue/477">LLVM Weekly #477</a>.</li>
+</ul>
+<h2 id="week-of-13th-february-2023"><a href="#week-of-13th-february-2023" class="anchor" aria-hidden="true" tabindex="-1"></a>Week of 13th February 2023</h2>
+<ul>
+<li>After a fair bit of investigation and thinking about reported compatibility
+issues between GNU and LLVM tools (particularly binutils ld and lld) due to
+RISC-V extension versioning, <a href="https://discourse.llvm.org/t/rfc-resolving-issues-related-to-extension-versioning-in-risc-v/68472">posted an RFC outlining the major issues and a
+proposed fix for what I consider to be a regression in
+lld</a>.
+<ul>
+<li>Landed a few LLVM patches cleaning up tests related to this.
+<a href="https://reviews.llvm.org/rG8b5004864aab">8b50048</a>
+<a href="https://reviews.llvm.org/rG574d0c2ec107">574d0c2</a>,
+<a href="https://reviews.llvm.org/rGd05e1e99b1d6">d05e1e9</a>.</li>
+<li>Posted <a href="https://reviews.llvm.org/D144353">D144353</a>, a proposed fix for the
+LLD regression due to overzealous checking of extensions/versions when
+merging RISC-V attributes.</li>
+</ul>
+</li>
+<li>Organised agenda for and ran the bi-weekly <a href="https://discourse.llvm.org/t/risc-v-llvm-sync-up-call-16th-february-2023/68500">RISC-V LLVM contributor
+call</a>.
+Key discussion items were the extension versioning related compatibility
+issue mentioned below and support for emulated TLS (where I&#x27;d <a href="https://reviews.llvm.org/D143708#4118468">left some
+comments</a> the previous week).</li>
+<li>Updated my patch (<a href="https://reviews.llvm.org/D143172">D143172</a>) to register
+and configure a RISC-V qemu-user based builder with LLVM&#x27;s staging
+buildmaster, based on review feedback.</li>
+<li>A variety of upstream LLVM reviews. Also landed
+<a href="https://reviews.llvm.org/D143507">D143407</a>, marking Zawrs as
+non-experimental.</li>
+<li><a href="https://llvmweekly.org/issue/476">LLVM Weekly #476</a>.</li>
+</ul>
+<h2 id="week-of-6th-february-2023"><a href="#week-of-6th-february-2023" class="anchor" aria-hidden="true" tabindex="-1"></a>Week of 6th February 2023</h2>
+<ul>
+<li>Left feedback on the proposed RISC-V psABI
+<a href="https://github.com/riscv-non-isa/riscv-elf-psabi-doc/pull/365">patch clarifying treatment of empty structs or unions in the FP calling
+convention</a>.
+This is a follow-up to the <a href="https://github.com/riscv-non-isa/riscv-elf-psabi-doc/issues/358">issue I
+filed</a> on
+this issue (where I have <a href="https://reviews.llvm.org/D142327">D142327</a> queued
+up for LLVM to fix our incorrect handling).</li>
+<li>Responded to a question on LLVM&#x27;s Discourse <a href="https://discourse.llvm.org/t/support-for-zicsr-and-zifencei-extensions/68369/2">about zicsr and zifencei
+support in
+LLVM</a>.
+As noted, the issue is that we haven&#x27;t moved RV32I/RV64I 2.1 yet which split
+out Zicsr and Zifencei. Unfortunately this is a backwards-incompatible
+change so requires some care.</li>
+<li>Worked with a colleague trying to reproduce an assertion failure in his
+committed patch <a href="https://reviews.llvm.org/rGeb66833d19573df97034a81279eda31b8d19815b">adding support for WebAssembly externref in
+Clang</a>
+that appeared only on an MSan buildbot. The <a href="https://github.com/google/sanitizers/wiki/SanitizerBotReproduceBuild">sanitizers project
+guidance</a>
+is useful for this, but I ended up <a href="https://gist.github.com/asb/645a071903f0c3cf9ef6c59a3d3e0810">rolling a slightly hacky
+script</a> as I
+stepped through each part of the multi-stage build and test sequence.</li>
+<li>Left my thoughts on a <a href="https://github.com/riscv-non-isa/riscv-c-api-doc/issues/32">proposed RISC-V preprocessor define to specify
+support and for and performance of misaligned
+loads/stores</a>. I
+like the idea of the define, but prefer sticking to the <code>Zicclsm</code>
+terminology introduced in the RISC-V profiles.</li>
+<li>Posted patch <a href="https://reviews.llvm.org/D143507">D143507</a> to mark RISC-V
+Zawrs as non-experimental, after confirming there were no relevant changes
+between the implemented 1.0-rc3 spec and the ratified version.</li>
+<li>A series of WebAssembly GC type related patches remains a work in progress
+downstream, but I landed a couple of related minor test cleanups.
+<a href="https://reviews.llvm.org/rG604c9a07f3a9">604c9a0</a>,
+<a href="https://reviews.llvm.org/rG3a80dc27ed45">3a80dc2</a>.</li>
+<li>Many upstream RISC-V LLVM reviews.</li>
+<li><a href="https://llvmweekly.org/issue/475">LLVM Weekly #475</a>.</li>
+</ul>
+
+</div>
+<footer class="footer">
+<img id="footer-image" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E" width="50" height="50"/>
+<p>Curated by Alex Bradbury | &copy; <a href="/">Muxup</a> contributors | <a href="/about">About</a> | <a href="https://github.com/muxup">GitHub</a> | <a href="https://twitter.com/muxup">Twitter</a></p>
+</footer>
+<script>
+const t="http://www.w3.org/2000/svg";function o(t){return Math.random()*(2*t)-t}function n(t){const n=t.t.getBoundingClientRect();const e=t.o.getClientRects();let c="";for(const t of e){const e=t.x-n.x,f=t.y-n.y,s=t.width,r=t.height;const i=f+r/2;let u=s<75?3:s<300?6:8;const l=.2+.2*Math.random();c=`${c}\n      M${e+o(u)} ${i+o(u)}\n      C${e+s*l+o(u)} ${i+o(u)},\n       ${e+2*s*l+o(u)} ${i+o(u)}\n       ${e+s+o(u)} ${i+o(u)}`}t.i=c;t.strokeWidth=.85*e[0].height}const e=new Map;let c=new ResizeObserver((t=>{for(const o of t){const t=e.get(o.target);if(!t.i)n(t)}for(const o of t){s(e.get(o.target))}}));function f(o){const n=document.createElementNS(t,"svg");n.style.position="absolute";n.style.zIndex=-1;n.style.top="0";n.style.left="0";n.style.overflow="visible";const e=document.createElementNS(t,"path");e.setAttribute("fill","none");e.setAttribute("stroke",o.u);n.appendChild(e);o.o.insertAdjacentElement("beforebegin",n);o.t=n}function s(t){if(!t.i){n(t)}const o=t.t.children[0];o.setAttribute("stroke-width",t.strokeWidth);o.setAttribute("d",t.i);t.i=null}function r(){for(const t of e.values()){f(t)}for(const t of e.values()){n(t)}for(const t of e.keys()){c.observe(t)}document.fonts.ready.then((()=>i()))}function i(){for(const t of e.values()){n(t)}for(const t of e.values()){s(t)}}function u(t,o){let n;t.addEventListener("mouseover",(()=>{s(o);n=setInterval((()=>s(o)),240)}),false);t.addEventListener("mouseout",(()=>{clearInterval(n)}));t.addEventListener("click",(()=>{clearInterval(n)}))}function l(t,o,n){let c={o:t,l:o,u:n};e.set(o,c);return c}let a=new Set([window.location.pathname]);const h=document.querySelector("#footer-image");let d=null;function m(){let t=Math.floor(Math.random()*188);d="/static/footer/"+String(t).padStart(4,"0")+".svg"}function g(t){h.src=d;m();if(!t)v()}function v(){if(a.has(d))return;a.add(d);fetch(d)}m();g(true);const w=[{transform:"rotate(0)"},{transform:"rotate(360deg)"}];const $={duration:600,h:1};h.addEventListener("click",(()=>{h.animate(w,$);g()}));function M(){h.animate(w,$);v()}h.addEventListener("mouseover",M);h.addEventListener("touchstart",M,{passive:true});function k(t){const o=t.currentTarget.getAttribute("href").split("#")[0];if(a.has(o))return;a.add(o);fetch(o)}const p=document.getElementsByTagName("a");for(const t of p){const o=(t.getAttribute("href")??"").split("#")[0];if(o.includes("?")||!o.startsWith("/")||o.slice(o.lastIndexOf("/")+1).includes(".")){continue}t.addEventListener("mouseover",k);t.addEventListener("touchstart",k,{passive:true})}const b=["#ffdef2","#f2e2ff","#e2eeff","#ddfffc","#ffffe3"];const I=document.querySelector("#title-highlight");l(I,I.parentNode,b[Math.floor(Math.random()*b.length)]);const C=document.querySelector("#logo-highlight");const E=l(C,C.parentNode,"#ffdac0");r();u(C,E);
+
+</script>
+</body>
+</html>
