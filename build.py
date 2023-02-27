@@ -17,7 +17,6 @@ import subprocess
 import threading
 import typing
 import urllib.parse
-from collections import namedtuple
 from contextlib import contextmanager
 from dataclasses import dataclass
 from http import HTTPStatus
@@ -266,31 +265,6 @@ def parse_page(file: pathlib.Path) -> PageData:
     )
 
 
-TraverseResult = namedtuple("TraverseResult", ["node", "parent", "depth"])
-
-
-# Copied and fixed from mistletoe.utils.
-# TODO: Replace with call to lib version once a new release includes it.
-def traverse(
-    source: mistletoe.token.Token,
-    klass: type | None = None,
-    depth: int | None = None,
-    include_source: bool = False,
-) -> Iterator[TraverseResult]:
-    current_depth = 0
-    if include_source:
-        yield TraverseResult(source, None, current_depth)
-    next_children = [(source, c) for c in getattr(source, "children", [])]
-    while next_children and (depth is None or current_depth > depth):
-        current_depth += 1
-        new_children = []
-        for parent, child in next_children:
-            if klass is None or isinstance(child, klass):
-                yield TraverseResult(child, parent, current_depth)
-            new_children.extend([(child, c) for c in getattr(child, "children", [])])
-        next_children = new_children
-
-
 def strip_anchor(target: str) -> str:
     return target.split("#")[0]
 
@@ -371,7 +345,7 @@ def render_markdown(
 
     def check_and_rewrite_links(doc: mistletoe.Document) -> None:
         # Rewrite any /pages/foo.md links to appropriate permalinks.
-        for t in traverse(doc, klass=mistletoe.span_token.Link):
+        for t in mistletoe.utils.traverse(doc, klass=mistletoe.span_token.Link):
             # TODO: check anchor links, including within the current document.
             stripped_target = strip_anchor(t.node.target)
             check_link_target(stripped_target, src_file)
@@ -387,7 +361,7 @@ def render_markdown(
         changelog_heading = None
         last_major_update = None
         last_minor_update = None
-        for t in traverse(doc, klass=mistletoe.block_token.Heading):
+        for t in mistletoe.utils.traverse(doc, klass=mistletoe.block_token.Heading):
             if changelog_heading:
                 err("changelog wasn't last heading")
             # TODO: error if changelog heading isn't the last
