@@ -162,6 +162,7 @@ standard_footer = """\
 </footer>\
 """
 
+
 # Helpers
 def page_path_to_permalink(path: pathlib.Path) -> str:
     return "/" + str(path.relative_to(pages_path).with_suffix(""))
@@ -266,6 +267,7 @@ def parse_page(file: pathlib.Path) -> PageData:
 
 
 TraverseResult = namedtuple("TraverseResult", ["node", "parent", "depth"])
+
 
 # Copied and fixed from mistletoe.utils.
 # TODO: Replace with call to lib version once a new release includes it.
