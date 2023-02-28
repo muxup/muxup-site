@@ -153,11 +153,40 @@ visibility:visible;
 .anchor::before {
 content:"#";
 }
+hr {
+border:none;
+border-top:4px solid #f1f3f5;
+}
 code {
 background:#f5f5f5;
 padding:.125rem .25rem;
 font-size:.833rem
 }
+details {
+font-size:.833rem;
+}
+details summary {
+margin:.75rem 0 .5rem 0;
+font-weight:600;
+cursor:pointer;
+font-size:1.2rem;
+line-height:1.25;
+letter-spacing:-.025em;
+list-style:none;
+}
+details summary > * {
+display:inline;
+}
+summary::-webkit-details-marker {
+display:none;
+}
+summary::after {
+content: " »";
+}
+details[open] summary::after {
+content: " «";
+}
+
 </style>
 <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed.xml"/>
 <link rel="canonical" href="https://muxup.com/2023q1/week-log"/>
@@ -168,7 +197,7 @@ font-size:.833rem
 <div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></a></div>
 </div>
 <h1 id="article-title"><span id="title-highlight">2023Q1 week log</span></h1>
-<div id="article-meta"><span title="2023-02-27">2023Q1</span>.</div>
+<div id="article-meta"><span title="2023-02-27">2023Q1</span>. Last update <span title="2023-02-27">27 Feb 2023</span>. <a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
 <p>I tend to keep quite a lot of notes on the development related (sometimes at
 work, sometimes not) I do on a week-by-week basis, and thought it might be fun
 to write up the parts that were public. This
@@ -200,6 +229,9 @@ clang-rv64gc-qemu-user-single-stage</a>.
 recurrent issue was an assert in <code>___pthread_mutex_lock</code> when executing
 <code>ccache</code>. Setting <code>inode_cache=false</code> in the local <code>ccache</code> config seems
 to avoid this.</li>
+<li>Posted a couple of patches - <a href="https://reviews.llvm.org/D144464">D144464</a>
+and <a href="https://reviews.llvm.org/D144465">D144465</a> to tweak the LLVM docs on
+setting up a builder, based on my experience doing so.</li>
 </ul>
 </li>
 <li>Chased for reviews and clarification about pre-commit test requirements for
@@ -283,6 +315,13 @@ downstream, but I landed a couple of related minor test cleanups.
 <li>Many upstream RISC-V LLVM reviews.</li>
 <li><a href="https://llvmweekly.org/issue/475">LLVM Weekly #475</a>.</li>
 </ul>
+<hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor "aria-hidden="true" tabindex="-1"></a>Article changelog</summary>
+<ul>
+<li>2023-02-27: Added in a forgotten note about trivial buildbot doc
+improvements.</li>
+<li>2023-02-27: Initial publication date.</li>
+</ul>
+</details>
 
 </div>
 <footer class="footer">

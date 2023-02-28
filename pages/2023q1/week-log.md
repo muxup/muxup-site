@@ -30,6 +30,9 @@ downstream work (or perhaps just a less productive week - I am only human!).
     recurrent issue was an assert in `___pthread_mutex_lock` when executing
     `ccache`. Setting `inode_cache=false` in the local `ccache` config seems
     to avoid this.
+  * Posted a couple of patches - [D144464](https://reviews.llvm.org/D144464)
+    and [D144465](https://reviews.llvm.org/D144465) to tweak the LLVM docs on
+    setting up a builder, based on my experience doing so.
 * Chased for reviews and clarification about pre-commit test requirements for
   my libcxx RISC-V test fix patch,
   [D134158](https://reviews.llvm.org/D143158).
@@ -105,3 +108,7 @@ downstream work (or perhaps just a less productive week - I am only human!).
   [3a80dc2](https://reviews.llvm.org/rG3a80dc27ed45).
 * Many upstream RISC-V LLVM reviews.
 * [LLVM Weekly #475](https://llvmweekly.org/issue/475).
+
+## Article changelog
+* 2023-02-27: (minor) Added in a forgotten note about trivial buildbot doc
+  improvements.

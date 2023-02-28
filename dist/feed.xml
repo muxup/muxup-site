@@ -44,6 +44,9 @@ clang-rv64gc-qemu-user-single-stage&lt;/a&gt;.
 recurrent issue was an assert in &lt;code&gt;___pthread_mutex_lock&lt;/code&gt; when executing
 &lt;code&gt;ccache&lt;/code&gt;. Setting &lt;code&gt;inode_cache=false&lt;/code&gt; in the local &lt;code&gt;ccache&lt;/code&gt; config seems
 to avoid this.&lt;/li&gt;
+&lt;li&gt;Posted a couple of patches - &lt;a href=&quot;https://reviews.llvm.org/D144464&quot;&gt;D144464&lt;/a&gt;
+and &lt;a href=&quot;https://reviews.llvm.org/D144465&quot;&gt;D144465&lt;/a&gt; to tweak the LLVM docs on
+setting up a builder, based on my experience doing so.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;Chased for reviews and clarification about pre-commit test requirements for
@@ -127,6 +130,13 @@ downstream, but I landed a couple of related minor test cleanups.
 &lt;li&gt;Many upstream RISC-V LLVM reviews.&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/475&quot;&gt;LLVM Weekly #475&lt;/a&gt;.&lt;/li&gt;
 &lt;/ul&gt;
+&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
+&lt;ul&gt;
+&lt;li&gt;2023-02-27: Added in a forgotten note about trivial buildbot doc
+improvements.&lt;/li&gt;
+&lt;li&gt;2023-02-27: Initial publication date.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/details&gt;
 </content>
 </entry>
 <entry>
