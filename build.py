@@ -554,6 +554,8 @@ for file in sorted(pages_path.rglob("*.md")):
     pages_data.append(pd)
     gated_css_frag = generate_gated_css(pd.markdown_content_as_html, gated_css_rules)
     out_path = dest_path / file.relative_to(pages_path).with_suffix(".html")
+    if not out_path.parent.exists():
+        out_path.parent.mkdir(parents=True)
     with atomic_write(out_path) as o:
         o.write(
             f"""\
