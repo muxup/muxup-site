@@ -4,8 +4,795 @@
 <subtitle>Adventures in collaborative open source development</subtitle>
 <link href="https://muxup.com/feed.xml" rel="self" type="application/atom+xml"/>
 <link href="https://muxup.com"/>
-<updated>2023-02-27T12:00:00Z</updated>
+<updated>2023-03-03T12:00:00Z</updated>
 <id>https://muxup.com/feed.xml</id>
+<entry>
+<title>Commercially available RISC-V silicon</title>
+<published>2023-03-03T12:00:00Z</published>
+<updated>2023-03-03T12:00:00Z</updated>
+<link rel="alternate" href="https://muxup.com/2023q1/commercially-available-risc-v-silicon"/>
+<id>https://muxup.com/2023q1/commercially-available-risc-v-silicon</id>
+<content type="html">
+&lt;p&gt;The RISC-V instruction set architecture has seen huge excitement and growth in
+recent years (&lt;a href=&quot;https://venturebeat.com/ai/how-risc-v-has-become-a-viable-third-processor-architecture-calista-redmond/&quot;&gt;10B cores estimated to have shipped as of Dec
+2022&lt;/a&gt;)
+and I&amp;#x27;ve been keeping very busy with RISC-V related work &lt;a href=&quot;https://www.igalia.com/contact/&quot;&gt;at
+Igalia&lt;/a&gt;. I thought it would be fun to look
+beyond the cores I&amp;#x27;ve been working with and to enumerate the SoCs that are
+available for direct purchase or in development boards and feature RISC-V
+cores that are programmable by the end user. I&amp;#x27;m certain to be missing some
+SoCs or have some mistakes or missing information - any corrections very
+gratefully received at asb@muxup.com or
+&lt;a href=&quot;https://twitter.com/asbradbury&quot;&gt;@asbradbury&lt;/a&gt;. I&amp;#x27;m focusing almost
+exclusively on the RISC-V aspects of each SoC - i.e. don&amp;#x27;t expect a detailed
+listing of other on-chip peripherals or accelerators.&lt;/p&gt;
+&lt;h2 id=&quot;a-few-thoughts&quot;&gt;&lt;a href=&quot;#a-few-thoughts&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;A few thoughts&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;It was absolutely astonishing how difficult it was to get basic information
+about the RISC-V specification implemented by many of these SoCs. In a
+number of cases, just a description of a &amp;quot;RV32 core at xxMHz&amp;quot; with further
+detective work being needed to find any information at all about even the
+standard instruction set extensions supported.&lt;/li&gt;
+&lt;li&gt;The way I&amp;#x27;ve focused on the details of individual cores does a bit of a
+disservice to those SoCs with compute clusters or interesting cache
+hierarchies. If I were to do this again (or if I revisit this in the
+future), I&amp;#x27;d look to rectify that. There a whole bunch of other
+micro-architectural details it would be interesting to detail too.&lt;/li&gt;
+&lt;li&gt;There&amp;#x27;s a lot of chips here - but although I&amp;#x27;ve likely missed some, not so
+many that it&amp;#x27;s impossible to enumerate. RISC-V is growing rapidly, so
+perhaps this will change in the next year or two.&lt;/li&gt;
+&lt;li&gt;A large proportion of the SoC designs listed are based on proprietary core
+designs (with one of the most notable exceptions being those based on the
+Apache-licensed T-Head IP). As a long-term proponent of open source silicon
+I&amp;#x27;d hope to see this change over time. Once a company has moved from a
+proprietary ISA to an open standard (RISC-V), there&amp;#x27;s a much easier
+transition path to switch from a proprietary IP core to one that&amp;#x27;s open
+source.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;64-bit-linux-capable-application-processors&quot;&gt;&lt;a href=&quot;#64-bit-linux-capable-application-processors&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;64-bit Linux-capable application processors&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https://doc-en.rvspace.org/JH7110/TRM/JH7110_DS/highlighted_features.html&quot;&gt;StarFive
+JH7110&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;4 x RV64GC &lt;a href=&quot;https://www.sifive.com/cores/u74&quot;&gt;SiFive U74&lt;/a&gt; application
+cores, 1 x monitor core of unclear design (&lt;a href=&quot;https://sifive-china.oss-cn-zhangjiakou.aliyuncs.com/%E8%B5%9B%E6%98%89%E7%A7%91%E6%8A%80%E7%94%B5%E5%AD%90%E6%89%8B%E5%86%8C.pdf&quot;&gt;this
+datasheet&lt;/a&gt;
+claims a 32-bit SiFive E24, while &lt;a href=&quot;https://doc-en.rvspace.org/JH7110/TRM/JH7110_DS/highlighted_features.html&quot;&gt;this online
+TRM&lt;/a&gt;
+claims a SiFive S7.&lt;/li&gt;
+&lt;li&gt;The U74 is a dual-issue in-order pipeline with 8 stages.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1.5 GHz, fabbed on TSMC 28nm
+(&lt;a href=&quot;https://riscv.or.jp/wp-content/uploads/day3_StarFive_risc-v_tokyo_day2022Autumn.pdf&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;li&gt;StarFive
+&lt;a href=&quot;https://riscv.or.jp/wp-content/uploads/day3_StarFive_risc-v_tokyo_day2022Autumn.pdf&quot;&gt;report&lt;/a&gt;
+a CoreMark/MHz of 5.09.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Available in the &lt;a href=&quot;https://www.kickstarter.com/projects/starfive/visionfive-2&quot;&gt;VisionFive
+2&lt;/a&gt;
+development board.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://d1.docs.aw-ol.com/en/&quot;&gt;Allwinner D1-H&lt;/a&gt;
+(&lt;a href=&quot;https://github.com/DongshanPI/Awesome_RISCV-AllwinnerD1/blob/master/Tina-SDK/Hardware%E7%A1%AC%E4%BB%B6%E7%B1%BB%E6%96%87%E6%A1%A3/%E8%8A%AF%E7%89%87%E6%89%8B%E5%86%8C/D1-H_Datasheet_V1.0.pdf&quot;&gt;datasheet&lt;/a&gt;,
+&lt;a href=&quot;https://github.com/DongshanPI/Awesome_RISCV-AllwinnerD1/blob/master/Tina-SDK/Hardware%E7%A1%AC%E4%BB%B6%E7%B1%BB%E6%96%87%E6%A1%A3/%E8%8A%AF%E7%89%87%E6%89%8B%E5%86%8C/D1-H_User%20Manual_V1.0.pdf&quot;&gt;user
+manual&lt;/a&gt;)
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1 x RV64GC &lt;a href=&quot;https://www.t-head.cn/product/c906?lang=en&quot;&gt;T-Head C906&lt;/a&gt;
+application core. Additionally supports the unratified, v0.7.1 RISC-V
+vector specification
+(&lt;a href=&quot;https://old.reddit.com/r/RISCV/comments/v1dvww/allwinner_d1_extensions/ialzm2q/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;li&gt;Single-issue in-order pipeline with 5 stages.&lt;/li&gt;
+&lt;li&gt;Verilog for the core is &lt;a href=&quot;https://github.com/T-head-Semi/openc906&quot;&gt;on
+GitHub&lt;/a&gt; under the Apache
+License (see &lt;a href=&quot;https://news.ycombinator.com/item?id=30691980&quot;&gt;discussion&lt;/a&gt;
+on what is included).&lt;/li&gt;
+&lt;li&gt;At least early versions of the chip &lt;a href=&quot;https://bugs.llvm.org/show_bug.cgi?id=50746&quot;&gt;incorrectly trapped on
+&lt;code&gt;fence.tso&lt;/code&gt;&lt;/a&gt;. It&amp;#x27;s unclear if
+this has been fixed in later revisions.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1GHz, taped out on a 22nm process node.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://linuxgizmos.com/99-sbc-runs-linux-on-risc-v-based-allwinner-d1/&quot;&gt;Reportedly&lt;/a&gt; 3.8 CoreMark/MHz.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Available in a number of development boards (e.g.  &lt;a href=&quot;https://d1.docs.aw-ol.com/en/d1_dev/&quot;&gt;Allwinner
+Nezha&lt;/a&gt;, &lt;a href=&quot;https://wiki.sipeed.com/hardware/en/lichee/RV/RV.html&quot;&gt;SiPeed Lichee
+RV&lt;/a&gt;, and
+&lt;a href=&quot;https://linux-sunxi.org/Category:D1_Boards&quot;&gt;more&lt;/a&gt;).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://starfivetech.com/uploads/JH7100%20Datasheet.pdf&quot;&gt;StarFive JH7100&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;2 x RV64GC &lt;a href=&quot;https://www.sifive.com/cores/u74&quot;&gt;SiFive U74&lt;/a&gt; application
+cores.&lt;/li&gt;
+&lt;li&gt;The U74 is a dual-issue in-order pipeline with 8 stages.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1.2GHz (as listed on &lt;a href=&quot;https://www.starfivetech.com/en/site/soc&quot;&gt;StarFive&amp;#x27;s
+page&lt;/a&gt; but articles about the V1
+board claimed 1.5GHz), presumably fabbed on TSMC 28nm (the &lt;a href=&quot;https://riscv.or.jp/wp-content/uploads/day3_StarFive_risc-v_tokyo_day2022Autumn.pdf&quot;&gt;JH7110
+is&lt;/a&gt;).&lt;/li&gt;
+&lt;li&gt;The current U74 product page claims 5.75 CoreMark/MHz (&lt;a href=&quot;https://linuxgizmos.com/hifive-unmatched-sbc-showcases-new-fu740-risc-v-soc/&quot;&gt;previous
+reports&lt;/a&gt;
+suggested 4.9 CoreMark/MHz).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Available on the &lt;a href=&quot;https://www.cnx-software.com/2021/11/27/visionfive-v1-risc-v-linux-sbc-resurrects-beaglev-single-board-computer/&quot;&gt;VisionFive V1 development
+board&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://www.canaan.io/product/kendryteai&quot;&gt;Kendryte K210&lt;/a&gt;
+(&lt;a href=&quot;https://cdn.hackaday.io/files/1654127076987008/kendryte_datasheet_20181011163248_en.pdf&quot;&gt;datasheet&lt;/a&gt;)
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;2 x RV64GC application cores
+(&lt;a href=&quot;https://lore.kernel.org/all/48e10b3d-12f3-a65c-8017-99c780c63040@gmail.com/&quot;&gt;reportedly&lt;/a&gt;
+implementations of the open-source
+&lt;a href=&quot;https://github.com/chipsalliance/rocket-chip&quot;&gt;Rocket&lt;/a&gt; core design).&lt;/li&gt;
+&lt;li&gt;If it&amp;#x27;s correct the K210 uses Rocket, it&amp;#x27;s a single-issue in-order
+pipeline with 5 stages.&lt;/li&gt;
+&lt;li&gt;Has a non-standard (older version of the privileged spec?) MMU
+(&lt;a href=&quot;https://github.com/riscv-software-src/opensbi/pull/206#issuecomment-821726609&quot;&gt;ref&lt;/a&gt;,
+so the &lt;a href=&quot;https://lore.kernel.org/all/20200212103432.660256-5-damien.lemoal@wdc.com/t/&quot;&gt;nommu Linux
+port&lt;/a&gt;
+is typically used.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;400MHz, fabbed on TSMC 28nm.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Available in &lt;a href=&quot;https://wiki.sipeed.com/hardware/maixface/en/core_modules/k210_core_modules.html&quot;&gt;development boards from
+SiPeed&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://www.microchip.com/en-us/products/fpgas-and-plds/system-on-chip-fpgas/polarfire-soc-fpgas&quot;&gt;MicroChip PolarFire SoC
+MPFSxxxT&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;4 x RV64GC &lt;a href=&quot;https://www.sifive.com/cores/u54&quot;&gt;SiFive U54&lt;/a&gt; application
+cores, 1 x RV64IMAC SiFive E51 (now renamed to
+&lt;a href=&quot;https://www.sifive.com/cores/s51&quot;&gt;S51&lt;/a&gt;) monitor core.&lt;/li&gt;
+&lt;li&gt;The U54 is a single-issue, in-order pipeline with 5 stages.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;667 MHz (&lt;a href=&quot;https://www.microsemi.com/document-portal/doc_download/1244584-polarfire-soc-product-overview&quot;&gt;ref&lt;/a&gt;),
+fabbed on a 28nm node
+(&lt;a href=&quot;https://riscv.org/wp-content/uploads/2019/04/RISC-V-Linux-Foundation.pdf&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;li&gt;Microchip report 3.125 CoreMark/MHz.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Available in the
+&lt;a href=&quot;https://www.microsemi.com/existing-parts/parts/152514&quot;&gt;&amp;#x27;Icicle&amp;#x27;&lt;/a&gt;
+development board.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://sifive.cdn.prismic.io/sifive/1a82e600-1f93-4f41-b2d8-86ed8b16acba_fu740-c000-manual-v1p6.pdf&quot;&gt;SiFive
+FU740&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;4 x RV64GC &lt;a href=&quot;https://www.sifive.com/cores/u74&quot;&gt;SFive U74&lt;/a&gt; application
+cores, 1 x RV64IMAC SiFive S71 monitor core.&lt;/li&gt;
+&lt;li&gt;It&amp;#x27;s hard to find details for the S71 core, the FU740 manual refers to
+it as an S7 while the HiFive Unmatched refers to it as the S71 - but
+neither have a page on SiFive&amp;#x27;s site (there is an
+&lt;a href=&quot;https://www.sifive.com/cores/s76&quot;&gt;S76&lt;/a&gt; though).&lt;/li&gt;
+&lt;li&gt;The U74 is a dual-issue in-order pipeline with 8 stages.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1.2 GHz, fabbed on TSMC 28nm (&lt;a href=&quot;https://www.theregister.com/2020/10/29/sifive_riscv_pc/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;li&gt;The current U74 product page claims 5.75 CoreMark/MHz (&lt;a href=&quot;https://linuxgizmos.com/hifive-unmatched-sbc-showcases-new-fu740-risc-v-soc/&quot;&gt;previous
+reports&lt;/a&gt;
+suggested 4.9 CoreMark/MHz).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Was available on the now-discontinued &lt;a href=&quot;https://www.sifive.com/boards/hifive-unmatched&quot;&gt;HiFive Unmatched development
+board&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://static.dev.sifive.com/FU540-C000-v1.0.pdf&quot;&gt;SiFive FU540&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;4 x RV64GC &lt;a href=&quot;https://www.sifive.com/cores/u54&quot;&gt;SiFive U54&lt;/a&gt; application
+cores, 1 x RV64IMAC SiFive E51 (now renamed to
+&lt;a href=&quot;https://www.sifive.com/cores/s51&quot;&gt;S51&lt;/a&gt;) monitor core.&lt;/li&gt;
+&lt;li&gt;The U54 is a single-issue, in-order pipeline with 5 stages.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1.5GHz, fabbed on TSMC 28nm
+(&lt;a href=&quot;https://riscv.org/wp-content/uploads/2018/05/14.15-14.30-RISC-V-Barcelona-workshop.pdf&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;li&gt;The current U54 product page claims 3.16 CoreMark/MHz but it was &lt;a href=&quot;https://twitter.com/wikichip/status/917585069509959680&quot;&gt;2.75
+in 2017&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Was available on the now-discontinued &lt;a href=&quot;https://www.sifive.com/boards/hifive-unleashed&quot;&gt;HiFive Unleashed development
+board&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/bouffalolab/bl_docs/blob/main/BL808_DS/en/BL808_DS_1.2_en.pdf&quot;&gt;Bouffalo Lab
+BL808&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1 x RV64IMAFCV &lt;a href=&quot;https://www.t-head.cn/product/c906?lang=en&quot;&gt;T-Head C906&lt;/a&gt;
+application core, 1 x RV32IMAFCP &lt;a href=&quot;https://www.t-head.cn/product/e907?lang=en&quot;&gt;T-Head
+E907&lt;/a&gt;, 1 x RV32E?? &lt;a href=&quot;https://www.t-head.cn/product/e902?lang=en&quot;&gt;T-Head
+E902&lt;/a&gt;
+(&lt;a href=&quot;https://wiki.pine64.org/wiki/Ox64&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;li&gt;See notes elsewhere for more info on these T-Head core designs.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;The C906 runs at 480 MHz, the E907 at 320 MHz and the E902 at 150 MHz.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Available in the &lt;a href=&quot;https://wiki.pine64.org/wiki/Ox64&quot;&gt;Ox64&lt;/a&gt; from Pine64.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://www.renesas.com/in/en/products/microcontrollers-microprocessors/rz-mpus/rzfive-general-purpose-microprocessors-risc-v-cpu-core-andes-ax45mp-single-10-ghz-2ch-gigabit-ethernet&quot;&gt;Renesas
+RZ/Five&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1 x RV64GC &lt;a href=&quot;http://www.andestech.com/en/products-solutions/andescore-processors/riscv-ax45mp/&quot;&gt;Andes
+AX45MP&lt;/a&gt;
+application core with additional Andes extensions (draft of the &amp;#x27;P&amp;#x27;
+packed SIMD spec, Andes &amp;#x27;V5&amp;#x27; extensions).&lt;/li&gt;
+&lt;li&gt;Dual issue, in-order pipeline with 8 stages.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1.0 GHz, 5.63 CoreMark/MHz
+(&lt;a href=&quot;http://www.andestech.com/en/products-solutions/andescore-processors/riscv-ax45mp/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https://www.renesas.com/us/en/products/microcontrollers-microprocessors/rz-mpus/rzfive-evaluation-board-kit-rzfive-evaluation-board-kit&quot;&gt;Evaluation
+kit&lt;/a&gt;
+available.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://www.canaan.io/product/kendryte-k510&quot;&gt;Kendryte K510&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;2 x RV64GC application cores and 1 x RV64GC core with DSP extensions.
+&lt;a href=&quot;https://www.robertlipe.com/elusive-k510-specs-start-to-show-developer-board-now-available/&quot;&gt;Apparently&lt;/a&gt;
+based on the &lt;a href=&quot;http://www.andestech.com/en/products-solutions/andestar-architecture/&quot;&gt;AndeStar
+V5&lt;/a&gt;
+but I can&amp;#x27;t find the original source for this.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;800 MHz.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https://www.canaan.io/product/kendryte-k510-crb-kit-developer-kit&quot;&gt;K510
+CRB-KIT&lt;/a&gt;
+developer kit is available.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;(Upcoming) &lt;a href=&quot;https://www.sifive.com/boards/hifive-pro-p550&quot;&gt;Intel-SiFive Horse Creek SoC&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;4 x RV64GBC SiFive P550 application cores (docs not yet available, but
+&lt;a href=&quot;https://www.cnx-software.com/2021/06/23/sifive-performance-p550-fastest-64-bit-risc-v-processor/&quot;&gt;an overview is
+here&lt;/a&gt;).&lt;/li&gt;
+&lt;li&gt;13 stage, 3 issue, out-of-order pipeline.&lt;/li&gt;
+&lt;li&gt;As the bit manipulation extension was split into a range of
+sub-extensions it&amp;#x27;s unclear exactly which of the &amp;#x27;B&amp;#x27; family extensions
+will be supported.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;2.2 GHz, fabbed on Intel&amp;#x27;s &amp;#x27;4&amp;#x27; process node
+(&lt;a href=&quot;https://fuse.wikichip.org/news/7277/intel-sifive-demo-high-performance-risc-v-horse-creek-dev-platform-on-intel-4-process/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Will be available in the &lt;a href=&quot;https://www.sifive.com/boards/hifive-pro-p550&quot;&gt;HiFive Pro P550 development
+board&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;(Upcoming) T-Head TH1520
+(&lt;a href=&quot;https://riscv.org/blog/2022/10/deepcomputing-and-xcalibyte-announce-the-roma-laptop-will-be-powered-by-th1520-the-first-soc-from-wujian-600s-platform-by-alibaba-t-head-xcalibyte/&quot;&gt;announcement&lt;/a&gt;)
+&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;4 x RV64GC &lt;a href=&quot;https://www.t-head.cn/product/c910&quot;&gt;T-Head C910&lt;/a&gt; application
+cores, 1 x RV64GC &lt;a href=&quot;https://www.t-head.cn/product/c906?lang=en&quot;&gt;T-Head
+C906&lt;/a&gt;, 1 x RV32IMC &lt;a href=&quot;https://www.t-head.cn/product/e902&quot;&gt;T-Head
+E902&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;The C910 is a 3-issue out-of-order pipeline with 12 stages, the C906 is
+single-issue in-order with 5 stages, and the E902 is single-issue in-order
+with 2 stages.&lt;/li&gt;
+&lt;li&gt;Verilog for the cores is up on GitHub under the Apache license:
+&lt;a href=&quot;https://github.com/T-head-Semi/openc910&quot;&gt;C910&lt;/a&gt;,
+&lt;a href=&quot;https://github.com/T-head-Semi/openc906&quot;&gt;C906&lt;/a&gt;,
+&lt;a href=&quot;https://github.com/T-head-Semi/opene902&quot;&gt;E902&lt;/a&gt;.
+See &lt;a href=&quot;https://news.ycombinator.com/item?id=30691980&quot;&gt;discussion&lt;/a&gt;
+on what is included).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;2.4 GHz, fabbed on a 12nm process
+(&lt;a href=&quot;https://sipeed.com/licheepi4a/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Will be available on the &lt;a href=&quot;https://sipeed.com/licheepi4a/&quot;&gt;SiPeed Lichee Pi
+4A&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;embedded--specialised-socs-mostly-32-bit&quot;&gt;&lt;a href=&quot;#embedded--specialised-socs-mostly-32-bit&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Embedded / specialised SoCs (mostly 32-bit)&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https://static.dev.sifive.com/SiFive-E310-G000-manual-v1.0.1.pdf&quot;&gt;SiFive
+FE310&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1 x RV32IMAC &lt;a href=&quot;https://www.sifive.com/cores/e31&quot;&gt;SiFive E31&lt;/a&gt; core.&lt;/li&gt;
+&lt;li&gt;Single-issue, in-order pipeline with 5-6 stages (&amp;#x27;variable pipeline&amp;#x27;).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;320 MHz
+(&lt;a href=&quot;https://sifive.cdn.prismic.io/sifive/4999db8a-432f-45e4-bab2-57007eed0a43_fe310-g002-datasheet-v1p2.pdf&quot;&gt;ref&lt;/a&gt;),
+fabbed on TSMC 180nm
+(&lt;a href=&quot;https://static.dev.sifive.com/SiFive-E310-G000-manual-v1.0.1.pdf&quot;&gt;ref&lt;/a&gt;),&lt;/li&gt;
+&lt;li&gt;2.73 CoreMark/MHz &lt;a href=&quot;https://sifive.cdn.prismic.io/sifive/4999db8a-432f-45e4-bab2-57007eed0a43_fe310-g002-datasheet-v1p2.pdf&quot;&gt;in the FE310-G002
+datasheet&lt;/a&gt;,
+3.17 CoreMark/MHz on the &lt;a href=&quot;https://www.sifive.com/cores/e31&quot;&gt;E31 product
+page&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Available in development boards such as the &lt;a href=&quot;https://www.sifive.com/boards/hifive1-rev-b&quot;&gt;HiFive 1 Rev
+B&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://www.gigadevice.com/products/microcontrollers/gd32/risc-v/mainstream-line/gd32vf103-series/&quot;&gt;GigaDevice GD32VF103
+series&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1 x RV32IMAC Nuclei &lt;a href=&quot;https://github.com/nucleisys/Bumblebee_Core_Doc&quot;&gt;Bumblebee
+N200&lt;/a&gt; (&amp;quot;jointly
+developed by Nuclei System Technology and Andes Technology.&amp;quot;)&lt;/li&gt;
+&lt;li&gt;No support for PMP (Physical Memory Protection), includes the &amp;#x27;ECLIC&amp;#x27;
+interrupt controller derived from the CLIC design.&lt;/li&gt;
+&lt;li&gt;Single-issue, in-order pipeline with 2 stages.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;108 MHz. 360 CoreMark
+(&lt;a href=&quot;https://www.eenewseurope.com/en/open-source-risc-v-mcu-with-bumblebee-core/&quot;&gt;ref&lt;/a&gt;),
+implying 3.33 CoreMark/MHz.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Available in development boards such as the &lt;a href=&quot;https://www.seeedstudio.com/Sipeed-Longan-Nano-V1-1-p-5118.html&quot;&gt;Sipeed Longan
+Nano&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://greenwaves-technologies.com/gap8_mcu_ai/&quot;&gt;GreenWaves GAP8&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Fabric Controller (FC) core and compute cluster of 8 cores based on
+&lt;a href=&quot;https://pulp-platform.org/&quot;&gt;PULP&lt;/a&gt;. Implements RV32IMC with alongside
+&lt;a href=&quot;https://greenwaves-technologies.com/manuals/BUILD/HOME/html/index.html&quot;&gt;additional custom
+extensions&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;175 MHz Fabric Controller, 250 MHz cluster. Fabbed on TSMC&amp;#x27;s 55nm
+process (&lt;a href=&quot;https://en.wikichip.org/wiki/greenwaves/gap8&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;li&gt;22.65 GOPS at 4.24mW/GOP
+(&lt;a href=&quot;https://greenwaves-technologies.com/low-power-processor/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;li&gt;Shipped 150,000 units, composed of roughly 80% open source and 20%
+proprietary IP
+(&lt;a href=&quot;https://www.eetimes.eu/greenwaves-channels-funding-into-new-risc-v-processors/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Available in the
+&lt;a href=&quot;https://greenwaves-technologies.com/product/gapuino/&quot;&gt;GAPuino&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://greenwaves-technologies.com/gap9_processor/&quot;&gt;GreenWaves GAP9&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Fabric Controller (FC) and compute cluster of 9 cores. Extends the
+RV32IMC (plus extensions) GAP8 core design with additional custom
+extensions
+(&lt;a href=&quot;https://riscv.org/wp-content/uploads/2019/12/12.10-17.10a-The-Next-Generation-of-GAP8-An-IoT-Application-Processor-for-Inference-at-the-Very-Edge.pdf&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;400 MHz Fabric Controller and computer cluster. Fabbed on Global
+Foundries 22nm FDX process
+(&lt;a href=&quot;https://greenwaves-technologies.com/gap9_iot_application_processor/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;li&gt;150.8 GOPS at 0.33mW/GOP
+(&lt;a href=&quot;https://greenwaves-technologies.com/low-power-processor/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;GAP9 evaluation kit listed on &lt;a href=&quot;https://greenwaves-technologies.com/store/&quot;&gt;Greenwaves
+store&lt;/a&gt; but you must email
+to receive access to order it.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://www.renesas.com/eu/en/products/microcontrollers-microprocessors/rh850-automotive-mcus/rh850u2b-zonedomain-and-vehicle-motion-microcontroller&quot;&gt;Renesas
+RH850/U2B&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Features an &lt;a href=&quot;https://www.nsitexe.com/en/ip-solutions/data-flow-processor/DR1000C/&quot;&gt;NSITEXE
+DR1000C&lt;/a&gt;
+RISC-V parallel coprocessor, comprised of RV32I scalar processor units,
+a control core unit, and a vector processing unit based on the RISC-V
+vector extension.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;400MHz. Fabbed on a 28nm process.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;None I can find.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://www.analog.com/en/products/max78000.html#product-overview&quot;&gt;Analog Devices
+MAX78000&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Features an RV32 RISC-V coprocessor of unknown (to me!) design and
+unknown ISA naming string.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;60MHz (for the RISC-V co-processor), fabbed on a TSMC 40nm process
+(&lt;a href=&quot;https://forums.tinyml.org/t/two-tinyml-talks-on-october-27-2020-by-kristopher-ardis-and-robert-muchsel-from-maxim-integrated-and-manuele-rusci-from-greenwaves-technologies/385&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https://www.analog.com/en/design-center/evaluation-hardware-and-software/evaluation-boards-kits/max78000evkit.html&quot;&gt;MAX78000EVKIT&lt;/a&gt;
+and
+&lt;a href=&quot;https://www.analog.com/en/design-center/evaluation-hardware-and-software/evaluation-boards-kits/max78000fthr.html&quot;&gt;MAX78000FTHR&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://www.espressif.com/en/products/socs/esp32-c3&quot;&gt;Espressif ESP32-C3&lt;/a&gt; / ESP8685
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1 x RV32IMC core of unknown design, single issue in-order 4-stage
+pipeline
+(&lt;a href=&quot;https://www.espressif.com/sites/default/files/documentation/esp32-c3_datasheet_en.pdf&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;160 MHz, fabbed on a TSMC 40nm process
+(&lt;a href=&quot;https://www.espressif.com.cn/sites/default/files/ESP32-C3%20%26%20ESP32-S3%20BQB%20Certification_0.pdf&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;li&gt;2.55 CoreMark/MHz.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Available in a number of formats including the
+&lt;a href=&quot;https://www.mouser.co.uk/ProductDetail/Espressif-Systems/ESP32-C3-DevKitM-1?qs=pUKx8fyJudB1sOWbbEnGFw%3D%3D&quot;&gt;ESP32-C3-DevKitM-1&lt;/a&gt;
+and the &lt;a href=&quot;https://www.mouser.co.uk/new/m5stack/m5stack-m5stamp-c3-set/&quot;&gt;M5Stack M5Stamp
+C3&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://www.espressif.com/en/products/socs/esp32-c6&quot;&gt;Espressif ESP32-C6&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1 x RV32I core of unknown design (four stage pipeline) and 1 x RV32I
+core of unknown design (two stage pipeline) for low power operation.
+It&amp;#x27;s unclear what the full ISA naming string is for both cores.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;160 MHz high performance (HP) core with 2.76 CoreMark/MHz, 20 MHz low power (LP) core.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;: Available in the
+&lt;a href=&quot;https://www.mouser.co.uk/ProductDetail/Espressif-Systems/ESP32-C6-DevKitC-1-N8?qs=8Wlm6%252BaMh8TjnOR8RwmaBw%3D%3D&quot;&gt;ESP32-C6-DevKitC-1-N8&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://www.hisilicon.com/en/products/smart-iot/ShortRangeWirelessIOT/Hi3861V100&quot;&gt;HiSilicon
+Hi3861&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1 x RV32IM core of unknown design, supporting additional non-standard
+compressed instruction set extensions
+(&lt;a href=&quot;https://github.com/koendv/hi3861_notes&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;160 MHz.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;A low-cost board &lt;a href=&quot;https://www.aliexpress.com/item/1005003342192909.html&quot;&gt;is
+available&lt;/a&gt;
+advertising support for Harmony OS.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://en.bouffalolab.com/product/?type=detail&amp;amp;id=1&quot;&gt;Bouffalo Lab BL602/BL604&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1 x RV32IMAFC &lt;a href=&quot;https://www.sifive.com/cores/e24&quot;&gt;SiFive E24&lt;/a&gt; core
+(&lt;a href=&quot;https://maero.dk/bl602-firmware-image-format/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;li&gt;3-stage pipeline.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;192 MHz, 3.1 CoreMark/MHz
+(&lt;a href=&quot;http://download.bl602.fun/BL602_%E5%AE%98%E6%96%B9%E8%8A%AF%E7%89%87%E8%B5%84%E6%96%99.pdf&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Available in the very low cost
+&lt;a href=&quot;https://pine64.com/product/pinecone-bl602-evaluation-board/&quot;&gt;Pinecone&lt;/a&gt;
+evaluation board.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Other&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;The &lt;a href=&quot;https://en.bouffalolab.com/product/?type=detail&amp;amp;id=4&quot;&gt;BL702&lt;/a&gt;
+appears to have the same core, so I haven&amp;#x27;t listed it separately.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.bluetrum.com/product/ab5301a.html&quot;&gt;Bluetrum AB5301A&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1 x RV32 core of uknown design and unknown ISA naming string (&lt;a href=&quot;https://www.cnx-software.com/2021/03/09/bluetrum-ab32vg1-board-features-ab5301a-bluetooth-risc-v-mcu-runs-rt-thread-rtos/&quot;&gt;CNX
+Software tried and failed to get
+clarification&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;125 MHz.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Available in the
+&lt;a href=&quot;https://www.aliexpress.com/item/1005002953148585.html&quot;&gt;AB32VG1&lt;/a&gt;
+development board.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.wch-ic.com/products/CH583.html&quot;&gt;WCH CH583&lt;/a&gt;/CH582/CH581
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1 x RV32IMAC &lt;a href=&quot;http://www.wch-ic.com/downloads/file/367.html&quot;&gt;Qingke V4a&lt;/a&gt;
+core, which also supports a &amp;quot;hardware prologue/epilogue&amp;quot; extension.&lt;/li&gt;
+&lt;li&gt;Single issue in-order pipeline with 2 stages.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;20MHz.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;An evaluation board &lt;a href=&quot;https://www.aliexpress.com/i/1005003926698348.html&quot;&gt;is
+available&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.wch-ic.com/products/CH32V307.html&quot;&gt;WCH CH32V307&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1 x RV32IMAFC &lt;a href=&quot;http://www.wch-ic.com/downloads/file/367.html&quot;&gt;Qingke
+V4f&lt;/a&gt; core.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;144 MHz.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;An evaluation board &lt;a href=&quot;https://www.aliexpress.com/item/1005004511264952.html&quot;&gt;is
+available&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.wch-ic.com/products/CH32V003.html&quot;&gt;WCH CH32V003&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1 x RV32EC &lt;a href=&quot;http://www.wch-ic.com/downloads/file/369.html&quot;&gt;Qinkge V2A&lt;/a&gt;
+with custom instruction set extensions (&amp;#x27;XW&amp;#x27; for sign-extended byte and
+half word opterations).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;48 MHz.&lt;/li&gt;
+&lt;li&gt;Notably announced as &lt;a href=&quot;https://twitter.com/patrick_riscv/status/1580384430996484101&quot;&gt;costing less than 10
+cents&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Various boards
+&lt;a href=&quot;https://www.aliexpress.com/item/1005004988121617.html&quot;&gt;available&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://picocom.com/products/socs/pc802/&quot;&gt;PicoCom PC802&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Two clusters of 16 RV32 &lt;a href=&quot;http://www.andestech.com/en/products-solutions/andescore-processors/riscv-n25f/&quot;&gt;Andes
+N25F&lt;/a&gt;
+cores
+(&lt;a href=&quot;https://www.electronicsweekly.com/news/business/picocom-adopts-andes-risc-v-cores-o-ran-soc-2020-08/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;li&gt;Single issue, in order pipeline with 5 stages.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Fabbed on TSMC 12nm process
+(&lt;a href=&quot;https://www.eenewseurope.com/en/picocom-tapes-out-multicore-risc-v-openran-chip-for-oranic-board/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Several boards &lt;a href=&quot;https://picocom.com/products/boards/&quot;&gt;are available&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;bonus-other-socs-that-donx27t-match-the-above-criteria-or-where-therex27s-insufficient-info&quot;&gt;&lt;a href=&quot;#bonus-other-socs-that-donx27t-match-the-above-criteria-or-where-therex27s-insufficient-info&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Bonus: Other SoCs that don&amp;#x27;t match the above criteria or where there&amp;#x27;s insufficient info&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;The &lt;a href=&quot;https://www.espressif.com/en/news/ESP32-P4&quot;&gt;Espressif ESP32-P4&lt;/a&gt; was
+announced, featuring a dual-core 400MHz RISC-V CPU with &amp;quot;an AI instructions
+extension&amp;quot;. I look forward to incorporating it into the list above when more
+information is available.&lt;/li&gt;
+&lt;li&gt;I won&amp;#x27;t try to enumerate every use of RISC-V in chips that aren&amp;#x27;t
+programmable by end users or where development boards aren&amp;#x27;t available, but
+it&amp;#x27;s worth noting the &lt;a href=&quot;https://www.androidauthority.com/titan-m2-google-3261547/&quot;&gt;use of RISC-V Google&amp;#x27;s Titan
+M2&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;In January 2022 Intel Mobileye
+&lt;a href=&quot;https://www.anandtech.com/show/17165/mobileye-announces-eyeq-ultra-l4-auto-soc&quot;&gt;announced&lt;/a&gt;
+the EyeQ Ultra featuring 12 RISC-V cores (of unknown design), but there
+hasn&amp;#x27;t been any news since.&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+</entry>
 <entry>
 <title>2023Q1 week log</title>
 <published>2023-02-27T12:00:00Z</published>
