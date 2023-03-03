@@ -37,7 +37,16 @@ standard instruction set extensions supported.&lt;/li&gt;
 disservice to those SoCs with compute clusters or interesting cache
 hierarchies. If I were to do this again (or if I revisit this in the
 future), I&amp;#x27;d look to rectify that. There a whole bunch of other
-micro-architectural details it would be interesting to detail too.&lt;/li&gt;
+micro-architectural details it would be interesting to detail too.
+&lt;ul&gt;
+&lt;li&gt;I&amp;#x27;ve picked up CoreMark numbers where available, but of course that&amp;#x27;s a
+very limited metric to compare cores. It&amp;#x27;s also not always clear which
+compiler was used, which extensions were targeted and so on. Plus when the
+figure is taken from an IP core product page, the numbers may refer to a
+newer version of the IP. Where there are multiple numbers floating about
+I&amp;#x27;ve listed them all.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
 &lt;li&gt;There&amp;#x27;s a lot of chips here - but although I&amp;#x27;ve likely missed some, not so
 many that it&amp;#x27;s impossible to enumerate. RISC-V is growing rapidly, so
 perhaps this will change in the next year or two.&lt;/li&gt;
@@ -824,6 +833,7 @@ hasn&amp;#x27;t been any news since.&lt;/li&gt;
 &lt;ul&gt;
 &lt;li&gt;2023-03-03:
 &lt;ul&gt;
+&lt;li&gt;Added note about CoreMark scores.&lt;/li&gt;
 &lt;li&gt;Added the Renesas R9A02G020 (thanks to Giancarlo Parodi for the tip!).&lt;/li&gt;
 &lt;li&gt;Various typo fixes.&lt;/li&gt;
 &lt;li&gt;Add link to PicoCom RISC-V Summit talk and clarify the ISA extensions

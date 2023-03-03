@@ -29,6 +29,12 @@ listing of other on-chip peripherals or accelerators.
   hierarchies. If I were to do this again (or if I revisit this in the
   future), I'd look to rectify that. There a whole bunch of other
   micro-architectural details it would be interesting to detail too.
+  * I've picked up CoreMark numbers where available, but of course that's a
+    very limited metric to compare cores. It's also not always clear which
+    compiler was used, which extensions were targeted and so on. Plus when the
+    figure is taken from an IP core product page, the numbers may refer to a
+    newer version of the IP. Where there are multiple numbers floating about
+    I've listed them all.
 * There's a lot of chips here - but although I've likely missed some, not so
   many that it's impossible to enumerate. RISC-V is growing rapidly, so
   perhaps this will change in the next year or two.
@@ -481,6 +487,7 @@ listing of other on-chip peripherals or accelerators.
 
 ## Article changelog
 * 2023-03-03: (minor)
+  * Added note about CoreMark scores.
   * Added the Renesas R9A02G020 (thanks to Giancarlo Parodi for the tip!).
   * Various typo fixes.
   * Add link to PicoCom RISC-V Summit talk and clarify the ISA extensions
