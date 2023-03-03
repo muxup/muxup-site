@@ -378,7 +378,8 @@ board&lt;/a&gt;.&lt;/li&gt;
 &lt;/li&gt;
 &lt;li&gt;(Upcoming) T-Head TH1520
 (&lt;a href=&quot;https://riscv.org/blog/2022/10/deepcomputing-and-xcalibyte-announce-the-roma-laptop-will-be-powered-by-th1520-the-first-soc-from-wujian-600s-platform-by-alibaba-t-head-xcalibyte/&quot;&gt;announcement&lt;/a&gt;)
-&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
 &lt;ul&gt;
 &lt;li&gt;4 x RV64GC &lt;a href=&quot;https://www.t-head.cn/product/c910&quot;&gt;T-Head C910&lt;/a&gt; application
 cores, 1 x RV64GC &lt;a href=&quot;https://www.t-head.cn/product/c906?lang=en&quot;&gt;T-Head
@@ -393,6 +394,8 @@ with 2 stages.&lt;/li&gt;
 &lt;a href=&quot;https://github.com/T-head-Semi/opene902&quot;&gt;E902&lt;/a&gt;.
 See &lt;a href=&quot;https://news.ycombinator.com/item?id=30691980&quot;&gt;discussion&lt;/a&gt;
 on what is included).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
 &lt;ul&gt;
 &lt;li&gt;2.4 GHz, fabbed on a 12nm process

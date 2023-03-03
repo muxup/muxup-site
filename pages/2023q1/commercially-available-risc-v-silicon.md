@@ -235,7 +235,7 @@ listing of other on-chip peripherals or accelerators.
       board](https://www.sifive.com/boards/hifive-pro-p550).
 * (Upcoming) T-Head TH1520
   ([announcement](https://riscv.org/blog/2022/10/deepcomputing-and-xcalibyte-announce-the-roma-laptop-will-be-powered-by-th1520-the-first-soc-from-wujian-600s-platform-by-alibaba-t-head-xcalibyte/))
-  **Core design**:
+  * **Core design**:
     * 4 x RV64GC [T-Head C910](https://www.t-head.cn/product/c910) application
       cores, 1 x RV64GC [T-Head
       C906](https://www.t-head.cn/product/c906?lang=en), 1 x RV32IMC [T-Head
