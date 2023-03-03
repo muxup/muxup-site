@@ -529,12 +529,38 @@ vector extension.&lt;/li&gt;
 &lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
 &lt;ul&gt;
-&lt;li&gt;400MHz. Fabbed on a 28nm process.&lt;/li&gt;
+&lt;li&gt;400 MHz. Fabbed on a 28nm process.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
 &lt;ul&gt;
 &lt;li&gt;None I can find.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://www.renesas.com/eu/en/products/microcontrollers-microprocessors/risc-v/r9a02g020-assp-easy-mcu-motor-control-based-risc-v&quot;&gt;Renesas
+R9A02G020&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1 x RV32IMC &lt;a href=&quot;http://www.andestech.com/en/products-solutions/andescore-processors/riscv-n22/&quot;&gt;AndesCore
+N22&lt;/a&gt;
+(additionally supporting the Andes &amp;#x27;Performance&amp;#x27; and &amp;#x27;CoDense&amp;#x27;
+instruction set extensions).&lt;/li&gt;
+&lt;li&gt;Single-issue in-order with a 2-stage pipeline.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;32 MHz.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;The
+&lt;a href=&quot;https://www.renesas.com/eu/en/products/microcontrollers-microprocessors/risc-v/r9a02g020-evk-r9a02g020-assp-easy-motor-control-kit&quot;&gt;R9A02G020-EVK&lt;/a&gt;
+motor control kit is available.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
@@ -550,7 +576,7 @@ unknown ISA naming string.&lt;/li&gt;
 &lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
 &lt;ul&gt;
-&lt;li&gt;60MHz (for the RISC-V co-processor), fabbed on a TSMC 40nm process
+&lt;li&gt;60 MHz (for the RISC-V co-processor), fabbed on a TSMC 40nm process
 (&lt;a href=&quot;https://forums.tinyml.org/t/two-tinyml-talks-on-october-27-2020-by-kristopher-ardis-and-robert-muchsel-from-maxim-integrated-and-manuele-rusci-from-greenwaves-technologies/385&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
@@ -796,8 +822,14 @@ hasn&amp;#x27;t been any news since.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
 &lt;ul&gt;
-&lt;li&gt;2023-03-03: Typo fixes, add link to PicoCom RISC-V Summit talk and
-clarify the ISA extensions supported by the PC802 Andes N25F clusters.&lt;/li&gt;
+&lt;li&gt;2023-03-03:
+&lt;ul&gt;
+&lt;li&gt;Added the Renesas R9A02G020 (thanks to Giancarlo Parodi for the tip!).&lt;/li&gt;
+&lt;li&gt;Various typo fixes.&lt;/li&gt;
+&lt;li&gt;Add link to PicoCom RISC-V Summit talk and clarify the ISA extensions
+supported by the PC802 Andes N25F clusters.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
 &lt;li&gt;2023-03-03: Initial publication date.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/details&gt;

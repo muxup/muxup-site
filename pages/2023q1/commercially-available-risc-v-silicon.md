@@ -327,16 +327,30 @@ listing of other on-chip peripherals or accelerators.
       a control core unit, and a vector processing unit based on the RISC-V
       vector extension.
   * **Key stats**:
-    * 400MHz. Fabbed on a 28nm process.
+    * 400 MHz. Fabbed on a 28nm process.
   * **Development board**:
     * None I can find.
+* [Renesas
+  R9A02G020](https://www.renesas.com/eu/en/products/microcontrollers-microprocessors/risc-v/r9a02g020-assp-easy-mcu-motor-control-based-risc-v)
+  * **Core design**:
+    * 1 x RV32IMC [AndesCore
+      N22](http://www.andestech.com/en/products-solutions/andescore-processors/riscv-n22/)
+      (additionally supporting the Andes 'Performance' and 'CoDense'
+      instruction set extensions).
+    * Single-issue in-order with a 2-stage pipeline.
+  * **Key stats**:
+    * 32 MHz.
+  * **Development board**:
+    * The
+      [R9A02G020-EVK](https://www.renesas.com/eu/en/products/microcontrollers-microprocessors/risc-v/r9a02g020-evk-r9a02g020-assp-easy-motor-control-kit)
+      motor control kit is available.
 * [Analog Devices
   MAX78000](https://www.analog.com/en/products/max78000.html#product-overview)
   * **Core design**:
     * Features an RV32 RISC-V coprocessor of unknown (to me!) design and
       unknown ISA naming string.
   * **Key stats**:
-    * 60MHz (for the RISC-V co-processor), fabbed on a TSMC 40nm process
+    * 60 MHz (for the RISC-V co-processor), fabbed on a TSMC 40nm process
       ([ref](https://forums.tinyml.org/t/two-tinyml-talks-on-october-27-2020-by-kristopher-ardis-and-robert-muchsel-from-maxim-integrated-and-manuele-rusci-from-greenwaves-technologies/385)).
   * **Development board**:
     * [MAX78000EVKIT](https://www.analog.com/en/design-center/evaluation-hardware-and-software/evaluation-boards-kits/max78000evkit.html)
@@ -466,5 +480,8 @@ listing of other on-chip peripherals or accelerators.
   hasn't been any news since.
 
 ## Article changelog
-* 2023-03-03: (minor) Typo fixes, add link to PicoCom RISC-V Summit talk and
-  clarify the ISA extensions supported by the PC802 Andes N25F clusters.
+* 2023-03-03: (minor)
+  * Added the Renesas R9A02G020 (thanks to Giancarlo Parodi for the tip!).
+  * Various typo fixes.
+  * Add link to PicoCom RISC-V Summit talk and clarify the ISA extensions
+    supported by the PC802 Andes N25F clusters.
