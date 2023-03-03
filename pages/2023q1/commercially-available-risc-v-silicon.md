@@ -10,8 +10,8 @@ recent years ([10B cores estimated to have shipped as of Dec
 and I've been keeping very busy with RISC-V related work [at
 Igalia](https://www.igalia.com/contact/). I thought it would be fun to look
 beyond the cores I've been working with and to enumerate the SoCs that are
-available for direct purchase or in development boards and feature RISC-V
-cores that are programmable by the end user. I'm certain to be missing some
+available for direct purchase or in development boards that feature RISC-V
+cores programmable by the end user. I'm certain to be missing some
 SoCs or have some mistakes or missing information - any corrections very
 gratefully received at asb@muxup.com or
 [@asbradbury](https://twitter.com/asbradbury). I'm focusing almost
