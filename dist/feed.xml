@@ -733,7 +733,7 @@ available&lt;/a&gt;.&lt;/li&gt;
 &lt;ul&gt;
 &lt;li&gt;1 x RV32EC &lt;a href=&quot;http://www.wch-ic.com/downloads/file/369.html&quot;&gt;Qinkge V2A&lt;/a&gt;
 with custom instruction set extensions (&amp;#x27;XW&amp;#x27; for sign-extended byte and
-half word opterations).&lt;/li&gt;
+half word operations).&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
@@ -755,11 +755,14 @@ cents&lt;/a&gt;.&lt;/li&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
 &lt;ul&gt;
-&lt;li&gt;Two clusters of 16 RV32 &lt;a href=&quot;http://www.andestech.com/en/products-solutions/andescore-processors/riscv-n25f/&quot;&gt;Andes
+&lt;li&gt;Two clusters of 16 RV32IMAC &lt;a href=&quot;http://www.andestech.com/en/products-solutions/andescore-processors/riscv-n25f/&quot;&gt;Andes
 N25F&lt;/a&gt;
 cores
 (&lt;a href=&quot;https://www.electronicsweekly.com/news/business/picocom-adopts-andes-risc-v-cores-o-ran-soc-2020-08/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
 &lt;li&gt;Single issue, in order pipeline with 5 stages.&lt;/li&gt;
+&lt;li&gt;Also see the &lt;a href=&quot;https://www.youtube.com/watch?v=EmG0fWFwIqI&quot;&gt;2021 RISC-V summit
+talk&lt;/a&gt; for more insight on
+the architecture.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
@@ -791,6 +794,13 @@ M2&lt;/a&gt;&lt;/li&gt;
 the EyeQ Ultra featuring 12 RISC-V cores (of unknown design), but there
 hasn&amp;#x27;t been any news since.&lt;/li&gt;
 &lt;/ul&gt;
+&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
+&lt;ul&gt;
+&lt;li&gt;2023-03-03: Typo fixes, add link to PicoCom RISC-V Summit talk and
+clarify the ISA extensions supported by the PC802 Andes N25F clusters.&lt;/li&gt;
+&lt;li&gt;2023-03-03: Initial publication date.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/details&gt;
 </content>
 </entry>
 <entry>

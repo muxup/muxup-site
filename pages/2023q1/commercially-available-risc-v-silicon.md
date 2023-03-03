@@ -426,7 +426,7 @@ listing of other on-chip peripherals or accelerators.
   * **Core design**:
     * 1 x RV32EC [Qinkge V2A](http://www.wch-ic.com/downloads/file/369.html)
       with custom instruction set extensions ('XW' for sign-extended byte and
-      half word opterations).
+      half word operations).
   * **Key stats**:
     * 48 MHz.
     * Notably announced as [costing less than 10
@@ -436,11 +436,14 @@ listing of other on-chip peripherals or accelerators.
       [available](https://www.aliexpress.com/item/1005004988121617.html).
 * [PicoCom PC802](https://picocom.com/products/socs/pc802/)
   * **Core design**:
-    * Two clusters of 16 RV32 [Andes
+    * Two clusters of 16 RV32IMAC [Andes
       N25F](http://www.andestech.com/en/products-solutions/andescore-processors/riscv-n25f/)
       cores
       ([ref](https://www.electronicsweekly.com/news/business/picocom-adopts-andes-risc-v-cores-o-ran-soc-2020-08/)).
     * Single issue, in order pipeline with 5 stages.
+    * Also see the [2021 RISC-V summit
+      talk](https://www.youtube.com/watch?v=EmG0fWFwIqI) for more insight on
+      the architecture.
   * **Key stats**:
     * Fabbed on TSMC 12nm process
       ([ref](https://www.eenewseurope.com/en/picocom-tapes-out-multicore-risc-v-openran-chip-for-oranic-board/)).
@@ -461,3 +464,7 @@ listing of other on-chip peripherals or accelerators.
   [announced](https://www.anandtech.com/show/17165/mobileye-announces-eyeq-ultra-l4-auto-soc)
   the EyeQ Ultra featuring 12 RISC-V cores (of unknown design), but there
   hasn't been any news since.
+
+## Article changelog
+* 2023-03-03: (minor) Typo fixes, add link to PicoCom RISC-V Summit talk and
+  clarify the ISA extensions supported by the PC802 Andes N25F clusters.
