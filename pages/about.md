@@ -6,9 +6,16 @@ hidden = true
 # About
 
 Muxup is created and maintained by [Alex
-Bradbury](https://twitter.com/asbradbury). It aims to serve as a technical
-blog and index to my open source projects. See also: Muxup [on
-Github](https://github.com/muxup) and [on Twitter](https://twitter.com/muxup).
+Bradbury](https://twitter.com/asbradbury) (also [on
+LinkedIn](https://www.linkedin.com/in/alex-bradbury/)). I'm lucky enough to
+work at [Igalia](https://www.igalia.com/), an open source consultancy working
+across a huge number of upstream open source projects. If you're interested in
+me and/or my colleagues working on something for you, then [get in
+touch](https://www.igalia.com/contact/).
+
+Muxup aims to serve as a technical blog and index to my open source projects.
+See also: Muxup [on Github](https://github.com/muxup) and [on
+Twitter](https://twitter.com/muxup).
 
 ## Copyright
 
@@ -61,5 +68,6 @@ drawing skills to the internet.
 
 ## Article changelog
 
+* 2023-03-03: (minor) Mention I work at Igalia, link to my LinkedIn profile.
 * 2022-09-17: (minor) Fix typo.
 * 2022-09-11: (minor) Minor wording tweaks.
