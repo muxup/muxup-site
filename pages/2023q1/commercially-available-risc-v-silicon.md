@@ -407,8 +407,9 @@ listing of other on-chip peripherals or accelerators.
       core of unknown design (two stage pipeline) for low power operation ([ref](https://www.espressif.com/sites/default/files/documentation/esp32-c6_datasheet_en.pdf)).
   * **Key stats**:
     * 160 MHz high performance (HP) core with 2.76 CoreMark/MHz, 20 MHz low power (LP) core.
-  * **Development board**: Available in the
-    [ESP32-C6-DevKitC-1-N8](https://www.mouser.co.uk/ProductDetail/Espressif-Systems/ESP32-C6-DevKitC-1-N8?qs=8Wlm6%252BaMh8TjnOR8RwmaBw%3D%3D).
+  * **Development board**:
+    * Available in the
+      [ESP32-C6-DevKitC-1-N8](https://www.mouser.co.uk/ProductDetail/Espressif-Systems/ESP32-C6-DevKitC-1-N8?qs=8Wlm6%252BaMh8TjnOR8RwmaBw%3D%3D).
 * [HiSilicon
   Hi3861](https://www.hisilicon.com/en/products/smart-iot/ShortRangeWirelessIOT/Hi3861V100)
   * **Core design**:
@@ -511,6 +512,9 @@ listing of other on-chip peripherals or accelerators.
 
 ## Article changelog
 * 2023-03-04: (minor)
+  * Further Espressif information and new ESP32-C2 entry
+    [contributed](https://github.com/muxup/muxup-site/pull/1) by Ivan
+    Grokhotkov.
   * Clarified cores in the JH7110 and JH7100 (thanks to Conor Dooley for the
     tip).
   * Added T-Head C910-ICE (thanks to a tip via email).
