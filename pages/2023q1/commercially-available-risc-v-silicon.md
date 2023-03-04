@@ -389,11 +389,22 @@ listing of other on-chip peripherals or accelerators.
       [ESP32-C3-DevKitM-1](https://www.mouser.co.uk/ProductDetail/Espressif-Systems/ESP32-C3-DevKitM-1?qs=pUKx8fyJudB1sOWbbEnGFw%3D%3D)
       and the [M5Stack M5Stamp
       C3](https://www.mouser.co.uk/new/m5stack/m5stack-m5stamp-c3-set/).
+* [Espressif ESP32-C2](https://www.espressif.com/en/products/socs/esp32-c2) / ESP8684
+  * **Core design**:
+    * 1 x RV32IMC core of unknown design, single issue in-order 4-stage
+      pipeline
+      ([ref](https://www.espressif.com/sites/default/files/documentation/esp8684_datasheet_en.pdf)).
+  * **Key stats**:
+    * 160 MHz, fabbed on a TSMC 40nm process.
+    * 2.55 CoreMark/MHz.
+    * Die photo available [in this article](https://blog.espressif.com/esp32-c2-and-why-it-matter-s-bcf4d7d0b2c6).
+  * **Development board**:
+    * Available in the
+      [ESP8684-DevKitM-1-H4](https://eu.mouser.com/ProductDetail/Espressif-Systems/ESP8684-DevKitM-1-H4?qs=tlsG%2FOw5FFjDvS55rvTa7Q%3D%3D).
 * [Espressif ESP32-C6](https://www.espressif.com/en/products/socs/esp32-c6)
   * **Core design**:
-    * 1 x RV32I core of unknown design (four stage pipeline) and 1 x RV32I
-      core of unknown design (two stage pipeline) for low power operation.
-      It's unclear what the full ISA naming string is for both cores.
+    * 1 x RV32IMAC core of unknown design (four stage pipeline) and 1 x RV32IMAC
+      core of unknown design (two stage pipeline) for low power operation ([ref](https://www.espressif.com/sites/default/files/documentation/esp32-c6_datasheet_en.pdf)).
   * **Key stats**:
     * 160 MHz high performance (HP) core with 2.76 CoreMark/MHz, 20 MHz low power (LP) core.
   * **Development board**: Available in the
