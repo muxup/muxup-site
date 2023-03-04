@@ -652,13 +652,36 @@ C3&lt;/a&gt;.&lt;/li&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://www.espressif.com/en/products/socs/esp32-c2&quot;&gt;Espressif ESP32-C2&lt;/a&gt; / ESP8684
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1 x RV32IMC core of unknown design, single issue in-order 4-stage
+pipeline
+(&lt;a href=&quot;https://www.espressif.com/sites/default/files/documentation/esp8684_datasheet_en.pdf&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;160 MHz, fabbed on a TSMC 40nm process.&lt;/li&gt;
+&lt;li&gt;2.55 CoreMark/MHz.&lt;/li&gt;
+&lt;li&gt;Die photo available &lt;a href=&quot;https://blog.espressif.com/esp32-c2-and-why-it-matter-s-bcf4d7d0b2c6&quot;&gt;in this article&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Available in the
+&lt;a href=&quot;https://eu.mouser.com/ProductDetail/Espressif-Systems/ESP8684-DevKitM-1-H4?qs=tlsG%2FOw5FFjDvS55rvTa7Q%3D%3D&quot;&gt;ESP8684-DevKitM-1-H4&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;https://www.espressif.com/en/products/socs/esp32-c6&quot;&gt;Espressif ESP32-C6&lt;/a&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
 &lt;ul&gt;
-&lt;li&gt;1 x RV32I core of unknown design (four stage pipeline) and 1 x RV32I
-core of unknown design (two stage pipeline) for low power operation.
-It&amp;#x27;s unclear what the full ISA naming string is for both cores.&lt;/li&gt;
+&lt;li&gt;1 x RV32IMAC core of unknown design (four stage pipeline) and 1 x RV32IMAC
+core of unknown design (two stage pipeline) for low power operation (&lt;a href=&quot;https://www.espressif.com/sites/default/files/documentation/esp32-c6_datasheet_en.pdf&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
@@ -666,8 +689,12 @@ It&amp;#x27;s unclear what the full ISA naming string is for both cores.&lt;/li&
 &lt;li&gt;160 MHz high performance (HP) core with 2.76 CoreMark/MHz, 20 MHz low power (LP) core.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;: Available in the
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Available in the
 &lt;a href=&quot;https://www.mouser.co.uk/ProductDetail/Espressif-Systems/ESP32-C6-DevKitC-1-N8?qs=8Wlm6%252BaMh8TjnOR8RwmaBw%3D%3D&quot;&gt;ESP32-C6-DevKitC-1-N8&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;https://www.hisilicon.com/en/products/smart-iot/ShortRangeWirelessIOT/Hi3861V100&quot;&gt;HiSilicon
@@ -861,6 +888,9 @@ hasn&amp;#x27;t been any news since.&lt;/li&gt;
 &lt;ul&gt;
 &lt;li&gt;2023-03-04:
 &lt;ul&gt;
+&lt;li&gt;Further Espressif information and new ESP32-C2 entry
+&lt;a href=&quot;https://github.com/muxup/muxup-site/pull/1&quot;&gt;contributed&lt;/a&gt; by Ivan
+Grokhotkov.&lt;/li&gt;
 &lt;li&gt;Clarified cores in the JH7110 and JH7100 (thanks to Conor Dooley for the
 tip).&lt;/li&gt;
 &lt;li&gt;Added T-Head C910-ICE (thanks to a tip via email).&lt;/li&gt;

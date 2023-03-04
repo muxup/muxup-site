@@ -837,13 +837,36 @@ C3</a>.</li>
 </li>
 </ul>
 </li>
+<li><a href="https://www.espressif.com/en/products/socs/esp32-c2">Espressif ESP32-C2</a> / ESP8684
+<ul>
+<li><strong>Core design</strong>:
+<ul>
+<li>1 x RV32IMC core of unknown design, single issue in-order 4-stage
+pipeline
+(<a href="https://www.espressif.com/sites/default/files/documentation/esp8684_datasheet_en.pdf">ref</a>).</li>
+</ul>
+</li>
+<li><strong>Key stats</strong>:
+<ul>
+<li>160 MHz, fabbed on a TSMC 40nm process.</li>
+<li>2.55 CoreMark/MHz.</li>
+<li>Die photo available <a href="https://blog.espressif.com/esp32-c2-and-why-it-matter-s-bcf4d7d0b2c6">in this article</a>.</li>
+</ul>
+</li>
+<li><strong>Development board</strong>:
+<ul>
+<li>Available in the
+<a href="https://eu.mouser.com/ProductDetail/Espressif-Systems/ESP8684-DevKitM-1-H4?qs=tlsG%2FOw5FFjDvS55rvTa7Q%3D%3D">ESP8684-DevKitM-1-H4</a>.</li>
+</ul>
+</li>
+</ul>
+</li>
 <li><a href="https://www.espressif.com/en/products/socs/esp32-c6">Espressif ESP32-C6</a>
 <ul>
 <li><strong>Core design</strong>:
 <ul>
-<li>1 x RV32I core of unknown design (four stage pipeline) and 1 x RV32I
-core of unknown design (two stage pipeline) for low power operation.
-It&#x27;s unclear what the full ISA naming string is for both cores.</li>
+<li>1 x RV32IMAC core of unknown design (four stage pipeline) and 1 x RV32IMAC
+core of unknown design (two stage pipeline) for low power operation (<a href="https://www.espressif.com/sites/default/files/documentation/esp32-c6_datasheet_en.pdf">ref</a>).</li>
 </ul>
 </li>
 <li><strong>Key stats</strong>:
@@ -851,8 +874,12 @@ It&#x27;s unclear what the full ISA naming string is for both cores.</li>
 <li>160 MHz high performance (HP) core with 2.76 CoreMark/MHz, 20 MHz low power (LP) core.</li>
 </ul>
 </li>
-<li><strong>Development board</strong>: Available in the
+<li><strong>Development board</strong>:
+<ul>
+<li>Available in the
 <a href="https://www.mouser.co.uk/ProductDetail/Espressif-Systems/ESP32-C6-DevKitC-1-N8?qs=8Wlm6%252BaMh8TjnOR8RwmaBw%3D%3D">ESP32-C6-DevKitC-1-N8</a>.</li>
+</ul>
+</li>
 </ul>
 </li>
 <li><a href="https://www.hisilicon.com/en/products/smart-iot/ShortRangeWirelessIOT/Hi3861V100">HiSilicon
@@ -1046,6 +1073,9 @@ hasn&#x27;t been any news since.</li>
 <ul>
 <li>2023-03-04:
 <ul>
+<li>Further Espressif information and new ESP32-C2 entry
+<a href="https://github.com/muxup/muxup-site/pull/1">contributed</a> by Ivan
+Grokhotkov.</li>
 <li>Clarified cores in the JH7110 and JH7100 (thanks to Conor Dooley for the
 tip).</li>
 <li>Added T-Head C910-ICE (thanks to a tip via email).</li>
