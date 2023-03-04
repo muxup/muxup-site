@@ -250,12 +250,12 @@ JH7110</a>
 <ul>
 <li><strong>Core design</strong>:
 <ul>
-<li>4 x RV64GC <a href="https://www.sifive.com/cores/u74">SiFive U74</a> application
-cores, 1 x monitor core of unclear design (<a href="https://sifive-china.oss-cn-zhangjiakou.aliyuncs.com/%E8%B5%9B%E6%98%89%E7%A7%91%E6%8A%80%E7%94%B5%E5%AD%90%E6%89%8B%E5%86%8C.pdf">this
-datasheet</a>
-claims a 32-bit SiFive E24, while <a href="https://doc-en.rvspace.org/JH7110/TRM/JH7110_DS/highlighted_features.html">this online
-TRM</a>
-claims a SiFive S7.</li>
+<li>4 x RV64GC_Zba_Zbb <a href="https://www.sifive.com/cores/u74">SiFive U74</a>
+application cores, 1 x RV64IMAC SiFive S7
+(<a href="https://www.sifive.com/cores/s76">this?</a>) monitor core, and 1 x
+RV32IMFC <a href="https://www.sifive.com/cores/e24">SiFive E24</a>
+(<a href="https://doc-en.rvspace.org/JH7110/PDF/JH7110_Datasheet.pdf">ref</a>,
+<a href="https://lore.kernel.org/lkml/dda144a8397a175f3ce092485f08896c9a66d232.camel@icenowy.me/">ref</a>).</li>
 <li>The U74 is a dual-issue in-order pipeline with 8 stages.</li>
 </ul>
 </li>
@@ -272,7 +272,8 @@ a CoreMark/MHz of 5.09.</li>
 <ul>
 <li>Available in the <a href="https://www.kickstarter.com/projects/starfive/visionfive-2">VisionFive
 2</a>
-development board.</li>
+and <a href="https://wiki.pine64.org/wiki/STAR64">Pine64 Star64</a> development
+boards.</li>
 </ul>
 </li>
 </ul>
@@ -343,7 +344,7 @@ RV</a>, and
 <li><strong>Core design</strong>:
 <ul>
 <li>2 x RV64GC <a href="https://www.sifive.com/cores/u74">SiFive U74</a> application
-cores.</li>
+cores and 1 x RV32IMAFC <a href="https://www.sifive.com/cores/e24">SiFive E24</a>.</li>
 <li>The U74 is a dual-issue in-order pipeline with 8 stages.</li>
 </ul>
 </li>
@@ -1045,6 +1046,8 @@ hasn&#x27;t been any news since.</li>
 <ul>
 <li>2023-03-04:
 <ul>
+<li>Clarified cores in the JH7110 and JH7100 (thanks to Conor Dooley for the
+tip).</li>
 <li>Added T-Head C910-ICE (thanks to a tip via email).</li>
 </ul>
 </li>

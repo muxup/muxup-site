@@ -52,12 +52,12 @@ listing of other on-chip peripherals or accelerators.
 * [StarFive
   JH7110](https://doc-en.rvspace.org/JH7110/TRM/JH7110_DS/highlighted_features.html)
   * **Core design**:
-    * 4 x RV64GC [SiFive U74](https://www.sifive.com/cores/u74) application
-      cores, 1 x monitor core of unclear design ([this
-      datasheet](https://sifive-china.oss-cn-zhangjiakou.aliyuncs.com/%E8%B5%9B%E6%98%89%E7%A7%91%E6%8A%80%E7%94%B5%E5%AD%90%E6%89%8B%E5%86%8C.pdf)
-      claims a 32-bit SiFive E24, while [this online
-      TRM](https://doc-en.rvspace.org/JH7110/TRM/JH7110_DS/highlighted_features.html)
-      claims a SiFive S7.
+    * 4 x RV64GC_Zba_Zbb [SiFive U74](https://www.sifive.com/cores/u74)
+      application cores, 1 x RV64IMAC SiFive S7
+      ([this?](https://www.sifive.com/cores/s76)) monitor core, and 1 x
+      RV32IMFC [SiFive E24](https://www.sifive.com/cores/e24)
+      ([ref](https://doc-en.rvspace.org/JH7110/PDF/JH7110_Datasheet.pdf),
+      [ref](https://lore.kernel.org/lkml/dda144a8397a175f3ce092485f08896c9a66d232.camel@icenowy.me/)).
     * The U74 is a dual-issue in-order pipeline with 8 stages.
   * **Key stats**:
     * 1.5 GHz, fabbed on TSMC 28nm
@@ -68,7 +68,8 @@ listing of other on-chip peripherals or accelerators.
   * **Development board**:
     * Available in the [VisionFive
       2](https://www.kickstarter.com/projects/starfive/visionfive-2)
-      development board.
+      and [Pine64 Star64](https://wiki.pine64.org/wiki/STAR64) development
+      boards.
 * [T-Head C910 ICE](https://github.com/T-head-Semi/riscv-aosp)
   * **Core design**:
     * 2 x RV64GC [T-Head C910](https://www.t-head.cn/product/c910) application
@@ -109,7 +110,7 @@ listing of other on-chip peripherals or accelerators.
 * [StarFive JH7100](https://starfivetech.com/uploads/JH7100%20Datasheet.pdf)
   * **Core design**:
     * 2 x RV64GC [SiFive U74](https://www.sifive.com/cores/u74) application
-      cores.
+      cores and 1 x RV32IMAFC [SiFive E24](https://www.sifive.com/cores/e24).
     * The U74 is a dual-issue in-order pipeline with 8 stages. 
   * **Key stats**:
     * 1.2GHz (as listed on [StarFive's
@@ -499,6 +500,8 @@ listing of other on-chip peripherals or accelerators.
 
 ## Article changelog
 * 2023-03-04: (minor)
+  * Clarified cores in the JH7110 and JH7100 (thanks to Conor Dooley for the
+    tip).
   * Added T-Head C910-ICE (thanks to a tip via email).
 * 2023-03-03: (minor)
   * Added note about CoreMark scores.
