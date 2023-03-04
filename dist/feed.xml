@@ -354,10 +354,8 @@ available.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
 &lt;ul&gt;
 &lt;li&gt;2 x RV64GC application cores and 1 x RV64GC core with DSP extensions.
-&lt;a href=&quot;https://www.robertlipe.com/elusive-k510-specs-start-to-show-developer-board-now-available/&quot;&gt;Apparently&lt;/a&gt;
-based on the &lt;a href=&quot;http://www.andestech.com/en/products-solutions/andestar-architecture/&quot;&gt;AndeStar
-V5&lt;/a&gt;
-but I can&amp;#x27;t find the original source for this.&lt;/li&gt;
+The &lt;a href=&quot;http://www.andestech.com/en/products-solutions/andescore-processors/riscv-ax25mp/&quot;&gt;Andes
+AX25MP&lt;/a&gt; appears to be used (&lt;a href=&quot;https://drive.google.com/file/d/1IlbkZZg1dUWZMKIfvYX6A7HVNmmQs5r2/view&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
@@ -721,6 +719,29 @@ advertising support for Harmony OS.&lt;/li&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://en.bouffalolab.com/product/?type=detail&amp;amp;id=25&quot;&gt;Bouffalo Lab
+BL616/BL618&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1 x RV32GC core of unknown design, also with support for the unratified
+&amp;#x27;P&amp;#x27; packed SIMD extension
+(&lt;a href=&quot;https://wiki.sipeed.com/hardware/en/maixzero/m0s/m0s.html&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;320 MHz.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Available in the &lt;a href=&quot;https://wiki.sipeed.com/hardware/en/maixzero/m0s/m0s.html&quot;&gt;Sipeed M0S
+module&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;https://en.bouffalolab.com/product/?type=detail&amp;amp;id=1&quot;&gt;Bouffalo Lab BL602/BL604&lt;/a&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
@@ -778,9 +799,11 @@ development board.&lt;/li&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
 &lt;ul&gt;
-&lt;li&gt;1 x RV32IMAC &lt;a href=&quot;http://www.wch-ic.com/downloads/file/367.html&quot;&gt;Qingke V4a&lt;/a&gt;
+&lt;li&gt;1 x RV32IMAC &lt;a href=&quot;http://www.wch-ic.com/downloads/file/367.html&quot;&gt;QingKe V4a&lt;/a&gt;
 core, which also supports a &amp;quot;hardware prologue/epilogue&amp;quot; extension.&lt;/li&gt;
 &lt;li&gt;Single issue in-order pipeline with 2 stages.&lt;/li&gt;
+&lt;li&gt;Unlike the other QingKe V4 series core designs, the V4a doesn&amp;#x27;t support
+the custom &amp;#x27;extended instruction&amp;#x27; (XW) instruction set extension.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
@@ -800,7 +823,7 @@ available&lt;/a&gt;.&lt;/li&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
 &lt;ul&gt;
-&lt;li&gt;1 x RV32IMAFC &lt;a href=&quot;http://www.wch-ic.com/downloads/file/367.html&quot;&gt;Qingke
+&lt;li&gt;1 x RV32IMAFC &lt;a href=&quot;http://www.wch-ic.com/downloads/file/367.html&quot;&gt;QingKe
 V4f&lt;/a&gt; core.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
@@ -817,11 +840,63 @@ available&lt;/a&gt;.&lt;/li&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.wch-ic.com/products/CH32V208.html&quot;&gt;WVH CH32V208&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1 x RV32IMAC &lt;a href=&quot;http://www.wch-ic.com/downloads/file/367.html&quot;&gt;QingKe
+V4c&lt;/a&gt; core with custom
+instruction set extensions (&amp;#x27;XW&amp;#x27; for sign-extended byte and half word
+operations).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key info&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;144 MHz.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Available &lt;a href=&quot;https://www.aliexpress.com/item/1005004924242063.html&quot;&gt;here&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Other&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;The &lt;a href=&quot;http://www.wch-ic.com/products/CH32V203.html&quot;&gt;CH32V203&lt;/a&gt; is also
+available but I haven&amp;#x27;t listed it separately as it&amp;#x27;s not clear how the
+QingKe V4b core in that chip differs to the V4c in this one.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.wch-ic.com/products/CH569.html&quot;&gt;WCH CH569&lt;/a&gt; / &lt;a href=&quot;http://www.wch-ic.com/products/CH573.html&quot;&gt;WCH
+CH573&lt;/a&gt; / &lt;a href=&quot;http://www.wch-ic.com/products/CH32V103.html&quot;&gt;WCH
+CH32V103&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1 x RV32IMAC &lt;a href=&quot;http://www.wch-ic.com/downloads/file/368.html&quot;&gt;QinqKe V3a&lt;/a&gt;
+core.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;120 MHz (CH569), 20 MHz (CH573), 80 MHz (CH32V103).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Evaluation boards available, e.g. &lt;a href=&quot;https://www.aliexpress.com/item/1005004607642695.html&quot;&gt;this one for the
+CH32V103&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;http://www.wch-ic.com/products/CH32V003.html&quot;&gt;WCH CH32V003&lt;/a&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
 &lt;ul&gt;
-&lt;li&gt;1 x RV32EC &lt;a href=&quot;http://www.wch-ic.com/downloads/file/369.html&quot;&gt;Qinkge V2A&lt;/a&gt;
+&lt;li&gt;1 x RV32EC &lt;a href=&quot;http://www.wch-ic.com/downloads/file/369.html&quot;&gt;QingKe V2A&lt;/a&gt;
 with custom instruction set extensions (&amp;#x27;XW&amp;#x27; for sign-extended byte and
 half word operations).&lt;/li&gt;
 &lt;/ul&gt;
@@ -868,6 +943,27 @@ the architecture.&lt;/li&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://csm-ic.com/Html/ProductView.asp?ID=253&amp;amp;SortID=201&quot;&gt;CSM32RV20&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1 x RV32IMAC core of unknown design.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;2.6 CoreMark/MHz.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;The &lt;a href=&quot;http://csm-ic.com/Html/ProductView.asp?ID=253&amp;amp;SortID=201&quot;&gt;product
+page&lt;/a&gt; suggests
+two boards are available.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&quot;bonus-other-socs-that-donx27t-match-the-above-criteria-or-where-therex27s-insufficient-info&quot;&gt;&lt;a href=&quot;#bonus-other-socs-that-donx27t-match-the-above-criteria-or-where-therex27s-insufficient-info&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Bonus: Other SoCs that don&amp;#x27;t match the above criteria or where there&amp;#x27;s insufficient info&lt;/h2&gt;
 &lt;ul&gt;
@@ -888,6 +984,11 @@ hasn&amp;#x27;t been any news since.&lt;/li&gt;
 &lt;ul&gt;
 &lt;li&gt;2023-03-04:
 &lt;ul&gt;
+&lt;li&gt;Added in the CSM32RV20 and some extra Bouffalo Lab and WCH chips (&lt;a href=&quot;https://old.reddit.com/r/RISCV/comments/11h2e6u/commercially_available_riscv_silicon_list/jasbyfo/&quot;&gt;thanks
+to Reddit user
+1r0n_m6n&lt;/a&gt;).&lt;/li&gt;
+&lt;li&gt;Confirmed likely core design in the K510 (&lt;a href=&quot;https://old.reddit.com/r/RISCV/comments/11h2e6u/commercially_available_riscv_silicon_list/jaupwnb/&quot;&gt;thanks to Reddit user
+zephray_wenting&lt;/a&gt;).&lt;/li&gt;
 &lt;li&gt;Further Espressif information and new ESP32-C2 entry
 &lt;a href=&quot;https://github.com/muxup/muxup-site/pull/1&quot;&gt;contributed&lt;/a&gt; by Ivan
 Grokhotkov.&lt;/li&gt;

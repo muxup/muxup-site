@@ -221,10 +221,8 @@ listing of other on-chip peripherals or accelerators.
 * [Kendryte K510](https://www.canaan.io/product/kendryte-k510)
   * **Core design**:
     * 2 x RV64GC application cores and 1 x RV64GC core with DSP extensions.
-    [Apparently](https://www.robertlipe.com/elusive-k510-specs-start-to-show-developer-board-now-available/)
-    based on the [AndeStar
-    V5](http://www.andestech.com/en/products-solutions/andestar-architecture/)
-    but I can't find the original source for this.
+      The [Andes
+      AX25MP](http://www.andestech.com/en/products-solutions/andescore-processors/riscv-ax25mp/) appears to be used ([ref](https://drive.google.com/file/d/1IlbkZZg1dUWZMKIfvYX6A7HVNmmQs5r2/view)).
   * **Key stats**:
     * 800 MHz.
   * **Development board**:
@@ -422,6 +420,17 @@ listing of other on-chip peripherals or accelerators.
     * A low-cost board [is
       available](https://www.aliexpress.com/item/1005003342192909.html)
       advertising support for Harmony OS.
+* [Bouffalo Lab
+  BL616/BL618](https://en.bouffalolab.com/product/?type=detail&id=25)
+  * **Core design**:
+    * 1 x RV32GC core of unknown design, also with support for the unratified
+      'P' packed SIMD extension
+      ([ref](https://wiki.sipeed.com/hardware/en/maixzero/m0s/m0s.html)).
+  * **Key stats**:
+    * 320 MHz.
+  * **Development board**:
+    * Available in the [Sipeed M0S
+      module](https://wiki.sipeed.com/hardware/en/maixzero/m0s/m0s.html).
 * [Bouffalo Lab BL602/BL604](https://en.bouffalolab.com/product/?type=detail&id=1)
   * **Core design**:
     * 1 x RV32IMAFC [SiFive E24](https://www.sifive.com/cores/e24) core
@@ -450,9 +459,11 @@ listing of other on-chip peripherals or accelerators.
       development board.
 * [WCH CH583](http://www.wch-ic.com/products/CH583.html)/CH582/CH581
   * **Core design**:
-    * 1 x RV32IMAC [Qingke V4a](http://www.wch-ic.com/downloads/file/367.html)
+    * 1 x RV32IMAC [QingKe V4a](http://www.wch-ic.com/downloads/file/367.html)
       core, which also supports a "hardware prologue/epilogue" extension.
     * Single issue in-order pipeline with 2 stages.
+    * Unlike the other QingKe V4 series core designs, the V4a doesn't support
+      the custom 'extended instruction' (XW) instruction set extension.
   * **Key stats**:
     * 20MHz.
   * **Development board**:
@@ -460,16 +471,41 @@ listing of other on-chip peripherals or accelerators.
       available](https://www.aliexpress.com/i/1005003926698348.html).
 * [WCH CH32V307](http://www.wch-ic.com/products/CH32V307.html)
   * **Core design**:
-    * 1 x RV32IMAFC [Qingke
+    * 1 x RV32IMAFC [QingKe
       V4f](http://www.wch-ic.com/downloads/file/367.html) core.
   * **Key stats**:
     * 144 MHz.
   * **Development board**:
     * An evaluation board [is
       available](https://www.aliexpress.com/item/1005004511264952.html).
+* [WVH CH32V208](http://www.wch-ic.com/products/CH32V208.html)
+  * **Core design**:
+    * 1 x RV32IMAC [QingKe
+      V4c](http://www.wch-ic.com/downloads/file/367.html) core with custom
+      instruction set extensions ('XW' for sign-extended byte and half word
+      operations).
+  * **Key info**:
+    * 144 MHz.
+  * **Development board**:
+    * Available [here](https://www.aliexpress.com/item/1005004924242063.html).
+  * **Other**:
+    * The [CH32V203](http://www.wch-ic.com/products/CH32V203.html) is also
+      available but I haven't listed it separately as it's not clear how the
+      QingKe V4b core in that chip differs to the V4c in this one.
+* [WCH CH569](http://www.wch-ic.com/products/CH569.html) / [WCH
+  CH573](http://www.wch-ic.com/products/CH573.html) / [WCH
+  CH32V103](http://www.wch-ic.com/products/CH32V103.html)
+  * **Core design**:
+    * 1 x RV32IMAC [QinqKe V3a](http://www.wch-ic.com/downloads/file/368.html)
+      core.
+  * **Key stats**:
+    * 120 MHz (CH569), 20 MHz (CH573), 80 MHz (CH32V103).
+  * **Development board**:
+    * Evaluation boards available, e.g. [this one for the
+      CH32V103](https://www.aliexpress.com/item/1005004607642695.html).
 * [WCH CH32V003](http://www.wch-ic.com/products/CH32V003.html)
   * **Core design**:
-    * 1 x RV32EC [Qinkge V2A](http://www.wch-ic.com/downloads/file/369.html)
+    * 1 x RV32EC [QingKe V2A](http://www.wch-ic.com/downloads/file/369.html)
       with custom instruction set extensions ('XW' for sign-extended byte and
       half word operations).
   * **Key stats**:
@@ -494,6 +530,15 @@ listing of other on-chip peripherals or accelerators.
       ([ref](https://www.eenewseurope.com/en/picocom-tapes-out-multicore-risc-v-openran-chip-for-oranic-board/)).
   * **Development board**:
     * Several boards [are available](https://picocom.com/products/boards/).
+* [CSM32RV20](http://csm-ic.com/Html/ProductView.asp?ID=253&SortID=201)
+  * **Core design**:
+    * 1 x RV32IMAC core of unknown design.
+  * **Key stats**:
+    * 2.6 CoreMark/MHz.
+  * **Development board**:
+    * The [product
+      page](http://csm-ic.com/Html/ProductView.asp?ID=253&SortID=201) suggests
+      two boards are available.
 
 ## Bonus: Other SoCs that don't match the above criteria or where there's insufficient info
 
@@ -512,6 +557,11 @@ listing of other on-chip peripherals or accelerators.
 
 ## Article changelog
 * 2023-03-04: (minor)
+  * Added in the CSM32RV20 and some extra Bouffalo Lab and WCH chips ([thanks
+    to Reddit user
+    1r0n_m6n](https://old.reddit.com/r/RISCV/comments/11h2e6u/commercially_available_riscv_silicon_list/jasbyfo/)).
+  * Confirmed likely core design in the K510 ([thanks to Reddit user
+    zephray_wenting](https://old.reddit.com/r/RISCV/comments/11h2e6u/commercially_available_riscv_silicon_list/jaupwnb/)).
   * Further Espressif information and new ESP32-C2 entry
     [contributed](https://github.com/muxup/muxup-site/pull/1) by Ivan
     Grokhotkov.
