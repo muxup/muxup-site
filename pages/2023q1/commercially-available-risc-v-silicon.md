@@ -69,6 +69,18 @@ listing of other on-chip peripherals or accelerators.
     * Available in the [VisionFive
       2](https://www.kickstarter.com/projects/starfive/visionfive-2)
       development board.
+* [T-Head C910 ICE](https://github.com/T-head-Semi/riscv-aosp)
+  * **Core design**:
+    * 2 x RV64GC [T-Head C910](https://www.t-head.cn/product/c910) application
+      cores and an additional T-Head C910 RV64GCV core (i.e., with the vector
+      extension).
+    * The C910 is a 3-issue out-of-order pipeline with 12 stages.
+  * **Key stats**:
+    * 1.2 GHz, fabbed on a 28nm process
+      ([ref](https://github.com/T-head-Semi/riscv-aosp)).
+  * **Development board**:
+    * Available in the
+      [RVB-ICE](https://www.aliexpress.com/item/1005003395978459.html).
 * [Allwinner D1-H](https://d1.docs.aw-ol.com/en/)
   ([datasheet](https://github.com/DongshanPI/Awesome_RISCV-AllwinnerD1/blob/master/Tina-SDK/Hardware%E7%A1%AC%E4%BB%B6%E7%B1%BB%E6%96%87%E6%A1%A3/%E8%8A%AF%E7%89%87%E6%89%8B%E5%86%8C/D1-H_Datasheet_V1.0.pdf),
   [user
@@ -486,6 +498,8 @@ listing of other on-chip peripherals or accelerators.
   hasn't been any news since.
 
 ## Article changelog
+* 2023-03-04: (minor)
+  * Added T-Head C910-ICE (thanks to a tip via email).
 * 2023-03-03: (minor)
   * Added note about CoreMark scores.
   * Added the Renesas R9A02G020 (thanks to Giancarlo Parodi for the tip!).
