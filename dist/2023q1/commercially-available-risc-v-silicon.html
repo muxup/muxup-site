@@ -197,7 +197,7 @@ content: " «";
 <div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></a></div>
 </div>
 <h1 id="article-title"><span id="title-highlight">Commercially available RISC-V silicon</span></h1>
-<div id="article-meta"><span title="2023-03-03">2023Q1</span>. Last update <span title="2023-03-03">03 Mar 2023</span>. <a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
+<div id="article-meta"><span title="2023-03-03">2023Q1</span>. Last update <span title="2023-03-04">04 Mar 2023</span>. <a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
 <p>The RISC-V instruction set architecture has seen huge excitement and growth in
 recent years (<a href="https://venturebeat.com/ai/how-risc-v-has-become-a-viable-third-processor-architecture-calista-redmond/">10B cores estimated to have shipped as of Dec
 2022</a>)
@@ -273,6 +273,30 @@ a CoreMark/MHz of 5.09.</li>
 <li>Available in the <a href="https://www.kickstarter.com/projects/starfive/visionfive-2">VisionFive
 2</a>
 development board.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="https://github.com/T-head-Semi/riscv-aosp">T-Head C910 ICE</a>
+<ul>
+<li><strong>Core design</strong>:
+<ul>
+<li>2 x RV64GC <a href="https://www.t-head.cn/product/c910">T-Head C910</a> application
+cores and an additional T-Head C910 RV64GCV core (i.e., with the vector
+extension).</li>
+<li>The C910 is a 3-issue out-of-order pipeline with 12 stages.</li>
+</ul>
+</li>
+<li><strong>Key stats</strong>:
+<ul>
+<li>1.2 GHz, fabbed on a 28nm process
+(<a href="https://github.com/T-head-Semi/riscv-aosp">ref</a>).</li>
+</ul>
+</li>
+<li><strong>Development board</strong>:
+<ul>
+<li>Available in the
+<a href="https://www.aliexpress.com/item/1005003395978459.html">RVB-ICE</a>.</li>
 </ul>
 </li>
 </ul>
@@ -1019,6 +1043,11 @@ hasn&#x27;t been any news since.</li>
 </ul>
 <hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor "aria-hidden="true" tabindex="-1"></a>Article changelog</summary>
 <ul>
+<li>2023-03-04:
+<ul>
+<li>Added T-Head C910-ICE (thanks to a tip via email).</li>
+</ul>
+</li>
 <li>2023-03-03:
 <ul>
 <li>Added note about CoreMark scores.</li>

@@ -92,6 +92,30 @@ development board.&lt;/li&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/T-head-Semi/riscv-aosp&quot;&gt;T-Head C910 ICE&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;2 x RV64GC &lt;a href=&quot;https://www.t-head.cn/product/c910&quot;&gt;T-Head C910&lt;/a&gt; application
+cores and an additional T-Head C910 RV64GCV core (i.e., with the vector
+extension).&lt;/li&gt;
+&lt;li&gt;The C910 is a 3-issue out-of-order pipeline with 12 stages.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1.2 GHz, fabbed on a 28nm process
+(&lt;a href=&quot;https://github.com/T-head-Semi/riscv-aosp&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Available in the
+&lt;a href=&quot;https://www.aliexpress.com/item/1005003395978459.html&quot;&gt;RVB-ICE&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;https://d1.docs.aw-ol.com/en/&quot;&gt;Allwinner D1-H&lt;/a&gt;
 (&lt;a href=&quot;https://github.com/DongshanPI/Awesome_RISCV-AllwinnerD1/blob/master/Tina-SDK/Hardware%E7%A1%AC%E4%BB%B6%E7%B1%BB%E6%96%87%E6%A1%A3/%E8%8A%AF%E7%89%87%E6%89%8B%E5%86%8C/D1-H_Datasheet_V1.0.pdf&quot;&gt;datasheet&lt;/a&gt;,
 &lt;a href=&quot;https://github.com/DongshanPI/Awesome_RISCV-AllwinnerD1/blob/master/Tina-SDK/Hardware%E7%A1%AC%E4%BB%B6%E7%B1%BB%E6%96%87%E6%A1%A3/%E8%8A%AF%E7%89%87%E6%89%8B%E5%86%8C/D1-H_User%20Manual_V1.0.pdf&quot;&gt;user
@@ -834,6 +858,11 @@ hasn&amp;#x27;t been any news since.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
 &lt;ul&gt;
+&lt;li&gt;2023-03-04:
+&lt;ul&gt;
+&lt;li&gt;Added T-Head C910-ICE (thanks to a tip via email).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
 &lt;li&gt;2023-03-03:
 &lt;ul&gt;
 &lt;li&gt;Added note about CoreMark scores.&lt;/li&gt;
