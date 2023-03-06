@@ -197,13 +197,75 @@ content: " «";
 <div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></a></div>
 </div>
 <h1 id="article-title"><span id="title-highlight">2023Q1 week log</span></h1>
-<div id="article-meta"><span title="2023-02-27">2023Q1</span>. Last update <span title="2023-02-27">27 Feb 2023</span>. <a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
+<div id="article-meta"><span title="2023-02-27">2023Q1</span>. Last update <span title="2023-03-06">06 Mar 2023</span>. <a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
 <p>I tend to keep quite a lot of notes on the development related (sometimes at
 work, sometimes not) I do on a week-by-week basis, and thought it might be fun
 to write up the parts that were public. This
 may or may not be of wider interest, but it aims to be a useful aide-mémoire
 for my purposes at least. Weeks with few entries might be due to focusing on
 downstream work (or perhaps just a less productive week - I am only human!).</p>
+<h2 id="week-of-27th-february-2023"><a href="#week-of-27th-february-2023" class="anchor" aria-hidden="true" tabindex="-1"></a>Week of 27th February 2023</h2>
+<ul>
+<li>Completed (to the point I was happy to publish at lest) my attempt to
+enumerate the <a href="/2023q1/commercially-available-risc-v-silicon">commercially available RISC-V
+SoCs</a>. I&#x27;m very
+grateful to have received a whole range of suggested additions and
+clarifications over the weekend, which have all been incorporated.</li>
+<li>Ran the usual biweekly <a href="https://discourse.llvm.org/t/risc-v-llvm-sync-up-call-2nd-march-2023/68876">RISC-V LLVM sync-up
+call</a>.
+Topics included outstanding issues for LLVM 16.x (no major issues now my
+<a href="https://github.com/llvm/llvm-project-release-prs/pull/324#issuecomment-1445012422">backport
+request</a>
+to fix and LLD regression was merged), an overview off <code>_Float16</code> ABI
+lowering fixes, GP relaxation in LLD, my recent RISC-V buildbot, and some
+vectorisation related issues.</li>
+<li>Investigated and largely resolved a issues related to ABI lowering of
+<code>_Float16</code> for RISC-V. Primarily, we weren&#x27;t handling the cases where a
+GPR+FPR or a pair of FPRs are used to pass small structs including
+<code>_Float16</code>.
+<ul>
+<li>Part of this work involved rebasing my
+<a href="https://reviews.llvm.org/D134050">previous</a>
+<a href="https://reviews.llvm.org/D140400">patches</a> to refactor our RISC-V ABI
+lowering tests in Clang. Now that a version of my improvements to
+<code>update_cc_test_check.py --function-signature</code> (required for the refactor)
+landed as part of <a href="https://reviews.llvm.org/D144963">D144963</a>, this can
+hopefully be completed.</li>
+<li>Committed a number of simple test improvements related to half floats. e.g.
+<a href="https://reviews.llvm.org/rG570995eba2f9">570995e</a>,
+<a href="https://reviews.llvm.org/rG81979c3038de">81979c3</a>,
+<a href="https://reviews.llvm.org/rG34b412dc0efe">34b412d</a>.</li>
+<li>Posted <a href="https://reviews.llvm.org/D145070">D145070</a> to add proper coverage
+for <code>_Float16</code> ABI lowering, and
+<a href="https://reviews.llvm.org/D145074">D145074</a> to fix it. Also
+<a href="https://reviews.llvm.org/D145071">D145071</a> to set the <code>HasLegalHalfType</code>
+property, but the semantics of that are less clear.</li>
+<li>Posted a <a href="https://github.com/riscv-non-isa/riscv-elf-psabi-doc/pull/367">strawman psABI
+patch</a> for
+<code>__bf16</code>, needed for the RISC-V bfloat16 extension.</li>
+</ul>
+</li>
+<li>Attended the <a href="https://community.riscv.org/events/details/risc-v-international-cambridge-risc-v-group-presents-cheri-risc-v-full-stack-security-using-open-source-hardware-and-software/">Cambridge RISC-V
+Meetup</a>.</li>
+<li>After seeing the Helix editor <a href="https://lobste.rs/s/nvoikx/helix_notes">discussed on
+lobste.rs</a>, retried my previously
+shared <a href="https://github.com/helix-editor/helix/issues/3072#issuecomment-1208133990">large Markdown file test
+case</a>.
+Unfortunately it&#x27;s still unusably slow to edit, seemingly due to a
+tree-sitter related issue.</li>
+<li>Cleaned up the static site generator used for this site a bit. e.g. now my
+fixes (<a href="https://github.com/miyuchina/mistletoe/pull/157">#157</a>,
+<a href="https://github.com/miyuchina/mistletoe/pull/158">#158</a>,
+<a href="https://github.com/miyuchina/mistletoe/pull/159">#159</a>) for the
+<code>traverse()</code> helper in <a href="https://github.com/miyuchina/mistletoe">mistletoe</a>
+where merged upstream, I
+<a href="https://github.com/muxup/muxup-site/commit/52989cf7462d7900bbef5bc2ca9f976af8022ade">removed</a>
+my downstream version.</li>
+<li>The usual mix of upstream LLVM reviews.</li>
+<li>Had a day off for my birthday.</li>
+<li>Publicly shared this week log for the first time.</li>
+<li><a href="https://llvmweekly.org/issue/477">LLVM Weekly #477</a>.</li>
+</ul>
 <h2 id="week-of-20th-february-2023"><a href="#week-of-20th-february-2023" class="anchor" aria-hidden="true" tabindex="-1"></a>Week of 20th February 2023</h2>
 <ul>
 <li>Iterated on <a href="https://reviews.llvm.org/D144353">D144353</a> (aiming to fix LLD
@@ -317,6 +379,7 @@ downstream, but I landed a couple of related minor test cleanups.
 </ul>
 <hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor "aria-hidden="true" tabindex="-1"></a>Article changelog</summary>
 <ul>
+<li>2023-03-06: Added notes for the week of 27th February 2023.</li>
 <li>2023-02-27: Added in a forgotten note about trivial buildbot doc
 improvements.</li>
 <li>2023-02-27: Initial publication date.</li>

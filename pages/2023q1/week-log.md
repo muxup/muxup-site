@@ -10,6 +10,64 @@ may or may not be of wider interest, but it aims to be a useful aide-mémoire
 for my purposes at least. Weeks with few entries might be due to focusing on
 downstream work (or perhaps just a less productive week - I am only human!).
 
+## Week of 27th February 2023
+* Completed (to the point I was happy to publish at lest) my attempt to
+  enumerate the [commercially available RISC-V
+  SoCs](/pages/2023q1/commercially-available-risc-v-silicon.md). I'm very
+  grateful to have received a whole range of suggested additions and
+  clarifications over the weekend, which have all been incorporated.
+* Ran the usual biweekly [RISC-V LLVM sync-up
+  call](https://discourse.llvm.org/t/risc-v-llvm-sync-up-call-2nd-march-2023/68876).
+  Topics included outstanding issues for LLVM 16.x (no major issues now my
+  [backport
+  request](https://github.com/llvm/llvm-project-release-prs/pull/324#issuecomment-1445012422)
+  to fix and LLD regression was merged), an overview off `_Float16` ABI
+  lowering fixes, GP relaxation in LLD, my recent RISC-V buildbot, and some
+  vectorisation related issues.
+* Investigated and largely resolved a issues related to ABI lowering of
+  `_Float16` for RISC-V. Primarily, we weren't handling the cases where a
+  GPR+FPR or a pair of FPRs are used to pass small structs including
+  `_Float16`.
+  * Part of this work involved rebasing my
+    [previous](https://reviews.llvm.org/D134050)
+    [patches](https://reviews.llvm.org/D140400) to refactor our RISC-V ABI
+    lowering tests in Clang. Now that a version of my improvements to
+    `update_cc_test_check.py --function-signature` (required for the refactor)
+    landed as part of [D144963](https://reviews.llvm.org/D144963), this can
+    hopefully be completed.
+  * Committed a number of simple test improvements related to half floats. e.g.
+    [570995e](https://reviews.llvm.org/rG570995eba2f9),
+    [81979c3](https://reviews.llvm.org/rG81979c3038de),
+    [34b412d](https://reviews.llvm.org/rG34b412dc0efe).
+  * Posted [D145070](https://reviews.llvm.org/D145070) to add proper coverage
+    for `_Float16` ABI lowering, and
+    [D145074](https://reviews.llvm.org/D145074) to fix it. Also
+    [D145071](https://reviews.llvm.org/D145071) to set the `HasLegalHalfType`
+    property, but the semantics of that are less clear.
+  * Posted a [strawman psABI
+    patch](https://github.com/riscv-non-isa/riscv-elf-psabi-doc/pull/367) for
+    `__bf16`, needed for the RISC-V bfloat16 extension.
+* Attended the [Cambridge RISC-V
+  Meetup](https://community.riscv.org/events/details/risc-v-international-cambridge-risc-v-group-presents-cheri-risc-v-full-stack-security-using-open-source-hardware-and-software/).
+* After seeing the Helix editor [discussed on
+  lobste.rs](https://lobste.rs/s/nvoikx/helix_notes), retried my previously
+  shared [large Markdown file test
+  case](https://github.com/helix-editor/helix/issues/3072#issuecomment-1208133990).
+  Unfortunately it's still unusably slow to edit, seemingly due to a
+  tree-sitter related issue.
+* Cleaned up the static site generator used for this site a bit. e.g. now my
+  fixes ([#157](https://github.com/miyuchina/mistletoe/pull/157),
+  [#158](https://github.com/miyuchina/mistletoe/pull/158),
+  [#159](https://github.com/miyuchina/mistletoe/pull/159)) for the
+  `traverse()` helper in [mistletoe](https://github.com/miyuchina/mistletoe)
+  where merged upstream, I
+  [removed](https://github.com/muxup/muxup-site/commit/52989cf7462d7900bbef5bc2ca9f976af8022ade)
+  my downstream version.
+* The usual mix of upstream LLVM reviews.
+* Had a day off for my birthday.
+* Publicly shared this week log for the first time.
+* [LLVM Weekly #477](https://llvmweekly.org/issue/477).
+
 ## Week of 20th February 2023
 * Iterated on [D144353](https://reviews.llvm.org/D144353) (aiming to fix LLD
   regression related to merging RISC-V attributes) based on review feedback
@@ -110,5 +168,6 @@ downstream work (or perhaps just a less productive week - I am only human!).
 * [LLVM Weekly #475](https://llvmweekly.org/issue/475).
 
 ## Article changelog
+* 2023-03-06: Added notes for the week of 27th February 2023.
 * 2023-02-27: (minor) Added in a forgotten note about trivial buildbot doc
   improvements.
