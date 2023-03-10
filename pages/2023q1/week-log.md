@@ -11,7 +11,7 @@ for my purposes at least. Weeks with few entries might be due to focusing on
 downstream work (or perhaps just a less productive week - I am only human!).
 
 ## Week of 27th February 2023
-* Completed (to the point I was happy to publish at lest) my attempt to
+* Completed (to the point I was happy to publish at least) my attempt to
   enumerate the [commercially available RISC-V
   SoCs](/pages/2023q1/commercially-available-risc-v-silicon.md). I'm very
   grateful to have received a whole range of suggested additions and
