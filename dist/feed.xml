@@ -247,8 +247,9 @@ I&amp;#x27;ve listed them all.&lt;/li&gt;
 many that it&amp;#x27;s impossible to enumerate. RISC-V is growing rapidly, so
 perhaps this will change in the next year or two.&lt;/li&gt;
 &lt;li&gt;A large proportion of the SoC designs listed are based on proprietary core
-designs (with one of the most notable exceptions being those based on the
-Apache-licensed T-Head IP). As a long-term proponent of open source silicon
+designs. The exceptions are the collection of SoCs based on the T-Head
+cores, the SiFive E31 and Kendryte K210 (Rocket-derived) and the GreenWaves
+GAP8/GAP9 (PULP-derived). As a long-term proponent of open source silicon
 I&amp;#x27;d hope to see this change over time. Once a company has moved from a
 proprietary ISA to an open standard (RISC-V), there&amp;#x27;s a much easier
 transition path to switch from a proprietary IP core to one that&amp;#x27;s open
@@ -446,8 +447,9 @@ FU740&lt;/a&gt;
 cores, 1 x RV64IMAC SiFive S71 monitor core.&lt;/li&gt;
 &lt;li&gt;It&amp;#x27;s hard to find details for the S71 core, the FU740 manual refers to
 it as an S7 while the HiFive Unmatched refers to it as the S71 - but
-neither have a page on SiFive&amp;#x27;s site (there is an
-&lt;a href=&quot;https://www.sifive.com/cores/s76&quot;&gt;S76&lt;/a&gt; though).&lt;/li&gt;
+neither have a page on SiFive&amp;#x27;s site. I&amp;#x27;m told that the S71 has the same
+pipeline as the &lt;a href=&quot;https://www.sifive.com/cores/s76&quot;&gt;S76&lt;/a&gt;, just no support
+for the F and D extensions.&lt;/li&gt;
 &lt;li&gt;The U74 is a dual-issue in-order pipeline with 8 stages.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
@@ -572,9 +574,11 @@ developer kit is available.&lt;/li&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
 &lt;ul&gt;
-&lt;li&gt;4 x RV64GBC SiFive P550 application cores (docs not yet available, but
+&lt;li&gt;4 x &amp;quot;RV64GBC&amp;quot; SiFive P550 application cores (docs not yet available, but
 &lt;a href=&quot;https://www.cnx-software.com/2021/06/23/sifive-performance-p550-fastest-64-bit-risc-v-processor/&quot;&gt;an overview is
-here&lt;/a&gt;).&lt;/li&gt;
+here&lt;/a&gt;).
+As the &amp;#x27;B&amp;#x27; extension was broken up into smaller sub-extensions, this is
+perhaps RV64GC_Zba_Zbb like the SiFive U74.&lt;/li&gt;
 &lt;li&gt;13 stage, 3 issue, out-of-order pipeline.&lt;/li&gt;
 &lt;li&gt;As the bit manipulation extension was split into a range of
 sub-extensions it&amp;#x27;s unclear exactly which of the &amp;#x27;B&amp;#x27; family extensions
@@ -638,7 +642,10 @@ FE310&lt;/a&gt;
 &lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
 &lt;ul&gt;
 &lt;li&gt;1 x RV32IMAC &lt;a href=&quot;https://www.sifive.com/cores/e31&quot;&gt;SiFive E31&lt;/a&gt; core.&lt;/li&gt;
-&lt;li&gt;Single-issue, in-order pipeline with 5-6 stages (&amp;#x27;variable pipeline&amp;#x27;).&lt;/li&gt;
+&lt;li&gt;Single-issue, in-order pipeline with 5 stages.&lt;/li&gt;
+&lt;li&gt;Derived from the open source
+&lt;a href=&quot;https://github.com/chipsalliance/rocket-chip&quot;&gt;Rocket&lt;/a&gt; core design
+(&lt;a href=&quot;https://github.com/sifive/freedom&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
@@ -1178,6 +1185,8 @@ hasn&amp;#x27;t been any news since.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
 &lt;ul&gt;
+&lt;li&gt;2023-03-12: Clarified details of several SiFive cores and made the
+listing of SoCs using cores derived from open source RTL exhaustive.&lt;/li&gt;
 &lt;li&gt;2023-03-04:
 &lt;ul&gt;
 &lt;li&gt;Added in the CSM32RV20 and some extra Bouffalo Lab and WCH chips (&lt;a href=&quot;https://old.reddit.com/r/RISCV/comments/11h2e6u/commercially_available_riscv_silicon_list/jasbyfo/&quot;&gt;thanks

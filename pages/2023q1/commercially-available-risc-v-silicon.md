@@ -39,8 +39,9 @@ listing of other on-chip peripherals or accelerators.
   many that it's impossible to enumerate. RISC-V is growing rapidly, so
   perhaps this will change in the next year or two.
 * A large proportion of the SoC designs listed are based on proprietary core
-  designs (with one of the most notable exceptions being those based on the
-  Apache-licensed T-Head IP). As a long-term proponent of open source silicon
+  designs. The exceptions are the collection of SoCs based on the T-Head
+  cores, the SiFive E31 and Kendryte K210 (Rocket-derived) and the GreenWaves
+  GAP8/GAP9 (PULP-derived). As a long-term proponent of open source silicon
   I'd hope to see this change over time. Once a company has moved from a
   proprietary ISA to an open standard (RISC-V), there's a much easier
   transition path to switch from a proprietary IP core to one that's open
@@ -165,8 +166,9 @@ listing of other on-chip peripherals or accelerators.
     cores, 1 x RV64IMAC SiFive S71 monitor core.
     * It's hard to find details for the S71 core, the FU740 manual refers to
       it as an S7 while the HiFive Unmatched refers to it as the S71 - but
-      neither have a page on SiFive's site (there is an
-      [S76](https://www.sifive.com/cores/s76) though).
+      neither have a page on SiFive's site. I'm told that the S71 has the same
+      pipeline as the [S76](https://www.sifive.com/cores/s76), just no support
+      for the F and D extensions.
     * The U74 is a dual-issue in-order pipeline with 8 stages.
   * **Key stats**:
     * 1.2 GHz, fabbed on TSMC 28nm ([ref](https://www.theregister.com/2020/10/29/sifive_riscv_pc/)).
@@ -231,9 +233,11 @@ listing of other on-chip peripherals or accelerators.
       developer kit is available.
 * (Upcoming) [Intel-SiFive Horse Creek SoC](https://www.sifive.com/boards/hifive-pro-p550)
   * **Core design**:
-    * 4 x RV64GBC SiFive P550 application cores (docs not yet available, but
+    * 4 x "RV64GBC" SiFive P550 application cores (docs not yet available, but
       [an overview is
       here](https://www.cnx-software.com/2021/06/23/sifive-performance-p550-fastest-64-bit-risc-v-processor/)).
+      As the 'B' extension was broken up into smaller sub-extensions, this is
+      perhaps RV64GC_Zba_Zbb like the SiFive U74.
     * 13 stage, 3 issue, out-of-order pipeline.
     * As the bit manipulation extension was split into a range of
       sub-extensions it's unclear exactly which of the 'B' family extensions
@@ -273,7 +277,10 @@ listing of other on-chip peripherals or accelerators.
   FE310](https://static.dev.sifive.com/SiFive-E310-G000-manual-v1.0.1.pdf)
   * **Core design**:
     * 1 x RV32IMAC [SiFive E31](https://www.sifive.com/cores/e31) core.
-    * Single-issue, in-order pipeline with 5-6 stages ('variable pipeline').
+    * Single-issue, in-order pipeline with 5 stages.
+    * Derived from the open source
+      [Rocket](https://github.com/chipsalliance/rocket-chip) core design
+      ([ref](https://github.com/sifive/freedom)).
   * **Key stats**:
     * 320 MHz
       ([ref](https://sifive.cdn.prismic.io/sifive/4999db8a-432f-45e4-bab2-57007eed0a43_fe310-g002-datasheet-v1p2.pdf)),
@@ -556,6 +563,8 @@ listing of other on-chip peripherals or accelerators.
   hasn't been any news since.
 
 ## Article changelog
+* 2023-03-12: (minor) Clarified details of several SiFive cores and made the
+  listing of SoCs using cores derived from open source RTL exhaustive.
 * 2023-03-04: (minor)
   * Added in the CSM32RV20 and some extra Bouffalo Lab and WCH chips ([thanks
     to Reddit user
