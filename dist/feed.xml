@@ -4,12 +4,12 @@
 <subtitle>Adventures in collaborative open source development</subtitle>
 <link href="https://muxup.com/feed.xml" rel="self" type="application/atom+xml"/>
 <link href="https://muxup.com"/>
-<updated>2023-03-06T12:00:00Z</updated>
+<updated>2023-03-13T12:00:00Z</updated>
 <id>https://muxup.com/feed.xml</id>
 <entry>
 <title>2023Q1 week log</title>
 <published>2023-02-27T12:00:00Z</published>
-<updated>2023-03-06T12:00:00Z</updated>
+<updated>2023-03-13T12:00:00Z</updated>
 <link rel="alternate" href="https://muxup.com/2023q1/week-log"/>
 <id>https://muxup.com/2023q1/week-log</id>
 <content type="html">
@@ -19,6 +19,50 @@ to write up the parts that were public. This
 may or may not be of wider interest, but it aims to be a useful aide-mémoire
 for my purposes at least. Weeks with few entries might be due to focusing on
 downstream work (or perhaps just a less productive week - I am only human!).&lt;/p&gt;
+&lt;h2 id=&quot;week-of-6th-march-2023&quot;&gt;&lt;a href=&quot;#week-of-6th-march-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 6th March 2023&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Had a really useful meeting with a breakout group from the &lt;a href=&quot;https://docs.google.com/document/d/1G3ocHm2zE6AYTS2N3_3w2UxFnSEyKkcF57siLWe-NVs/edit&quot;&gt;RISC-V LLVM
+sync-up
+calls&lt;/a&gt;
+about the long-standing issues related to ISA extension versioning, error
+handling for this, and other related issues.
+&lt;ul&gt;
+&lt;li&gt;Related to this, posted &lt;a href=&quot;https://reviews.llvm.org/D145879&quot;&gt;D145879&lt;/a&gt; and
+&lt;a href=&quot;https://reviews.llvm.org/D145882&quot;&gt;D145882&lt;/a&gt; to flesh out testing of
+&lt;code&gt;RISCVISAInfo::parseArchString&lt;/code&gt; ahead of further improvements, and to
+start to fix identified issues.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Incorporated more clarifications submitted to me about the &lt;a href=&quot;/2023q1/commercially-available-risc-v-silicon&quot;&gt;commercially
+available RISC-V
+SoCs&lt;/a&gt; post,
+particularly around SiFive cores.&lt;/li&gt;
+&lt;li&gt;Shared &lt;a href=&quot;https://discourse.llvm.org/t/diversity-inclusion-strategic-planning-march-6-7/68794/8&quot;&gt;some
+thoughts&lt;/a&gt;
+on attracting more people to the LLVM Foundation strategic planning
+sessions.&lt;/li&gt;
+&lt;li&gt;Posted and committed an LLVM patch to &lt;a href=&quot;https://reviews.llvm.org/D145570&quot;&gt;migrate the RISC-V backend to using
+shared MCELFStreamer code for attribute
+emission&lt;/a&gt;. The initial implementation was
+largely derived from Arm&amp;#x27;s version of the same feature but a later
+refactoring managed to move this logic to common code, which we can now
+reuse.&lt;/li&gt;
+&lt;li&gt;Some small tasks related to the RISC-V LLVM build-bot: trying to find a path
+forwards for a &lt;a href=&quot;https://reviews.llvm.org/D143158&quot;&gt;simple patch to enable RISC-V support in
+libcxx&lt;/a&gt;, and &lt;a href=&quot;https://reviews.llvm.org/D144465&quot;&gt;clarifying how often the
+staging buildmaster configuration is
+updated&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Posted a docs patch to &lt;a href=&quot;https://reviews.llvm.org/D145564&quot;&gt;clarify
+Clang&amp;#x27;s &lt;code&gt;-fexceptions&lt;/code&gt;&lt;/a&gt; in follow-up to
+discussion in &lt;a href=&quot;https://github.com/llvm/llvm-project/issues/61216&quot;&gt;issue
+61216&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Did some final preparations for the LLVM 16.0.0 release - committing some
+&lt;a href=&quot;https://reviews.llvm.org/rGae37edf1486d&quot;&gt;cleaned up release notes&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;A variety of upstream LLVM reviews, and left some thoughts on &lt;a href=&quot;https://github.com/llvm/llvm-project/issues/61179&quot;&gt;using
+sub-modules for RVV intrinsics
+tests&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/479&quot;&gt;LLVM Weekly #479&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h2 id=&quot;week-of-27th-february-2023&quot;&gt;&lt;a href=&quot;#week-of-27th-february-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 27th February 2023&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;Completed (to the point I was happy to publish at least) my attempt to
@@ -79,7 +123,7 @@ my downstream version.&lt;/li&gt;
 &lt;li&gt;The usual mix of upstream LLVM reviews.&lt;/li&gt;
 &lt;li&gt;Had a day off for my birthday.&lt;/li&gt;
 &lt;li&gt;Publicly shared this week log for the first time.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/477&quot;&gt;LLVM Weekly #477&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/478&quot;&gt;LLVM Weekly #478&lt;/a&gt;.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&quot;week-of-20th-february-2023&quot;&gt;&lt;a href=&quot;#week-of-20th-february-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 20th February 2023&lt;/h2&gt;
 &lt;ul&gt;
@@ -194,6 +238,7 @@ downstream, but I landed a couple of related minor test cleanups.
 &lt;/ul&gt;
 &lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
 &lt;ul&gt;
+&lt;li&gt;2023-03-13: Added notes for the week of 6th March 2023.&lt;/li&gt;
 &lt;li&gt;2023-03-06: Added notes for the week of 27th February 2023.&lt;/li&gt;
 &lt;li&gt;2023-02-27: Added in a forgotten note about trivial buildbot doc
 improvements.&lt;/li&gt;
