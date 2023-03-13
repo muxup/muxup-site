@@ -10,6 +10,47 @@ may or may not be of wider interest, but it aims to be a useful aide-mémoire
 for my purposes at least. Weeks with few entries might be due to focusing on
 downstream work (or perhaps just a less productive week - I am only human!).
 
+## Week of 6th March 2023
+* Had a really useful meeting with a breakout group from the [RISC-V LLVM
+  sync-up
+  calls](https://docs.google.com/document/d/1G3ocHm2zE6AYTS2N3_3w2UxFnSEyKkcF57siLWe-NVs/edit)
+  about the long-standing issues related to ISA extension versioning, error
+  handling for this, and other related issues.
+  * Related to this, posted [D145879](https://reviews.llvm.org/D145879) and
+    [D145882](https://reviews.llvm.org/D145882) to flesh out testing of
+    `RISCVISAInfo::parseArchString` ahead of further improvements, and to
+    start to fix identified issues.
+* Incorporated more clarifications submitted to me about the [commercially
+  available RISC-V
+  SoCs](/pages/2023q1/commercially-available-risc-v-silicon.md) post,
+  particularly around SiFive cores.
+* Shared [some
+  thoughts](https://discourse.llvm.org/t/diversity-inclusion-strategic-planning-march-6-7/68794/8)
+  on attracting more people to the LLVM Foundation strategic planning
+  sessions.
+* Posted and committed an LLVM patch to [migrate the RISC-V backend to using
+  shared MCELFStreamer code for attribute
+  emission](https://reviews.llvm.org/D145570). The initial implementation was
+  largely derived from Arm's version of the same feature but a later
+  refactoring managed to move this logic to common code, which we can now
+  reuse.
+* Some small tasks related to the RISC-V LLVM build-bot: trying to find a path
+  forwards for a [simple patch to enable RISC-V support in
+  libcxx](https://reviews.llvm.org/D143158), and [clarifying how often the
+  staging buildmaster configuration is
+  updated](https://reviews.llvm.org/D144465).
+* Posted a docs patch to [clarify
+  Clang's `-fexceptions`](https://reviews.llvm.org/D145564) in follow-up to
+  discussion in [issue
+  61216](https://github.com/llvm/llvm-project/issues/61216).
+* Did some final preparations for the LLVM 16.0.0 release - committing some
+  [cleaned up release notes](https://reviews.llvm.org/rGae37edf1486d).
+* A variety of upstream LLVM reviews, and left some thoughts on [using
+  sub-modules for RVV intrinsics
+  tests](https://github.com/llvm/llvm-project/issues/61179).
+* [LLVM Weekly #479](https://llvmweekly.org/issue/479).
+
+
 ## Week of 27th February 2023
 * Completed (to the point I was happy to publish at least) my attempt to
   enumerate the [commercially available RISC-V
@@ -66,7 +107,7 @@ downstream work (or perhaps just a less productive week - I am only human!).
 * The usual mix of upstream LLVM reviews.
 * Had a day off for my birthday.
 * Publicly shared this week log for the first time.
-* [LLVM Weekly #477](https://llvmweekly.org/issue/477).
+* [LLVM Weekly #478](https://llvmweekly.org/issue/478).
 
 ## Week of 20th February 2023
 * Iterated on [D144353](https://reviews.llvm.org/D144353) (aiming to fix LLD
@@ -168,6 +209,7 @@ downstream work (or perhaps just a less productive week - I am only human!).
 * [LLVM Weekly #475](https://llvmweekly.org/issue/475).
 
 ## Article changelog
+* 2023-03-13: Added notes for the week of 6th March 2023.
 * 2023-03-06: Added notes for the week of 27th February 2023.
 * 2023-02-27: (minor) Added in a forgotten note about trivial buildbot doc
   improvements.
