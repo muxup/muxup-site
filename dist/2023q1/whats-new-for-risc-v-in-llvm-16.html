@@ -153,6 +153,10 @@ visibility:visible;
 .anchor::before {
 content:"#";
 }
+hr {
+border:none;
+border-top:4px solid #f1f3f5;
+}
 code {
 background:#f5f5f5;
 padding:.125rem .25rem;
@@ -170,6 +174,31 @@ margin:1rem -1rem;
 border-radius:.4rem;
 border:1px solid #d2d2d2;
 }
+details {
+font-size:.833rem;
+}
+details summary {
+margin:.75rem 0 .5rem 0;
+font-weight:600;
+cursor:pointer;
+font-size:1.2rem;
+line-height:1.25;
+letter-spacing:-.025em;
+list-style:none;
+}
+details summary > * {
+display:inline;
+}
+summary::-webkit-details-marker {
+display:none;
+}
+summary::after {
+content: " »";
+}
+details[open] summary::after {
+content: " «";
+}
+
 </style>
 <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed.xml"/>
 <link rel="canonical" href="https://muxup.com/2023q1/whats-new-for-risc-v-in-llvm-16"/>
@@ -180,7 +209,7 @@ border:1px solid #d2d2d2;
 <div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></a></div>
 </div>
 <h1 id="article-title"><span id="title-highlight">What&#x27;s new for RISC-V in LLVM 16</span></h1>
-<div id="article-meta"><span title="2023-03-18">2023Q1</span>.</div>
+<div id="article-meta"><span title="2023-03-18">2023Q1</span>. Last update <span title="2023-03-19">19 Mar 2023</span>. <a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
 <p>LLVM 16.0.0 was <a href="https://discourse.llvm.org/t/llvm-16-0-0-release/69326">just
 released today</a>, and
 as <a href="/2022q3/whats-new-for-risc-v-in-llvm-15">I did for LLVM 15</a>, I
@@ -268,12 +297,12 @@ floating point loads and stores from the standard &#x27;C&#x27; compressed
 instruction set extension (<code>c.fld</code>, <code>c.fldsp</code>, <code>c.fsd</code>, <code>c.fsdsp</code>).</li>
 </ul>
 </li>
-<li>Experimental support for the
+<li>Experimental assembler/disassembler support for the
 <a href="https://github.com/riscv/riscv-isa-manual/releases/tag/draft-20220831-bf5a151">Zihintntl</a>
 instruction set extension. This provides a small set of instructions that
 can be used to hint that the memory accesses of the following instruction
 exhibits poor temporal locality.</li>
-<li>Experimental support for the
+<li>Experimental assembler/disassembler support for the
 <a href="https://github.com/riscv/riscv-zawrs/releases/download/V1.0-rc3/Zawrs.pdf">Zawrs</a>
 instruction set extension, providing a pair of instructions meant for use in
 a polling loop allowing a core to enter a low-power state and wait on a
@@ -445,6 +474,13 @@ everyone who has been contributing to make the RISC-V in LLVM even better.</p>
 <p>If you have a RISC-V project you think me and my colleagues and at Igalia may
 be able to help with, then do <a href="https://www.igalia.com/contact/">get in touch</a>
 regarding our services.</p>
+<hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor "aria-hidden="true" tabindex="-1"></a>Article changelog</summary>
+<ul>
+<li>2023-03-19: Clarified that Zawrs and Zihintntl support just involves
+the MC layer (assembler/disassembler).</li>
+<li>2023-03-18: Initial publication date.</li>
+</ul>
+</details>
 
 </div>
 <footer class="footer">

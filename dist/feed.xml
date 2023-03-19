@@ -100,12 +100,12 @@ floating point loads and stores from the standard &amp;#x27;C&amp;#x27; compress
 instruction set extension (&lt;code&gt;c.fld&lt;/code&gt;, &lt;code&gt;c.fldsp&lt;/code&gt;, &lt;code&gt;c.fsd&lt;/code&gt;, &lt;code&gt;c.fsdsp&lt;/code&gt;).&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
-&lt;li&gt;Experimental support for the
+&lt;li&gt;Experimental assembler/disassembler support for the
 &lt;a href=&quot;https://github.com/riscv/riscv-isa-manual/releases/tag/draft-20220831-bf5a151&quot;&gt;Zihintntl&lt;/a&gt;
 instruction set extension. This provides a small set of instructions that
 can be used to hint that the memory accesses of the following instruction
 exhibits poor temporal locality.&lt;/li&gt;
-&lt;li&gt;Experimental support for the
+&lt;li&gt;Experimental assembler/disassembler support for the
 &lt;a href=&quot;https://github.com/riscv/riscv-zawrs/releases/download/V1.0-rc3/Zawrs.pdf&quot;&gt;Zawrs&lt;/a&gt;
 instruction set extension, providing a pair of instructions meant for use in
 a polling loop allowing a core to enter a low-power state and wait on a
@@ -277,6 +277,13 @@ everyone who has been contributing to make the RISC-V in LLVM even better.&lt;/p
 &lt;p&gt;If you have a RISC-V project you think me and my colleagues and at Igalia may
 be able to help with, then do &lt;a href=&quot;https://www.igalia.com/contact/&quot;&gt;get in touch&lt;/a&gt;
 regarding our services.&lt;/p&gt;
+&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
+&lt;ul&gt;
+&lt;li&gt;2023-03-19: Clarified that Zawrs and Zihintntl support just involves
+the MC layer (assembler/disassembler).&lt;/li&gt;
+&lt;li&gt;2023-03-18: Initial publication date.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/details&gt;
 </content>
 </entry>
 <entry>
