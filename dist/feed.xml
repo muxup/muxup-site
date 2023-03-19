@@ -196,7 +196,7 @@ feature&lt;/a&gt;
 enables, where atomic load/store can be lowered to a load/store with
 appropriate fences (as is supported in the base ISA) while other atomic
 operations generate a &lt;code&gt;__sync_*&lt;/code&gt; libcall.&lt;/p&gt;
-&lt;p&gt;There&amp;#x27;s also been a very minor improvement for targets which native atomics
+&lt;p&gt;There&amp;#x27;s also been a very minor improvement for targets with native atomics
 support (the &amp;#x27;A&amp;#x27; instruction set extension) that I may as well mention while
 on the topic. As you might know, atomic operations such as compare and swap
 that are lowered to an instruction sequence involving &lt;code&gt;lr.{w,d}&lt;/code&gt; (load reserved) and
