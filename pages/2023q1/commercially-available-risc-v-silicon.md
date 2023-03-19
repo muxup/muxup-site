@@ -212,6 +212,9 @@ listing of other on-chip peripherals or accelerators.
       AX45MP](http://www.andestech.com/en/products-solutions/andescore-processors/riscv-ax45mp/)
       application core with additional Andes extensions (draft of the 'P'
       packed SIMD spec, Andes 'V5' extensions).
+    * Unfortunately has a hardware bug where [virtual addresses in a certain
+      range are always treated as physical
+      addresses](https://lore.kernel.org/all/OSZPR01MB70191A1A9FD7FAE4EF4F8FF0AA129@OSZPR01MB7019.jpnprd01.prod.outlook.com/).
     * Dual issue, in-order pipeline with 8 stages.
   * **Key stats**:
     * 1.0 GHz, 5.63 CoreMark/MHz
@@ -563,6 +566,7 @@ listing of other on-chip peripherals or accelerators.
   hasn't been any news since.
 
 ## Article changelog
+* 2023-03-19: (minor) Add note on silicon bug in the Renesas RZ/Five.
 * 2023-03-12: (minor) Clarified details of several SiFive cores and made the
   listing of SoCs using cores derived from open source RTL exhaustive.
 * 2023-03-04: (minor)
