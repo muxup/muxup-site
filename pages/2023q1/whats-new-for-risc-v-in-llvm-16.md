@@ -199,7 +199,7 @@ enables, where atomic load/store can be lowered to a load/store with
 appropriate fences (as is supported in the base ISA) while other atomic
 operations generate a `__sync_*` libcall.
 
-There's also been a very minor improvement for targets which native atomics
+There's also been a very minor improvement for targets with native atomics
 support (the 'A' instruction set extension) that I may as well mention while
 on the topic. As you might know, atomic operations such as compare and swap
 that are lowered to an instruction sequence involving `lr.{w,d}` (load reserved) and
