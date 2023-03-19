@@ -96,12 +96,12 @@ trivial. On to the list of newly added instruction set extensions:
   * Zcd, as you might have guessed, just includes the double precision
     floating point loads and stores from the standard 'C' compressed
     instruction set extension (`c.fld`, `c.fldsp`, `c.fsd`, `c.fsdsp`).
-* Experimental support for the
+* Experimental assembler/disassembler support for the
   [Zihintntl](https://github.com/riscv/riscv-isa-manual/releases/tag/draft-20220831-bf5a151)
   instruction set extension. This provides a small set of instructions that
   can be used to hint that the memory accesses of the following instruction
   exhibits poor temporal locality.
-* Experimental support for the
+* Experimental assembler/disassembler support for the
   [Zawrs](https://github.com/riscv/riscv-zawrs/releases/download/V1.0-rc3/Zawrs.pdf)
   instruction set extension, providing a pair of instructions meant for use in
   a polling loop allowing a core to enter a low-power state and wait on a
@@ -290,3 +290,7 @@ everyone who has been contributing to make the RISC-V in LLVM even better.
 If you have a RISC-V project you think me and my colleagues and at Igalia may
 be able to help with, then do [get in touch](https://www.igalia.com/contact/)
 regarding our services.
+
+## Article changelog
+* 2023-03-19: (minor) Clarified that Zawrs and Zihintntl support just involves
+  the MC layer (assembler/disassembler).
