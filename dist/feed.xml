@@ -854,6 +854,9 @@ RZ/Five&lt;/a&gt;
 AX45MP&lt;/a&gt;
 application core with additional Andes extensions (draft of the &amp;#x27;P&amp;#x27;
 packed SIMD spec, Andes &amp;#x27;V5&amp;#x27; extensions).&lt;/li&gt;
+&lt;li&gt;Unfortunately has a hardware bug where &lt;a href=&quot;https://lore.kernel.org/all/OSZPR01MB70191A1A9FD7FAE4EF4F8FF0AA129@OSZPR01MB7019.jpnprd01.prod.outlook.com/&quot;&gt;virtual addresses in a certain
+range are always treated as physical
+addresses&lt;/a&gt;.&lt;/li&gt;
 &lt;li&gt;Dual issue, in-order pipeline with 8 stages.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
@@ -1510,6 +1513,7 @@ hasn&amp;#x27;t been any news since.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
 &lt;ul&gt;
+&lt;li&gt;2023-03-19: Add note on silicon bug in the Renesas RZ/Five.&lt;/li&gt;
 &lt;li&gt;2023-03-12: Clarified details of several SiFive cores and made the
 listing of SoCs using cores derived from open source RTL exhaustive.&lt;/li&gt;
 &lt;li&gt;2023-03-04:

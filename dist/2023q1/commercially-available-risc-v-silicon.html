@@ -197,7 +197,7 @@ content: " «";
 <div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></a></div>
 </div>
 <h1 id="article-title"><span id="title-highlight">Commercially available RISC-V silicon</span></h1>
-<div id="article-meta"><span title="2023-03-03">2023Q1</span>. Last update <span title="2023-03-12">12 Mar 2023</span>. <a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
+<div id="article-meta"><span title="2023-03-03">2023Q1</span>. Last update <span title="2023-03-19">19 Mar 2023</span>. <a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
 <p>The RISC-V instruction set architecture has seen huge excitement and growth in
 recent years (<a href="https://venturebeat.com/ai/how-risc-v-has-become-a-viable-third-processor-architecture-calista-redmond/">10B cores estimated to have shipped as of Dec
 2022</a>)
@@ -518,6 +518,9 @@ RZ/Five</a>
 AX45MP</a>
 application core with additional Andes extensions (draft of the &#x27;P&#x27;
 packed SIMD spec, Andes &#x27;V5&#x27; extensions).</li>
+<li>Unfortunately has a hardware bug where <a href="https://lore.kernel.org/all/OSZPR01MB70191A1A9FD7FAE4EF4F8FF0AA129@OSZPR01MB7019.jpnprd01.prod.outlook.com/">virtual addresses in a certain
+range are always treated as physical
+addresses</a>.</li>
 <li>Dual issue, in-order pipeline with 8 stages.</li>
 </ul>
 </li>
@@ -1174,6 +1177,7 @@ hasn&#x27;t been any news since.</li>
 </ul>
 <hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor "aria-hidden="true" tabindex="-1"></a>Article changelog</summary>
 <ul>
+<li>2023-03-19: Add note on silicon bug in the Renesas RZ/Five.</li>
 <li>2023-03-12: Clarified details of several SiFive cores and made the
 listing of SoCs using cores derived from open source RTL exhaustive.</li>
 <li>2023-03-04:
