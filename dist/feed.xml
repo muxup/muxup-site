@@ -4,8 +4,318 @@
 <subtitle>Adventures in collaborative open source development</subtitle>
 <link href="https://muxup.com/feed.xml" rel="self" type="application/atom+xml"/>
 <link href="https://muxup.com"/>
-<updated>2023-03-18T12:00:00Z</updated>
+<updated>2023-03-20T12:00:00Z</updated>
 <id>https://muxup.com/feed.xml</id>
+<entry>
+<title>2023Q1 week log</title>
+<published>2023-02-27T12:00:00Z</published>
+<updated>2023-03-20T12:00:00Z</updated>
+<link rel="alternate" href="https://muxup.com/2023q1/week-log"/>
+<id>https://muxup.com/2023q1/week-log</id>
+<content type="html">
+&lt;p&gt;I tend to keep quite a lot of notes on the development related (sometimes at
+work, sometimes not) I do on a week-by-week basis, and thought it might be fun
+to write up the parts that were public. This
+may or may not be of wider interest, but it aims to be a useful aide-mémoire
+for my purposes at least. Weeks with few entries might be due to focusing on
+downstream work (or perhaps just a less productive week - I am only human!).&lt;/p&gt;
+&lt;h2 id=&quot;week-of-13th-march-2023&quot;&gt;&lt;a href=&quot;#week-of-13th-march-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 13th March 2023&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Most importantly, added
+&lt;a href=&quot;https://github.com/muxup/muxup-site/commit/7159a2400e6535a288c78dfd4d71c1b544ddf51e#diff-196dde1107e14fd35d571db219211acb6853813d95a5c7faee5ac09e058f9203&quot;&gt;some&lt;/a&gt;
+&lt;a href=&quot;https://github.com/muxup/muxup-site/commit/a1cb4d4256815bcfa8a6a4c5174a03ae077ee8c6#diff-4e9f5b15205b49dff89e5050a5a899e63213f1f015daeca45b76270bb2c009dd&quot;&gt;more&lt;/a&gt;
+footer images for this site from the Quick Draw dataset. Thanks to my son
+(Archie, 5) for the assistance.&lt;/li&gt;
+&lt;li&gt;Added note to the &lt;a href=&quot;/2023q1/commercially-available-risc-v-silicon&quot;&gt;commercially available RISC-V silicon
+post&lt;/a&gt; about a
+hardware bug in the Renesas RZ/Five.&lt;/li&gt;
+&lt;li&gt;Finished writing and published &lt;a href=&quot;/2023q1/whats-new-for-risc-v-in-llvm-16&quot;&gt;what&amp;#x27;s new for RISC-V in LLVM 16
+article&lt;/a&gt; and took part in
+some of the discussions in the
+&lt;a href=&quot;https://news.ycombinator.com/item?id=35215826&quot;&gt;HN&lt;/a&gt; and &lt;a href=&quot;https://old.reddit.com/r/RISCV/comments/11veftz/whats_new_for_riscv_in_llvm_16/&quot;&gt;Reddit
+threads&lt;/a&gt;
+(it&amp;#x27;s &lt;a href=&quot;https://lobste.rs/s/qcu7fc/what_s_new_for_risc_v_llvm_16&quot;&gt;on lobste.rs
+too&lt;/a&gt;, but that
+didn&amp;#x27;t generate any comments).&lt;/li&gt;
+&lt;li&gt;Investigated an issue where inline asm with the &lt;code&gt;m&lt;/code&gt; constraint was
+generating worse code on LLVM vs GCC, finding that LLVM conservatively
+lowers this to a single register, while GCC treats &lt;code&gt;m&lt;/code&gt; as reg+imm, relying
+on users indicating &lt;code&gt;A&lt;/code&gt; when using a memory operand with an instruction that
+can&amp;#x27;t take an immediate offset. Worked with a colleague who posted
+&lt;a href=&quot;https://reviews.llvm.org/D146245&quot;&gt;D146245&lt;/a&gt; to fix this.&lt;/li&gt;
+&lt;li&gt;Set
+&lt;a href=&quot;https://discourse.llvm.org/t/risc-v-llvm-sync-up-call-16th-march-2023-note-daylight-savings-impact/69244&quot;&gt;agenda&lt;/a&gt;
+for and ran the biweekly RISC-V LLVM contributor sync call as usual.&lt;/li&gt;
+&lt;li&gt;Bisected reported LLVM bug
+&lt;a href=&quot;https://github.com/llvm/llvm-project/issues/61412&quot;&gt;#61412&lt;/a&gt;, which
+as it happens was fixed that evening by
+&lt;a href=&quot;https://reviews.llvm.org/D145474&quot;&gt;D145474&lt;/a&gt; being committed. We hope to
+backport this to 16.0.1.&lt;/li&gt;
+&lt;li&gt;Did some digging on a regression (compiler crash) for &lt;code&gt;-Oz&lt;/code&gt;, bisecting it to
+the commit that enabled machine copy propagation by default. I found the
+issue was due to machine copy propagation running after the machine
+outliner, and incorrectly determining that some register writes in outlined
+functions were not live-out. I posted and
+landed &lt;a href=&quot;https://reviews.llvm.org/D146037&quot;&gt;D146037&lt;/a&gt; to fix this by running
+machine copy propagation earlier in the pipeline, though a more principled
+fix would be desirable.&lt;/li&gt;
+&lt;li&gt;Filed a PR against the riscv-isa-manual to &lt;a href=&quot;https://github.com/riscv/riscv-isa-manual/pull/990&quot;&gt;disambiguate the use of the term
+&amp;quot;reserved&amp;quot; for HINT
+instructions&lt;/a&gt;. I&amp;#x27;ve also
+been looking at the proposed bfloat16 extension recently and filed an
+&lt;a href=&quot;https://github.com/riscv/riscv-bfloat16/issues/27&quot;&gt;issue&lt;/a&gt; to clarify if
+Zfbfinxmin will be defined (as all the other floating point extensions so
+far have an &lt;code&gt;*inx&lt;/code&gt; twin.&lt;/li&gt;
+&lt;li&gt;Almost finished work to resolve issues related to overzealous error checking
+on RISC-V ISA naming strings (with llvm-objdump and related tools being the
+final piece).
+&lt;ul&gt;
+&lt;li&gt;Landed &lt;a href=&quot;https://reviews.llvm.org/D145879&quot;&gt;D145879&lt;/a&gt; and
+&lt;a href=&quot;https://reviews.llvm.org/D145882&quot;&gt;D145882&lt;/a&gt; to expand &lt;code&gt;RISCVISAInfo&lt;/code&gt; test
+coverage and fix an issue that surfaced through that.&lt;/li&gt;
+&lt;li&gt;Posted a pair of patches that makes llvm-objdump and related tools
+tolerant of unrecognised versions of ISA extensions.
+&lt;a href=&quot;https://reviews.llvm.org/D146070&quot;&gt;D146070&lt;/a&gt; resolves this for the base ISA
+in a minimally invasive way, while
+&lt;a href=&quot;https://reviews.llvm.org/D146114&quot;&gt;D146114&lt;/a&gt; solves this for other
+extensions, moving the parsing logic to using the
+&lt;code&gt;parseNormalizedArchString&lt;/code&gt; function I introduced to fix a similar issue
+in LLD. This built on some directly committed work to &lt;a href=&quot;https://reviews.llvm.org/rG0ae8f5ac08ae&quot;&gt;expand
+testing&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;The usual assortment of upstream LLVM reviews.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/480&quot;&gt;LLVM Weekly #480&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;week-of-6th-march-2023&quot;&gt;&lt;a href=&quot;#week-of-6th-march-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 6th March 2023&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Had a really useful meeting with a breakout group from the &lt;a href=&quot;https://docs.google.com/document/d/1G3ocHm2zE6AYTS2N3_3w2UxFnSEyKkcF57siLWe-NVs/edit&quot;&gt;RISC-V LLVM
+sync-up
+calls&lt;/a&gt;
+about the long-standing issues related to ISA extension versioning, error
+handling for this, and other related issues.
+&lt;ul&gt;
+&lt;li&gt;Related to this, posted &lt;a href=&quot;https://reviews.llvm.org/D145879&quot;&gt;D145879&lt;/a&gt; and
+&lt;a href=&quot;https://reviews.llvm.org/D145882&quot;&gt;D145882&lt;/a&gt; to flesh out testing of
+&lt;code&gt;RISCVISAInfo::parseArchString&lt;/code&gt; ahead of further improvements, and to
+start to fix identified issues.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Incorporated more clarifications submitted to me about the &lt;a href=&quot;/2023q1/commercially-available-risc-v-silicon&quot;&gt;commercially
+available RISC-V
+SoCs&lt;/a&gt; post,
+particularly around SiFive cores.&lt;/li&gt;
+&lt;li&gt;Shared &lt;a href=&quot;https://discourse.llvm.org/t/diversity-inclusion-strategic-planning-march-6-7/68794/8&quot;&gt;some
+thoughts&lt;/a&gt;
+on attracting more people to the LLVM Foundation strategic planning
+sessions.&lt;/li&gt;
+&lt;li&gt;Posted and committed an LLVM patch to &lt;a href=&quot;https://reviews.llvm.org/D145570&quot;&gt;migrate the RISC-V backend to using
+shared MCELFStreamer code for attribute
+emission&lt;/a&gt;. The initial implementation was
+largely derived from Arm&amp;#x27;s version of the same feature but a later
+refactoring managed to move this logic to common code, which we can now
+reuse.&lt;/li&gt;
+&lt;li&gt;Some small tasks related to the RISC-V LLVM build-bot: trying to find a path
+forwards for a &lt;a href=&quot;https://reviews.llvm.org/D143158&quot;&gt;simple patch to enable RISC-V support in
+libcxx&lt;/a&gt;, and &lt;a href=&quot;https://reviews.llvm.org/D144465&quot;&gt;clarifying how often the
+staging buildmaster configuration is
+updated&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Posted a docs patch to &lt;a href=&quot;https://reviews.llvm.org/D145564&quot;&gt;clarify
+Clang&amp;#x27;s &lt;code&gt;-fexceptions&lt;/code&gt;&lt;/a&gt; in follow-up to
+discussion in &lt;a href=&quot;https://github.com/llvm/llvm-project/issues/61216&quot;&gt;issue
+61216&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Did some final preparations for the LLVM 16.0.0 release - committing some
+&lt;a href=&quot;https://reviews.llvm.org/rGae37edf1486d&quot;&gt;cleaned up release notes&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;A variety of upstream LLVM reviews, and left some thoughts on &lt;a href=&quot;https://github.com/llvm/llvm-project/issues/61179&quot;&gt;using
+sub-modules for RVV intrinsics
+tests&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/479&quot;&gt;LLVM Weekly #479&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;week-of-27th-february-2023&quot;&gt;&lt;a href=&quot;#week-of-27th-february-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 27th February 2023&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Completed (to the point I was happy to publish at least) my attempt to
+enumerate the &lt;a href=&quot;/2023q1/commercially-available-risc-v-silicon&quot;&gt;commercially available RISC-V
+SoCs&lt;/a&gt;. I&amp;#x27;m very
+grateful to have received a whole range of suggested additions and
+clarifications over the weekend, which have all been incorporated.&lt;/li&gt;
+&lt;li&gt;Ran the usual biweekly &lt;a href=&quot;https://discourse.llvm.org/t/risc-v-llvm-sync-up-call-2nd-march-2023/68876&quot;&gt;RISC-V LLVM sync-up
+call&lt;/a&gt;.
+Topics included outstanding issues for LLVM 16.x (no major issues now my
+&lt;a href=&quot;https://github.com/llvm/llvm-project-release-prs/pull/324#issuecomment-1445012422&quot;&gt;backport
+request&lt;/a&gt;
+to fix and LLD regression was merged), an overview off &lt;code&gt;_Float16&lt;/code&gt; ABI
+lowering fixes, GP relaxation in LLD, my recent RISC-V buildbot, and some
+vectorisation related issues.&lt;/li&gt;
+&lt;li&gt;Investigated and largely resolved a issues related to ABI lowering of
+&lt;code&gt;_Float16&lt;/code&gt; for RISC-V. Primarily, we weren&amp;#x27;t handling the cases where a
+GPR+FPR or a pair of FPRs are used to pass small structs including
+&lt;code&gt;_Float16&lt;/code&gt;.
+&lt;ul&gt;
+&lt;li&gt;Part of this work involved rebasing my
+&lt;a href=&quot;https://reviews.llvm.org/D134050&quot;&gt;previous&lt;/a&gt;
+&lt;a href=&quot;https://reviews.llvm.org/D140400&quot;&gt;patches&lt;/a&gt; to refactor our RISC-V ABI
+lowering tests in Clang. Now that a version of my improvements to
+&lt;code&gt;update_cc_test_check.py --function-signature&lt;/code&gt; (required for the refactor)
+landed as part of &lt;a href=&quot;https://reviews.llvm.org/D144963&quot;&gt;D144963&lt;/a&gt;, this can
+hopefully be completed.&lt;/li&gt;
+&lt;li&gt;Committed a number of simple test improvements related to half floats. e.g.
+&lt;a href=&quot;https://reviews.llvm.org/rG570995eba2f9&quot;&gt;570995e&lt;/a&gt;,
+&lt;a href=&quot;https://reviews.llvm.org/rG81979c3038de&quot;&gt;81979c3&lt;/a&gt;,
+&lt;a href=&quot;https://reviews.llvm.org/rG34b412dc0efe&quot;&gt;34b412d&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Posted &lt;a href=&quot;https://reviews.llvm.org/D145070&quot;&gt;D145070&lt;/a&gt; to add proper coverage
+for &lt;code&gt;_Float16&lt;/code&gt; ABI lowering, and
+&lt;a href=&quot;https://reviews.llvm.org/D145074&quot;&gt;D145074&lt;/a&gt; to fix it. Also
+&lt;a href=&quot;https://reviews.llvm.org/D145071&quot;&gt;D145071&lt;/a&gt; to set the &lt;code&gt;HasLegalHalfType&lt;/code&gt;
+property, but the semantics of that are less clear.&lt;/li&gt;
+&lt;li&gt;Posted a &lt;a href=&quot;https://github.com/riscv-non-isa/riscv-elf-psabi-doc/pull/367&quot;&gt;strawman psABI
+patch&lt;/a&gt; for
+&lt;code&gt;__bf16&lt;/code&gt;, needed for the RISC-V bfloat16 extension.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Attended the &lt;a href=&quot;https://community.riscv.org/events/details/risc-v-international-cambridge-risc-v-group-presents-cheri-risc-v-full-stack-security-using-open-source-hardware-and-software/&quot;&gt;Cambridge RISC-V
+Meetup&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;After seeing the Helix editor &lt;a href=&quot;https://lobste.rs/s/nvoikx/helix_notes&quot;&gt;discussed on
+lobste.rs&lt;/a&gt;, retried my previously
+shared &lt;a href=&quot;https://github.com/helix-editor/helix/issues/3072#issuecomment-1208133990&quot;&gt;large Markdown file test
+case&lt;/a&gt;.
+Unfortunately it&amp;#x27;s still unusably slow to edit, seemingly due to a
+tree-sitter related issue.&lt;/li&gt;
+&lt;li&gt;Cleaned up the static site generator used for this site a bit. e.g. now my
+fixes (&lt;a href=&quot;https://github.com/miyuchina/mistletoe/pull/157&quot;&gt;#157&lt;/a&gt;,
+&lt;a href=&quot;https://github.com/miyuchina/mistletoe/pull/158&quot;&gt;#158&lt;/a&gt;,
+&lt;a href=&quot;https://github.com/miyuchina/mistletoe/pull/159&quot;&gt;#159&lt;/a&gt;) for the
+&lt;code&gt;traverse()&lt;/code&gt; helper in &lt;a href=&quot;https://github.com/miyuchina/mistletoe&quot;&gt;mistletoe&lt;/a&gt;
+where merged upstream, I
+&lt;a href=&quot;https://github.com/muxup/muxup-site/commit/52989cf7462d7900bbef5bc2ca9f976af8022ade&quot;&gt;removed&lt;/a&gt;
+my downstream version.&lt;/li&gt;
+&lt;li&gt;The usual mix of upstream LLVM reviews.&lt;/li&gt;
+&lt;li&gt;Had a day off for my birthday.&lt;/li&gt;
+&lt;li&gt;Publicly shared this week log for the first time.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/478&quot;&gt;LLVM Weekly #478&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;week-of-20th-february-2023&quot;&gt;&lt;a href=&quot;#week-of-20th-february-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 20th February 2023&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Iterated on &lt;a href=&quot;https://reviews.llvm.org/D144353&quot;&gt;D144353&lt;/a&gt; (aiming to fix LLD
+regression related to merging RISC-V attributes) based on review feedback
+and committed it.
+&lt;ul&gt;
+&lt;li&gt;Created &lt;a href=&quot;https://github.com/llvm/llvm-project/issues/60889&quot;&gt;an issue to track this as a
+regression&lt;/a&gt;, aiming for
+a backport into 16.0.0, and &lt;a href=&quot;https://github.com/llvm/llvm-project-release-prs/pull/324#issuecomment-1445012422&quot;&gt;requested that
+backport&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Also some related discussion in ClangBuiltLinux issues
+&lt;a href=&quot;https://github.com/ClangBuiltLinux/linux/issues/1777&quot;&gt;#1777&lt;/a&gt; and
+&lt;a href=&quot;https://github.com/ClangBuiltLinux/linux/issues/1808&quot;&gt;#1808&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Committed &lt;a href=&quot;https://reviews.llvm.org/D143172&quot;&gt;my llvm-zorg patch to add the qemu-user based RISC-V
+builder&lt;/a&gt;, after finalising provisioning
+the machine to run it. The builder is live on the LLVM staging buildmaster
+&lt;a href=&quot;https://lab.llvm.org/staging/#/builders/241&quot;&gt;as
+clang-rv64gc-qemu-user-single-stage&lt;/a&gt;.
+&lt;ul&gt;
+&lt;li&gt;Worked to resolve remaining test failures and stability issues. One
+recurrent issue was an assert in &lt;code&gt;___pthread_mutex_lock&lt;/code&gt; when executing
+&lt;code&gt;ccache&lt;/code&gt;. Setting &lt;code&gt;inode_cache=false&lt;/code&gt; in the local &lt;code&gt;ccache&lt;/code&gt; config seems
+to avoid this.&lt;/li&gt;
+&lt;li&gt;Posted a couple of patches - &lt;a href=&quot;https://reviews.llvm.org/D144464&quot;&gt;D144464&lt;/a&gt;
+and &lt;a href=&quot;https://reviews.llvm.org/D144465&quot;&gt;D144465&lt;/a&gt; to tweak the LLVM docs on
+setting up a builder, based on my experience doing so.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Chased for reviews and clarification about pre-commit test requirements for
+my libcxx RISC-V test fix patch,
+&lt;a href=&quot;https://reviews.llvm.org/D143158&quot;&gt;D134158&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Committed a couple of further test updates for Wasm in LLVM ahead of some
+upcoming patches. &lt;a href=&quot;https://reviews.llvm.org/rG771261ff0128&quot;&gt;771261f&lt;/a&gt;
+&lt;a href=&quot;https://reviews.llvm.org/rG1ae859753c06&quot;&gt;1ae8597&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Left some quick notes on the &lt;a href=&quot;https://discourse.llvm.org/t/rfc-rfc-shepherds/68666/8&quot;&gt;LLVM RFC
+shepherds&lt;/a&gt; proposal.&lt;/li&gt;
+&lt;li&gt;A variety of upstream LLVM reviews, and received a &lt;a href=&quot;https://reviews.llvm.org/D143115#4151994&quot;&gt;useful clarification on
+the RISC-V psABI and the ratification
+lifecycle&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/477&quot;&gt;LLVM Weekly #477&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;week-of-13th-february-2023&quot;&gt;&lt;a href=&quot;#week-of-13th-february-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 13th February 2023&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;After a fair bit of investigation and thinking about reported compatibility
+issues between GNU and LLVM tools (particularly binutils ld and lld) due to
+RISC-V extension versioning, &lt;a href=&quot;https://discourse.llvm.org/t/rfc-resolving-issues-related-to-extension-versioning-in-risc-v/68472&quot;&gt;posted an RFC outlining the major issues and a
+proposed fix for what I consider to be a regression in
+lld&lt;/a&gt;.
+&lt;ul&gt;
+&lt;li&gt;Landed a few LLVM patches cleaning up tests related to this.
+&lt;a href=&quot;https://reviews.llvm.org/rG8b5004864aab&quot;&gt;8b50048&lt;/a&gt;
+&lt;a href=&quot;https://reviews.llvm.org/rG574d0c2ec107&quot;&gt;574d0c2&lt;/a&gt;,
+&lt;a href=&quot;https://reviews.llvm.org/rGd05e1e99b1d6&quot;&gt;d05e1e9&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Posted &lt;a href=&quot;https://reviews.llvm.org/D144353&quot;&gt;D144353&lt;/a&gt;, a proposed fix for the
+LLD regression due to overzealous checking of extensions/versions when
+merging RISC-V attributes.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Organised agenda for and ran the bi-weekly &lt;a href=&quot;https://discourse.llvm.org/t/risc-v-llvm-sync-up-call-16th-february-2023/68500&quot;&gt;RISC-V LLVM contributor
+call&lt;/a&gt;.
+Key discussion items were the extension versioning related compatibility
+issue mentioned below and support for emulated TLS (where I&amp;#x27;d &lt;a href=&quot;https://reviews.llvm.org/D143708#4118468&quot;&gt;left some
+comments&lt;/a&gt; the previous week).&lt;/li&gt;
+&lt;li&gt;Updated my patch (&lt;a href=&quot;https://reviews.llvm.org/D143172&quot;&gt;D143172&lt;/a&gt;) to register
+and configure a RISC-V qemu-user based builder with LLVM&amp;#x27;s staging
+buildmaster, based on review feedback.&lt;/li&gt;
+&lt;li&gt;A variety of upstream LLVM reviews. Also landed
+&lt;a href=&quot;https://reviews.llvm.org/D143507&quot;&gt;D143407&lt;/a&gt;, marking Zawrs as
+non-experimental.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/476&quot;&gt;LLVM Weekly #476&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;week-of-6th-february-2023&quot;&gt;&lt;a href=&quot;#week-of-6th-february-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 6th February 2023&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Left feedback on the proposed RISC-V psABI
+&lt;a href=&quot;https://github.com/riscv-non-isa/riscv-elf-psabi-doc/pull/365&quot;&gt;patch clarifying treatment of empty structs or unions in the FP calling
+convention&lt;/a&gt;.
+This is a follow-up to the &lt;a href=&quot;https://github.com/riscv-non-isa/riscv-elf-psabi-doc/issues/358&quot;&gt;issue I
+filed&lt;/a&gt; on
+this issue (where I have &lt;a href=&quot;https://reviews.llvm.org/D142327&quot;&gt;D142327&lt;/a&gt; queued
+up for LLVM to fix our incorrect handling).&lt;/li&gt;
+&lt;li&gt;Responded to a question on LLVM&amp;#x27;s Discourse &lt;a href=&quot;https://discourse.llvm.org/t/support-for-zicsr-and-zifencei-extensions/68369/2&quot;&gt;about zicsr and zifencei
+support in
+LLVM&lt;/a&gt;.
+As noted, the issue is that we haven&amp;#x27;t moved RV32I/RV64I 2.1 yet which split
+out Zicsr and Zifencei. Unfortunately this is a backwards-incompatible
+change so requires some care.&lt;/li&gt;
+&lt;li&gt;Worked with a colleague trying to reproduce an assertion failure in his
+committed patch &lt;a href=&quot;https://reviews.llvm.org/rGeb66833d19573df97034a81279eda31b8d19815b&quot;&gt;adding support for WebAssembly externref in
+Clang&lt;/a&gt;
+that appeared only on an MSan buildbot. The &lt;a href=&quot;https://github.com/google/sanitizers/wiki/SanitizerBotReproduceBuild&quot;&gt;sanitizers project
+guidance&lt;/a&gt;
+is useful for this, but I ended up &lt;a href=&quot;https://gist.github.com/asb/645a071903f0c3cf9ef6c59a3d3e0810&quot;&gt;rolling a slightly hacky
+script&lt;/a&gt; as I
+stepped through each part of the multi-stage build and test sequence.&lt;/li&gt;
+&lt;li&gt;Left my thoughts on a &lt;a href=&quot;https://github.com/riscv-non-isa/riscv-c-api-doc/issues/32&quot;&gt;proposed RISC-V preprocessor define to specify
+support and for and performance of misaligned
+loads/stores&lt;/a&gt;. I
+like the idea of the define, but prefer sticking to the &lt;code&gt;Zicclsm&lt;/code&gt;
+terminology introduced in the RISC-V profiles.&lt;/li&gt;
+&lt;li&gt;Posted patch &lt;a href=&quot;https://reviews.llvm.org/D143507&quot;&gt;D143507&lt;/a&gt; to mark RISC-V
+Zawrs as non-experimental, after confirming there were no relevant changes
+between the implemented 1.0-rc3 spec and the ratified version.&lt;/li&gt;
+&lt;li&gt;A series of WebAssembly GC type related patches remains a work in progress
+downstream, but I landed a couple of related minor test cleanups.
+&lt;a href=&quot;https://reviews.llvm.org/rG604c9a07f3a9&quot;&gt;604c9a0&lt;/a&gt;,
+&lt;a href=&quot;https://reviews.llvm.org/rG3a80dc27ed45&quot;&gt;3a80dc2&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Many upstream RISC-V LLVM reviews.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/475&quot;&gt;LLVM Weekly #475&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
+&lt;ul&gt;
+&lt;li&gt;2023-03-20: Added notes for the week of 13th March 2023.&lt;/li&gt;
+&lt;li&gt;2023-03-13: Added notes for the week of 6th March 2023.&lt;/li&gt;
+&lt;li&gt;2023-03-06: Added notes for the week of 27th February 2023.&lt;/li&gt;
+&lt;li&gt;2023-02-27: Added in a forgotten note about trivial buildbot doc
+improvements.&lt;/li&gt;
+&lt;li&gt;2023-02-27: Initial publication date.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/details&gt;
+</content>
+</entry>
 <entry>
 <title>What&#x27;s new for RISC-V in LLVM 16</title>
 <published>2023-03-18T12:00:00Z</published>
@@ -282,247 +592,6 @@ regarding our services.&lt;/p&gt;
 &lt;li&gt;2023-03-19: Clarified that Zawrs and Zihintntl support just involves
 the MC layer (assembler/disassembler).&lt;/li&gt;
 &lt;li&gt;2023-03-18: Initial publication date.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/details&gt;
-</content>
-</entry>
-<entry>
-<title>2023Q1 week log</title>
-<published>2023-02-27T12:00:00Z</published>
-<updated>2023-03-13T12:00:00Z</updated>
-<link rel="alternate" href="https://muxup.com/2023q1/week-log"/>
-<id>https://muxup.com/2023q1/week-log</id>
-<content type="html">
-&lt;p&gt;I tend to keep quite a lot of notes on the development related (sometimes at
-work, sometimes not) I do on a week-by-week basis, and thought it might be fun
-to write up the parts that were public. This
-may or may not be of wider interest, but it aims to be a useful aide-mémoire
-for my purposes at least. Weeks with few entries might be due to focusing on
-downstream work (or perhaps just a less productive week - I am only human!).&lt;/p&gt;
-&lt;h2 id=&quot;week-of-6th-march-2023&quot;&gt;&lt;a href=&quot;#week-of-6th-march-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 6th March 2023&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;Had a really useful meeting with a breakout group from the &lt;a href=&quot;https://docs.google.com/document/d/1G3ocHm2zE6AYTS2N3_3w2UxFnSEyKkcF57siLWe-NVs/edit&quot;&gt;RISC-V LLVM
-sync-up
-calls&lt;/a&gt;
-about the long-standing issues related to ISA extension versioning, error
-handling for this, and other related issues.
-&lt;ul&gt;
-&lt;li&gt;Related to this, posted &lt;a href=&quot;https://reviews.llvm.org/D145879&quot;&gt;D145879&lt;/a&gt; and
-&lt;a href=&quot;https://reviews.llvm.org/D145882&quot;&gt;D145882&lt;/a&gt; to flesh out testing of
-&lt;code&gt;RISCVISAInfo::parseArchString&lt;/code&gt; ahead of further improvements, and to
-start to fix identified issues.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Incorporated more clarifications submitted to me about the &lt;a href=&quot;/2023q1/commercially-available-risc-v-silicon&quot;&gt;commercially
-available RISC-V
-SoCs&lt;/a&gt; post,
-particularly around SiFive cores.&lt;/li&gt;
-&lt;li&gt;Shared &lt;a href=&quot;https://discourse.llvm.org/t/diversity-inclusion-strategic-planning-march-6-7/68794/8&quot;&gt;some
-thoughts&lt;/a&gt;
-on attracting more people to the LLVM Foundation strategic planning
-sessions.&lt;/li&gt;
-&lt;li&gt;Posted and committed an LLVM patch to &lt;a href=&quot;https://reviews.llvm.org/D145570&quot;&gt;migrate the RISC-V backend to using
-shared MCELFStreamer code for attribute
-emission&lt;/a&gt;. The initial implementation was
-largely derived from Arm&amp;#x27;s version of the same feature but a later
-refactoring managed to move this logic to common code, which we can now
-reuse.&lt;/li&gt;
-&lt;li&gt;Some small tasks related to the RISC-V LLVM build-bot: trying to find a path
-forwards for a &lt;a href=&quot;https://reviews.llvm.org/D143158&quot;&gt;simple patch to enable RISC-V support in
-libcxx&lt;/a&gt;, and &lt;a href=&quot;https://reviews.llvm.org/D144465&quot;&gt;clarifying how often the
-staging buildmaster configuration is
-updated&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;Posted a docs patch to &lt;a href=&quot;https://reviews.llvm.org/D145564&quot;&gt;clarify
-Clang&amp;#x27;s &lt;code&gt;-fexceptions&lt;/code&gt;&lt;/a&gt; in follow-up to
-discussion in &lt;a href=&quot;https://github.com/llvm/llvm-project/issues/61216&quot;&gt;issue
-61216&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;Did some final preparations for the LLVM 16.0.0 release - committing some
-&lt;a href=&quot;https://reviews.llvm.org/rGae37edf1486d&quot;&gt;cleaned up release notes&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;A variety of upstream LLVM reviews, and left some thoughts on &lt;a href=&quot;https://github.com/llvm/llvm-project/issues/61179&quot;&gt;using
-sub-modules for RVV intrinsics
-tests&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/479&quot;&gt;LLVM Weekly #479&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&quot;week-of-27th-february-2023&quot;&gt;&lt;a href=&quot;#week-of-27th-february-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 27th February 2023&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;Completed (to the point I was happy to publish at least) my attempt to
-enumerate the &lt;a href=&quot;/2023q1/commercially-available-risc-v-silicon&quot;&gt;commercially available RISC-V
-SoCs&lt;/a&gt;. I&amp;#x27;m very
-grateful to have received a whole range of suggested additions and
-clarifications over the weekend, which have all been incorporated.&lt;/li&gt;
-&lt;li&gt;Ran the usual biweekly &lt;a href=&quot;https://discourse.llvm.org/t/risc-v-llvm-sync-up-call-2nd-march-2023/68876&quot;&gt;RISC-V LLVM sync-up
-call&lt;/a&gt;.
-Topics included outstanding issues for LLVM 16.x (no major issues now my
-&lt;a href=&quot;https://github.com/llvm/llvm-project-release-prs/pull/324#issuecomment-1445012422&quot;&gt;backport
-request&lt;/a&gt;
-to fix and LLD regression was merged), an overview off &lt;code&gt;_Float16&lt;/code&gt; ABI
-lowering fixes, GP relaxation in LLD, my recent RISC-V buildbot, and some
-vectorisation related issues.&lt;/li&gt;
-&lt;li&gt;Investigated and largely resolved a issues related to ABI lowering of
-&lt;code&gt;_Float16&lt;/code&gt; for RISC-V. Primarily, we weren&amp;#x27;t handling the cases where a
-GPR+FPR or a pair of FPRs are used to pass small structs including
-&lt;code&gt;_Float16&lt;/code&gt;.
-&lt;ul&gt;
-&lt;li&gt;Part of this work involved rebasing my
-&lt;a href=&quot;https://reviews.llvm.org/D134050&quot;&gt;previous&lt;/a&gt;
-&lt;a href=&quot;https://reviews.llvm.org/D140400&quot;&gt;patches&lt;/a&gt; to refactor our RISC-V ABI
-lowering tests in Clang. Now that a version of my improvements to
-&lt;code&gt;update_cc_test_check.py --function-signature&lt;/code&gt; (required for the refactor)
-landed as part of &lt;a href=&quot;https://reviews.llvm.org/D144963&quot;&gt;D144963&lt;/a&gt;, this can
-hopefully be completed.&lt;/li&gt;
-&lt;li&gt;Committed a number of simple test improvements related to half floats. e.g.
-&lt;a href=&quot;https://reviews.llvm.org/rG570995eba2f9&quot;&gt;570995e&lt;/a&gt;,
-&lt;a href=&quot;https://reviews.llvm.org/rG81979c3038de&quot;&gt;81979c3&lt;/a&gt;,
-&lt;a href=&quot;https://reviews.llvm.org/rG34b412dc0efe&quot;&gt;34b412d&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;Posted &lt;a href=&quot;https://reviews.llvm.org/D145070&quot;&gt;D145070&lt;/a&gt; to add proper coverage
-for &lt;code&gt;_Float16&lt;/code&gt; ABI lowering, and
-&lt;a href=&quot;https://reviews.llvm.org/D145074&quot;&gt;D145074&lt;/a&gt; to fix it. Also
-&lt;a href=&quot;https://reviews.llvm.org/D145071&quot;&gt;D145071&lt;/a&gt; to set the &lt;code&gt;HasLegalHalfType&lt;/code&gt;
-property, but the semantics of that are less clear.&lt;/li&gt;
-&lt;li&gt;Posted a &lt;a href=&quot;https://github.com/riscv-non-isa/riscv-elf-psabi-doc/pull/367&quot;&gt;strawman psABI
-patch&lt;/a&gt; for
-&lt;code&gt;__bf16&lt;/code&gt;, needed for the RISC-V bfloat16 extension.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Attended the &lt;a href=&quot;https://community.riscv.org/events/details/risc-v-international-cambridge-risc-v-group-presents-cheri-risc-v-full-stack-security-using-open-source-hardware-and-software/&quot;&gt;Cambridge RISC-V
-Meetup&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;After seeing the Helix editor &lt;a href=&quot;https://lobste.rs/s/nvoikx/helix_notes&quot;&gt;discussed on
-lobste.rs&lt;/a&gt;, retried my previously
-shared &lt;a href=&quot;https://github.com/helix-editor/helix/issues/3072#issuecomment-1208133990&quot;&gt;large Markdown file test
-case&lt;/a&gt;.
-Unfortunately it&amp;#x27;s still unusably slow to edit, seemingly due to a
-tree-sitter related issue.&lt;/li&gt;
-&lt;li&gt;Cleaned up the static site generator used for this site a bit. e.g. now my
-fixes (&lt;a href=&quot;https://github.com/miyuchina/mistletoe/pull/157&quot;&gt;#157&lt;/a&gt;,
-&lt;a href=&quot;https://github.com/miyuchina/mistletoe/pull/158&quot;&gt;#158&lt;/a&gt;,
-&lt;a href=&quot;https://github.com/miyuchina/mistletoe/pull/159&quot;&gt;#159&lt;/a&gt;) for the
-&lt;code&gt;traverse()&lt;/code&gt; helper in &lt;a href=&quot;https://github.com/miyuchina/mistletoe&quot;&gt;mistletoe&lt;/a&gt;
-where merged upstream, I
-&lt;a href=&quot;https://github.com/muxup/muxup-site/commit/52989cf7462d7900bbef5bc2ca9f976af8022ade&quot;&gt;removed&lt;/a&gt;
-my downstream version.&lt;/li&gt;
-&lt;li&gt;The usual mix of upstream LLVM reviews.&lt;/li&gt;
-&lt;li&gt;Had a day off for my birthday.&lt;/li&gt;
-&lt;li&gt;Publicly shared this week log for the first time.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/478&quot;&gt;LLVM Weekly #478&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&quot;week-of-20th-february-2023&quot;&gt;&lt;a href=&quot;#week-of-20th-february-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 20th February 2023&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;Iterated on &lt;a href=&quot;https://reviews.llvm.org/D144353&quot;&gt;D144353&lt;/a&gt; (aiming to fix LLD
-regression related to merging RISC-V attributes) based on review feedback
-and committed it.
-&lt;ul&gt;
-&lt;li&gt;Created &lt;a href=&quot;https://github.com/llvm/llvm-project/issues/60889&quot;&gt;an issue to track this as a
-regression&lt;/a&gt;, aiming for
-a backport into 16.0.0, and &lt;a href=&quot;https://github.com/llvm/llvm-project-release-prs/pull/324#issuecomment-1445012422&quot;&gt;requested that
-backport&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;Also some related discussion in ClangBuiltLinux issues
-&lt;a href=&quot;https://github.com/ClangBuiltLinux/linux/issues/1777&quot;&gt;#1777&lt;/a&gt; and
-&lt;a href=&quot;https://github.com/ClangBuiltLinux/linux/issues/1808&quot;&gt;#1808&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Committed &lt;a href=&quot;https://reviews.llvm.org/D143172&quot;&gt;my llvm-zorg patch to add the qemu-user based RISC-V
-builder&lt;/a&gt;, after finalising provisioning
-the machine to run it. The builder is live on the LLVM staging buildmaster
-&lt;a href=&quot;https://lab.llvm.org/staging/#/builders/241&quot;&gt;as
-clang-rv64gc-qemu-user-single-stage&lt;/a&gt;.
-&lt;ul&gt;
-&lt;li&gt;Worked to resolve remaining test failures and stability issues. One
-recurrent issue was an assert in &lt;code&gt;___pthread_mutex_lock&lt;/code&gt; when executing
-&lt;code&gt;ccache&lt;/code&gt;. Setting &lt;code&gt;inode_cache=false&lt;/code&gt; in the local &lt;code&gt;ccache&lt;/code&gt; config seems
-to avoid this.&lt;/li&gt;
-&lt;li&gt;Posted a couple of patches - &lt;a href=&quot;https://reviews.llvm.org/D144464&quot;&gt;D144464&lt;/a&gt;
-and &lt;a href=&quot;https://reviews.llvm.org/D144465&quot;&gt;D144465&lt;/a&gt; to tweak the LLVM docs on
-setting up a builder, based on my experience doing so.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Chased for reviews and clarification about pre-commit test requirements for
-my libcxx RISC-V test fix patch,
-&lt;a href=&quot;https://reviews.llvm.org/D143158&quot;&gt;D134158&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;Committed a couple of further test updates for Wasm in LLVM ahead of some
-upcoming patches. &lt;a href=&quot;https://reviews.llvm.org/rG771261ff0128&quot;&gt;771261f&lt;/a&gt;
-&lt;a href=&quot;https://reviews.llvm.org/rG1ae859753c06&quot;&gt;1ae8597&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;Left some quick notes on the &lt;a href=&quot;https://discourse.llvm.org/t/rfc-rfc-shepherds/68666/8&quot;&gt;LLVM RFC
-shepherds&lt;/a&gt; proposal.&lt;/li&gt;
-&lt;li&gt;A variety of upstream LLVM reviews, and received a &lt;a href=&quot;https://reviews.llvm.org/D143115#4151994&quot;&gt;useful clarification on
-the RISC-V psABI and the ratification
-lifecycle&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/477&quot;&gt;LLVM Weekly #477&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&quot;week-of-13th-february-2023&quot;&gt;&lt;a href=&quot;#week-of-13th-february-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 13th February 2023&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;After a fair bit of investigation and thinking about reported compatibility
-issues between GNU and LLVM tools (particularly binutils ld and lld) due to
-RISC-V extension versioning, &lt;a href=&quot;https://discourse.llvm.org/t/rfc-resolving-issues-related-to-extension-versioning-in-risc-v/68472&quot;&gt;posted an RFC outlining the major issues and a
-proposed fix for what I consider to be a regression in
-lld&lt;/a&gt;.
-&lt;ul&gt;
-&lt;li&gt;Landed a few LLVM patches cleaning up tests related to this.
-&lt;a href=&quot;https://reviews.llvm.org/rG8b5004864aab&quot;&gt;8b50048&lt;/a&gt;
-&lt;a href=&quot;https://reviews.llvm.org/rG574d0c2ec107&quot;&gt;574d0c2&lt;/a&gt;,
-&lt;a href=&quot;https://reviews.llvm.org/rGd05e1e99b1d6&quot;&gt;d05e1e9&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;Posted &lt;a href=&quot;https://reviews.llvm.org/D144353&quot;&gt;D144353&lt;/a&gt;, a proposed fix for the
-LLD regression due to overzealous checking of extensions/versions when
-merging RISC-V attributes.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Organised agenda for and ran the bi-weekly &lt;a href=&quot;https://discourse.llvm.org/t/risc-v-llvm-sync-up-call-16th-february-2023/68500&quot;&gt;RISC-V LLVM contributor
-call&lt;/a&gt;.
-Key discussion items were the extension versioning related compatibility
-issue mentioned below and support for emulated TLS (where I&amp;#x27;d &lt;a href=&quot;https://reviews.llvm.org/D143708#4118468&quot;&gt;left some
-comments&lt;/a&gt; the previous week).&lt;/li&gt;
-&lt;li&gt;Updated my patch (&lt;a href=&quot;https://reviews.llvm.org/D143172&quot;&gt;D143172&lt;/a&gt;) to register
-and configure a RISC-V qemu-user based builder with LLVM&amp;#x27;s staging
-buildmaster, based on review feedback.&lt;/li&gt;
-&lt;li&gt;A variety of upstream LLVM reviews. Also landed
-&lt;a href=&quot;https://reviews.llvm.org/D143507&quot;&gt;D143407&lt;/a&gt;, marking Zawrs as
-non-experimental.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/476&quot;&gt;LLVM Weekly #476&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&quot;week-of-6th-february-2023&quot;&gt;&lt;a href=&quot;#week-of-6th-february-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 6th February 2023&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;Left feedback on the proposed RISC-V psABI
-&lt;a href=&quot;https://github.com/riscv-non-isa/riscv-elf-psabi-doc/pull/365&quot;&gt;patch clarifying treatment of empty structs or unions in the FP calling
-convention&lt;/a&gt;.
-This is a follow-up to the &lt;a href=&quot;https://github.com/riscv-non-isa/riscv-elf-psabi-doc/issues/358&quot;&gt;issue I
-filed&lt;/a&gt; on
-this issue (where I have &lt;a href=&quot;https://reviews.llvm.org/D142327&quot;&gt;D142327&lt;/a&gt; queued
-up for LLVM to fix our incorrect handling).&lt;/li&gt;
-&lt;li&gt;Responded to a question on LLVM&amp;#x27;s Discourse &lt;a href=&quot;https://discourse.llvm.org/t/support-for-zicsr-and-zifencei-extensions/68369/2&quot;&gt;about zicsr and zifencei
-support in
-LLVM&lt;/a&gt;.
-As noted, the issue is that we haven&amp;#x27;t moved RV32I/RV64I 2.1 yet which split
-out Zicsr and Zifencei. Unfortunately this is a backwards-incompatible
-change so requires some care.&lt;/li&gt;
-&lt;li&gt;Worked with a colleague trying to reproduce an assertion failure in his
-committed patch &lt;a href=&quot;https://reviews.llvm.org/rGeb66833d19573df97034a81279eda31b8d19815b&quot;&gt;adding support for WebAssembly externref in
-Clang&lt;/a&gt;
-that appeared only on an MSan buildbot. The &lt;a href=&quot;https://github.com/google/sanitizers/wiki/SanitizerBotReproduceBuild&quot;&gt;sanitizers project
-guidance&lt;/a&gt;
-is useful for this, but I ended up &lt;a href=&quot;https://gist.github.com/asb/645a071903f0c3cf9ef6c59a3d3e0810&quot;&gt;rolling a slightly hacky
-script&lt;/a&gt; as I
-stepped through each part of the multi-stage build and test sequence.&lt;/li&gt;
-&lt;li&gt;Left my thoughts on a &lt;a href=&quot;https://github.com/riscv-non-isa/riscv-c-api-doc/issues/32&quot;&gt;proposed RISC-V preprocessor define to specify
-support and for and performance of misaligned
-loads/stores&lt;/a&gt;. I
-like the idea of the define, but prefer sticking to the &lt;code&gt;Zicclsm&lt;/code&gt;
-terminology introduced in the RISC-V profiles.&lt;/li&gt;
-&lt;li&gt;Posted patch &lt;a href=&quot;https://reviews.llvm.org/D143507&quot;&gt;D143507&lt;/a&gt; to mark RISC-V
-Zawrs as non-experimental, after confirming there were no relevant changes
-between the implemented 1.0-rc3 spec and the ratified version.&lt;/li&gt;
-&lt;li&gt;A series of WebAssembly GC type related patches remains a work in progress
-downstream, but I landed a couple of related minor test cleanups.
-&lt;a href=&quot;https://reviews.llvm.org/rG604c9a07f3a9&quot;&gt;604c9a0&lt;/a&gt;,
-&lt;a href=&quot;https://reviews.llvm.org/rG3a80dc27ed45&quot;&gt;3a80dc2&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;Many upstream RISC-V LLVM reviews.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/475&quot;&gt;LLVM Weekly #475&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
-&lt;ul&gt;
-&lt;li&gt;2023-03-13: Added notes for the week of 6th March 2023.&lt;/li&gt;
-&lt;li&gt;2023-03-06: Added notes for the week of 27th February 2023.&lt;/li&gt;
-&lt;li&gt;2023-02-27: Added in a forgotten note about trivial buildbot doc
-improvements.&lt;/li&gt;
-&lt;li&gt;2023-02-27: Initial publication date.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/details&gt;
 </content>

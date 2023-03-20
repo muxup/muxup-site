@@ -197,13 +197,81 @@ content: " «";
 <div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></a></div>
 </div>
 <h1 id="article-title"><span id="title-highlight">2023Q1 week log</span></h1>
-<div id="article-meta"><span title="2023-02-27">2023Q1</span>. Last update <span title="2023-03-13">13 Mar 2023</span>. <a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
+<div id="article-meta"><span title="2023-02-27">2023Q1</span>. Last update <span title="2023-03-20">20 Mar 2023</span>. <a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
 <p>I tend to keep quite a lot of notes on the development related (sometimes at
 work, sometimes not) I do on a week-by-week basis, and thought it might be fun
 to write up the parts that were public. This
 may or may not be of wider interest, but it aims to be a useful aide-mémoire
 for my purposes at least. Weeks with few entries might be due to focusing on
 downstream work (or perhaps just a less productive week - I am only human!).</p>
+<h2 id="week-of-13th-march-2023"><a href="#week-of-13th-march-2023" class="anchor" aria-hidden="true" tabindex="-1"></a>Week of 13th March 2023</h2>
+<ul>
+<li>Most importantly, added
+<a href="https://github.com/muxup/muxup-site/commit/7159a2400e6535a288c78dfd4d71c1b544ddf51e#diff-196dde1107e14fd35d571db219211acb6853813d95a5c7faee5ac09e058f9203">some</a>
+<a href="https://github.com/muxup/muxup-site/commit/a1cb4d4256815bcfa8a6a4c5174a03ae077ee8c6#diff-4e9f5b15205b49dff89e5050a5a899e63213f1f015daeca45b76270bb2c009dd">more</a>
+footer images for this site from the Quick Draw dataset. Thanks to my son
+(Archie, 5) for the assistance.</li>
+<li>Added note to the <a href="/2023q1/commercially-available-risc-v-silicon">commercially available RISC-V silicon
+post</a> about a
+hardware bug in the Renesas RZ/Five.</li>
+<li>Finished writing and published <a href="/2023q1/whats-new-for-risc-v-in-llvm-16">what&#x27;s new for RISC-V in LLVM 16
+article</a> and took part in
+some of the discussions in the
+<a href="https://news.ycombinator.com/item?id=35215826">HN</a> and <a href="https://old.reddit.com/r/RISCV/comments/11veftz/whats_new_for_riscv_in_llvm_16/">Reddit
+threads</a>
+(it&#x27;s <a href="https://lobste.rs/s/qcu7fc/what_s_new_for_risc_v_llvm_16">on lobste.rs
+too</a>, but that
+didn&#x27;t generate any comments).</li>
+<li>Investigated an issue where inline asm with the <code>m</code> constraint was
+generating worse code on LLVM vs GCC, finding that LLVM conservatively
+lowers this to a single register, while GCC treats <code>m</code> as reg+imm, relying
+on users indicating <code>A</code> when using a memory operand with an instruction that
+can&#x27;t take an immediate offset. Worked with a colleague who posted
+<a href="https://reviews.llvm.org/D146245">D146245</a> to fix this.</li>
+<li>Set
+<a href="https://discourse.llvm.org/t/risc-v-llvm-sync-up-call-16th-march-2023-note-daylight-savings-impact/69244">agenda</a>
+for and ran the biweekly RISC-V LLVM contributor sync call as usual.</li>
+<li>Bisected reported LLVM bug
+<a href="https://github.com/llvm/llvm-project/issues/61412">#61412</a>, which
+as it happens was fixed that evening by
+<a href="https://reviews.llvm.org/D145474">D145474</a> being committed. We hope to
+backport this to 16.0.1.</li>
+<li>Did some digging on a regression (compiler crash) for <code>-Oz</code>, bisecting it to
+the commit that enabled machine copy propagation by default. I found the
+issue was due to machine copy propagation running after the machine
+outliner, and incorrectly determining that some register writes in outlined
+functions were not live-out. I posted and
+landed <a href="https://reviews.llvm.org/D146037">D146037</a> to fix this by running
+machine copy propagation earlier in the pipeline, though a more principled
+fix would be desirable.</li>
+<li>Filed a PR against the riscv-isa-manual to <a href="https://github.com/riscv/riscv-isa-manual/pull/990">disambiguate the use of the term
+&quot;reserved&quot; for HINT
+instructions</a>. I&#x27;ve also
+been looking at the proposed bfloat16 extension recently and filed an
+<a href="https://github.com/riscv/riscv-bfloat16/issues/27">issue</a> to clarify if
+Zfbfinxmin will be defined (as all the other floating point extensions so
+far have an <code>*inx</code> twin.</li>
+<li>Almost finished work to resolve issues related to overzealous error checking
+on RISC-V ISA naming strings (with llvm-objdump and related tools being the
+final piece).
+<ul>
+<li>Landed <a href="https://reviews.llvm.org/D145879">D145879</a> and
+<a href="https://reviews.llvm.org/D145882">D145882</a> to expand <code>RISCVISAInfo</code> test
+coverage and fix an issue that surfaced through that.</li>
+<li>Posted a pair of patches that makes llvm-objdump and related tools
+tolerant of unrecognised versions of ISA extensions.
+<a href="https://reviews.llvm.org/D146070">D146070</a> resolves this for the base ISA
+in a minimally invasive way, while
+<a href="https://reviews.llvm.org/D146114">D146114</a> solves this for other
+extensions, moving the parsing logic to using the
+<code>parseNormalizedArchString</code> function I introduced to fix a similar issue
+in LLD. This built on some directly committed work to <a href="https://reviews.llvm.org/rG0ae8f5ac08ae">expand
+testing</a>.</li>
+</ul>
+</li>
+<li>The usual assortment of upstream LLVM reviews.</li>
+<li><a href="https://llvmweekly.org/issue/480">LLVM Weekly #480</a>.</li>
+</ul>
 <h2 id="week-of-6th-march-2023"><a href="#week-of-6th-march-2023" class="anchor" aria-hidden="true" tabindex="-1"></a>Week of 6th March 2023</h2>
 <ul>
 <li>Had a really useful meeting with a breakout group from the <a href="https://docs.google.com/document/d/1G3ocHm2zE6AYTS2N3_3w2UxFnSEyKkcF57siLWe-NVs/edit">RISC-V LLVM
@@ -423,6 +491,7 @@ downstream, but I landed a couple of related minor test cleanups.
 </ul>
 <hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor "aria-hidden="true" tabindex="-1"></a>Article changelog</summary>
 <ul>
+<li>2023-03-20: Added notes for the week of 13th March 2023.</li>
 <li>2023-03-13: Added notes for the week of 6th March 2023.</li>
 <li>2023-03-06: Added notes for the week of 27th February 2023.</li>
 <li>2023-02-27: Added in a forgotten note about trivial buildbot doc
