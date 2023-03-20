@@ -16,6 +16,8 @@ downstream work (or perhaps just a less productive week - I am only human!).
   [more](https://github.com/muxup/muxup-site/commit/a1cb4d4256815bcfa8a6a4c5174a03ae077ee8c6#diff-4e9f5b15205b49dff89e5050a5a899e63213f1f015daeca45b76270bb2c009dd)
   footer images for this site from the Quick Draw dataset. Thanks to my son
   (Archie, 5) for the assistance.
+* Reviewed submissions for [EuroLLVM](https://llvm.org/devmtg/2023-05/) (I'm
+  on the program committee).
 * Added note to the [commercially available RISC-V silicon
   post](/pages/2023q1/commercially-available-risc-v-silicon.md) about a
   hardware bug in the Renesas RZ/Five.
