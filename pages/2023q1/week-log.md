@@ -10,6 +10,70 @@ may or may not be of wider interest, but it aims to be a useful aide-mémoire
 for my purposes at least. Weeks with few entries might be due to focusing on
 downstream work (or perhaps just a less productive week - I am only human!).
 
+## Week of 13th March 2023
+* Most importantly, added
+  [some](https://github.com/muxup/muxup-site/commit/7159a2400e6535a288c78dfd4d71c1b544ddf51e#diff-196dde1107e14fd35d571db219211acb6853813d95a5c7faee5ac09e058f9203)
+  [more](https://github.com/muxup/muxup-site/commit/a1cb4d4256815bcfa8a6a4c5174a03ae077ee8c6#diff-4e9f5b15205b49dff89e5050a5a899e63213f1f015daeca45b76270bb2c009dd)
+  footer images for this site from the Quick Draw dataset. Thanks to my son
+  (Archie, 5) for the assistance.
+* Added note to the [commercially available RISC-V silicon
+  post](/pages/2023q1/commercially-available-risc-v-silicon.md) about a
+  hardware bug in the Renesas RZ/Five.
+* Finished writing and published [what's new for RISC-V in LLVM 16
+  article](/pages/2023q1/whats-new-for-risc-v-in-llvm-16.md) and took part in
+  some of the discussions in the
+  [HN](https://news.ycombinator.com/item?id=35215826) and [Reddit
+  threads](https://old.reddit.com/r/RISCV/comments/11veftz/whats_new_for_riscv_in_llvm_16/)
+  (it's [on lobste.rs
+  too](https://lobste.rs/s/qcu7fc/what_s_new_for_risc_v_llvm_16), but that
+  didn't generate any comments).
+* Investigated an issue where inline asm with the `m` constraint was
+  generating worse code on LLVM vs GCC, finding that LLVM conservatively
+  lowers this to a single register, while GCC treats `m` as reg+imm, relying
+  on users indicating `A` when using a memory operand with an instruction that
+  can't take an immediate offset. Worked with a colleague who posted
+  [D146245](https://reviews.llvm.org/D146245) to fix this.
+* Set
+  [agenda](https://discourse.llvm.org/t/risc-v-llvm-sync-up-call-16th-march-2023-note-daylight-savings-impact/69244)
+  for and ran the biweekly RISC-V LLVM contributor sync call as usual.
+* Bisected reported LLVM bug
+  [#61412](https://github.com/llvm/llvm-project/issues/61412), which
+  as it happens was fixed that evening by
+  [D145474](https://reviews.llvm.org/D145474) being committed. We hope to
+  backport this to 16.0.1.
+* Did some digging on a regression (compiler crash) for `-Oz`, bisecting it to
+  the commit that enabled machine copy propagation by default. I found the
+  issue was due to machine copy propagation running after the machine
+  outliner, and incorrectly determining that some register writes in outlined
+  functions were not live-out. I posted and
+  landed [D146037](https://reviews.llvm.org/D146037) to fix this by running
+  machine copy propagation earlier in the pipeline, though a more principled
+  fix would be desirable.
+* Filed a PR against the riscv-isa-manual to [disambiguate the use of the term
+  "reserved" for HINT
+  instructions](https://github.com/riscv/riscv-isa-manual/pull/990). I've also
+  been looking at the proposed bfloat16 extension recently and filed an
+  [issue](https://github.com/riscv/riscv-bfloat16/issues/27) to clarify if
+  Zfbfinxmin will be defined (as all the other floating point extensions so
+  far have an `*inx` twin.
+* Almost finished work to resolve issues related to overzealous error checking
+  on RISC-V ISA naming strings (with llvm-objdump and related tools being the
+  final piece).
+  * Landed [D145879](https://reviews.llvm.org/D145879) and
+    [D145882](https://reviews.llvm.org/D145882) to expand `RISCVISAInfo` test
+    coverage and fix an issue that surfaced through that.
+  * Posted a pair of patches that makes llvm-objdump and related tools
+    tolerant of unrecognised versions of ISA extensions.
+    [D146070](https://reviews.llvm.org/D146070) resolves this for the base ISA
+    in a minimally invasive way, while
+    [D146114](https://reviews.llvm.org/D146114) solves this for other
+    extensions, moving the parsing logic to using the
+    `parseNormalizedArchString` function I introduced to fix a similar issue
+    in LLD. This built on some directly committed work to [expand
+    testing](https://reviews.llvm.org/rG0ae8f5ac08ae).
+* The usual assortment of upstream LLVM reviews.
+* [LLVM Weekly #480](https://llvmweekly.org/issue/480).
+
 ## Week of 6th March 2023
 * Had a really useful meeting with a breakout group from the [RISC-V LLVM
   sync-up
@@ -209,6 +273,7 @@ downstream work (or perhaps just a less productive week - I am only human!).
 * [LLVM Weekly #475](https://llvmweekly.org/issue/475).
 
 ## Article changelog
+* 2023-03-20: Added notes for the week of 13th March 2023.
 * 2023-03-13: Added notes for the week of 6th March 2023.
 * 2023-03-06: Added notes for the week of 27th February 2023.
 * 2023-02-27: (minor) Added in a forgotten note about trivial buildbot doc
