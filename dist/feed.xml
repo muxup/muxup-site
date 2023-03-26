@@ -1566,6 +1566,32 @@ two boards are available.&lt;/li&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://www.hpmicro.com/product/summary.html?id=d7fdb78f-1fa5-43be-be08-b97b405b65f0&quot;&gt;HPMicro
+HPM6750&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;2 x RV32IMAFDC cores (&lt;a href=&quot;http://www.andestech.com/en/products-solutions/andescore-processors/riscv-d45/&quot;&gt;AndesCore
+D45&lt;/a&gt;)
+with an implementation of the draft &amp;#x27;P&amp;#x27; packed SIMD spec
+(&lt;a href=&quot;https://riscv.org/news/2021/12/hpmicro-semiconductor-announces-the-release-of-the-hpm6000-series-of-microcontrollers-with-andescore-dual-d45-cores-andes-technology/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
+&lt;li&gt;In-order dual-issue 8-stage pipeline.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;800 MHz&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;Available in the
+&lt;a href=&quot;http://doc.hpmicro.com/sdk_doc/en/latest/html/boards/hpm6750evk/README.html&quot;&gt;HPM6750EVK&lt;/a&gt;
+as well as other variants.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&quot;bonus-other-socs-that-donx27t-match-the-above-criteria-or-where-therex27s-insufficient-info&quot;&gt;&lt;a href=&quot;#bonus-other-socs-that-donx27t-match-the-above-criteria-or-where-therex27s-insufficient-info&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Bonus: Other SoCs that don&amp;#x27;t match the above criteria or where there&amp;#x27;s insufficient info&lt;/h2&gt;
 &lt;ul&gt;
@@ -1584,6 +1610,7 @@ hasn&amp;#x27;t been any news since.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
 &lt;ul&gt;
+&lt;li&gt;2023-03-26: Add HPM6750 to the list.&lt;/li&gt;
 &lt;li&gt;2023-03-19: Add note on silicon bug in the Renesas RZ/Five.&lt;/li&gt;
 &lt;li&gt;2023-03-12: Clarified details of several SiFive cores and made the
 listing of SoCs using cores derived from open source RTL exhaustive.&lt;/li&gt;

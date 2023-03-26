@@ -549,6 +549,20 @@ listing of other on-chip peripherals or accelerators.
     * The [product
       page](http://csm-ic.com/Html/ProductView.asp?ID=253&SortID=201) suggests
       two boards are available.
+* [HPMicro
+  HPM6750](https://www.hpmicro.com/product/summary.html?id=d7fdb78f-1fa5-43be-be08-b97b405b65f0)
+  * **Core design**:
+    * 2 x RV32IMAFDC cores ([AndesCore
+      D45](http://www.andestech.com/en/products-solutions/andescore-processors/riscv-d45/))
+      with an implementation of the draft 'P' packed SIMD spec
+      ([ref](https://riscv.org/news/2021/12/hpmicro-semiconductor-announces-the-release-of-the-hpm6000-series-of-microcontrollers-with-andescore-dual-d45-cores-andes-technology/)).
+    * In-order dual-issue 8-stage pipeline.
+  * **Key stats**:
+    * 800 MHz
+  * **Development board**:
+    * Available in the
+      [HPM6750EVK](http://doc.hpmicro.com/sdk_doc/en/latest/html/boards/hpm6750evk/README.html)
+      as well as other variants.
 
 ## Bonus: Other SoCs that don't match the above criteria or where there's insufficient info
 
@@ -566,6 +580,7 @@ listing of other on-chip peripherals or accelerators.
   hasn't been any news since.
 
 ## Article changelog
+* 2023-03-26: (minor) Add HPM6750 to the list.
 * 2023-03-19: (minor) Add note on silicon bug in the Renesas RZ/Five.
 * 2023-03-12: (minor) Clarified details of several SiFive cores and made the
   listing of SoCs using cores derived from open source RTL exhaustive.
