@@ -197,13 +197,45 @@ content: " «";
 <div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></a></div>
 </div>
 <h1 id="article-title"><span id="title-highlight">2023Q1 week log</span></h1>
-<div id="article-meta"><span title="2023-02-27">2023Q1</span>. Last update <span title="2023-03-20">20 Mar 2023</span>. <a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
+<div id="article-meta"><span title="2023-02-27">2023Q1</span>. Last update <span title="2023-03-27">27 Mar 2023</span>. <a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
 <p>I tend to keep quite a lot of notes on the development related (sometimes at
 work, sometimes not) I do on a week-by-week basis, and thought it might be fun
 to write up the parts that were public. This
 may or may not be of wider interest, but it aims to be a useful aide-mémoire
 for my purposes at least. Weeks with few entries might be due to focusing on
 downstream work (or perhaps just a less productive week - I am only human!).</p>
+<h2 id="week-of-20th-march-2023"><a href="#week-of-20th-march-2023" class="anchor" aria-hidden="true" tabindex="-1"></a>Week of 20th March 2023</h2>
+<ul>
+<li>Landed patches to fix RISC-V ISA extension versioning related issues in
+llvm-objdump and related tools (<a href="https://reviews.llvm.org/D146070">D146070</a>,
+<a href="https://reviews.llvm.org/D146113">D146113</a>, and
+<a href="https://reviews.llvm.org/D146114">D146114</a>). Also patches to fix an ABI bug
+with <code>_Float16</code> lowering on RISC-V
+(<a href="https://reviews.llvm.org/D142326">D142326</a>,
+<a href="https://reviews.llvm.org/D145074">D145074</a>).</li>
+<li>Opened a few issues on the <a href="https://github.com/sigoden/aichat">aichat</a>
+(command line ChatGPT client) repo: one for <a href="https://github.com/sigoden/aichat/issues/97">maximum line
+width</a>, another for <a href="https://github.com/sigoden/aichat/issues/99">word
+wrapping</a>, and a <a href="https://github.com/sigoden/aichat/issues/88#issuecomment-1484132478">suggestion on
+converting one-shot questions to
+conversations</a>.</li>
+<li>Added the HPM6750 to my <a href="/2023q1/commercially-available-risc-v-silicon">commercially available RISC-V silicon
+list</a>.</li>
+<li>My tutorial and lightning talk proposals were accepted for EuroLLVM!</li>
+<li>Some bits and pieces related to the RISC-V bfloat16 spec and also Zfh.
+<ul>
+<li><a href="https://github.com/riscv/riscv-bfloat16/pull/31">Drafted</a> a Zfbfinxmin
+extension definition (primarily for symmetry with the existing
+<code>z*inx[min]</code> extensions.</li>
+<li><a href="https://reviews.llvm.org/D146435">Fixing</a> a missed predicate for
+<code>PseudoQuietFCMP</code>.</li>
+<li><a href="https://github.com/riscv/riscv-bfloat16/pull/29">Minor clarification</a> to
+the riscv-bfloat16 spec.</li>
+</ul>
+</li>
+<li>Usual mix of upstream LLVM reviews.</li>
+<li><a href="https://llvmweekly.org/issue/480">LLVM Weekly #480</a>.</li>
+</ul>
 <h2 id="week-of-13th-march-2023"><a href="#week-of-13th-march-2023" class="anchor" aria-hidden="true" tabindex="-1"></a>Week of 13th March 2023</h2>
 <ul>
 <li>Most importantly, added
@@ -493,6 +525,7 @@ downstream, but I landed a couple of related minor test cleanups.
 </ul>
 <hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor "aria-hidden="true" tabindex="-1"></a>Article changelog</summary>
 <ul>
+<li>2023-03-27: Added notes for the week of 20th March 2023.</li>
 <li>2023-03-20: Added notes for the week of 13th March 2023.</li>
 <li>2023-03-13: Added notes for the week of 6th March 2023.</li>
 <li>2023-03-06: Added notes for the week of 27th February 2023.</li>
