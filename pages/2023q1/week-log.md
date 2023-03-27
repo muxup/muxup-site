@@ -10,6 +10,34 @@ may or may not be of wider interest, but it aims to be a useful aide-mémoire
 for my purposes at least. Weeks with few entries might be due to focusing on
 downstream work (or perhaps just a less productive week - I am only human!).
 
+## Week of 20th March 2023
+* Landed patches to fix RISC-V ISA extension versioning related issues in
+  llvm-objdump and related tools ([D146070](https://reviews.llvm.org/D146070),
+  [D146113](https://reviews.llvm.org/D146113), and
+  [D146114](https://reviews.llvm.org/D146114)). Also patches to fix an ABI bug
+  with `_Float16` lowering on RISC-V
+  ([D142326](https://reviews.llvm.org/D142326),
+  [D145074](https://reviews.llvm.org/D145074)).
+* Opened a few issues on the [aichat](https://github.com/sigoden/aichat)
+  (command line ChatGPT client) repo: one for [maximum line
+  width](https://github.com/sigoden/aichat/issues/97), another for [word
+  wrapping](https://github.com/sigoden/aichat/issues/99), and a [suggestion on
+  converting one-shot questions to
+  conversations](https://github.com/sigoden/aichat/issues/88#issuecomment-1484132478).
+* Added the HPM6750 to my [commercially available RISC-V silicon
+  list](/pages/2023q1/commercially-available-risc-v-silicon.md).
+* My tutorial and lightning talk proposals were accepted for EuroLLVM!
+* Some bits and pieces related to the RISC-V bfloat16 spec and also Zfh.
+  * [Drafted](https://github.com/riscv/riscv-bfloat16/pull/31) a Zfbfinxmin
+    extension definition (primarily for symmetry with the existing
+    `z*inx[min]` extensions.
+  * [Fixing](https://reviews.llvm.org/D146435) a missed predicate for
+    `PseudoQuietFCMP`.
+  * [Minor clarification](https://github.com/riscv/riscv-bfloat16/pull/29) to
+    the riscv-bfloat16 spec.
+* Usual mix of upstream LLVM reviews.
+* [LLVM Weekly #480](https://llvmweekly.org/issue/480).
+
 ## Week of 13th March 2023
 * Most importantly, added
   [some](https://github.com/muxup/muxup-site/commit/7159a2400e6535a288c78dfd4d71c1b544ddf51e#diff-196dde1107e14fd35d571db219211acb6853813d95a5c7faee5ac09e058f9203)
@@ -275,6 +303,7 @@ downstream work (or perhaps just a less productive week - I am only human!).
 * [LLVM Weekly #475](https://llvmweekly.org/issue/475).
 
 ## Article changelog
+* 2023-03-27: Added notes for the week of 20th March 2023.
 * 2023-03-20: Added notes for the week of 13th March 2023.
 * 2023-03-13: Added notes for the week of 6th March 2023.
 * 2023-03-06: Added notes for the week of 27th February 2023.
