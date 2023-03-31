@@ -563,6 +563,17 @@ listing of other on-chip peripherals or accelerators.
     * Available in the
       [HPM6750EVK](http://doc.hpmicro.com/sdk_doc/en/latest/html/boards/hpm6750evk/README.html)
       as well as other variants.
+* [Renesas
+  R9A06G150](https://www.renesas.com/eu/en/application/iot-applications/smart-appliances/voice-control-hmi-risc-v-assp)
+  * **Core design**:
+    * 1 x RV32IMAFC [AndesCore
+      D25F](http://www.andestech.com/en/products-solutions/andescore-processors/riscv-d25f/)
+      with additional vendor-specific instruction set extensions.
+    * 5 stage pipeline, single issue in-order.
+  * **Key stats**:
+    * 100 MHz
+  * **Development board**:
+    * None available currently.
 
 ## Bonus: Other SoCs that don't match the above criteria or where there's insufficient info
 
@@ -580,6 +591,7 @@ listing of other on-chip peripherals or accelerators.
   hasn't been any news since.
 
 ## Article changelog
+* 2023-03-31: (minor) Add Renesas R9A06G150 to the list.
 * 2023-03-26: (minor) Add HPM6750 to the list.
 * 2023-03-19: (minor) Add note on silicon bug in the Renesas RZ/Five.
 * 2023-03-12: (minor) Clarified details of several SiFive cores and made the

@@ -1625,6 +1625,29 @@ as well as other variants.&lt;/li&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://www.renesas.com/eu/en/application/iot-applications/smart-appliances/voice-control-hmi-risc-v-assp&quot;&gt;Renesas
+R9A06G150&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;1 x RV32IMAFC &lt;a href=&quot;http://www.andestech.com/en/products-solutions/andescore-processors/riscv-d25f/&quot;&gt;AndesCore
+D25F&lt;/a&gt;
+with additional vendor-specific instruction set extensions.&lt;/li&gt;
+&lt;li&gt;5 stage pipeline, single issue in-order.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;100 MHz&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
+&lt;ul&gt;
+&lt;li&gt;None available currently.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&quot;bonus-other-socs-that-donx27t-match-the-above-criteria-or-where-therex27s-insufficient-info&quot;&gt;&lt;a href=&quot;#bonus-other-socs-that-donx27t-match-the-above-criteria-or-where-therex27s-insufficient-info&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Bonus: Other SoCs that don&amp;#x27;t match the above criteria or where there&amp;#x27;s insufficient info&lt;/h2&gt;
 &lt;ul&gt;
@@ -1643,6 +1666,7 @@ hasn&amp;#x27;t been any news since.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
 &lt;ul&gt;
+&lt;li&gt;2023-03-31: Add Renesas R9A06G150 to the list.&lt;/li&gt;
 &lt;li&gt;2023-03-26: Add HPM6750 to the list.&lt;/li&gt;
 &lt;li&gt;2023-03-19: Add note on silicon bug in the Renesas RZ/Five.&lt;/li&gt;
 &lt;li&gt;2023-03-12: Clarified details of several SiFive cores and made the
