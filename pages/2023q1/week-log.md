@@ -5,10 +5,52 @@ description = "What did I do last week?"
 # 2023Q1 week log
 I tend to keep quite a lot of notes on the development related (sometimes at
 work, sometimes not) I do on a week-by-week basis, and thought it might be fun
-to write up the parts that were public. This
-may or may not be of wider interest, but it aims to be a useful aide-mémoire
-for my purposes at least. Weeks with few entries might be due to focusing on
-downstream work (or perhaps just a less productive week - I am only human!).
+to write up the parts that were public. This may or may not be of wider
+interest, but it aims to be a useful aide-mémoire for my purposes at least.
+Weeks with few entries might be due to focusing on downstream work (or perhaps
+just a less productive week - I am only human!).
+
+## Week of 27th March 2023
+* Submitted a [backport request to
+  16.0.1](https://github.com/llvm/llvm-project-release-prs/pull/406) for my
+  recent fixes to `llvm-objdump` (and related tools) when encountering
+  unrecognised RISC-V base or ISA extension versions, or unrecognised ISA
+  extension names.
+* Landed a tweak to the RISC-V ISA manual to [make it clear that HINT
+  encodings aren't
+  "reserved"](https://github.com/riscv/riscv-isa-manual/pull/1001) in terms of
+  being part of the defined "reserved instruction-set category". Thanks to
+  Andrew Waterman for suggesting a simpler fix than my first attempt.
+* I'm now on Mastodon, at [@asb@fosstodon.org](https://fosstodon.org/@asb) and
+  [@llvmweekly@fosstodon.org](https://fosstodon.org/@llvmweekly).
+* Proposed [alternate wording for the RISC-V LLVM doc updates reflecting
+  recent ISA versioning
+  discussions](https://reviews.llvm.org/D147183#4233360).
+* Set agenda for and ran the usual biweekly [RISC-V LLVM contributor sync up
+  call](https://discourse.llvm.org/t/risc-v-llvm-sync-up-call-30th-march-2023-note-daylight-savings-time-impact/69635).
+* Added the Renesas R9A06G150 to my [commercially available RISC-V silicon
+  list](/pages/2023q1/commercially-available-risc-v-silicon.md).
+* Posted and landed patches to implement MC layer and codegen support for the
+  experimental `Zicond` (integer conditional operations) extension
+  ([D146946](https://reviews.llvm.org/D146946),
+  [D147147](https://reviews.llvm.org/D147147)). This is essentially the same
+  as the `XVentanaCondOps` extension.
+* Advertised the ongoing discussion about changing the shadow call stack
+  register on RISC-V [through an
+  RFC](https://discourse.llvm.org/t/rfc-psa-changing-the-shadow-call-stack-register-on-risc-v/69537).
+* It was pointed out to me that the expansion of `seq_cst` atomic ops to
+  RISC-V lr/sc loops was slightly stronger than required by the mapping table
+  in the ISA manual. Specifically, `sc.{w|d}.rl` is sufficient rather than
+  `sc.{w|d}.aqrl`. Fixed with [D146933](https://reviews.llvm.org/D146933).
+* Filed issue about the [fcvt.bf16.s instruction encoding colliding with
+  fround.h](https://github.com/riscv/riscv-bfloat16/issues/33) (instructions
+  from `zfbfmin` and `zfa` respectively).
+* Usual mix of upstream LLVM reviews. We were now able to
+  [bump](https://reviews.llvm.org/D147179) the versions of the standard ISA
+  extensions LLVM claims to support. As noted in my [previous
+  RFC](https://discourse.llvm.org/t/rfc-resolving-issues-related-to-extension-versioning-in-risc-v/68472),
+  LLVM was reporting the wrong version information for the A/F/D extensions.
+* [LLVM Weekly #482](https://llvmweekly.org/issue/482).
 
 ## Week of 20th March 2023
 * Landed patches to fix RISC-V ISA extension versioning related issues in
@@ -36,7 +78,7 @@ downstream work (or perhaps just a less productive week - I am only human!).
   * [Minor clarification](https://github.com/riscv/riscv-bfloat16/pull/29) to
     the riscv-bfloat16 spec.
 * Usual mix of upstream LLVM reviews.
-* [LLVM Weekly #480](https://llvmweekly.org/issue/480).
+* [LLVM Weekly #481](https://llvmweekly.org/issue/481).
 
 ## Week of 13th March 2023
 * Most importantly, added
@@ -303,6 +345,7 @@ downstream work (or perhaps just a less productive week - I am only human!).
 * [LLVM Weekly #475](https://llvmweekly.org/issue/475).
 
 ## Article changelog
+* 2023-04-03: Added notes for the week of 27th March 2023.
 * 2023-03-27: Added notes for the week of 20th March 2023.
 * 2023-03-20: Added notes for the week of 13th March 2023.
 * 2023-03-13: Added notes for the week of 6th March 2023.
