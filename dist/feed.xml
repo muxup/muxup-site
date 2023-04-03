@@ -4,21 +4,64 @@
 <subtitle>Adventures in collaborative open source development</subtitle>
 <link href="https://muxup.com/feed.xml" rel="self" type="application/atom+xml"/>
 <link href="https://muxup.com"/>
-<updated>2023-03-27T12:00:00Z</updated>
+<updated>2023-04-03T12:00:00Z</updated>
 <id>https://muxup.com/feed.xml</id>
 <entry>
 <title>2023Q1 week log</title>
 <published>2023-02-27T12:00:00Z</published>
-<updated>2023-03-27T12:00:00Z</updated>
+<updated>2023-04-03T12:00:00Z</updated>
 <link rel="alternate" href="https://muxup.com/2023q1/week-log"/>
 <id>https://muxup.com/2023q1/week-log</id>
 <content type="html">
 &lt;p&gt;I tend to keep quite a lot of notes on the development related (sometimes at
 work, sometimes not) I do on a week-by-week basis, and thought it might be fun
-to write up the parts that were public. This
-may or may not be of wider interest, but it aims to be a useful aide-mémoire
-for my purposes at least. Weeks with few entries might be due to focusing on
-downstream work (or perhaps just a less productive week - I am only human!).&lt;/p&gt;
+to write up the parts that were public. This may or may not be of wider
+interest, but it aims to be a useful aide-mémoire for my purposes at least.
+Weeks with few entries might be due to focusing on downstream work (or perhaps
+just a less productive week - I am only human!).&lt;/p&gt;
+&lt;h2 id=&quot;week-of-27th-march-2023&quot;&gt;&lt;a href=&quot;#week-of-27th-march-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 27th March 2023&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Submitted a &lt;a href=&quot;https://github.com/llvm/llvm-project-release-prs/pull/406&quot;&gt;backport request to
+16.0.1&lt;/a&gt; for my
+recent fixes to &lt;code&gt;llvm-objdump&lt;/code&gt; (and related tools) when encountering
+unrecognised RISC-V base or ISA extension versions, or unrecognised ISA
+extension names.&lt;/li&gt;
+&lt;li&gt;Landed a tweak to the RISC-V ISA manual to &lt;a href=&quot;https://github.com/riscv/riscv-isa-manual/pull/1001&quot;&gt;make it clear that HINT
+encodings aren&amp;#x27;t
+&amp;quot;reserved&amp;quot;&lt;/a&gt; in terms of
+being part of the defined &amp;quot;reserved instruction-set category&amp;quot;. Thanks to
+Andrew Waterman for suggesting a simpler fix than my first attempt.&lt;/li&gt;
+&lt;li&gt;I&amp;#x27;m now on Mastodon, at &lt;a href=&quot;https://fosstodon.org/@asb&quot;&gt;@asb@fosstodon.org&lt;/a&gt; and
+&lt;a href=&quot;https://fosstodon.org/@llvmweekly&quot;&gt;@llvmweekly@fosstodon.org&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Proposed &lt;a href=&quot;https://reviews.llvm.org/D147183#4233360&quot;&gt;alternate wording for the RISC-V LLVM doc updates reflecting
+recent ISA versioning
+discussions&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Set agenda for and ran the usual biweekly &lt;a href=&quot;https://discourse.llvm.org/t/risc-v-llvm-sync-up-call-30th-march-2023-note-daylight-savings-time-impact/69635&quot;&gt;RISC-V LLVM contributor sync up
+call&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Added the Renesas R9A06G150 to my &lt;a href=&quot;/2023q1/commercially-available-risc-v-silicon&quot;&gt;commercially available RISC-V silicon
+list&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Posted and landed patches to implement MC layer and codegen support for the
+experimental &lt;code&gt;Zicond&lt;/code&gt; (integer conditional operations) extension
+(&lt;a href=&quot;https://reviews.llvm.org/D146946&quot;&gt;D146946&lt;/a&gt;,
+&lt;a href=&quot;https://reviews.llvm.org/D147147&quot;&gt;D147147&lt;/a&gt;). This is essentially the same
+as the &lt;code&gt;XVentanaCondOps&lt;/code&gt; extension.&lt;/li&gt;
+&lt;li&gt;Advertised the ongoing discussion about changing the shadow call stack
+register on RISC-V &lt;a href=&quot;https://discourse.llvm.org/t/rfc-psa-changing-the-shadow-call-stack-register-on-risc-v/69537&quot;&gt;through an
+RFC&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;It was pointed out to me that the expansion of &lt;code&gt;seq_cst&lt;/code&gt; atomic ops to
+RISC-V lr/sc loops was slightly stronger than required by the mapping table
+in the ISA manual. Specifically, &lt;code&gt;sc.{w|d}.rl&lt;/code&gt; is sufficient rather than
+&lt;code&gt;sc.{w|d}.aqrl&lt;/code&gt;. Fixed with &lt;a href=&quot;https://reviews.llvm.org/D146933&quot;&gt;D146933&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Filed issue about the &lt;a href=&quot;https://github.com/riscv/riscv-bfloat16/issues/33&quot;&gt;fcvt.bf16.s instruction encoding colliding with
+fround.h&lt;/a&gt; (instructions
+from &lt;code&gt;zfbfmin&lt;/code&gt; and &lt;code&gt;zfa&lt;/code&gt; respectively).&lt;/li&gt;
+&lt;li&gt;Usual mix of upstream LLVM reviews. We were now able to
+&lt;a href=&quot;https://reviews.llvm.org/D147179&quot;&gt;bump&lt;/a&gt; the versions of the standard ISA
+extensions LLVM claims to support. As noted in my &lt;a href=&quot;https://discourse.llvm.org/t/rfc-resolving-issues-related-to-extension-versioning-in-risc-v/68472&quot;&gt;previous
+RFC&lt;/a&gt;,
+LLVM was reporting the wrong version information for the A/F/D extensions.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/482&quot;&gt;LLVM Weekly #482&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h2 id=&quot;week-of-20th-march-2023&quot;&gt;&lt;a href=&quot;#week-of-20th-march-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 20th March 2023&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;Landed patches to fix RISC-V ISA extension versioning related issues in
@@ -49,7 +92,7 @@ the riscv-bfloat16 spec.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;Usual mix of upstream LLVM reviews.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/480&quot;&gt;LLVM Weekly #480&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/481&quot;&gt;LLVM Weekly #481&lt;/a&gt;.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&quot;week-of-13th-march-2023&quot;&gt;&lt;a href=&quot;#week-of-13th-march-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 13th March 2023&lt;/h2&gt;
 &lt;ul&gt;
@@ -340,6 +383,7 @@ downstream, but I landed a couple of related minor test cleanups.
 &lt;/ul&gt;
 &lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
 &lt;ul&gt;
+&lt;li&gt;2023-04-03: Added notes for the week of 27th March 2023.&lt;/li&gt;
 &lt;li&gt;2023-03-27: Added notes for the week of 20th March 2023.&lt;/li&gt;
 &lt;li&gt;2023-03-20: Added notes for the week of 13th March 2023.&lt;/li&gt;
 &lt;li&gt;2023-03-13: Added notes for the week of 6th March 2023.&lt;/li&gt;

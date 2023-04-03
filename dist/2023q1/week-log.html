@@ -197,13 +197,56 @@ content: " «";
 <div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></a></div>
 </div>
 <h1 id="article-title"><span id="title-highlight">2023Q1 week log</span></h1>
-<div id="article-meta"><span title="2023-02-27">2023Q1</span>. Last update <span title="2023-03-27">27 Mar 2023</span>. <a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
+<div id="article-meta"><span title="2023-02-27">2023Q1</span>. Last update <span title="2023-04-03">03 Apr 2023</span>. <a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
 <p>I tend to keep quite a lot of notes on the development related (sometimes at
 work, sometimes not) I do on a week-by-week basis, and thought it might be fun
-to write up the parts that were public. This
-may or may not be of wider interest, but it aims to be a useful aide-mémoire
-for my purposes at least. Weeks with few entries might be due to focusing on
-downstream work (or perhaps just a less productive week - I am only human!).</p>
+to write up the parts that were public. This may or may not be of wider
+interest, but it aims to be a useful aide-mémoire for my purposes at least.
+Weeks with few entries might be due to focusing on downstream work (or perhaps
+just a less productive week - I am only human!).</p>
+<h2 id="week-of-27th-march-2023"><a href="#week-of-27th-march-2023" class="anchor" aria-hidden="true" tabindex="-1"></a>Week of 27th March 2023</h2>
+<ul>
+<li>Submitted a <a href="https://github.com/llvm/llvm-project-release-prs/pull/406">backport request to
+16.0.1</a> for my
+recent fixes to <code>llvm-objdump</code> (and related tools) when encountering
+unrecognised RISC-V base or ISA extension versions, or unrecognised ISA
+extension names.</li>
+<li>Landed a tweak to the RISC-V ISA manual to <a href="https://github.com/riscv/riscv-isa-manual/pull/1001">make it clear that HINT
+encodings aren&#x27;t
+&quot;reserved&quot;</a> in terms of
+being part of the defined &quot;reserved instruction-set category&quot;. Thanks to
+Andrew Waterman for suggesting a simpler fix than my first attempt.</li>
+<li>I&#x27;m now on Mastodon, at <a href="https://fosstodon.org/@asb">@asb@fosstodon.org</a> and
+<a href="https://fosstodon.org/@llvmweekly">@llvmweekly@fosstodon.org</a>.</li>
+<li>Proposed <a href="https://reviews.llvm.org/D147183#4233360">alternate wording for the RISC-V LLVM doc updates reflecting
+recent ISA versioning
+discussions</a>.</li>
+<li>Set agenda for and ran the usual biweekly <a href="https://discourse.llvm.org/t/risc-v-llvm-sync-up-call-30th-march-2023-note-daylight-savings-time-impact/69635">RISC-V LLVM contributor sync up
+call</a>.</li>
+<li>Added the Renesas R9A06G150 to my <a href="/2023q1/commercially-available-risc-v-silicon">commercially available RISC-V silicon
+list</a>.</li>
+<li>Posted and landed patches to implement MC layer and codegen support for the
+experimental <code>Zicond</code> (integer conditional operations) extension
+(<a href="https://reviews.llvm.org/D146946">D146946</a>,
+<a href="https://reviews.llvm.org/D147147">D147147</a>). This is essentially the same
+as the <code>XVentanaCondOps</code> extension.</li>
+<li>Advertised the ongoing discussion about changing the shadow call stack
+register on RISC-V <a href="https://discourse.llvm.org/t/rfc-psa-changing-the-shadow-call-stack-register-on-risc-v/69537">through an
+RFC</a>.</li>
+<li>It was pointed out to me that the expansion of <code>seq_cst</code> atomic ops to
+RISC-V lr/sc loops was slightly stronger than required by the mapping table
+in the ISA manual. Specifically, <code>sc.{w|d}.rl</code> is sufficient rather than
+<code>sc.{w|d}.aqrl</code>. Fixed with <a href="https://reviews.llvm.org/D146933">D146933</a>.</li>
+<li>Filed issue about the <a href="https://github.com/riscv/riscv-bfloat16/issues/33">fcvt.bf16.s instruction encoding colliding with
+fround.h</a> (instructions
+from <code>zfbfmin</code> and <code>zfa</code> respectively).</li>
+<li>Usual mix of upstream LLVM reviews. We were now able to
+<a href="https://reviews.llvm.org/D147179">bump</a> the versions of the standard ISA
+extensions LLVM claims to support. As noted in my <a href="https://discourse.llvm.org/t/rfc-resolving-issues-related-to-extension-versioning-in-risc-v/68472">previous
+RFC</a>,
+LLVM was reporting the wrong version information for the A/F/D extensions.</li>
+<li><a href="https://llvmweekly.org/issue/482">LLVM Weekly #482</a>.</li>
+</ul>
 <h2 id="week-of-20th-march-2023"><a href="#week-of-20th-march-2023" class="anchor" aria-hidden="true" tabindex="-1"></a>Week of 20th March 2023</h2>
 <ul>
 <li>Landed patches to fix RISC-V ISA extension versioning related issues in
@@ -234,7 +277,7 @@ the riscv-bfloat16 spec.</li>
 </ul>
 </li>
 <li>Usual mix of upstream LLVM reviews.</li>
-<li><a href="https://llvmweekly.org/issue/480">LLVM Weekly #480</a>.</li>
+<li><a href="https://llvmweekly.org/issue/481">LLVM Weekly #481</a>.</li>
 </ul>
 <h2 id="week-of-13th-march-2023"><a href="#week-of-13th-march-2023" class="anchor" aria-hidden="true" tabindex="-1"></a>Week of 13th March 2023</h2>
 <ul>
@@ -525,6 +568,7 @@ downstream, but I landed a couple of related minor test cleanups.
 </ul>
 <hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor "aria-hidden="true" tabindex="-1"></a>Article changelog</summary>
 <ul>
+<li>2023-04-03: Added notes for the week of 27th March 2023.</li>
 <li>2023-03-27: Added notes for the week of 20th March 2023.</li>
 <li>2023-03-20: Added notes for the week of 13th March 2023.</li>
 <li>2023-03-13: Added notes for the week of 6th March 2023.</li>
