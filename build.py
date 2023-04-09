@@ -177,6 +177,7 @@ class PageData:
     markdown_content: str
     markdown_content_as_html: str
     hidden: bool
+    extra_css: str
     yyyyqq_dir: str | None
     last_major_update: str | None
     last_minor_update: str | None
@@ -235,6 +236,7 @@ def parse_page(file: pathlib.Path) -> PageData:
     published_date = fm_get("published", datetime.date).strftime("%Y-%m-%d")
     permalink = page_path_to_permalink(file)
     hidden = fm_get_opt("hidden", bool) or False
+    extra_css = fm_get_opt("extra_css", str) or ""
     path_part = file.parts[1]
     yyyyqq_dir = None
     if (
@@ -260,6 +262,7 @@ def parse_page(file: pathlib.Path) -> PageData:
         markdown_content=markdown_content,
         markdown_content_as_html=markdown_content_as_html,
         hidden=hidden,
+        extra_css=extra_css,
         last_major_update=last_major_update,
         last_minor_update=last_minor_update,
     )
@@ -578,7 +581,7 @@ for file in sorted(pages_path.rglob("*.md")):
 <meta name="description" content="{html.escape(pd.description)}">
 <style>
 {common_css_frag}{article_css_frag}{gated_css_frag}
-</style>
+{remove_leading_whitespace(pd.extra_css)}</style>
 <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed.xml"/>
 <link rel="canonical" href="{base_url}{pd.permalink}"/>
 </head>
