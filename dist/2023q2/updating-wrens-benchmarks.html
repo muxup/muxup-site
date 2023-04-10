@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:title" content="Updating Wren&#x27;s benchmarks"/>
+<meta property="og:site_name" content="Muxup">
+<meta property="og:description" content="Rerunning the Wren programming language&#x27;s benchmarks against current Lua/Python/Ruby."/>
+<meta property="og:type" content="article"/>
+<meta property="og:url" content="https://muxup.com/2023q2/updating-wrens-benchmarks"/>
+<meta property="og:image" content="https://v1.screenshot.11ty.dev/https%3A%2F%2Fmuxup.com%2F2023q2%2Fupdating-wrens-benchmarks/opengraph/ar/bigger"/>
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:site" content="@muxup">
+<meta property="twitter:creator" content="@asbradbury">
+<title>Updating Wren&#x27;s benchmarks - Muxup</title>
+<link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg xmlns='http:%2F%2Fwww.w3.org%2F2000%2Fsvg' viewBox='0 0 100 100'%3E%3Ctext y='80' font-size='110'%3E▨%3C%2Ftext%3E%3C%2Fsvg%3E">
+<meta name="description" content="Rerunning the Wren programming language&#x27;s benchmarks against current Lua/Python/Ruby.">
+<style>
+@font-face {
+font-family:'Nunito Var';
+src:url('/static/Nunito.var.v2.woff2') format('woff2-variations');
+font-display:swap;
+font-weight: 200 1000;
+}
+*, *::before, *::after {
+box-sizing:border-box;
+}
+* {
+margin:0;
+}
+input, button, textarea, select {
+font:inherit;
+}
+img, picture, video, canvas, svg {
+display:block;
+max-width:100%;
+}
+html {
+font-family:'Nunito Var', sans-serif;
+height:100%;
+font-size:16px;
+-webkit-tap-highlight-color:transparent;
+}
+@media screen and (min-width:640px) {
+html {
+font-size:18px;
+}
+}
+body {
+line-height:1.5;
+color:#222;
+display:grid;
+height:100%;
+grid-template-rows:1fr auto;
+background:#fff no-repeat 0% 0% / 100% .7rem linear-gradient(120deg, #ffffe3 20%, #ddfffc 20%, #ddfffc 40%, #e2eeff 40%, #e2eeff 60%, #f2e2ff 60%, #f2e2ff 80%, #ffdef2 80%, #ffdef2 100%);
+tab-size:4;
+}
+h1, h2, h3, h4, h5, h6 {
+line-height:1.25;
+font-weight:600;
+overflow-wrap:break-word;
+letter-spacing:-.025em;
+margin:1.75rem 0 .75rem;
+}
+h1 {
+font-size:2.986rem
+}
+h2 {
+font-size:2.488rem
+}
+p {
+margin:.75rem 0;
+font-weight:400;
+overflow-wrap:break-word;
+}
+a {
+color:inherit;
+text-decoration:underline;
+text-decoration-color:#aaa;
+text-underline-offset:.15em;
+}
+a:hover {
+text-decoration-thickness:2px;
+}
+ol, ul {
+margin:0 0 0 1.5rem;
+padding-left:0;
+}
+li {
+margin:0 0 .25rem
+}
+::selection {
+background:#ffdac0;
+}
+footer {
+font-size:.833rem;
+color:#777;
+padding:0 1rem;
+width:100%;
+max-width:min(calc(750px + 2rem), calc(100vw - 1rem));
+margin:0 auto;
+}
+footer p {
+text-align:center;
+margin:0 0 .75rem;
+}
+#footer-image {
+margin:0 auto;
+cursor:pointer;
+}
+#article-logo {
+line-height:1.25;
+margin:.5rem 0 0;
+font-size:1.44rem;
+font-weight:700;
+position:relative;
+}
+#article-logo a {
+text-decoration:none;
+}
+#article-title {
+margin:1.5rem 0 0;
+position:relative;
+}
+#article-meta {
+font-size:.833rem;
+color:#777;
+}
+#article-container {
+margin:0 auto;
+padding:1rem;
+max-width:min(calc(750px + 2rem), calc(100vw - 1rem));
+width:100%;
+}
+.anchor {
+position: absolute;
+text-decoration: none;
+width:1.75ex;
+margin-left:-1.4ex;
+visibility:hidden;
+font-size:.8em;
+padding-top:.2em;
+color:#aaa;
+}
+h2:hover .anchor,
+h3:hover .anchor,
+h4:hover .anchor,
+h5:hover .anchor,
+h6:hover .anchor,
+summary:hover .anchor {
+visibility:visible;
+}
+.anchor::before {
+content:"#";
+}
+code {
+background:#f5f5f5;
+padding:.125rem .25rem;
+font-size:.833rem
+}
+pre > code {
+padding:0;
+background:#fff;
+}
+pre {
+word-wrap:break-word;
+overflow-x:auto;
+padding:.5rem 1rem;
+margin:1rem -1rem;
+border-radius:.4rem;
+border:1px solid #d2d2d2;
+}
+table {
+border-spacing:.75rem 0;
+text-align:left;
+width:100%;
+margin:0 0 1.5rem 0;
+}
+td, th {
+border-bottom:.05rem solid #dadee4;
+padding:.6rem 0;
+}
+table.chart {
+font-size:.833rem;
+}
+table.chart td, th {
+padding:.1em;
+border-bottom:0;
+}
+table.chart th {
+width:15%;
+}
+table.chart .chart-bar {
+background:#8bdd7c;
+text-align:right;
+}
+</style>
+<link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed.xml"/>
+<link rel="canonical" href="https://muxup.com/2023q2/updating-wrens-benchmarks"/>
+</head>
+<body>
+<div id="article-container">
+<div>
+<div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></a></div>
+</div>
+<h1 id="article-title"><span id="title-highlight">Updating Wren&#x27;s benchmarks</span></h1>
+<div id="article-meta"><span title="2023-04-10">2023Q2</span>.</div>
+<p><a href="https://wren.io/">Wren</a> is a &quot;small, fast, class-based, concurrent scripting
+language&quot;, originally designed by Bob Nystrom (who you might recognise as the
+author of <a href="https://gameprogrammingpatterns.com/">Game Programming Patterns</a>
+and <a href="https://craftinginterpreters.com/">Crafting Interpreters</a>. It&#x27;s a really
+fun language to study - the implementation is compact and easily readable, and
+although class-based languages aren&#x27;t considered very hip these days there&#x27;s a
+real elegance to its design. I saw Wren&#x27;s <a href="https://wren.io/performance.html">performance
+page</a> hadn&#x27;t been updated for a very long
+time, and especially given the recent upstream interpreter performance work on
+Python, was interested in seeing how performance on these microbencharks has
+changed. Hence this quick post to share some new numbers.</p>
+<h2 id="new-results"><a href="#new-results" class="anchor" aria-hidden="true" tabindex="-1"></a>New results</h2>
+<p>To cut to the chase, here are the results I get running the same set of
+<a href="https://github.com/wren-lang/wren/tree/main/test/benchmark">benchmarks</a>
+across a collection of Python, Ruby, and Lua versions (those available in
+current Arch Linux).</p>
+<p><strong>Method Call</strong>:</p>
+<table class="chart">
+  <tr>
+    <th>wren0.4</th><td><div class="chart-bar" style="width: 25%;">0.079s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>luajit2.1 -joff</th><td><div class="chart-bar" style="width: 29%;">0.090s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>ruby2.7</th><td><div class="chart-bar" style="width: 33%;">0.102s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>ruby3.0</th><td><div class="chart-bar" style="width: 33%;">0.104s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>lua5.4</th><td><div class="chart-bar" style="width: 39%;">0.123s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>lua5.3</th><td><div class="chart-bar" style="width: 50%;">0.156s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>python3.11</th><td><div class="chart-bar" style="width: 54%;">0.170s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>lua5.2</th><td><div class="chart-bar" style="width: 59%;">0.184s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>mruby</th><td><div class="chart-bar" style="width: 62%;">0.193s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>python3.10</th><td><div class="chart-bar" style="width: 100%;">0.313s&nbsp;</div></td>
+  </tr>
+</table>
+<p><strong>Delta Blue</strong>:</p>
+<table class="chart">
+  <tr>
+    <th>wren0.4</th><td><div class="chart-bar" style="width: 43%;">0.086s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>python3.11</th><td><div class="chart-bar" style="width: 53%;">0.106s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>python3.10</th><td><div class="chart-bar" style="width: 100%;">0.202s&nbsp;</div></td>
+  </tr>
+</table>
+<p><strong>Binary Trees</strong>:</p>
+<table class="chart">
+  <tr>
+    <th>luajit2.1 -joff</th><td><div class="chart-bar" style="width: 37%;">0.073s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>ruby2.7</th><td><div class="chart-bar" style="width: 58%;">0.113s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>ruby3.0</th><td><div class="chart-bar" style="width: 59%;">0.115s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>python3.11</th><td><div class="chart-bar" style="width: 70%;">0.137s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>lua5.4</th><td><div class="chart-bar" style="width: 71%;">0.138s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>wren0.4</th><td><div class="chart-bar" style="width: 73%;">0.144s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>mruby</th><td><div class="chart-bar" style="width: 84%;">0.163s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>python3.10</th><td><div class="chart-bar" style="width: 95%;">0.186s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>lua5.3</th><td><div class="chart-bar" style="width: 99%;">0.195s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>lua5.2</th><td><div class="chart-bar" style="width: 100%;">0.196s&nbsp;</div></td>
+  </tr>
+</table>
+<p><strong>Recursive Fibonacci</strong>:</p>
+<table class="chart">
+  <tr>
+    <th>luajit2.1 -joff</th><td><div class="chart-bar" style="width: 22%;">0.055s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>lua5.4</th><td><div class="chart-bar" style="width: 36%;">0.090s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>ruby2.7</th><td><div class="chart-bar" style="width: 43%;">0.109s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>ruby3.0</th><td><div class="chart-bar" style="width: 47%;">0.117s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>lua5.3</th><td><div class="chart-bar" style="width: 50%;">0.126s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>lua5.2</th><td><div class="chart-bar" style="width: 55%;">0.138s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>wren0.4</th><td><div class="chart-bar" style="width: 59%;">0.148s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>python3.11</th><td><div class="chart-bar" style="width: 62%;">0.157s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>mruby</th><td><div class="chart-bar" style="width: 73%;">0.185s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>python3.10</th><td><div class="chart-bar" style="width: 100%;">0.252s&nbsp;</div></td>
+  </tr>
+</table>
+<p>I&#x27;ve used essentially the same presentation and methodology as in the original
+benchmark, partly to save time pondering the optimal approach, partly so I can
+redirect any critiques to the original author (sorry Bob!). Benchmarks do not
+measure interpreter startup time, and each benchmark is run ten times with the
+median used (thermal throttling could potentially mean this isn&#x27;t the best
+methodology, but changing the number of test repetitions to e.g. 1000 seems to
+have little effect).</p>
+<p>The tests were run on a machine with an AMD Ryzen 9 5950X processor. wren 0.4
+as of commit
+<a href="https://github.com/wren-lang/wren/commit/c2a75f1eaf9b1ba1245d7533a723360863fb012d">c2a75f1</a>
+was used as well as the following Arch Linux packages:</p>
+<ul>
+<li>lua52-5.2.4-5</li>
+<li>lua53-5.3.6-1</li>
+<li>lua-5.4.4-3,</li>
+<li>luajit-2.1.0.beta3.r471.g505e2c03-1</li>
+<li>mruby-3.1.0-1</li>
+<li>python-3.10.10-1</li>
+<li>python-3.11.3-1 (taken from Arch Linux&#x27;s staging repo)</li>
+<li>ruby2.7-2.7.7-1</li>
+<li>ruby-3.0.5-1</li>
+</ul>
+<p>The Python 3.10 and 3.11 packages were compiled with the same GCC version
+(12.2.1 according to <code>python -VV</code>), though this won&#x27;t necessarily be true for
+all other packages (e.g. the lua52 and lua53 packages are several years old so
+will have been built an older GCC).</p>
+<p>I&#x27;ve submitted a <a href="https://github.com/wren-lang/wren/pull/1164">pull request to update the Wren performance
+page</a>.</p>
+<h2 id="old-results"><a href="#old-results" class="anchor" aria-hidden="true" tabindex="-1"></a>Old results</h2>
+<p>The following results are copied from the <a href="https://wren.io/performance.html">Wren performance
+page</a> (<a href="https://web.archive.org/web/20230326002211/https://wren.io/performance.html">archive.org
+link</a>
+ease of comparison. They were run on a MacBook Pro 2.3GHz Intel Core i7 with
+Lua 5.2.3, LuaJIT 2.0.2, Python 2.7.5, Python 3.3.4, ruby 2.0.0p247.</p>
+<p><strong>Method Call</strong>:</p>
+<table class="chart">
+  <tr>
+    <th>wren2015</th><td><div class="chart-bar" style="width: 14%;">0.12s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>luajit2.0 -joff</th><td><div class="chart-bar" style="width: 18%;">0.16s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>ruby2.0</th><td><div class="chart-bar" style="width: 23%;">0.20s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>lua5.2</th><td><div class="chart-bar" style="width: 41%;">0.35s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>python3.3</th><td><div class="chart-bar" style="width: 91%;">0.78s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>python2.7</th><td><div class="chart-bar" style="width: 100%;">0.85s&nbsp;</div></td>
+  </tr>
+</table>
+<p><strong>DeltaBlue</strong>:</p>
+<table class="chart">
+  <tr>
+    <th>wren2015</th><td><div class="chart-bar" style="width: 22%;">0.13s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>python3.3</th><td><div class="chart-bar" style="width: 83%;">0.48s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>python2.7</th><td><div class="chart-bar" style="width: 100%;">0.57s&nbsp;</div></td>
+  </tr>
+</table>
+<p><strong>Binary Trees</strong>:</p>
+<table class="chart">
+  <tr>
+    <th>luajit2.0 -joff</th><td><div class="chart-bar" style="width: 20%;">0.11s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>wren2015</th><td><div class="chart-bar" style="width: 41%;">0.22s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>ruby2.0</th><td><div class="chart-bar" style="width: 46%;">0.24s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>python2.7</th><td><div class="chart-bar" style="width: 71%;">0.37s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>python3.3</th><td><div class="chart-bar" style="width: 73%;">0.38s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>lua5.2</th><td><div class="chart-bar" style="width: 100%;">0.52s&nbsp;</div></td>
+  </tr>
+</table>
+<p><strong>Recursive Fibonacci</strong>:</p>
+<table class="chart">
+  <tr>
+    <th>luajit2.0 -joff</th><td><div class="chart-bar" style="width: 17%;">0.10s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>wren2015</th><td><div class="chart-bar" style="width: 35%;">0.20s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>ruby2.0</th><td><div class="chart-bar" style="width: 39%;">0.22s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>lua5.2</th><td><div class="chart-bar" style="width: 49%;">0.28s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>python2.7</th><td><div class="chart-bar" style="width: 90%;">0.51s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>python3.3</th><td><div class="chart-bar" style="width: 100%;">0.57s&nbsp;</div></td>
+  </tr>
+</table>
+<h2 id="observations"><a href="#observations" class="anchor" aria-hidden="true" tabindex="-1"></a>Observations</h2>
+<p>A few takeaways:</p>
+<ul>
+<li>LuaJIT&#x27;s bytecode interpreter remains incredibly fast (though see <a href="https://sillycross.github.io/2022/11/22/2022-11-22/">this blog
+post</a> for a methodology
+to produce an even faster interpreter).</li>
+<li>The performance improvements in Python 3.11 were <a href="https://docs.python.org/3/whatsnew/3.11.html#whatsnew311-faster-cpython">well
+documented</a>
+and are very visible on this set of microbenchparks.</li>
+<li>I was more surprised by the performance jump with Lua 5.4, especially as the
+<a href="https://www.lua.org/manual/5.4/readme.html#changes">release notes</a> give few
+hints of performance improvements that would be reflected in these
+microbenchmarks. The <a href="https://lwn.net/Articles/826134/">LWN article about the Lua 5.4
+release</a> however did note improved
+performance on a range of benchmarks.</li>
+<li>Wren remains speedy (for these workloads at least), but engineering work on
+other interpreters has narrowed that gap for some of these benchmarks.</li>
+<li>I haven&#x27;t taken the time to compare the January 2015 version of Wren used
+for the benchmarks vs present-day Wren 0.4. It would be interesting to
+explore that though.</li>
+<li>A tiny number of microbenchmarks have been used in this performance test. It
+wouldn&#x27;t be wise to draw general conclusions - this is just a bit of fun.</li>
+</ul>
+<h2 id="appendix-benchmark-script"><a href="#appendix-benchmark-script" class="anchor" aria-hidden="true" tabindex="-1"></a>Appendix: Benchmark script</h2>
+<p>Health warning: this is incredibly quick and dirty (especially the repeated
+switching between the python packages to allow testing both 3.10 and 3.11):</p>
+<div class="highlight" style="background: #ffffff"><pre style="line-height: 125%;"><span></span><code><span style="color: #177500">#!/usr/bin/env python3</span>
+
+<span style="color: #177500"># Copyright Muxup contributors.</span>
+<span style="color: #177500"># Distributed under the terms of the MIT license, see LICENSE for details.</span>
+<span style="color: #177500"># SPDX-License-Identifier: MIT</span>
+
+<span style="color: #A90D91">import</span> <span style="color: #000000">statistics</span>
+<span style="color: #A90D91">import</span> <span style="color: #000000">subprocess</span>
+
+<span style="color: #000000">out</span> <span style="color: #000000">=</span> <span style="color: #A90D91">open</span>(<span style="color: #C41A16">&quot;out.md&quot;</span>, <span style="color: #C41A16">&quot;w&quot;</span>, <span style="color: #000000">encoding=</span><span style="color: #C41A16">&quot;utf-8&quot;</span>)
+
+
+<span style="color: #A90D91">def</span> <span style="color: #000000">run_single_bench</span>(<span style="color: #000000">bench_name</span>, <span style="color: #000000">bench_file</span>, <span style="color: #000000">runner_name</span>):
+    <span style="color: #000000">bench_file</span> <span style="color: #000000">=</span> <span style="color: #C41A16">&quot;./test/benchmark/&quot;</span> <span style="color: #000000">+</span> <span style="color: #000000">bench_file</span>
+    <span style="color: #A90D91">if</span> <span style="color: #000000">runner_name</span> <span style="color: #000000">==</span> <span style="color: #C41A16">&quot;lua5.2&quot;</span>:
+        <span style="color: #000000">bench_file</span> <span style="color: #000000">+=</span> <span style="color: #C41A16">&quot;.lua&quot;</span>
+        <span style="color: #000000">cmdline</span> <span style="color: #000000">=</span> [<span style="color: #C41A16">&quot;lua5.2&quot;</span>, <span style="color: #000000">bench_file</span>]
+    <span style="color: #A90D91">elif</span> <span style="color: #000000">runner_name</span> <span style="color: #000000">==</span> <span style="color: #C41A16">&quot;lua5.3&quot;</span>:
+        <span style="color: #000000">bench_file</span> <span style="color: #000000">+=</span> <span style="color: #C41A16">&quot;.lua&quot;</span>
+        <span style="color: #000000">cmdline</span> <span style="color: #000000">=</span> [<span style="color: #C41A16">&quot;lua5.3&quot;</span>, <span style="color: #000000">bench_file</span>]
+    <span style="color: #A90D91">elif</span> <span style="color: #000000">runner_name</span> <span style="color: #000000">==</span> <span style="color: #C41A16">&quot;lua5.4&quot;</span>:
+        <span style="color: #000000">bench_file</span> <span style="color: #000000">+=</span> <span style="color: #C41A16">&quot;.lua&quot;</span>
+        <span style="color: #000000">cmdline</span> <span style="color: #000000">=</span> [<span style="color: #C41A16">&quot;lua5.4&quot;</span>, <span style="color: #000000">bench_file</span>]
+    <span style="color: #A90D91">elif</span> <span style="color: #000000">runner_name</span> <span style="color: #000000">==</span> <span style="color: #C41A16">&quot;luajit2.1 -joff&quot;</span>:
+        <span style="color: #000000">bench_file</span> <span style="color: #000000">+=</span> <span style="color: #C41A16">&quot;.lua&quot;</span>
+        <span style="color: #000000">cmdline</span> <span style="color: #000000">=</span> [<span style="color: #C41A16">&quot;luajit&quot;</span>, <span style="color: #C41A16">&quot;-joff&quot;</span>, <span style="color: #000000">bench_file</span>]
+    <span style="color: #A90D91">elif</span> <span style="color: #000000">runner_name</span> <span style="color: #000000">==</span> <span style="color: #C41A16">&quot;mruby&quot;</span>:
+        <span style="color: #000000">bench_file</span> <span style="color: #000000">+=</span> <span style="color: #C41A16">&quot;.rb&quot;</span>
+        <span style="color: #000000">cmdline</span> <span style="color: #000000">=</span> [<span style="color: #C41A16">&quot;mruby&quot;</span>, <span style="color: #000000">bench_file</span>]
+    <span style="color: #A90D91">elif</span> <span style="color: #000000">runner_name</span> <span style="color: #000000">==</span> <span style="color: #C41A16">&quot;python3.10&quot;</span>:
+        <span style="color: #000000">bench_file</span> <span style="color: #000000">+=</span> <span style="color: #C41A16">&quot;.py&quot;</span>
+        <span style="color: #000000">subprocess.run</span>(
+            [
+                <span style="color: #C41A16">&quot;sudo&quot;</span>,
+                <span style="color: #C41A16">&quot;pacman&quot;</span>,
+                <span style="color: #C41A16">&quot;-U&quot;</span>,
+                <span style="color: #C41A16">&quot;--noconfirm&quot;</span>,
+                <span style="color: #C41A16">&quot;/var/cache/pacman/pkg/python-3.10.10-1-x86_64.pkg.tar.zst&quot;</span>,
+            ],
+            <span style="color: #000000">check=</span><span style="color: #A90D91">True</span>,
+        )
+        <span style="color: #000000">cmdline</span> <span style="color: #000000">=</span> [<span style="color: #C41A16">&quot;python&quot;</span>, <span style="color: #000000">bench_file</span>]
+    <span style="color: #A90D91">elif</span> <span style="color: #000000">runner_name</span> <span style="color: #000000">==</span> <span style="color: #C41A16">&quot;python3.11&quot;</span>:
+        <span style="color: #000000">bench_file</span> <span style="color: #000000">+=</span> <span style="color: #C41A16">&quot;.py&quot;</span>
+        <span style="color: #000000">subprocess.run</span>(
+            [
+                <span style="color: #C41A16">&quot;sudo&quot;</span>,
+                <span style="color: #C41A16">&quot;pacman&quot;</span>,
+                <span style="color: #C41A16">&quot;-U&quot;</span>,
+                <span style="color: #C41A16">&quot;--noconfirm&quot;</span>,
+                <span style="color: #C41A16">&quot;/var/cache/pacman/pkg/python-3.11.3-1-x86_64.pkg.tar.zst&quot;</span>,
+            ],
+            <span style="color: #000000">check=</span><span style="color: #A90D91">True</span>,
+        )
+        <span style="color: #000000">cmdline</span> <span style="color: #000000">=</span> [<span style="color: #C41A16">&quot;python&quot;</span>, <span style="color: #000000">bench_file</span>]
+    <span style="color: #A90D91">elif</span> <span style="color: #000000">runner_name</span> <span style="color: #000000">==</span> <span style="color: #C41A16">&quot;ruby2.7&quot;</span>:
+        <span style="color: #000000">bench_file</span> <span style="color: #000000">+=</span> <span style="color: #C41A16">&quot;.rb&quot;</span>
+        <span style="color: #000000">cmdline</span> <span style="color: #000000">=</span> [<span style="color: #C41A16">&quot;ruby-2.7&quot;</span>, <span style="color: #000000">bench_file</span>]
+    <span style="color: #A90D91">elif</span> <span style="color: #000000">runner_name</span> <span style="color: #000000">==</span> <span style="color: #C41A16">&quot;ruby3.0&quot;</span>:
+        <span style="color: #000000">bench_file</span> <span style="color: #000000">+=</span> <span style="color: #C41A16">&quot;.rb&quot;</span>
+        <span style="color: #000000">cmdline</span> <span style="color: #000000">=</span> [<span style="color: #C41A16">&quot;ruby&quot;</span>, <span style="color: #000000">bench_file</span>]
+    <span style="color: #A90D91">elif</span> <span style="color: #000000">runner_name</span> <span style="color: #000000">==</span> <span style="color: #C41A16">&quot;wren0.4&quot;</span>:
+        <span style="color: #000000">bench_file</span> <span style="color: #000000">+=</span> <span style="color: #C41A16">&quot;.wren&quot;</span>
+        <span style="color: #000000">cmdline</span> <span style="color: #000000">=</span> [<span style="color: #C41A16">&quot;./bin/wren_test&quot;</span>, <span style="color: #000000">bench_file</span>]
+    <span style="color: #A90D91">else</span>:
+        <span style="color: #A90D91">raise</span> <span style="color: #000000">SystemExit</span>(<span style="color: #C41A16">&quot;Unrecognised runner&quot;</span>)
+
+    <span style="color: #000000">times</span> <span style="color: #000000">=</span> []
+    <span style="color: #A90D91">for</span> <span style="color: #000000">_</span> <span style="color: #000000">in</span> <span style="color: #A90D91">range</span>(<span style="color: #1C01CE">10</span>):
+        <span style="color: #000000">bench_out</span> <span style="color: #000000">=</span> <span style="color: #000000">subprocess.run</span>(
+            <span style="color: #000000">cmdline</span>, <span style="color: #000000">capture_output=</span><span style="color: #A90D91">True</span>, <span style="color: #000000">check=</span><span style="color: #A90D91">True</span>, <span style="color: #000000">encoding=</span><span style="color: #C41A16">&quot;utf-8&quot;</span>
+        )<span style="color: #000000">.stdout</span>
+        <span style="color: #000000">times.append</span>(<span style="color: #A90D91">float</span>(<span style="color: #000000">bench_out.split</span>(<span style="color: #C41A16">&quot;: &quot;</span>)[<span style="color: #000000">-</span><span style="color: #1C01CE">1</span>]<span style="color: #000000">.strip</span>()))
+    <span style="color: #A90D91">return</span> <span style="color: #000000">statistics.median</span>(<span style="color: #000000">times</span>)
+
+
+<span style="color: #A90D91">def</span> <span style="color: #000000">do_bench</span>(<span style="color: #000000">name</span>, <span style="color: #000000">file_base</span>, <span style="color: #000000">runners</span>):
+    <span style="color: #000000">results</span> <span style="color: #000000">=</span> {}
+    <span style="color: #A90D91">for</span> <span style="color: #000000">runner</span> <span style="color: #000000">in</span> <span style="color: #000000">runners</span>:
+        <span style="color: #000000">results</span>[<span style="color: #000000">runner</span>] <span style="color: #000000">=</span> <span style="color: #000000">run_single_bench</span>(<span style="color: #000000">name</span>, <span style="color: #000000">file_base</span>, <span style="color: #000000">runner</span>)
+    <span style="color: #000000">results</span> <span style="color: #000000">=</span> <span style="color: #A90D91">dict</span>(<span style="color: #A90D91">sorted</span>(<span style="color: #000000">results.items</span>(), <span style="color: #000000">key=</span><span style="color: #A90D91">lambda</span> <span style="color: #000000">kv</span>: <span style="color: #000000">kv</span>[<span style="color: #1C01CE">1</span>]))
+    <span style="color: #000000">longest_result</span> <span style="color: #000000">=</span> <span style="color: #A90D91">max</span>(<span style="color: #000000">results.values</span>())
+    <span style="color: #000000">out.write</span>(<span style="color: #C41A16">f&quot;**{</span><span style="color: #000000">name</span><span style="color: #C41A16">}**:\n&quot;</span>)
+    <span style="color: #000000">out.write</span>(<span style="color: #C41A16">&#39;&lt;table class=&quot;chart&quot;&gt;\n&#39;</span>)
+    <span style="color: #A90D91">for</span> <span style="color: #000000">runner</span>, <span style="color: #000000">result</span> <span style="color: #000000">in</span> <span style="color: #000000">results.items</span>():
+        <span style="color: #000000">percent</span> <span style="color: #000000">=</span> <span style="color: #A90D91">round</span>((<span style="color: #000000">result</span> <span style="color: #000000">/</span> <span style="color: #000000">longest_result</span>) <span style="color: #000000">*</span> <span style="color: #1C01CE">100</span>)
+        <span style="color: #000000">out.write</span>(
+            <span style="color: #C41A16">f&quot;&quot;&quot;\</span>
+<span style="color: #C41A16">  &lt;tr&gt;</span>
+<span style="color: #C41A16">    &lt;th&gt;{</span><span style="color: #000000">runner</span><span style="color: #C41A16">}&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: {</span><span style="color: #000000">percent</span><span style="color: #C41A16">}%;&quot;&gt;{</span><span style="color: #000000">result</span><span style="color: #C41A16">:.3f}s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;</span>
+<span style="color: #C41A16">  &lt;/tr&gt;\n&quot;&quot;&quot;</span>
+        )
+    <span style="color: #000000">out.write</span>(<span style="color: #C41A16">&quot;&lt;/table&gt;\n\n&quot;</span>)
+
+
+<span style="color: #000000">all_runners</span> <span style="color: #000000">=</span> [
+    <span style="color: #C41A16">&quot;lua5.2&quot;</span>,
+    <span style="color: #C41A16">&quot;lua5.3&quot;</span>,
+    <span style="color: #C41A16">&quot;lua5.4&quot;</span>,
+    <span style="color: #C41A16">&quot;luajit2.1 -joff&quot;</span>,
+    <span style="color: #C41A16">&quot;mruby&quot;</span>,
+    <span style="color: #C41A16">&quot;python3.10&quot;</span>,
+    <span style="color: #C41A16">&quot;python3.11&quot;</span>,
+    <span style="color: #C41A16">&quot;ruby2.7&quot;</span>,
+    <span style="color: #C41A16">&quot;ruby3.0&quot;</span>,
+    <span style="color: #C41A16">&quot;wren0.4&quot;</span>,
+]
+<span style="color: #000000">do_bench</span>(<span style="color: #C41A16">&quot;Method Call&quot;</span>, <span style="color: #C41A16">&quot;method_call&quot;</span>, <span style="color: #000000">all_runners</span>)
+<span style="color: #000000">do_bench</span>(<span style="color: #C41A16">&quot;Delta Blue&quot;</span>, <span style="color: #C41A16">&quot;delta_blue&quot;</span>, [<span style="color: #C41A16">&quot;python3.10&quot;</span>, <span style="color: #C41A16">&quot;python3.11&quot;</span>, <span style="color: #C41A16">&quot;wren0.4&quot;</span>])
+<span style="color: #000000">do_bench</span>(<span style="color: #C41A16">&quot;Binary Trees&quot;</span>, <span style="color: #C41A16">&quot;binary_trees&quot;</span>, <span style="color: #000000">all_runners</span>)
+<span style="color: #000000">do_bench</span>(<span style="color: #C41A16">&quot;Recursive Fibonacci&quot;</span>, <span style="color: #C41A16">&quot;fib&quot;</span>, <span style="color: #000000">all_runners</span>)
+<span style="color: #A90D91">print</span>(<span style="color: #C41A16">&quot;Output written to out.md&quot;</span>)
+</code></pre></div>
+
+
+</div>
+<footer class="footer">
+<img id="footer-image" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E" width="50" height="50"/>
+<p>Curated by Alex Bradbury | &copy; <a href="/">Muxup</a> contributors | <a href="/about">About</a> | <a href="https://github.com/muxup">GitHub</a> | <a href="https://twitter.com/muxup">Twitter</a></p>
+</footer>
+<script>
+const t="http://www.w3.org/2000/svg";function o(t){return Math.random()*(2*t)-t}function n(t){const n=t.t.getBoundingClientRect();const e=t.o.getClientRects();let c="";for(const t of e){const e=t.x-n.x,f=t.y-n.y,s=t.width,r=t.height;const i=f+r/2;let u=s<75?3:s<300?6:8;const l=.2+.2*Math.random();c=`${c}\n      M${e+o(u)} ${i+o(u)}\n      C${e+s*l+o(u)} ${i+o(u)},\n       ${e+2*s*l+o(u)} ${i+o(u)}\n       ${e+s+o(u)} ${i+o(u)}`}t.i=c;t.strokeWidth=.85*e[0].height}const e=new Map;let c=new ResizeObserver((t=>{for(const o of t){const t=e.get(o.target);if(!t.i)n(t)}for(const o of t){s(e.get(o.target))}}));function f(o){const n=document.createElementNS(t,"svg");n.style.position="absolute";n.style.zIndex=-1;n.style.top="0";n.style.left="0";n.style.overflow="visible";const e=document.createElementNS(t,"path");e.setAttribute("fill","none");e.setAttribute("stroke",o.u);n.appendChild(e);o.o.insertAdjacentElement("beforebegin",n);o.t=n}function s(t){if(!t.i){n(t)}const o=t.t.children[0];o.setAttribute("stroke-width",t.strokeWidth);o.setAttribute("d",t.i);t.i=null}function r(){for(const t of e.values()){f(t)}for(const t of e.values()){n(t)}for(const t of e.keys()){c.observe(t)}document.fonts.ready.then((()=>i()))}function i(){for(const t of e.values()){n(t)}for(const t of e.values()){s(t)}}function u(t,o){let n;t.addEventListener("mouseover",(()=>{s(o);n=setInterval((()=>s(o)),240)}),false);t.addEventListener("mouseout",(()=>{clearInterval(n)}));t.addEventListener("click",(()=>{clearInterval(n)}))}function l(t,o,n){let c={o:t,l:o,u:n};e.set(o,c);return c}let a=new Set([window.location.pathname]);const h=document.querySelector("#footer-image");let d=null;function m(){let t=Math.floor(Math.random()*282);d="/static/footer/"+String(t).padStart(4,"0")+".svg"}function g(t){h.src=d;m();if(!t)v()}function v(){if(a.has(d))return;a.add(d);fetch(d)}m();g(true);const w=[{transform:"rotate(0)"},{transform:"rotate(360deg)"}];const $={duration:600,h:1};h.addEventListener("click",(()=>{h.animate(w,$);g()}));function M(){h.animate(w,$);v()}h.addEventListener("mouseover",M);h.addEventListener("touchstart",M,{passive:true});function k(t){const o=t.currentTarget.getAttribute("href").split("#")[0];if(a.has(o))return;a.add(o);fetch(o)}const p=document.getElementsByTagName("a");for(const t of p){const o=(t.getAttribute("href")??"").split("#")[0];if(o.includes("?")||!o.startsWith("/")||o.slice(o.lastIndexOf("/")+1).includes(".")){continue}t.addEventListener("mouseover",k);t.addEventListener("touchstart",k,{passive:true})}const b=["#ffdef2","#f2e2ff","#e2eeff","#ddfffc","#ffffe3"];const I=document.querySelector("#title-highlight");l(I,I.parentNode,b[Math.floor(Math.random()*b.length)]);const C=document.querySelector("#logo-highlight");const E=l(C,C.parentNode,"#ffdac0");r();u(C,E);
+
+</script>
+</body>
+</html>

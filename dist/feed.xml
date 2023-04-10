@@ -4,8 +4,393 @@
 <subtitle>Adventures in collaborative open source development</subtitle>
 <link href="https://muxup.com/feed.xml" rel="self" type="application/atom+xml"/>
 <link href="https://muxup.com"/>
-<updated>2023-04-03T12:00:00Z</updated>
+<updated>2023-04-10T12:00:00Z</updated>
 <id>https://muxup.com/feed.xml</id>
+<entry>
+<title>Updating Wren&#x27;s benchmarks</title>
+<published>2023-04-10T12:00:00Z</published>
+<updated>2023-04-10T12:00:00Z</updated>
+<link rel="alternate" href="https://muxup.com/2023q2/updating-wrens-benchmarks"/>
+<id>https://muxup.com/2023q2/updating-wrens-benchmarks</id>
+<content type="html">
+&lt;p&gt;&lt;a href=&quot;https://wren.io/&quot;&gt;Wren&lt;/a&gt; is a &amp;quot;small, fast, class-based, concurrent scripting
+language&amp;quot;, originally designed by Bob Nystrom (who you might recognise as the
+author of &lt;a href=&quot;https://gameprogrammingpatterns.com/&quot;&gt;Game Programming Patterns&lt;/a&gt;
+and &lt;a href=&quot;https://craftinginterpreters.com/&quot;&gt;Crafting Interpreters&lt;/a&gt;. It&amp;#x27;s a really
+fun language to study - the implementation is compact and easily readable, and
+although class-based languages aren&amp;#x27;t considered very hip these days there&amp;#x27;s a
+real elegance to its design. I saw Wren&amp;#x27;s &lt;a href=&quot;https://wren.io/performance.html&quot;&gt;performance
+page&lt;/a&gt; hadn&amp;#x27;t been updated for a very long
+time, and especially given the recent upstream interpreter performance work on
+Python, was interested in seeing how performance on these microbencharks has
+changed. Hence this quick post to share some new numbers.&lt;/p&gt;
+&lt;h2 id=&quot;new-results&quot;&gt;&lt;a href=&quot;#new-results&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;New results&lt;/h2&gt;
+&lt;p&gt;To cut to the chase, here are the results I get running the same set of
+&lt;a href=&quot;https://github.com/wren-lang/wren/tree/main/test/benchmark&quot;&gt;benchmarks&lt;/a&gt;
+across a collection of Python, Ruby, and Lua versions (those available in
+current Arch Linux).&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Method Call&lt;/strong&gt;:&lt;/p&gt;
+&lt;table class=&quot;chart&quot;&gt;
+  &lt;tr&gt;
+    &lt;th&gt;wren0.4&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 25%;&quot;&gt;0.079s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;luajit2.1 -joff&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 29%;&quot;&gt;0.090s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;ruby2.7&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 33%;&quot;&gt;0.102s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;ruby3.0&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 33%;&quot;&gt;0.104s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;lua5.4&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 39%;&quot;&gt;0.123s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;lua5.3&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 50%;&quot;&gt;0.156s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;python3.11&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 54%;&quot;&gt;0.170s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;lua5.2&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 59%;&quot;&gt;0.184s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;mruby&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 62%;&quot;&gt;0.193s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;python3.10&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 100%;&quot;&gt;0.313s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;Delta Blue&lt;/strong&gt;:&lt;/p&gt;
+&lt;table class=&quot;chart&quot;&gt;
+  &lt;tr&gt;
+    &lt;th&gt;wren0.4&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 43%;&quot;&gt;0.086s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;python3.11&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 53%;&quot;&gt;0.106s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;python3.10&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 100%;&quot;&gt;0.202s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;Binary Trees&lt;/strong&gt;:&lt;/p&gt;
+&lt;table class=&quot;chart&quot;&gt;
+  &lt;tr&gt;
+    &lt;th&gt;luajit2.1 -joff&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 37%;&quot;&gt;0.073s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;ruby2.7&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 58%;&quot;&gt;0.113s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;ruby3.0&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 59%;&quot;&gt;0.115s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;python3.11&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 70%;&quot;&gt;0.137s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;lua5.4&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 71%;&quot;&gt;0.138s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;wren0.4&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 73%;&quot;&gt;0.144s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;mruby&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 84%;&quot;&gt;0.163s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;python3.10&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 95%;&quot;&gt;0.186s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;lua5.3&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 99%;&quot;&gt;0.195s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;lua5.2&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 100%;&quot;&gt;0.196s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;Recursive Fibonacci&lt;/strong&gt;:&lt;/p&gt;
+&lt;table class=&quot;chart&quot;&gt;
+  &lt;tr&gt;
+    &lt;th&gt;luajit2.1 -joff&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 22%;&quot;&gt;0.055s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;lua5.4&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 36%;&quot;&gt;0.090s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;ruby2.7&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 43%;&quot;&gt;0.109s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;ruby3.0&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 47%;&quot;&gt;0.117s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;lua5.3&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 50%;&quot;&gt;0.126s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;lua5.2&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 55%;&quot;&gt;0.138s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;wren0.4&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 59%;&quot;&gt;0.148s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;python3.11&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 62%;&quot;&gt;0.157s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;mruby&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 73%;&quot;&gt;0.185s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;python3.10&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 100%;&quot;&gt;0.252s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;p&gt;I&amp;#x27;ve used essentially the same presentation and methodology as in the original
+benchmark, partly to save time pondering the optimal approach, partly so I can
+redirect any critiques to the original author (sorry Bob!). Benchmarks do not
+measure interpreter startup time, and each benchmark is run ten times with the
+median used (thermal throttling could potentially mean this isn&amp;#x27;t the best
+methodology, but changing the number of test repetitions to e.g. 1000 seems to
+have little effect).&lt;/p&gt;
+&lt;p&gt;The tests were run on a machine with an AMD Ryzen 9 5950X processor. wren 0.4
+as of commit
+&lt;a href=&quot;https://github.com/wren-lang/wren/commit/c2a75f1eaf9b1ba1245d7533a723360863fb012d&quot;&gt;c2a75f1&lt;/a&gt;
+was used as well as the following Arch Linux packages:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;lua52-5.2.4-5&lt;/li&gt;
+&lt;li&gt;lua53-5.3.6-1&lt;/li&gt;
+&lt;li&gt;lua-5.4.4-3,&lt;/li&gt;
+&lt;li&gt;luajit-2.1.0.beta3.r471.g505e2c03-1&lt;/li&gt;
+&lt;li&gt;mruby-3.1.0-1&lt;/li&gt;
+&lt;li&gt;python-3.10.10-1&lt;/li&gt;
+&lt;li&gt;python-3.11.3-1 (taken from Arch Linux&amp;#x27;s staging repo)&lt;/li&gt;
+&lt;li&gt;ruby2.7-2.7.7-1&lt;/li&gt;
+&lt;li&gt;ruby-3.0.5-1&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The Python 3.10 and 3.11 packages were compiled with the same GCC version
+(12.2.1 according to &lt;code&gt;python -VV&lt;/code&gt;), though this won&amp;#x27;t necessarily be true for
+all other packages (e.g. the lua52 and lua53 packages are several years old so
+will have been built an older GCC).&lt;/p&gt;
+&lt;p&gt;I&amp;#x27;ve submitted a &lt;a href=&quot;https://github.com/wren-lang/wren/pull/1164&quot;&gt;pull request to update the Wren performance
+page&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&quot;old-results&quot;&gt;&lt;a href=&quot;#old-results&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Old results&lt;/h2&gt;
+&lt;p&gt;The following results are copied from the &lt;a href=&quot;https://wren.io/performance.html&quot;&gt;Wren performance
+page&lt;/a&gt; (&lt;a href=&quot;https://web.archive.org/web/20230326002211/https://wren.io/performance.html&quot;&gt;archive.org
+link&lt;/a&gt;
+ease of comparison. They were run on a MacBook Pro 2.3GHz Intel Core i7 with
+Lua 5.2.3, LuaJIT 2.0.2, Python 2.7.5, Python 3.3.4, ruby 2.0.0p247.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Method Call&lt;/strong&gt;:&lt;/p&gt;
+&lt;table class=&quot;chart&quot;&gt;
+  &lt;tr&gt;
+    &lt;th&gt;wren2015&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 14%;&quot;&gt;0.12s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;luajit2.0 -joff&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 18%;&quot;&gt;0.16s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;ruby2.0&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 23%;&quot;&gt;0.20s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;lua5.2&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 41%;&quot;&gt;0.35s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;python3.3&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 91%;&quot;&gt;0.78s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;python2.7&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 100%;&quot;&gt;0.85s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;DeltaBlue&lt;/strong&gt;:&lt;/p&gt;
+&lt;table class=&quot;chart&quot;&gt;
+  &lt;tr&gt;
+    &lt;th&gt;wren2015&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 22%;&quot;&gt;0.13s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;python3.3&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 83%;&quot;&gt;0.48s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;python2.7&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 100%;&quot;&gt;0.57s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;Binary Trees&lt;/strong&gt;:&lt;/p&gt;
+&lt;table class=&quot;chart&quot;&gt;
+  &lt;tr&gt;
+    &lt;th&gt;luajit2.0 -joff&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 20%;&quot;&gt;0.11s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;wren2015&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 41%;&quot;&gt;0.22s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;ruby2.0&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 46%;&quot;&gt;0.24s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;python2.7&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 71%;&quot;&gt;0.37s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;python3.3&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 73%;&quot;&gt;0.38s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;lua5.2&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 100%;&quot;&gt;0.52s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;Recursive Fibonacci&lt;/strong&gt;:&lt;/p&gt;
+&lt;table class=&quot;chart&quot;&gt;
+  &lt;tr&gt;
+    &lt;th&gt;luajit2.0 -joff&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 17%;&quot;&gt;0.10s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;wren2015&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 35%;&quot;&gt;0.20s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;ruby2.0&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 39%;&quot;&gt;0.22s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;lua5.2&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 49%;&quot;&gt;0.28s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;python2.7&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 90%;&quot;&gt;0.51s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;python3.3&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 100%;&quot;&gt;0.57s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;h2 id=&quot;observations&quot;&gt;&lt;a href=&quot;#observations&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Observations&lt;/h2&gt;
+&lt;p&gt;A few takeaways:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;LuaJIT&amp;#x27;s bytecode interpreter remains incredibly fast (though see &lt;a href=&quot;https://sillycross.github.io/2022/11/22/2022-11-22/&quot;&gt;this blog
+post&lt;/a&gt; for a methodology
+to produce an even faster interpreter).&lt;/li&gt;
+&lt;li&gt;The performance improvements in Python 3.11 were &lt;a href=&quot;https://docs.python.org/3/whatsnew/3.11.html#whatsnew311-faster-cpython&quot;&gt;well
+documented&lt;/a&gt;
+and are very visible on this set of microbenchparks.&lt;/li&gt;
+&lt;li&gt;I was more surprised by the performance jump with Lua 5.4, especially as the
+&lt;a href=&quot;https://www.lua.org/manual/5.4/readme.html#changes&quot;&gt;release notes&lt;/a&gt; give few
+hints of performance improvements that would be reflected in these
+microbenchmarks. The &lt;a href=&quot;https://lwn.net/Articles/826134/&quot;&gt;LWN article about the Lua 5.4
+release&lt;/a&gt; however did note improved
+performance on a range of benchmarks.&lt;/li&gt;
+&lt;li&gt;Wren remains speedy (for these workloads at least), but engineering work on
+other interpreters has narrowed that gap for some of these benchmarks.&lt;/li&gt;
+&lt;li&gt;I haven&amp;#x27;t taken the time to compare the January 2015 version of Wren used
+for the benchmarks vs present-day Wren 0.4. It would be interesting to
+explore that though.&lt;/li&gt;
+&lt;li&gt;A tiny number of microbenchmarks have been used in this performance test. It
+wouldn&amp;#x27;t be wise to draw general conclusions - this is just a bit of fun.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;appendix-benchmark-script&quot;&gt;&lt;a href=&quot;#appendix-benchmark-script&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Appendix: Benchmark script&lt;/h2&gt;
+&lt;p&gt;Health warning: this is incredibly quick and dirty (especially the repeated
+switching between the python packages to allow testing both 3.10 and 3.11):&lt;/p&gt;
+&lt;div class=&quot;highlight&quot; style=&quot;background: #ffffff&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span style=&quot;color: #177500&quot;&gt;#!/usr/bin/env python3&lt;/span&gt;
+
+&lt;span style=&quot;color: #177500&quot;&gt;# Copyright Muxup contributors.&lt;/span&gt;
+&lt;span style=&quot;color: #177500&quot;&gt;# Distributed under the terms of the MIT license, see LICENSE for details.&lt;/span&gt;
+&lt;span style=&quot;color: #177500&quot;&gt;# SPDX-License-Identifier: MIT&lt;/span&gt;
+
+&lt;span style=&quot;color: #A90D91&quot;&gt;import&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;statistics&lt;/span&gt;
+&lt;span style=&quot;color: #A90D91&quot;&gt;import&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;subprocess&lt;/span&gt;
+
+&lt;span style=&quot;color: #000000&quot;&gt;out&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #A90D91&quot;&gt;open&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;out.md&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;w&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;encoding=&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;utf-8&amp;quot;&lt;/span&gt;)
+
+
+&lt;span style=&quot;color: #A90D91&quot;&gt;def&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;run_single_bench&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;bench_name&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;runner_name&lt;/span&gt;):
+    &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;./test/benchmark/&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt;
+    &lt;span style=&quot;color: #A90D91&quot;&gt;if&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runner_name&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;==&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;lua5.2&amp;quot;&lt;/span&gt;:
+        &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;.lua&amp;quot;&lt;/span&gt;
+        &lt;span style=&quot;color: #000000&quot;&gt;cmdline&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; [&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;lua5.2&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt;]
+    &lt;span style=&quot;color: #A90D91&quot;&gt;elif&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runner_name&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;==&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;lua5.3&amp;quot;&lt;/span&gt;:
+        &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;.lua&amp;quot;&lt;/span&gt;
+        &lt;span style=&quot;color: #000000&quot;&gt;cmdline&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; [&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;lua5.3&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt;]
+    &lt;span style=&quot;color: #A90D91&quot;&gt;elif&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runner_name&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;==&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;lua5.4&amp;quot;&lt;/span&gt;:
+        &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;.lua&amp;quot;&lt;/span&gt;
+        &lt;span style=&quot;color: #000000&quot;&gt;cmdline&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; [&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;lua5.4&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt;]
+    &lt;span style=&quot;color: #A90D91&quot;&gt;elif&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runner_name&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;==&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;luajit2.1 -joff&amp;quot;&lt;/span&gt;:
+        &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;.lua&amp;quot;&lt;/span&gt;
+        &lt;span style=&quot;color: #000000&quot;&gt;cmdline&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; [&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;luajit&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;-joff&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt;]
+    &lt;span style=&quot;color: #A90D91&quot;&gt;elif&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runner_name&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;==&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;mruby&amp;quot;&lt;/span&gt;:
+        &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;.rb&amp;quot;&lt;/span&gt;
+        &lt;span style=&quot;color: #000000&quot;&gt;cmdline&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; [&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;mruby&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt;]
+    &lt;span style=&quot;color: #A90D91&quot;&gt;elif&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runner_name&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;==&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;python3.10&amp;quot;&lt;/span&gt;:
+        &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;.py&amp;quot;&lt;/span&gt;
+        &lt;span style=&quot;color: #000000&quot;&gt;subprocess.run&lt;/span&gt;(
+            [
+                &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;sudo&amp;quot;&lt;/span&gt;,
+                &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;pacman&amp;quot;&lt;/span&gt;,
+                &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;-U&amp;quot;&lt;/span&gt;,
+                &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;--noconfirm&amp;quot;&lt;/span&gt;,
+                &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;/var/cache/pacman/pkg/python-3.10.10-1-x86_64.pkg.tar.zst&amp;quot;&lt;/span&gt;,
+            ],
+            &lt;span style=&quot;color: #000000&quot;&gt;check=&lt;/span&gt;&lt;span style=&quot;color: #A90D91&quot;&gt;True&lt;/span&gt;,
+        )
+        &lt;span style=&quot;color: #000000&quot;&gt;cmdline&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; [&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;python&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt;]
+    &lt;span style=&quot;color: #A90D91&quot;&gt;elif&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runner_name&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;==&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;python3.11&amp;quot;&lt;/span&gt;:
+        &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;.py&amp;quot;&lt;/span&gt;
+        &lt;span style=&quot;color: #000000&quot;&gt;subprocess.run&lt;/span&gt;(
+            [
+                &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;sudo&amp;quot;&lt;/span&gt;,
+                &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;pacman&amp;quot;&lt;/span&gt;,
+                &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;-U&amp;quot;&lt;/span&gt;,
+                &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;--noconfirm&amp;quot;&lt;/span&gt;,
+                &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;/var/cache/pacman/pkg/python-3.11.3-1-x86_64.pkg.tar.zst&amp;quot;&lt;/span&gt;,
+            ],
+            &lt;span style=&quot;color: #000000&quot;&gt;check=&lt;/span&gt;&lt;span style=&quot;color: #A90D91&quot;&gt;True&lt;/span&gt;,
+        )
+        &lt;span style=&quot;color: #000000&quot;&gt;cmdline&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; [&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;python&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt;]
+    &lt;span style=&quot;color: #A90D91&quot;&gt;elif&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runner_name&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;==&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;ruby2.7&amp;quot;&lt;/span&gt;:
+        &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;.rb&amp;quot;&lt;/span&gt;
+        &lt;span style=&quot;color: #000000&quot;&gt;cmdline&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; [&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;ruby-2.7&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt;]
+    &lt;span style=&quot;color: #A90D91&quot;&gt;elif&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runner_name&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;==&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;ruby3.0&amp;quot;&lt;/span&gt;:
+        &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;.rb&amp;quot;&lt;/span&gt;
+        &lt;span style=&quot;color: #000000&quot;&gt;cmdline&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; [&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;ruby&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt;]
+    &lt;span style=&quot;color: #A90D91&quot;&gt;elif&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runner_name&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;==&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;wren0.4&amp;quot;&lt;/span&gt;:
+        &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;.wren&amp;quot;&lt;/span&gt;
+        &lt;span style=&quot;color: #000000&quot;&gt;cmdline&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; [&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;./bin/wren_test&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt;]
+    &lt;span style=&quot;color: #A90D91&quot;&gt;else&lt;/span&gt;:
+        &lt;span style=&quot;color: #A90D91&quot;&gt;raise&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;SystemExit&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;Unrecognised runner&amp;quot;&lt;/span&gt;)
+
+    &lt;span style=&quot;color: #000000&quot;&gt;times&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; []
+    &lt;span style=&quot;color: #A90D91&quot;&gt;for&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;_&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;in&lt;/span&gt; &lt;span style=&quot;color: #A90D91&quot;&gt;range&lt;/span&gt;(&lt;span style=&quot;color: #1C01CE&quot;&gt;10&lt;/span&gt;):
+        &lt;span style=&quot;color: #000000&quot;&gt;bench_out&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;subprocess.run&lt;/span&gt;(
+            &lt;span style=&quot;color: #000000&quot;&gt;cmdline&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;capture_output=&lt;/span&gt;&lt;span style=&quot;color: #A90D91&quot;&gt;True&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;check=&lt;/span&gt;&lt;span style=&quot;color: #A90D91&quot;&gt;True&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;encoding=&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;utf-8&amp;quot;&lt;/span&gt;
+        )&lt;span style=&quot;color: #000000&quot;&gt;.stdout&lt;/span&gt;
+        &lt;span style=&quot;color: #000000&quot;&gt;times.append&lt;/span&gt;(&lt;span style=&quot;color: #A90D91&quot;&gt;float&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;bench_out.split&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;: &amp;quot;&lt;/span&gt;)[&lt;span style=&quot;color: #000000&quot;&gt;-&lt;/span&gt;&lt;span style=&quot;color: #1C01CE&quot;&gt;1&lt;/span&gt;]&lt;span style=&quot;color: #000000&quot;&gt;.strip&lt;/span&gt;()))
+    &lt;span style=&quot;color: #A90D91&quot;&gt;return&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;statistics.median&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;times&lt;/span&gt;)
+
+
+&lt;span style=&quot;color: #A90D91&quot;&gt;def&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;do_bench&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;name&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;file_base&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;runners&lt;/span&gt;):
+    &lt;span style=&quot;color: #000000&quot;&gt;results&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; {}
+    &lt;span style=&quot;color: #A90D91&quot;&gt;for&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runner&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;in&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runners&lt;/span&gt;:
+        &lt;span style=&quot;color: #000000&quot;&gt;results&lt;/span&gt;[&lt;span style=&quot;color: #000000&quot;&gt;runner&lt;/span&gt;] &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;run_single_bench&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;name&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;file_base&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;runner&lt;/span&gt;)
+    &lt;span style=&quot;color: #000000&quot;&gt;results&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #A90D91&quot;&gt;dict&lt;/span&gt;(&lt;span style=&quot;color: #A90D91&quot;&gt;sorted&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;results.items&lt;/span&gt;(), &lt;span style=&quot;color: #000000&quot;&gt;key=&lt;/span&gt;&lt;span style=&quot;color: #A90D91&quot;&gt;lambda&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;kv&lt;/span&gt;: &lt;span style=&quot;color: #000000&quot;&gt;kv&lt;/span&gt;[&lt;span style=&quot;color: #1C01CE&quot;&gt;1&lt;/span&gt;]))
+    &lt;span style=&quot;color: #000000&quot;&gt;longest_result&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #A90D91&quot;&gt;max&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;results.values&lt;/span&gt;())
+    &lt;span style=&quot;color: #000000&quot;&gt;out.write&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;f&amp;quot;**{&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;name&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;}**:\n&amp;quot;&lt;/span&gt;)
+    &lt;span style=&quot;color: #000000&quot;&gt;out.write&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;#39;&amp;lt;table class=&amp;quot;chart&amp;quot;&amp;gt;\n&amp;#39;&lt;/span&gt;)
+    &lt;span style=&quot;color: #A90D91&quot;&gt;for&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runner&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;result&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;in&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;results.items&lt;/span&gt;():
+        &lt;span style=&quot;color: #000000&quot;&gt;percent&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #A90D91&quot;&gt;round&lt;/span&gt;((&lt;span style=&quot;color: #000000&quot;&gt;result&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;/&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;longest_result&lt;/span&gt;) &lt;span style=&quot;color: #000000&quot;&gt;*&lt;/span&gt; &lt;span style=&quot;color: #1C01CE&quot;&gt;100&lt;/span&gt;)
+        &lt;span style=&quot;color: #000000&quot;&gt;out.write&lt;/span&gt;(
+            &lt;span style=&quot;color: #C41A16&quot;&gt;f&amp;quot;&amp;quot;&amp;quot;\&lt;/span&gt;
+&lt;span style=&quot;color: #C41A16&quot;&gt;  &amp;lt;tr&amp;gt;&lt;/span&gt;
+&lt;span style=&quot;color: #C41A16&quot;&gt;    &amp;lt;th&amp;gt;{&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;runner&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;}&amp;lt;/th&amp;gt;&amp;lt;td&amp;gt;&amp;lt;div class=&amp;quot;chart-bar&amp;quot; style=&amp;quot;width: {&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;percent&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;}%;&amp;quot;&amp;gt;{&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;result&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;:.3f}s&amp;amp;nbsp;&amp;lt;/div&amp;gt;&amp;lt;/td&amp;gt;&lt;/span&gt;
+&lt;span style=&quot;color: #C41A16&quot;&gt;  &amp;lt;/tr&amp;gt;\n&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+        )
+    &lt;span style=&quot;color: #000000&quot;&gt;out.write&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&amp;lt;/table&amp;gt;\n\n&amp;quot;&lt;/span&gt;)
+
+
+&lt;span style=&quot;color: #000000&quot;&gt;all_runners&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; [
+    &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;lua5.2&amp;quot;&lt;/span&gt;,
+    &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;lua5.3&amp;quot;&lt;/span&gt;,
+    &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;lua5.4&amp;quot;&lt;/span&gt;,
+    &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;luajit2.1 -joff&amp;quot;&lt;/span&gt;,
+    &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;mruby&amp;quot;&lt;/span&gt;,
+    &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;python3.10&amp;quot;&lt;/span&gt;,
+    &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;python3.11&amp;quot;&lt;/span&gt;,
+    &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;ruby2.7&amp;quot;&lt;/span&gt;,
+    &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;ruby3.0&amp;quot;&lt;/span&gt;,
+    &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;wren0.4&amp;quot;&lt;/span&gt;,
+]
+&lt;span style=&quot;color: #000000&quot;&gt;do_bench&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;Method Call&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;method_call&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;all_runners&lt;/span&gt;)
+&lt;span style=&quot;color: #000000&quot;&gt;do_bench&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;Delta Blue&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;delta_blue&amp;quot;&lt;/span&gt;, [&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;python3.10&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;python3.11&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;wren0.4&amp;quot;&lt;/span&gt;])
+&lt;span style=&quot;color: #000000&quot;&gt;do_bench&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;Binary Trees&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;binary_trees&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;all_runners&lt;/span&gt;)
+&lt;span style=&quot;color: #000000&quot;&gt;do_bench&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;Recursive Fibonacci&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;fib&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;all_runners&lt;/span&gt;)
+&lt;span style=&quot;color: #A90D91&quot;&gt;print&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;Output written to out.md&amp;quot;&lt;/span&gt;)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+</content>
+</entry>
 <entry>
 <title>2023Q1 week log</title>
 <published>2023-02-27T12:00:00Z</published>
