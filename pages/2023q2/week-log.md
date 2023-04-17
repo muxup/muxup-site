@@ -10,6 +10,20 @@ interest, but it aims to be a useful aide-mémoire for my purposes at least.
 Weeks with few entries might be due to focusing on downstream work (or perhaps
 just a less productive week - I am only human!).
 
+## Week of 10th April 2023
+* Some days off due to the Easter holidays, so less to report this week.
+* Updated RISC-V bfloat16 patches
+  ([Zfbfmin](https://reviews.llvm.org/D147610),
+  [Zvfbfmin](https://reviews.llvm.org/D147611),
+  [Zvfbfwma](https://reviews.llvm.org/D147612)), incorporating new
+  `fcvt.bf16.s` encoding. Also filed an
+  [issue](https://github.com/riscv/riscv-bfloat16/issues/40) about the way in
+  which the dependencies of the vector bfloat16 extensions is specified.
+* Blogged about [updating the Wren language
+  benchmarks](/pages/2023q2/updating-wrens-benchmarks.md).
+* Variety of upstream LLVM reviews.
+* [LLVM Weekly #484](https://llvmweekly.org/issue/484).
+
 ## Week of 3rd April 2023
 * Some days off due to the Easter holidays, so less to report this week.
 * Posted MC layer (assembler/disassembler) patches for the bfloat16
@@ -31,3 +45,6 @@ just a less productive week - I am only human!).
   PR](https://github.com/riscv-non-isa/riscv-elf-psabi-doc/pull/371) where I
   suggested some alternate wording.
 * [LLVM Weekly #483](https://llvmweekly.org/issue/483).
+
+## Article changelog
+* 2023-04-17: Added notes for the week of 10th April 2023.
