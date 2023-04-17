@@ -4,12 +4,12 @@
 <subtitle>Adventures in collaborative open source development</subtitle>
 <link href="https://muxup.com/feed.xml" rel="self" type="application/atom+xml"/>
 <link href="https://muxup.com"/>
-<updated>2023-04-10T12:00:00Z</updated>
+<updated>2023-04-17T12:00:00Z</updated>
 <id>https://muxup.com/feed.xml</id>
 <entry>
 <title>2023Q2 week log</title>
 <published>2023-04-10T12:00:00Z</published>
-<updated>2023-04-10T12:00:00Z</updated>
+<updated>2023-04-17T12:00:00Z</updated>
 <link rel="alternate" href="https://muxup.com/2023q2/week-log"/>
 <id>https://muxup.com/2023q2/week-log</id>
 <content type="html">
@@ -19,6 +19,21 @@ to write up the parts that were public. This may or may not be of wider
 interest, but it aims to be a useful aide-mémoire for my purposes at least.
 Weeks with few entries might be due to focusing on downstream work (or perhaps
 just a less productive week - I am only human!).&lt;/p&gt;
+&lt;h2 id=&quot;week-of-10th-april-2023&quot;&gt;&lt;a href=&quot;#week-of-10th-april-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 10th April 2023&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Some days off due to the Easter holidays, so less to report this week.&lt;/li&gt;
+&lt;li&gt;Updated RISC-V bfloat16 patches
+(&lt;a href=&quot;https://reviews.llvm.org/D147610&quot;&gt;Zfbfmin&lt;/a&gt;,
+&lt;a href=&quot;https://reviews.llvm.org/D147611&quot;&gt;Zvfbfmin&lt;/a&gt;,
+&lt;a href=&quot;https://reviews.llvm.org/D147612&quot;&gt;Zvfbfwma&lt;/a&gt;), incorporating new
+&lt;code&gt;fcvt.bf16.s&lt;/code&gt; encoding. Also filed an
+&lt;a href=&quot;https://github.com/riscv/riscv-bfloat16/issues/40&quot;&gt;issue&lt;/a&gt; about the way in
+which the dependencies of the vector bfloat16 extensions is specified.&lt;/li&gt;
+&lt;li&gt;Blogged about &lt;a href=&quot;/2023q2/updating-wrens-benchmarks&quot;&gt;updating the Wren language
+benchmarks&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Variety of upstream LLVM reviews.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/484&quot;&gt;LLVM Weekly #484&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h2 id=&quot;week-of-3rd-april-2023&quot;&gt;&lt;a href=&quot;#week-of-3rd-april-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 3rd April 2023&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;Some days off due to the Easter holidays, so less to report this week.&lt;/li&gt;
@@ -45,6 +60,12 @@ PR&lt;/a&gt; where I
 suggested some alternate wording.&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/483&quot;&gt;LLVM Weekly #483&lt;/a&gt;.&lt;/li&gt;
 &lt;/ul&gt;
+&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
+&lt;ul&gt;
+&lt;li&gt;2023-04-17: Added notes for the week of 10th April 2023.&lt;/li&gt;
+&lt;li&gt;2023-04-10: Initial publication date.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/details&gt;
 </content>
 </entry>
 <entry>

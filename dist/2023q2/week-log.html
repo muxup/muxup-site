@@ -153,6 +153,39 @@ visibility:visible;
 .anchor::before {
 content:"#";
 }
+hr {
+border:none;
+border-top:4px solid #f1f3f5;
+}
+code {
+background:#f5f5f5;
+padding:.125rem .25rem;
+font-size:.833rem
+}
+details {
+font-size:.833rem;
+}
+details summary {
+margin:.75rem 0 .5rem 0;
+font-weight:600;
+cursor:pointer;
+font-size:1.2rem;
+line-height:1.25;
+letter-spacing:-.025em;
+list-style:none;
+}
+details summary > * {
+display:inline;
+}
+summary::-webkit-details-marker {
+display:none;
+}
+summary::after {
+content: " »";
+}
+details[open] summary::after {
+content: " «";
+}
 
 </style>
 <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed.xml"/>
@@ -164,13 +197,28 @@ content:"#";
 <div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></a></div>
 </div>
 <h1 id="article-title"><span id="title-highlight">2023Q2 week log</span></h1>
-<div id="article-meta"><span title="2023-04-10">2023Q2</span>.</div>
+<div id="article-meta"><span title="2023-04-10">2023Q2</span>. Last update <span title="2023-04-17">17 Apr 2023</span>. <a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
 <p>I tend to keep quite a lot of notes on the development related (sometimes at
 work, sometimes not) I do on a week-by-week basis, and thought it might be fun
 to write up the parts that were public. This may or may not be of wider
 interest, but it aims to be a useful aide-mémoire for my purposes at least.
 Weeks with few entries might be due to focusing on downstream work (or perhaps
 just a less productive week - I am only human!).</p>
+<h2 id="week-of-10th-april-2023"><a href="#week-of-10th-april-2023" class="anchor" aria-hidden="true" tabindex="-1"></a>Week of 10th April 2023</h2>
+<ul>
+<li>Some days off due to the Easter holidays, so less to report this week.</li>
+<li>Updated RISC-V bfloat16 patches
+(<a href="https://reviews.llvm.org/D147610">Zfbfmin</a>,
+<a href="https://reviews.llvm.org/D147611">Zvfbfmin</a>,
+<a href="https://reviews.llvm.org/D147612">Zvfbfwma</a>), incorporating new
+<code>fcvt.bf16.s</code> encoding. Also filed an
+<a href="https://github.com/riscv/riscv-bfloat16/issues/40">issue</a> about the way in
+which the dependencies of the vector bfloat16 extensions is specified.</li>
+<li>Blogged about <a href="/2023q2/updating-wrens-benchmarks">updating the Wren language
+benchmarks</a>.</li>
+<li>Variety of upstream LLVM reviews.</li>
+<li><a href="https://llvmweekly.org/issue/484">LLVM Weekly #484</a>.</li>
+</ul>
 <h2 id="week-of-3rd-april-2023"><a href="#week-of-3rd-april-2023" class="anchor" aria-hidden="true" tabindex="-1"></a>Week of 3rd April 2023</h2>
 <ul>
 <li>Some days off due to the Easter holidays, so less to report this week.</li>
@@ -197,6 +245,12 @@ PR</a> where I
 suggested some alternate wording.</li>
 <li><a href="https://llvmweekly.org/issue/483">LLVM Weekly #483</a>.</li>
 </ul>
+<hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor "aria-hidden="true" tabindex="-1"></a>Article changelog</summary>
+<ul>
+<li>2023-04-17: Added notes for the week of 10th April 2023.</li>
+<li>2023-04-10: Initial publication date.</li>
+</ul>
+</details>
 
 </div>
 <footer class="footer">
