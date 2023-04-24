@@ -197,13 +197,50 @@ content: " «";
 <div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></a></div>
 </div>
 <h1 id="article-title"><span id="title-highlight">2023Q2 week log</span></h1>
-<div id="article-meta"><span title="2023-04-10">2023Q2</span>. Last update <span title="2023-04-17">17 Apr 2023</span>. <a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
+<div id="article-meta"><span title="2023-04-10">2023Q2</span>. Last update <span title="2023-04-24">24 Apr 2023</span>. <a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
 <p>I tend to keep quite a lot of notes on the development related (sometimes at
 work, sometimes not) I do on a week-by-week basis, and thought it might be fun
 to write up the parts that were public. This may or may not be of wider
 interest, but it aims to be a useful aide-mémoire for my purposes at least.
 Weeks with few entries might be due to focusing on downstream work (or perhaps
 just a less productive week - I am only human!).</p>
+<h2 id="week-of-17th-april-2023"><a href="#week-of-17th-april-2023" class="anchor" aria-hidden="true" tabindex="-1"></a>Week of 17th April 2023</h2>
+<ul>
+<li>Still <a href="https://github.com/riscv/riscv-bfloat16/issues/33">pinging</a> for an
+updated riscv-bfloat1y spec version that incorporates the <code>fcvt.bf16.s</code>
+encoding fix.</li>
+<li>Bumped the version of the experimental Zfa RISC-V extension supported by
+LLVM to 0.2 (<a href="https://reviews.llvm.org/D148634">D146834</a>). This was very
+straightforward as after inspecting the spec history, it was clear there
+were no changes that would impact the compiler.</li>
+<li>Filed a couple of pull requests against the <a href="https://github.com/riscv/riscv-zacas">riscv-zacas
+repo</a> (RISC-V Atomic Compare and Swap
+extension).
+<ul>
+<li><a href="https://github.com/riscv/riscv-zacas/pull/8">#8</a> made the
+dependency on the A extension explicit.</li>
+<li><a href="https://github.com/riscv/riscv-zacas/pull/7">#7</a> attempted to explicitly
+reference the extension for misaligned atomics, though it seems won&#x27;t be
+merged. I do feel uncomfortable with RISC-V extensions that can have their
+semantics changed by other standard extensions without this possibility
+being called out very explicitly. As I note in the PR, failure to
+appreciate this might mean that conformance tests written for <code>zacas</code>
+might fail on a system with <code>zacas_zam</code>. I see a slight parallel to a
+recent <a href="https://lists.riscv.org/g/tech-profiles/message/94">discussion about RISC-V
+profiles</a>.</li>
+</ul>
+</li>
+<li>Fixed the canonical ordering used for ISA naming strings in RISCVISAInfo
+(this will mainly affect the string stored in build attributes). This was
+fixed in <a href="https://reviews.llvm.org/D148615">D148615</a> which built on the
+<a href="https://reviews.llvm.org/rGa35e67fc5be6">pre-committed test case</a>.</li>
+<li>A whole bunch of upstream LLVM reviews. As noted in
+<a href="https://reviews.llvm.org/D148315#4279486">D148315</a> I&#x27;m thinking we should
+probably relaxing the ordering rules for ISA strings in <code>-march</code> in order to
+avoid issues due to spec changes and incompatibilities between GCC and
+Clang.</li>
+<li><a href="https://llvmweekly.org/issue/484">LLVM Weekly #484</a>.</li>
+</ul>
 <h2 id="week-of-10th-april-2023"><a href="#week-of-10th-april-2023" class="anchor" aria-hidden="true" tabindex="-1"></a>Week of 10th April 2023</h2>
 <ul>
 <li>Some days off due to the Easter holidays, so less to report this week.</li>
@@ -247,6 +284,7 @@ suggested some alternate wording.</li>
 </ul>
 <hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor "aria-hidden="true" tabindex="-1"></a>Article changelog</summary>
 <ul>
+<li>2023-04-24: Added notes for the week of 17th April 2023.</li>
 <li>2023-04-17: Added notes for the week of 10th April 2023.</li>
 <li>2023-04-10: Initial publication date.</li>
 </ul>

@@ -4,12 +4,12 @@
 <subtitle>Adventures in collaborative open source development</subtitle>
 <link href="https://muxup.com/feed.xml" rel="self" type="application/atom+xml"/>
 <link href="https://muxup.com"/>
-<updated>2023-04-17T12:00:00Z</updated>
+<updated>2023-04-24T12:00:00Z</updated>
 <id>https://muxup.com/feed.xml</id>
 <entry>
 <title>2023Q2 week log</title>
 <published>2023-04-10T12:00:00Z</published>
-<updated>2023-04-17T12:00:00Z</updated>
+<updated>2023-04-24T12:00:00Z</updated>
 <link rel="alternate" href="https://muxup.com/2023q2/week-log"/>
 <id>https://muxup.com/2023q2/week-log</id>
 <content type="html">
@@ -19,6 +19,43 @@ to write up the parts that were public. This may or may not be of wider
 interest, but it aims to be a useful aide-mémoire for my purposes at least.
 Weeks with few entries might be due to focusing on downstream work (or perhaps
 just a less productive week - I am only human!).&lt;/p&gt;
+&lt;h2 id=&quot;week-of-17th-april-2023&quot;&gt;&lt;a href=&quot;#week-of-17th-april-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 17th April 2023&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Still &lt;a href=&quot;https://github.com/riscv/riscv-bfloat16/issues/33&quot;&gt;pinging&lt;/a&gt; for an
+updated riscv-bfloat1y spec version that incorporates the &lt;code&gt;fcvt.bf16.s&lt;/code&gt;
+encoding fix.&lt;/li&gt;
+&lt;li&gt;Bumped the version of the experimental Zfa RISC-V extension supported by
+LLVM to 0.2 (&lt;a href=&quot;https://reviews.llvm.org/D148634&quot;&gt;D146834&lt;/a&gt;). This was very
+straightforward as after inspecting the spec history, it was clear there
+were no changes that would impact the compiler.&lt;/li&gt;
+&lt;li&gt;Filed a couple of pull requests against the &lt;a href=&quot;https://github.com/riscv/riscv-zacas&quot;&gt;riscv-zacas
+repo&lt;/a&gt; (RISC-V Atomic Compare and Swap
+extension).
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/riscv/riscv-zacas/pull/8&quot;&gt;#8&lt;/a&gt; made the
+dependency on the A extension explicit.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/riscv/riscv-zacas/pull/7&quot;&gt;#7&lt;/a&gt; attempted to explicitly
+reference the extension for misaligned atomics, though it seems won&amp;#x27;t be
+merged. I do feel uncomfortable with RISC-V extensions that can have their
+semantics changed by other standard extensions without this possibility
+being called out very explicitly. As I note in the PR, failure to
+appreciate this might mean that conformance tests written for &lt;code&gt;zacas&lt;/code&gt;
+might fail on a system with &lt;code&gt;zacas_zam&lt;/code&gt;. I see a slight parallel to a
+recent &lt;a href=&quot;https://lists.riscv.org/g/tech-profiles/message/94&quot;&gt;discussion about RISC-V
+profiles&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Fixed the canonical ordering used for ISA naming strings in RISCVISAInfo
+(this will mainly affect the string stored in build attributes). This was
+fixed in &lt;a href=&quot;https://reviews.llvm.org/D148615&quot;&gt;D148615&lt;/a&gt; which built on the
+&lt;a href=&quot;https://reviews.llvm.org/rGa35e67fc5be6&quot;&gt;pre-committed test case&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;A whole bunch of upstream LLVM reviews. As noted in
+&lt;a href=&quot;https://reviews.llvm.org/D148315#4279486&quot;&gt;D148315&lt;/a&gt; I&amp;#x27;m thinking we should
+probably relaxing the ordering rules for ISA strings in &lt;code&gt;-march&lt;/code&gt; in order to
+avoid issues due to spec changes and incompatibilities between GCC and
+Clang.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/484&quot;&gt;LLVM Weekly #484&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h2 id=&quot;week-of-10th-april-2023&quot;&gt;&lt;a href=&quot;#week-of-10th-april-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 10th April 2023&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;Some days off due to the Easter holidays, so less to report this week.&lt;/li&gt;
@@ -62,6 +99,7 @@ suggested some alternate wording.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
 &lt;ul&gt;
+&lt;li&gt;2023-04-24: Added notes for the week of 17th April 2023.&lt;/li&gt;
 &lt;li&gt;2023-04-17: Added notes for the week of 10th April 2023.&lt;/li&gt;
 &lt;li&gt;2023-04-10: Initial publication date.&lt;/li&gt;
 &lt;/ul&gt;
