@@ -10,6 +10,39 @@ interest, but it aims to be a useful aide-mémoire for my purposes at least.
 Weeks with few entries might be due to focusing on downstream work (or perhaps
 just a less productive week - I am only human!).
 
+## Week of 17th April 2023
+* Still [pinging](https://github.com/riscv/riscv-bfloat16/issues/33) for an
+  updated riscv-bfloat1y spec version that incorporates the `fcvt.bf16.s`
+  encoding fix.
+* Bumped the version of the experimental Zfa RISC-V extension supported by
+  LLVM to 0.2 ([D146834](https://reviews.llvm.org/D148634)). This was very
+  straightforward as after inspecting the spec history, it was clear there
+  were no changes that would impact the compiler.
+* Filed a couple of pull requests against the [riscv-zacas
+  repo](https://github.com/riscv/riscv-zacas) (RISC-V Atomic Compare and Swap
+  extension).
+  * [#8](https://github.com/riscv/riscv-zacas/pull/8) made the
+  dependency on the A extension explicit.
+  * [#7](https://github.com/riscv/riscv-zacas/pull/7) attempted to explicitly
+    reference the extension for misaligned atomics, though it seems won't be
+    merged. I do feel uncomfortable with RISC-V extensions that can have their
+    semantics changed by other standard extensions without this possibility
+    being called out very explicitly. As I note in the PR, failure to
+    appreciate this might mean that conformance tests written for `zacas`
+    might fail on a system with `zacas_zam`. I see a slight parallel to a
+    recent [discussion about RISC-V
+    profiles](https://lists.riscv.org/g/tech-profiles/message/94).
+* Fixed the canonical ordering used for ISA naming strings in RISCVISAInfo
+  (this will mainly affect the string stored in build attributes). This was
+  fixed in [D148615](https://reviews.llvm.org/D148615) which built on the
+  [pre-committed test case](https://reviews.llvm.org/rGa35e67fc5be6).
+* A whole bunch of upstream LLVM reviews. As noted in
+  [D148315](https://reviews.llvm.org/D148315#4279486) I'm thinking we should
+  probably relaxing the ordering rules for ISA strings in `-march` in order to
+  avoid issues due to spec changes and incompatibilities between GCC and
+  Clang.
+* [LLVM Weekly #484](https://llvmweekly.org/issue/484).
+
 ## Week of 10th April 2023
 * Some days off due to the Easter holidays, so less to report this week.
 * Updated RISC-V bfloat16 patches
@@ -47,4 +80,5 @@ just a less productive week - I am only human!).
 * [LLVM Weekly #483](https://llvmweekly.org/issue/483).
 
 ## Article changelog
+* 2023-04-24: Added notes for the week of 17th April 2023.
 * 2023-04-17: Added notes for the week of 10th April 2023.
