@@ -4,12 +4,12 @@
 <subtitle>Adventures in collaborative open source development</subtitle>
 <link href="https://muxup.com/feed.xml" rel="self" type="application/atom+xml"/>
 <link href="https://muxup.com"/>
-<updated>2023-04-24T12:00:00Z</updated>
+<updated>2023-05-22T12:00:00Z</updated>
 <id>https://muxup.com/feed.xml</id>
 <entry>
 <title>2023Q2 week log</title>
 <published>2023-04-10T12:00:00Z</published>
-<updated>2023-04-24T12:00:00Z</updated>
+<updated>2023-05-22T12:00:00Z</updated>
 <link rel="alternate" href="https://muxup.com/2023q2/week-log"/>
 <id>https://muxup.com/2023q2/week-log</id>
 <content type="html">
@@ -19,6 +19,30 @@ to write up the parts that were public. This may or may not be of wider
 interest, but it aims to be a useful aide-mémoire for my purposes at least.
 Weeks with few entries might be due to focusing on downstream work (or perhaps
 just a less productive week - I am only human!).&lt;/p&gt;
+&lt;h2 id=&quot;week-of-15th-may-2023&quot;&gt;&lt;a href=&quot;#week-of-15th-may-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 15th May 2023&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Corrected Clang codegen support for half FP types when the zhinx extension
+is available (&lt;a href=&quot;https://reviews.llvm.org/D150777&quot;&gt;D150777&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Rebased and committed patches to implement MC layer support for the bfloat16
+extensions (unblocked now a new PDF was posted in the riscv-bfloat16 repo).
+&lt;a href=&quot;https://reviews.llvm.org/D147610&quot;&gt;Zfbfmin&lt;/a&gt;,
+&lt;a href=&quot;https://reviews.llvm.org/D147611&quot;&gt;zvfbfmin&lt;/a&gt;,
+&lt;a href=&quot;https://reviews.llvm.org/D147612&quot;&gt;zvfbfwma&lt;/a&gt;. Also made a &lt;a href=&quot;https://github.com/riscv/riscv-bfloat16/pull/48&quot;&gt;trivial typo fix
+to the spec&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Looked at cleaning up the usage of &lt;code&gt;report_fatal_error&lt;/code&gt; in the RISC-V
+backend and also &lt;a href=&quot;https://reviews.llvm.org/D150669&quot;&gt;fixed a bug encountered while looking at
+this&lt;/a&gt;.
+&lt;a href=&quot;https://reviews.llvm.org/D150674&quot;&gt;D150674&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Participated in the ongoing discussion about &lt;a href=&quot;https://github.com/riscv-non-isa/riscv-elf-psabi-doc/pull/378#issuecomment-1549250676&quot;&gt;adding atomics lowering to the
+RISC-V
+psABI&lt;/a&gt;,
+including a slightly altered lowering of some primitives in order to allow
+for forwards compatibility with &amp;quot;table A.7&amp;quot;.&lt;/li&gt;
+&lt;li&gt;Usual mix of upstream LLVM reviews, and a number of RISC-V psABI or ASM
+manual reviews.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/489&quot;&gt;LLVM Weekly #489&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Missed some weeks - busy with EuroLLVM etc.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h2 id=&quot;week-of-17th-april-2023&quot;&gt;&lt;a href=&quot;#week-of-17th-april-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 17th April 2023&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;Still &lt;a href=&quot;https://github.com/riscv/riscv-bfloat16/issues/33&quot;&gt;pinging&lt;/a&gt; for an
@@ -54,7 +78,7 @@ fixed in &lt;a href=&quot;https://reviews.llvm.org/D148615&quot;&gt;D148615&lt;/
 probably relaxing the ordering rules for ISA strings in &lt;code&gt;-march&lt;/code&gt; in order to
 avoid issues due to spec changes and incompatibilities between GCC and
 Clang.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/484&quot;&gt;LLVM Weekly #484&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/485&quot;&gt;LLVM Weekly #485&lt;/a&gt;.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&quot;week-of-10th-april-2023&quot;&gt;&lt;a href=&quot;#week-of-10th-april-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 10th April 2023&lt;/h2&gt;
 &lt;ul&gt;
@@ -99,6 +123,7 @@ suggested some alternate wording.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
 &lt;ul&gt;
+&lt;li&gt;2023-05-22: Added notes for the week of 15th May 2023.&lt;/li&gt;
 &lt;li&gt;2023-04-24: Added notes for the week of 17th April 2023.&lt;/li&gt;
 &lt;li&gt;2023-04-17: Added notes for the week of 10th April 2023.&lt;/li&gt;
 &lt;li&gt;2023-04-10: Initial publication date.&lt;/li&gt;

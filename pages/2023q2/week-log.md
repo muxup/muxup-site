@@ -10,6 +10,29 @@ interest, but it aims to be a useful aide-mémoire for my purposes at least.
 Weeks with few entries might be due to focusing on downstream work (or perhaps
 just a less productive week - I am only human!).
 
+## Week of 15th May 2023
+* Corrected Clang codegen support for half FP types when the zhinx extension
+  is available ([D150777](https://reviews.llvm.org/D150777).
+* Rebased and committed patches to implement MC layer support for the bfloat16
+  extensions (unblocked now a new PDF was posted in the riscv-bfloat16 repo).
+  [Zfbfmin](https://reviews.llvm.org/D147610),
+  [zvfbfmin](https://reviews.llvm.org/D147611),
+  [zvfbfwma](https://reviews.llvm.org/D147612). Also made a [trivial typo fix
+  to the spec](https://github.com/riscv/riscv-bfloat16/pull/48).
+* Looked at cleaning up the usage of `report_fatal_error` in the RISC-V
+  backend and also [fixed a bug encountered while looking at
+  this](https://reviews.llvm.org/D150669).
+  [D150674](https://reviews.llvm.org/D150674).
+* Participated in the ongoing discussion about [adding atomics lowering to the
+  RISC-V
+  psABI](https://github.com/riscv-non-isa/riscv-elf-psabi-doc/pull/378#issuecomment-1549250676),
+  including a slightly altered lowering of some primitives in order to allow
+  for forwards compatibility with "table A.7".
+* Usual mix of upstream LLVM reviews, and a number of RISC-V psABI or ASM
+  manual reviews.
+* [LLVM Weekly #489](https://llvmweekly.org/issue/489).
+* Missed some weeks - busy with EuroLLVM etc.
+
 ## Week of 17th April 2023
 * Still [pinging](https://github.com/riscv/riscv-bfloat16/issues/33) for an
   updated riscv-bfloat1y spec version that incorporates the `fcvt.bf16.s`
@@ -41,7 +64,7 @@ just a less productive week - I am only human!).
   probably relaxing the ordering rules for ISA strings in `-march` in order to
   avoid issues due to spec changes and incompatibilities between GCC and
   Clang.
-* [LLVM Weekly #484](https://llvmweekly.org/issue/484).
+* [LLVM Weekly #485](https://llvmweekly.org/issue/485).
 
 ## Week of 10th April 2023
 * Some days off due to the Easter holidays, so less to report this week.
@@ -80,5 +103,6 @@ just a less productive week - I am only human!).
 * [LLVM Weekly #483](https://llvmweekly.org/issue/483).
 
 ## Article changelog
+* 2023-05-22: Added notes for the week of 15th May 2023.
 * 2023-04-24: Added notes for the week of 17th April 2023.
 * 2023-04-17: Added notes for the week of 10th April 2023.
