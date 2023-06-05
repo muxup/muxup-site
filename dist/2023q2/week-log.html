@@ -197,13 +197,54 @@ content: " «";
 <div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></a></div>
 </div>
 <h1 id="article-title"><span id="title-highlight">2023Q2 week log</span></h1>
-<div id="article-meta"><span title="2023-04-10">2023Q2</span>. Last update <span title="2023-05-22">22 May 2023</span>. <a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
+<div id="article-meta"><span title="2023-04-10">2023Q2</span>. Last update <span title="2023-06-05">05 Jun 2023</span>. <a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
 <p>I tend to keep quite a lot of notes on the development related (sometimes at
 work, sometimes not) I do on a week-by-week basis, and thought it might be fun
 to write up the parts that were public. This may or may not be of wider
 interest, but it aims to be a useful aide-mémoire for my purposes at least.
 Weeks with few entries might be due to focusing on downstream work (or perhaps
 just a less productive week - I am only human!).</p>
+<h2 id="week-of-29th-may-2023"><a href="#week-of-29th-may-2023" class="anchor" aria-hidden="true" tabindex="-1"></a>Week of 29th May 2023</h2>
+<ul>
+<li>Posted <a href="https://reviews.llvm.org/D151663">D151663</a>, implementing support for
+bf16 truncate/extend of hard FP targets.</li>
+<li>Responded to user query about <a href="https://discourse.llvm.org/t/csrs-defined-in-sstc-extension/70824/2">gating of
+CSRs</a>.</li>
+<li>Filed <a href="https://gitlab.xfce.org/apps/xfce4-terminal/-/issues/244">issue</a>
+about shift and right-click and xfce4-terminal (after migrating to it due to
+frustration with gnome-terminal <a href="https://gitlab.gnome.org/GNOME/gnome-terminal/-/issues/6698">not supporting setting the urgent hint upon
+receiving a terminal
+bell</a>).</li>
+<li><a href="https://fosstodon.org/@asb/110475298100440985">Spread the word</a> about my
+keynote about LLVM next week at the RISC-V Summit Europe.</li>
+<li>A few reviews on RISC-V psABI or ASM manual PRs (e.g. <a href="https://github.com/riscv-non-isa/riscv-elf-psabi-doc/pull/378">atomics
+ABI</a>,
+<a href="https://github.com/riscv-non-isa/riscv-asm-manual/pull/86">floating point in the asm
+manual</a>).</li>
+<li>Less activity this week due to being on holiday.</li>
+<li><a href="https://llvmweekly.org/issue/491">LLVM Weekly #491</a>.</li>
+</ul>
+<h2 id="week-of-22nd-may-2023"><a href="#week-of-22nd-may-2023" class="anchor" aria-hidden="true" tabindex="-1"></a>Week of 22nd May 2023</h2>
+<ul>
+<li>Posted a <a href="https://reviews.llvm.org/D151434">patch</a> to generalise  the
+shouldExtendTypeInLibcall hook so it applies to half and bfloat16.</li>
+<li>Updated <a href="https://github.com/riscv-non-isa/riscv-elf-psabi-doc/pull/367">bfloat16 psABI
+PR</a>, which
+has now been merged.</li>
+<li>Posted <a href="https://reviews.llvm.org/D151563">D151363</a> a patch to implement soft
+FP legalisation for bf16 FP_EXTEND and BF16_TO_FP after abandoning <a href="https://reviews.llvm.org/D151436">patch to
+add an extenbfsf2 libcall</a> (which would
+match libgcc, but add no real value).</li>
+<li>Identified a bug in the ABI used for half FP libcalls and <a href="https://reviews.llvm.org/D151284">posted a
+patch</a> to fix it.</li>
+<li>Some misc small cleanups like <a href="https://reviews.llvm.org/D151096">making zfbfmin imply the F
+extension</a>, cleaning up bfloat16 tests
+(<a href="https://reviews.llvm.org/rGf3202b9da663">1</a>,
+<a href="https://reviews.llvm.org/rGa6e2b1ee49f5">2</a>).</li>
+<li>Prepared agenda for an ran biweekly <a href="https://discourse.llvm.org/t/risc-v-llvm-sync-up-call-may-25th-2023/70873">RISC-V LLVM sync-up
+call</a>.</li>
+<li><a href="https://llvmweekly.org/issue/490">LLVM Weekly #490</a>.</li>
+</ul>
 <h2 id="week-of-15th-may-2023"><a href="#week-of-15th-may-2023" class="anchor" aria-hidden="true" tabindex="-1"></a>Week of 15th May 2023</h2>
 <ul>
 <li>Corrected Clang codegen support for half FP types when the zhinx extension
@@ -308,6 +349,8 @@ suggested some alternate wording.</li>
 </ul>
 <hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor "aria-hidden="true" tabindex="-1"></a>Article changelog</summary>
 <ul>
+<li>2023-06-05: Added notes for the week of 22nd May 2023 and week fo 29th May
+2023.</li>
 <li>2023-05-22: Added notes for the week of 15th May 2023.</li>
 <li>2023-04-24: Added notes for the week of 17th April 2023.</li>
 <li>2023-04-17: Added notes for the week of 10th April 2023.</li>

@@ -4,12 +4,12 @@
 <subtitle>Adventures in collaborative open source development</subtitle>
 <link href="https://muxup.com/feed.xml" rel="self" type="application/atom+xml"/>
 <link href="https://muxup.com"/>
-<updated>2023-05-22T12:00:00Z</updated>
+<updated>2023-06-05T12:00:00Z</updated>
 <id>https://muxup.com/feed.xml</id>
 <entry>
 <title>2023Q2 week log</title>
 <published>2023-04-10T12:00:00Z</published>
-<updated>2023-05-22T12:00:00Z</updated>
+<updated>2023-06-05T12:00:00Z</updated>
 <link rel="alternate" href="https://muxup.com/2023q2/week-log"/>
 <id>https://muxup.com/2023q2/week-log</id>
 <content type="html">
@@ -19,6 +19,47 @@ to write up the parts that were public. This may or may not be of wider
 interest, but it aims to be a useful aide-mémoire for my purposes at least.
 Weeks with few entries might be due to focusing on downstream work (or perhaps
 just a less productive week - I am only human!).&lt;/p&gt;
+&lt;h2 id=&quot;week-of-29th-may-2023&quot;&gt;&lt;a href=&quot;#week-of-29th-may-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 29th May 2023&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Posted &lt;a href=&quot;https://reviews.llvm.org/D151663&quot;&gt;D151663&lt;/a&gt;, implementing support for
+bf16 truncate/extend of hard FP targets.&lt;/li&gt;
+&lt;li&gt;Responded to user query about &lt;a href=&quot;https://discourse.llvm.org/t/csrs-defined-in-sstc-extension/70824/2&quot;&gt;gating of
+CSRs&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Filed &lt;a href=&quot;https://gitlab.xfce.org/apps/xfce4-terminal/-/issues/244&quot;&gt;issue&lt;/a&gt;
+about shift and right-click and xfce4-terminal (after migrating to it due to
+frustration with gnome-terminal &lt;a href=&quot;https://gitlab.gnome.org/GNOME/gnome-terminal/-/issues/6698&quot;&gt;not supporting setting the urgent hint upon
+receiving a terminal
+bell&lt;/a&gt;).&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://fosstodon.org/@asb/110475298100440985&quot;&gt;Spread the word&lt;/a&gt; about my
+keynote about LLVM next week at the RISC-V Summit Europe.&lt;/li&gt;
+&lt;li&gt;A few reviews on RISC-V psABI or ASM manual PRs (e.g. &lt;a href=&quot;https://github.com/riscv-non-isa/riscv-elf-psabi-doc/pull/378&quot;&gt;atomics
+ABI&lt;/a&gt;,
+&lt;a href=&quot;https://github.com/riscv-non-isa/riscv-asm-manual/pull/86&quot;&gt;floating point in the asm
+manual&lt;/a&gt;).&lt;/li&gt;
+&lt;li&gt;Less activity this week due to being on holiday.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/491&quot;&gt;LLVM Weekly #491&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;week-of-22nd-may-2023&quot;&gt;&lt;a href=&quot;#week-of-22nd-may-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 22nd May 2023&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Posted a &lt;a href=&quot;https://reviews.llvm.org/D151434&quot;&gt;patch&lt;/a&gt; to generalise  the
+shouldExtendTypeInLibcall hook so it applies to half and bfloat16.&lt;/li&gt;
+&lt;li&gt;Updated &lt;a href=&quot;https://github.com/riscv-non-isa/riscv-elf-psabi-doc/pull/367&quot;&gt;bfloat16 psABI
+PR&lt;/a&gt;, which
+has now been merged.&lt;/li&gt;
+&lt;li&gt;Posted &lt;a href=&quot;https://reviews.llvm.org/D151563&quot;&gt;D151363&lt;/a&gt; a patch to implement soft
+FP legalisation for bf16 FP_EXTEND and BF16_TO_FP after abandoning &lt;a href=&quot;https://reviews.llvm.org/D151436&quot;&gt;patch to
+add an extenbfsf2 libcall&lt;/a&gt; (which would
+match libgcc, but add no real value).&lt;/li&gt;
+&lt;li&gt;Identified a bug in the ABI used for half FP libcalls and &lt;a href=&quot;https://reviews.llvm.org/D151284&quot;&gt;posted a
+patch&lt;/a&gt; to fix it.&lt;/li&gt;
+&lt;li&gt;Some misc small cleanups like &lt;a href=&quot;https://reviews.llvm.org/D151096&quot;&gt;making zfbfmin imply the F
+extension&lt;/a&gt;, cleaning up bfloat16 tests
+(&lt;a href=&quot;https://reviews.llvm.org/rGf3202b9da663&quot;&gt;1&lt;/a&gt;,
+&lt;a href=&quot;https://reviews.llvm.org/rGa6e2b1ee49f5&quot;&gt;2&lt;/a&gt;).&lt;/li&gt;
+&lt;li&gt;Prepared agenda for an ran biweekly &lt;a href=&quot;https://discourse.llvm.org/t/risc-v-llvm-sync-up-call-may-25th-2023/70873&quot;&gt;RISC-V LLVM sync-up
+call&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/490&quot;&gt;LLVM Weekly #490&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h2 id=&quot;week-of-15th-may-2023&quot;&gt;&lt;a href=&quot;#week-of-15th-may-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 15th May 2023&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;Corrected Clang codegen support for half FP types when the zhinx extension
@@ -123,6 +164,8 @@ suggested some alternate wording.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
 &lt;ul&gt;
+&lt;li&gt;2023-06-05: Added notes for the week of 22nd May 2023 and week fo 29th May
+2023.&lt;/li&gt;
 &lt;li&gt;2023-05-22: Added notes for the week of 15th May 2023.&lt;/li&gt;
 &lt;li&gt;2023-04-24: Added notes for the week of 17th April 2023.&lt;/li&gt;
 &lt;li&gt;2023-04-17: Added notes for the week of 10th April 2023.&lt;/li&gt;

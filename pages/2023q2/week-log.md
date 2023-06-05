@@ -10,6 +10,45 @@ interest, but it aims to be a useful aide-mémoire for my purposes at least.
 Weeks with few entries might be due to focusing on downstream work (or perhaps
 just a less productive week - I am only human!).
 
+## Week of 29th May 2023
+* Posted [D151663](https://reviews.llvm.org/D151663), implementing support for
+  bf16 truncate/extend of hard FP targets.
+* Responded to user query about [gating of
+  CSRs](https://discourse.llvm.org/t/csrs-defined-in-sstc-extension/70824/2).
+* Filed [issue](https://gitlab.xfce.org/apps/xfce4-terminal/-/issues/244)
+  about shift and right-click and xfce4-terminal (after migrating to it due to
+  frustration with gnome-terminal [not supporting setting the urgent hint upon
+  receiving a terminal
+  bell](https://gitlab.gnome.org/GNOME/gnome-terminal/-/issues/6698)).
+* [Spread the word](https://fosstodon.org/@asb/110475298100440985) about my
+  keynote about LLVM next week at the RISC-V Summit Europe.
+* A few reviews on RISC-V psABI or ASM manual PRs (e.g. [atomics
+  ABI](https://github.com/riscv-non-isa/riscv-elf-psabi-doc/pull/378),
+  [floating point in the asm
+  manual](https://github.com/riscv-non-isa/riscv-asm-manual/pull/86)).
+* Less activity this week due to being on holiday.
+* [LLVM Weekly #491](https://llvmweekly.org/issue/491).
+
+## Week of 22nd May 2023
+* Posted a [patch](https://reviews.llvm.org/D151434) to generalise  the
+  shouldExtendTypeInLibcall hook so it applies to half and bfloat16.
+* Updated [bfloat16 psABI
+  PR](https://github.com/riscv-non-isa/riscv-elf-psabi-doc/pull/367), which
+  has now been merged.
+* Posted [D151363](https://reviews.llvm.org/D151563) a patch to implement soft
+  FP legalisation for bf16 FP_EXTEND and BF16_TO_FP after abandoning [patch to
+  add an extenbfsf2 libcall](https://reviews.llvm.org/D151436) (which would
+  match libgcc, but add no real value).
+* Identified a bug in the ABI used for half FP libcalls and [posted a
+  patch](https://reviews.llvm.org/D151284) to fix it.
+* Some misc small cleanups like [making zfbfmin imply the F
+  extension](https://reviews.llvm.org/D151096), cleaning up bfloat16 tests
+  ([1](https://reviews.llvm.org/rGf3202b9da663),
+  [2](https://reviews.llvm.org/rGa6e2b1ee49f5)).
+* Prepared agenda for an ran biweekly [RISC-V LLVM sync-up
+  call](https://discourse.llvm.org/t/risc-v-llvm-sync-up-call-may-25th-2023/70873).
+* [LLVM Weekly #490](https://llvmweekly.org/issue/490).
+
 ## Week of 15th May 2023
 * Corrected Clang codegen support for half FP types when the zhinx extension
   is available ([D150777](https://reviews.llvm.org/D150777).
@@ -103,6 +142,8 @@ just a less productive week - I am only human!).
 * [LLVM Weekly #483](https://llvmweekly.org/issue/483).
 
 ## Article changelog
+* 2023-06-05: Added notes for the week of 22nd May 2023 and week fo 29th May
+  2023.
 * 2023-05-22: Added notes for the week of 15th May 2023.
 * 2023-04-24: Added notes for the week of 17th April 2023.
 * 2023-04-17: Added notes for the week of 10th April 2023.
