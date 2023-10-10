@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:title" content="What&#x27;s new for RISC-V in LLVM 17"/>
+<meta property="og:site_name" content="Muxup">
+<meta property="og:description" content="Details on newly added RISC-V features and improvements to Clang, LLVM, and other subprojects for LLVM 17.x."/>
+<meta property="og:type" content="article"/>
+<meta property="og:url" content="https://muxup.com/2023q4/whats-new-for-risc-v-in-llvm-17"/>
+<meta property="og:image" content="https://v1.screenshot.11ty.dev/https%3A%2F%2Fmuxup.com%2F2023q4%2Fwhats-new-for-risc-v-in-llvm-17/opengraph/ar/bigger"/>
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:site" content="@muxup">
+<meta property="twitter:creator" content="@asbradbury">
+<title>What&#x27;s new for RISC-V in LLVM 17 - Muxup</title>
+<link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg xmlns='http:%2F%2Fwww.w3.org%2F2000%2Fsvg' viewBox='0 0 100 100'%3E%3Ctext y='80' font-size='110'%3E▨%3C%2Ftext%3E%3C%2Fsvg%3E">
+<meta name="description" content="Details on newly added RISC-V features and improvements to Clang, LLVM, and other subprojects for LLVM 17.x.">
+<style>
+@font-face {
+font-family:'Nunito Var';
+src:url('/static/Nunito.var.v2.woff2') format('woff2-variations');
+font-display:swap;
+font-weight: 200 1000;
+}
+*, *::before, *::after {
+box-sizing:border-box;
+}
+* {
+margin:0;
+}
+input, button, textarea, select {
+font:inherit;
+}
+img, picture, video, canvas, svg {
+display:block;
+max-width:100%;
+}
+html {
+font-family:'Nunito Var', sans-serif;
+height:100%;
+font-size:16px;
+-webkit-tap-highlight-color:transparent;
+}
+@media screen and (min-width:640px) {
+html {
+font-size:18px;
+}
+}
+body {
+line-height:1.5;
+color:#222;
+display:grid;
+height:100%;
+grid-template-rows:1fr auto;
+background:#fff no-repeat 0% 0% / 100% .7rem linear-gradient(120deg, #ffffe3 20%, #ddfffc 20%, #ddfffc 40%, #e2eeff 40%, #e2eeff 60%, #f2e2ff 60%, #f2e2ff 80%, #ffdef2 80%, #ffdef2 100%);
+tab-size:4;
+}
+h1, h2, h3, h4, h5, h6 {
+line-height:1.25;
+font-weight:600;
+overflow-wrap:break-word;
+letter-spacing:-.025em;
+margin:1.75rem 0 .75rem;
+}
+h1 {
+font-size:2.986rem
+}
+h2 {
+font-size:2.488rem
+}
+p {
+margin:.75rem 0;
+font-weight:400;
+overflow-wrap:break-word;
+}
+a {
+color:inherit;
+text-decoration:underline;
+text-decoration-color:#aaa;
+text-underline-offset:.15em;
+}
+a:hover {
+text-decoration-thickness:2px;
+}
+ol, ul {
+margin:0 0 0 1.5rem;
+padding-left:0;
+}
+li {
+margin:0 0 .25rem
+}
+::selection {
+background:#ffdac0;
+}
+footer {
+font-size:.833rem;
+color:#777;
+padding:0 1rem;
+width:100%;
+max-width:min(calc(750px + 2rem), calc(100vw - 1rem));
+margin:0 auto;
+}
+footer p {
+text-align:center;
+margin:0 0 .75rem;
+}
+#footer-image {
+margin:0 auto;
+cursor:pointer;
+}
+#article-logo {
+line-height:1.25;
+margin:.5rem 0 0;
+font-size:1.44rem;
+font-weight:700;
+position:relative;
+}
+#article-logo a {
+text-decoration:none;
+}
+#article-title {
+margin:1.5rem 0 0;
+position:relative;
+}
+#article-meta {
+font-size:.833rem;
+color:#777;
+}
+#article-container {
+margin:0 auto;
+padding:1rem;
+max-width:min(calc(750px + 2rem), calc(100vw - 1rem));
+width:100%;
+}
+.anchor {
+position: absolute;
+text-decoration: none;
+width:1.75ex;
+margin-left:-1.4ex;
+visibility:hidden;
+font-size:.8em;
+padding-top:.2em;
+color:#aaa;
+}
+h2:hover .anchor,
+h3:hover .anchor,
+h4:hover .anchor,
+h5:hover .anchor,
+h6:hover .anchor,
+summary:hover .anchor {
+visibility:visible;
+}
+.anchor::before {
+content:"#";
+}
+code {
+background:#f5f5f5;
+padding:.125rem .25rem;
+font-size:.833rem
+}
+</style>
+<link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed.xml"/>
+<link rel="canonical" href="https://muxup.com/2023q4/whats-new-for-risc-v-in-llvm-17"/>
+</head>
+<body>
+<div id="article-container">
+<div>
+<div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></a></div>
+</div>
+<h1 id="article-title"><span id="title-highlight">What&#x27;s new for RISC-V in LLVM 17</span></h1>
+<div id="article-meta"><span title="2023-10-10">2023Q4</span>.</div>
+<p>LLVM 17 was <a href="https://discourse.llvm.org/t/llvm-17-0-1-released/73549">released in the past few
+weeks</a>, and I&#x27;m
+<a href="/2023q1/whats-new-for-risc-v-in-llvm-16">continuing</a> the
+<a href="/2022q3/whats-new-for-risc-v-in-llvm-15">tradition</a>
+of writing up some selective highlights of what&#x27;s new as far as RISC-V is
+concerned in this release. If you want more general, regular updates on what&#x27;s
+going on in LLVM you should of course <a href="https://llvmweekly.org/">subscribe to my
+newsletter</a>.</p>
+<p>In case you&#x27;re not familiar with LLVM&#x27;s release schedule, it&#x27;s worth noting
+that there are two major LLVM releases a year (i.e. one roughly every 6
+months) and these are timed releases as opposed to being cut when a pre-agreed
+set of feature targets have been met. We&#x27;re very fortunate to benefit from an
+active and growing set of contributors working on RISC-V support in LLVM
+projects, who are responsible for the work I describe below - thank you!
+I coordinate biweekly sync-up calls for RISC-V LLVM contributors, so if you&#x27;re
+working in this area please <a href="https://discourse.llvm.org/c/code-generation/riscv/57">consider dropping
+in</a>.</p>
+<h2 id="code-size-reduction-extensions"><a href="#code-size-reduction-extensions" class="anchor" aria-hidden="true" tabindex="-1"></a>Code size reduction extensions</h2>
+<p>A family of extensions referred to as the <a href="https://github.com/riscv/riscv-code-size-reduction/releases/download/v1.0.4-2/Zc_1.0.4-2.pdf">RISC-V code size reduction
+extensions</a>
+was ratified earlier this year. One aspect of this is providing ways of
+referring to subsets of the standard compressed &#x27;C&#x27; (16-bit instructions)
+extension that don&#x27;t include floating point loads/stores, as well as other
+variants. But the more meaningful additions are the <code>Zcmp</code> and <code>Zcmt</code>
+extensions, in both cases targeted at embedded rather than application cores,
+reusing encodings for double-precision FP store.</p>
+<p><code>Zcmp</code> provides instructions that implement common stack frame manipulation
+operations that would typically require a sequence of instructions, as well as
+instructions for moving pairs of registers. The <a href="https://github.com/llvm/llvm-project/blob/release/17.x/llvm/lib/Target/RISCV/RISCVMoveMerger.cpp">RISCVMoveMerger
+pass</a>
+performs the necessary peephole optimisation to produce <code>cm.mva01s</code> or
+<code>cm.mvsa01</code> instructions for moving to/from registers a0-a1 and s0-s7 when
+possible. It iterates over generated machine instructions, looking for pairs
+of <code>c.mv</code> instructions that can be replaced. <code>cm.push</code> and <code>cm.pop</code>
+instructions are generated by appropriate modifications to the RISC-V function
+frame lowering code, while the <a href="https://github.com/llvm/llvm-project/blob/release/17.x/llvm/lib/Target/RISCV/RISCVPushPopOptimizer.cpp">RISCVPushPopOptimizer
+pass</a>
+looks for opportunities to convert a <code>cm.pop</code> into a <code>cm.popretz</code> (pop
+registers, deallocate stack frame, and return zero) or <code>cm.popret</code> (pop
+registers, deallocate stack frame, and return).</p>
+<p><code>Zcmt</code> provides the <code>cm.jt</code> and <code>cm.jalt</code> instructions to reduce code size
+needed for implemented a jump table. Although support is present in the
+assembler, the patch to modify the linker to select these instructions is
+still under review so we can hope to see full support in LLVM 18.</p>
+<p>The RISC-V code size reduction working group have <a href="https://docs.google.com/spreadsheets/d/1bFMyGkuuulBXuIaMsjBINoCWoLwObr1l9h5TAWN8s7k/edit#gid=1837831327">estimates of the code size
+impact of these
+extensions</a>
+produced using <a href="https://github.com/riscv/riscv-code-size-reduction/tree/main/benchmarks">this analysis
+script</a>.
+I&#x27;m not aware of whether a comparison has been made to the real-world results
+of implementing support for the extensions in LLVM, but that would certainly
+be interesting.</p>
+<h2 id="vectorization"><a href="#vectorization" class="anchor" aria-hidden="true" tabindex="-1"></a>Vectorization</h2>
+<p>LLVM has <a href="https://llvm.org/docs/Vectorizers.html">two forms of
+auto-vectorization</a>, the loop
+vectorizer and the SLP (superword-level parallelism) vectorizer. The loop
+vectorizer was enabled during the LLVM 16 development cycle, while the SLP
+vectorizer <a href="https://github.com/llvm/llvm-project/commit/7f26c27e03f1">was
+enabled</a> for this
+release. Beyond that, there&#x27;s been a huge number of incremental improvements
+for vector codegen such that isn&#x27;t always easy to pick out particular
+highlights. But to pick a small set of changes:</p>
+<ul>
+<li><a href="https://github.com/riscv-non-isa/rvv-intrinsic-doc/releases/tag/v0.12.0">Version 0.12 of the RISC-V vector C intrinsics
+specification</a>
+is now supported by Clang. As noted in the release notes, the hope is there
+will not be new incompatibilities introduced prior to v1.0.</li>
+<li>There were lots of minor codegen improvements, one example would be
+<a href="https://github.com/llvm/llvm-project/commit/badf11de4ac6">improvements to the RISCVInsertVSETVLI
+pass</a> to avoid
+additional unnecessary insertions <code>vsetivli</code> instruction that is used to
+modify the <code>vtype</code> control register.</li>
+<li>It&#x27;s not particularly user visible, but there was a lot of refactoring of
+vector pseudoinstructions used internally during instruction selection
+(following <a href="https://discourse.llvm.org/t/riscv-transition-in-vector-pseudo-structure-policy-variants/71295">this
+thread</a>.
+The <a href="https://github.com/llvm/llvm-project/commit/691618a7a959">added
+documentation</a>
+will likely be helpful if you&#x27;re hoping to better understand this.</li>
+<li>You might be aware that <code>LMUL</code> in the RISC-V vector extension controls
+grouping of vector registers, for instance rather than 32 vector registers,
+you might want to set LMUL=4 to treat them as 8 registers that are 4 times
+as large. The &quot;best&quot; LMUL is going to vary depending on both the target
+microarchitecture and factors such as register pressure, but a change was
+made so <a href="https://github.com/llvm/llvm-project/commit/8d16c6809a08">LMUL=2 is the new
+default</a>.</li>
+<li><a href="https://llvm.org/docs/CommandGuide/llvm-mca.html">llvm-mca</a> (the LLVM
+Machine Code Analyzer) is a performance analysis tool that uses information
+such as LLVM scheduling models to statically estimate the performance of
+machine code on a specific CPU. There were at least two changes relevant to
+llvm-mca and RISC-V vector support: <a href="https://github.com/llvm/llvm-project/commit/1a855819a87f">scheduling information for RVV on
+SiFive7 cores</a>
+(which of course is used outside of llvm-mca as well), and support for
+<a href="https://github.com/llvm/llvm-project/commit/ecf372f993fa">vsetivli/vsetvli</a>
+&#x27;instruments&#x27;. llvm-mca has the concept of an &#x27;<a href="https://llvm.org/docs/CommandGuide/llvm-mca.html#instrument-regions">instrument
+region</a>&#x27;,
+a section of assembly with an LLVM-MCA comment that can (for instance)
+indicate the value of a control register that would affect scheduling. This
+can be used to set <code>LMUL</code> (register grouping) for RISC-V, however in the
+case of the immediate forms of <code>vsetvl</code> occuring in the input, <code>LMUL</code> can be
+statically determined.</li>
+</ul>
+<p>If you want to find out more about RISC-V vector support in LLVM, be sure to
+check out <a href="https://llvm.swoogo.com/2023devmtg/session/1767411/vector-codegen-in-the-risc-v-backend">my Igalia colleague Luke Lau&#x27;s
+talk</a>
+at the LLVM Dev Meeting this week (I&#x27;ll update this article when
+slides+recording are available).</p>
+<h2 id="other-isa-extensions"><a href="#other-isa-extensions" class="anchor" aria-hidden="true" tabindex="-1"></a>Other ISA extensions</h2>
+<p>It wouldn&#x27;t be a RISC-V article without a list of hard to interpret strings
+that claim to be ISA extension names (Zvfbfwma is a real extension, I
+promise!). In addition to the code size reduction extension listed above
+there&#x27;s been lots of newly added or updated extensions in this release cycle.
+Do refer to the <a href="https://releases.llvm.org/17.0.1/docs/RISCVUsage.html">RISCVUsage
+documentation</a> for
+something that aims to be a complete list of what is supported (occasionally
+there are omissions) as well as clarity on what we mean by an extension being
+marked as &quot;experimental&quot;.</p>
+<p>Here&#x27;s a partial list:</p>
+<ul>
+<li>Code generation support for the <a href="https://github.com/riscv/riscv-isa-manual/blob/main/src/zfinx.adoc">Zfinx, Zdinx, Zhinx, and Zhinxmin
+extensions</a>.
+These extensions provide support for single, double, and half precision
+floating point instructions respectively, but define them to operate on the
+general purpose register file rather than requiring an additional floating
+point register file. This reduces implementation cost on simple core
+designs.</li>
+<li>Support for a whole range of vendor-defined extensions. e.g. XTHeadBa
+(address gneeration), XTheadBb (basic bit manipulation), Xsfvcp (SiFive
+VCIX), XCVbitmanip (CORE-V bit manipulation custom instructions) and many
+more (see the <a href="https://releases.llvm.org/17.0.1/docs/ReleaseNotes.html#changes-to-the-risc-v-backend">release
+notes</a>.</li>
+<li>Experimental <a href="https://github.com/riscv/riscv-crypto">vector crypto extension</a> support was
+updated to version 0.5.1 of the specification.</li>
+<li>Experimental support was added for version 0.2 of the <a href="https://github.com/riscv/riscv-isa-manual/blob/main/src/zfa.adoc">Zfa
+extension</a>
+(providing additional floating-point instructions).</li>
+<li>Assembler/disassembler support for an experimental family of extensions to support operations
+on the <a href="https://en.wikipedia.org/wiki/Bfloat16_floating-point_format">bfloat16 floating-point
+format</a>.
+<a href="https://github.com/riscv/riscv-bfloat16">Zfbfmin, Zvfbfmin, and Zvfbfwma</a>.</li>
+<li>Assembler/disassembler support for the experimental
+<a href="https://github.com/riscv/riscv-zacas">Zacas</a> extension (atomic
+compare-and-swap).</li>
+</ul>
+<p>It landed after the 17.x branch so isn&#x27;t in this release, but in the future
+you&#x27;ll be able to use <code>--print-supported-extensions</code> with Clang to have it
+print a table of supported ISA extensions (the same flag has now been
+implemented for Arm and AArch64 too).</p>
+<h2 id="other-additions-and-improvements"><a href="#other-additions-and-improvements" class="anchor" aria-hidden="true" tabindex="-1"></a>Other additions and improvements</h2>
+<p>As always, it&#x27;s not possible to go into detail on every change. A selection of
+other changes that I&#x27;m not able to delve into more detail on:</p>
+<ul>
+<li>Initial RISC-V support was added to <a href="https://github.com/llvm/llvm-project/blob/main/bolt/README.md">LLVM&#x27;s BOLT post-link
+optimizer</a>
+and various fixes / feature additions made to
+<a href="https://llvm.org/docs/JITLink.html">JITLink</a>, thanks to the work of my
+Igalia colleague Job Noorman. There&#x27;s actually a lot to say about this work,
+but I don&#x27;t need to because Job has written up and <a href="https://blogs.igalia.com/compilers/2023/06/30/porting-bolt-to-risc-v/">excellent blog post on
+it</a>
+that I highly encourage you go and read.</li>
+<li>LLD <a href="https://github.com/llvm/llvm-project/commit/85444794cdde">gained
+support</a> for some
+of the relaxations involving the global pointer.</li>
+<li>I expect there&#x27;ll be more to say about this in future releases, but there&#x27;s
+been incremental progress on RISC-V
+<a href="https://llvm.org/docs/GlobalISel/index.html">GlobalISel</a> in the LLVM 17
+development cycle (which has continued after). You might be interested in
+the <a href="https://llvm.org/devmtg/2023-05/slides/Tutorial-May11/01-Bradbury-GlobalISelTutorial.pdf">slides from my GlobalISel by example talk at EuroLLVM this
+year</a>.
+Ivan Baev at SiFive is also set to <a href="https://riscvsummit2023.sched.com/event/1QUod">speak about some of this
+work</a> at the RISC-V Summit in
+November.</li>
+<li>Clang supports a form of control-flow integrity called
+<a href="https://clang.llvm.org/docs/ControlFlowIntegrity.html#fsanitize-kcfi">KCFI</a>.
+This is used by low-level software like the Linux kernel (see
+<code>CONFIG_CFI_CLANG</code> in the Linux tree) but the target-specific parts were
+previously unimplemented for RISC-V. This gap <a href="https://github.com/llvm/llvm-project/commit/83835e22c7cd">was
+filled</a> for the
+LLVM 17 release.</li>
+<li>LLVM has its own <a href="https://libc.llvm.org/">work-in-progress libc
+implementation</a>, and the RISC-V implementations of
+<code>memcmp</code>, <code>bcmp</code>, <code>memset</code>, and <code>memcpy</code> all gained optimised RISC-V
+specific versions. There will of course be further updates for LLVM 18,
+including the work from my colleague Mikhail R Gadelha on 32-bit RISC-V
+support.</li>
+</ul>
+<p>Apologies if I&#x27;ve missed
+your favourite new feature or improvement - the <a href="https://releases.llvm.org/17.0.1/docs/ReleaseNotes.html#changes-to-the-risc-v-backend">LLVM release
+notes</a>
+will include some things I haven&#x27;t had space for here. Thanks again for
+everyone who has been contributing to make the RISC-V in LLVM even better.</p>
+<p>If you have a RISC-V project you think me and my colleagues and at Igalia may
+be able to help with, then do <a href="https://www.igalia.com/contact/">get in touch</a>
+regarding our services.</p>
+
+</div>
+<footer class="footer">
+<img id="footer-image" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E" width="50" height="50"/>
+<p>Curated by Alex Bradbury | &copy; <a href="/">Muxup</a> contributors | <a href="/about">About</a> | <a href="https://github.com/muxup">GitHub</a> | <a href="https://twitter.com/muxup">Twitter</a></p>
+</footer>
+<script>
+const t="http://www.w3.org/2000/svg";function o(t){return Math.random()*(2*t)-t}function n(t){const n=t.t.getBoundingClientRect();const e=t.o.getClientRects();let c="";for(const t of e){const e=t.x-n.x,f=t.y-n.y,s=t.width,r=t.height;const i=f+r/2;let u=s<75?3:s<300?6:8;const l=.2+.2*Math.random();c=`${c}\n      M${e+o(u)} ${i+o(u)}\n      C${e+s*l+o(u)} ${i+o(u)},\n       ${e+2*s*l+o(u)} ${i+o(u)}\n       ${e+s+o(u)} ${i+o(u)}`}t.i=c;t.strokeWidth=.85*e[0].height}const e=new Map;let c=new ResizeObserver((t=>{for(const o of t){const t=e.get(o.target);if(!t.i)n(t)}for(const o of t){s(e.get(o.target))}}));function f(o){const n=document.createElementNS(t,"svg");n.style.position="absolute";n.style.zIndex=-1;n.style.top="0";n.style.left="0";n.style.overflow="visible";const e=document.createElementNS(t,"path");e.setAttribute("fill","none");e.setAttribute("stroke",o.u);n.appendChild(e);o.o.insertAdjacentElement("beforebegin",n);o.t=n}function s(t){if(!t.i){n(t)}const o=t.t.children[0];o.setAttribute("stroke-width",t.strokeWidth);o.setAttribute("d",t.i);t.i=null}function r(){for(const t of e.values()){f(t)}for(const t of e.values()){n(t)}for(const t of e.keys()){c.observe(t)}document.fonts.ready.then((()=>i()))}function i(){for(const t of e.values()){n(t)}for(const t of e.values()){s(t)}}function u(t,o){let n;t.addEventListener("mouseover",(()=>{s(o);n=setInterval((()=>s(o)),240)}),false);t.addEventListener("mouseout",(()=>{clearInterval(n)}));t.addEventListener("click",(()=>{clearInterval(n)}))}function l(t,o,n){let c={o:t,l:o,u:n};e.set(o,c);return c}let a=new Set([window.location.pathname]);const h=document.querySelector("#footer-image");let d=null;function m(){let t=Math.floor(Math.random()*282);d="/static/footer/"+String(t).padStart(4,"0")+".svg"}function g(t){h.src=d;m();if(!t)v()}function v(){if(a.has(d))return;a.add(d);fetch(d)}m();g(true);const w=[{transform:"rotate(0)"},{transform:"rotate(360deg)"}];const $={duration:600,h:1};h.addEventListener("click",(()=>{h.animate(w,$);g()}));function M(){h.animate(w,$);v()}h.addEventListener("mouseover",M);h.addEventListener("touchstart",M,{passive:true});function k(t){const o=t.currentTarget.getAttribute("href").split("#")[0];if(a.has(o))return;a.add(o);fetch(o)}const p=document.getElementsByTagName("a");for(const t of p){const o=(t.getAttribute("href")??"").split("#")[0];if(o.includes("?")||!o.startsWith("/")||o.slice(o.lastIndexOf("/")+1).includes(".")){continue}t.addEventListener("mouseover",k);t.addEventListener("touchstart",k,{passive:true})}const b=["#ffdef2","#f2e2ff","#e2eeff","#ddfffc","#ffffe3"];const I=document.querySelector("#title-highlight");l(I,I.parentNode,b[Math.floor(Math.random()*b.length)]);const C=document.querySelector("#logo-highlight");const E=l(C,C.parentNode,"#ffdac0");r();u(C,E);
+
+</script>
+</body>
+</html>
