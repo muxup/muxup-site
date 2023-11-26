@@ -153,11 +153,40 @@ visibility:visible;
 .anchor::before {
 content:"#";
 }
+hr {
+border:none;
+border-top:4px solid #f1f3f5;
+}
 code {
 background:#f5f5f5;
 padding:.125rem .25rem;
 font-size:.833rem
 }
+details {
+font-size:.833rem;
+}
+details summary {
+margin:.75rem 0 .5rem 0;
+font-weight:600;
+cursor:pointer;
+font-size:1.2rem;
+line-height:1.25;
+letter-spacing:-.025em;
+list-style:none;
+}
+details summary > * {
+display:inline;
+}
+summary::-webkit-details-marker {
+display:none;
+}
+summary::after {
+content: " »";
+}
+details[open] summary::after {
+content: " «";
+}
+
 </style>
 <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed.xml"/>
 <link rel="canonical" href="https://muxup.com/2023q4/storing-data-in-pointers"/>
@@ -168,7 +197,7 @@ font-size:.833rem
 <div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></a></div>
 </div>
 <h1 id="article-title"><span id="title-highlight">Storing data in pointers</span></h1>
-<div id="article-meta"><span title="2023-11-26">2023Q4</span>.</div>
+<div id="article-meta"><span title="2023-11-26">2023Q4</span>. Last update <span title="2023-11-26">26 Nov 2023</span>. <a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
 <h2 id="introduction"><a href="#introduction" class="anchor" aria-hidden="true" tabindex="-1"></a>Introduction</h2>
 <p>I think it&#x27;s quite well known that on a 64-bit system, the maximum bit-width
 of a virtual address is somewhat lower (commonly 48-bits). This gives an
@@ -293,7 +322,12 @@ must be set to all 0s or all 1s, as before. TBI is also used by Arm&#x27;s
 <a href="https://developer.arm.com/-/media/Arm%20Developer%20Community/PDF/Arm_Memory_Tagging_Extension_Whitepaper.pdf">Memory Tagging
 Extension</a>
 (MTE), which uses 4 of those bits as the &quot;key&quot; to be compared against the
-&quot;lock&quot; tag bits associated with a memory location being accessed.</li>
+&quot;lock&quot; tag bits associated with a memory location being accessed. Armv8.3
+defines another potential consumer of otherwise unused address bits,
+<a href="https://www.qualcomm.com/content/dam/qcomm-martech/dm-assets/documents/pointer-auth-v7.pdf">pointer
+authentication</a>
+which uses 11 to 31 bits depending on the virtual address width if TBI isn&#x27;t
+being used, or 3 to 23 bits if it is.</li>
 </ul>
 <h2 id="storing-data-in-least-significant-bits"><a href="#storing-data-in-least-significant-bits" class="anchor" aria-hidden="true" tabindex="-1"></a>Storing data in least significant bits</h2>
 <p>Another commonly used trick I&#x27;d be remiss not to mention is repurposing a
@@ -301,7 +335,19 @@ small number of the least significant bits in a pointer. If you know a certain
 set of pointers will only ever be used to point to memory with a given minimal
 alignment, you can exploit the fact that the lower bits corresponding to that
 alignment will always be zero and store your own data there. As before,
-masking out the unused bits is of course necessary before using the pointer.</p>
+you&#x27;ll need to account for the bits you repurpose when accessing the pointer -
+in this case either by masking, or by adjusting the offset used to access the
+address (if those least significant bits are known).</p>
+<p>As <a href="https://fosstodon.org/@pervognsen@mastodon.social/111478311705167492">suggested by Per
+Vognsen</a>,
+after this article was first published, you can exploit x86&#x27;s <a href="https://en.wikipedia.org/wiki/ModR/M#SIB_byte">scaled index
+addressing mode</a> to use up
+to 3 bits that are unused due to alignment, but storing your data in the upper bits.
+The scaled index addressing mode meaning there&#x27;s no need for separate pointer
+manipulation upon access. e.g. for an 8-byte aligned address, store it
+right-shifted by 3 and use the top 3 bits for metadata, then scaling by 8
+using SIB when accessing (which effectively ignores the top 3 bits).  This has
+some trade-offs, but is such a neat trick I felt I have to include it!</p>
 <h2 id="some-real-world-examples"><a href="#some-real-world-examples" class="anchor" aria-hidden="true" tabindex="-1"></a>Some real-world examples</h2>
 <p>To state what I hope is obvious, this is far from an exhaustive list. The
 point of this quick blog post was really to discuss cases where additional
@@ -320,7 +366,13 @@ class in LLVM to allow the easy implementation of this optimisation. There&#x27;
 also an <a href="https://github.com/rust-lang/rfcs/pull/3204">&#x27;alignment niches&#x27;
 proposal</a> for Rust which would
 allow this kind of optimisation to be done automatically for <code>enum</code>s (tagged
-unions).</li>
+unions). Another example of repurposing the LSB found in the wild would be
+the Linux kernel <a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/linux/list_bl.h">using it for a spin
+lock</a>
+(thanks Vegard Nossum for the
+<a href="https://fosstodon.org/@vegard@mastodon.social/111478755690419785">tip</a>, who
+notes this is used in the kernel&#x27;s directory entry cache hashtable). There
+are surely many many more examples.</li>
 <li>Go repurposes both upper and lower bits in its
 <a href="https://github.com/golang/go/blob/master/src/runtime/tagptr_64bit.go">taggedPointer</a>,
 used internally in its runtime implementation.</li>
@@ -361,6 +413,27 @@ of the XOR operation.</li>
 <h2 id="fin"><a href="#fin" class="anchor" aria-hidden="true" tabindex="-1"></a>Fin</h2>
 <p>What did I miss? What did I get wrong? Let me know <a href="https://fosstodon.org/@asb">on
 Mastodon</a> or email (asb@asbradbury.org).</p>
+<hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor "aria-hidden="true" tabindex="-1"></a>Article changelog</summary>
+<ul>
+<li>2023-11-26:
+<ul>
+<li>Note the Linux kernel repurposing the LSB as a spin lock (thanks to Vegard
+Nossum for the
+<a href="https://fosstodon.org/@vegard@mastodon.social/111478755690419785">suggestion</a>).</li>
+<li>Add SIB addressing idea <a href="https://fosstodon.org/@pervognsen@mastodon.social/111478311705167492">shared by Per
+Vognsen</a>.</li>
+<li>Integrate note
+<a href="https://fosstodon.org/@wingo@mastodon.social/111478367520587737">suggested</a>
+by Andy Wingo that explicit masking often isn&#x27;t needed when the least
+significant pointer bits are repurposed.</li>
+<li>Add a reference to Arm Pointer Authentication (thanks to the
+<a href="https://twitter.com/tmikov/status/1728849257439150425">suggestion</a> from
+Tzvetan Mikov).</li>
+</ul>
+</li>
+<li>2023-11-26: Initial publication date.</li>
+</ul>
+</details>
 
 </div>
 <footer class="footer">

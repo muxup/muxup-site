@@ -133,7 +133,12 @@ data within pointeres by making additional masking unnecessary.
   [Memory Tagging
   Extension](https://developer.arm.com/-/media/Arm%20Developer%20Community/PDF/Arm_Memory_Tagging_Extension_Whitepaper.pdf)
   (MTE), which uses 4 of those bits as the "key" to be compared against the
-  "lock" tag bits associated with a memory location being accessed.
+  "lock" tag bits associated with a memory location being accessed. Armv8.3
+  defines another potential consumer of otherwise unused address bits,
+  [pointer
+  authentication](https://www.qualcomm.com/content/dam/qcomm-martech/dm-assets/documents/pointer-auth-v7.pdf)
+  which uses 11 to 31 bits depending on the virtual address width if TBI isn't
+  being used, or 3 to 23 bits if it is.
 
 ## Storing data in least significant bits
 
@@ -142,7 +147,20 @@ small number of the least significant bits in a pointer. If you know a certain
 set of pointers will only ever be used to point to memory with a given minimal
 alignment, you can exploit the fact that the lower bits corresponding to that
 alignment will always be zero and store your own data there. As before,
-masking out the unused bits is of course necessary before using the pointer.
+you'll need to account for the bits you repurpose when accessing the pointer -
+in this case either by masking, or by adjusting the offset used to access the
+address (if those least significant bits are known).
+
+As [suggested by Per
+Vognsen](https://fosstodon.org/@pervognsen@mastodon.social/111478311705167492),
+after this article was first published, you can exploit x86's [scaled index
+addressing mode](https://en.wikipedia.org/wiki/ModR/M#SIB_byte) to use up
+to 3 bits that are unused due to alignment, but storing your data in the upper bits.
+The scaled index addressing mode meaning there's no need for separate pointer
+manipulation upon access. e.g. for an 8-byte aligned address, store it
+right-shifted by 3 and use the top 3 bits for metadata, then scaling by 8
+using SIB when accessing (which effectively ignores the top 3 bits).  This has
+some trade-offs, but is such a neat trick I felt I have to include it!
 
 ## Some real-world examples
 
@@ -163,7 +181,13 @@ arguably more common), so I've included some examples of that below:
   also an ['alignment niches'
   proposal](https://github.com/rust-lang/rfcs/pull/3204) for Rust which would
   allow this kind of optimisation to be done automatically for `enum`s (tagged
-  unions).
+  unions). Another example of repurposing the LSB found in the wild would be
+  the Linux kernel [using it for a spin
+  lock](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/linux/list_bl.h)
+  (thanks Vegard Nossum for the
+  [tip](https://fosstodon.org/@vegard@mastodon.social/111478755690419785), who
+  notes this is used in the kernel's directory entry cache hashtable). There
+  are surely many many more examples.
 * Go repurposes both upper and lower bits in its
   [taggedPointer](https://github.com/golang/go/blob/master/src/runtime/tagptr_64bit.go),
   used internally in its runtime implementation.
@@ -205,4 +229,19 @@ arguably more common), so I've included some examples of that below:
 
 What did I miss? What did I get wrong? Let me know [on
 Mastodon](https://fosstodon.org/@asb) or email (asb@asbradbury.org).
+
+## Article changelog
+* 2023-11-26: (minor)
+  * Note the Linux kernel repurposing the LSB as a spin lock (thanks to Vegard
+    Nossum for the
+    [suggestion](https://fosstodon.org/@vegard@mastodon.social/111478755690419785)).
+  * Add SIB addressing idea [shared by Per
+    Vognsen](https://fosstodon.org/@pervognsen@mastodon.social/111478311705167492).
+  * Integrate note
+    [suggested](https://fosstodon.org/@wingo@mastodon.social/111478367520587737)
+    by Andy Wingo that explicit masking often isn't needed when the least
+    significant pointer bits are repurposed.
+  * Add a reference to Arm Pointer Authentication (thanks to the
+    [suggestion](https://twitter.com/tmikov/status/1728849257439150425) from
+    Tzvetan Mikov).
 
