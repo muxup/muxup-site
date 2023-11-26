@@ -110,11 +110,11 @@ data within pointeres by making additional masking unnecessary.
     time of writing.
 * RISC-V has the proposed [pointer masking
   extension](https://github.com/riscv/riscv-j-extension/blob/1c7cf98295e678e015750ff0b7fdc54ed213b95e/zjpm-spec.pdf)
-  which defines new supervisor-level extensions to control it, allowing
-  `PMLEN` to potentially be set to 7 (masking the upper 7 bits) or 16 (masking
-  the upper 16 bits). In usual RISC-V style, it's not mandated which of these
-  are supported, but the [draft RVA23 profile mandates that PMLEN=7 must be
-  supported at a
+  which defines new supervisor-level extensions Ssnpm, Smnpm, and Smmpm to
+  control it. These allow `PMLEN` to potentially be set to 7 (masking the
+  upper 7 bits) or 16 (masking the upper 16 bits). In usual RISC-V style, it's
+  not mandated which of these are supported, but the [draft RVA23 profile
+  mandates that PMLEN=7 must be supported at a
   minimum](https://github.com/riscv/riscv-profiles/blob/ff79c48f975f93c25f6359d47d0f578b3ecb8555/rva23-profile.adoc).
   Eagle-eyed readers will note that the proposed approach has the same issue
   that caused concern with AMD's Upper Address Ignore, namely that the most
@@ -222,7 +222,7 @@ arguably more common), so I've included some examples of that below:
 * As this list is becoming more of a list of things slightly outside the scope
   of this article I might as well round it off with [the XOR linked
   list](https://en.wikipedia.org/wiki/XOR_linked_list), which reduces the
-  storage requirements for double linked list by exploiting the reversibility
+  storage requirements for doubly linked lists by exploiting the reversibility
   of the XOR operation.
 
 ## Fin
@@ -232,6 +232,7 @@ Mastodon](https://fosstodon.org/@asb) or email (asb@asbradbury.org).
 
 ## Article changelog
 * 2023-11-26: (minor)
+  * Minor typo fixes and rewordings.
   * Note the Linux kernel repurposing the LSB as a spin lock (thanks to Vegard
     Nossum for the
     [suggestion](https://fosstodon.org/@vegard@mastodon.social/111478755690419785)).
