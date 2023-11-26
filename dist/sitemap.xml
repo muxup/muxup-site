@@ -2,7 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
 <loc>https://muxup.com</loc>
-<lastmod>2023-10-10</lastmod>
+<lastmod>2023-11-26</lastmod>
+</url>
+<url>
+<loc>https://muxup.com/2023q4/storing-data-in-pointers</loc>
+<lastmod>2023-11-26</lastmod>
 </url>
 <url>
 <loc>https://muxup.com/2023q4/whats-new-for-risc-v-in-llvm-17</loc>

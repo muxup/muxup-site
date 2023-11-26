@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:title" content="Storing data in pointers"/>
+<meta property="og:site_name" content="Muxup">
+<meta property="og:description" content="Some notes on storing data in pointers and the impact of &gt;48-bit virtual addresses"/>
+<meta property="og:type" content="article"/>
+<meta property="og:url" content="https://muxup.com/2023q4/storing-data-in-pointers"/>
+<meta property="og:image" content="https://v1.screenshot.11ty.dev/https%3A%2F%2Fmuxup.com%2F2023q4%2Fstoring-data-in-pointers/opengraph/ar/bigger"/>
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:site" content="@muxup">
+<meta property="twitter:creator" content="@asbradbury">
+<title>Storing data in pointers - Muxup</title>
+<link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg xmlns='http:%2F%2Fwww.w3.org%2F2000%2Fsvg' viewBox='0 0 100 100'%3E%3Ctext y='80' font-size='110'%3E▨%3C%2Ftext%3E%3C%2Fsvg%3E">
+<meta name="description" content="Some notes on storing data in pointers and the impact of &gt;48-bit virtual addresses">
+<style>
+@font-face {
+font-family:'Nunito Var';
+src:url('/static/Nunito.var.v2.woff2') format('woff2-variations');
+font-display:swap;
+font-weight: 200 1000;
+}
+*, *::before, *::after {
+box-sizing:border-box;
+}
+* {
+margin:0;
+}
+input, button, textarea, select {
+font:inherit;
+}
+img, picture, video, canvas, svg {
+display:block;
+max-width:100%;
+}
+html {
+font-family:'Nunito Var', sans-serif;
+height:100%;
+font-size:16px;
+-webkit-tap-highlight-color:transparent;
+}
+@media screen and (min-width:640px) {
+html {
+font-size:18px;
+}
+}
+body {
+line-height:1.5;
+color:#222;
+display:grid;
+height:100%;
+grid-template-rows:1fr auto;
+background:#fff no-repeat 0% 0% / 100% .7rem linear-gradient(120deg, #ffffe3 20%, #ddfffc 20%, #ddfffc 40%, #e2eeff 40%, #e2eeff 60%, #f2e2ff 60%, #f2e2ff 80%, #ffdef2 80%, #ffdef2 100%);
+tab-size:4;
+}
+h1, h2, h3, h4, h5, h6 {
+line-height:1.25;
+font-weight:600;
+overflow-wrap:break-word;
+letter-spacing:-.025em;
+margin:1.75rem 0 .75rem;
+}
+h1 {
+font-size:2.986rem
+}
+h2 {
+font-size:2.488rem
+}
+p {
+margin:.75rem 0;
+font-weight:400;
+overflow-wrap:break-word;
+}
+a {
+color:inherit;
+text-decoration:underline;
+text-decoration-color:#aaa;
+text-underline-offset:.15em;
+}
+a:hover {
+text-decoration-thickness:2px;
+}
+ol, ul {
+margin:0 0 0 1.5rem;
+padding-left:0;
+}
+li {
+margin:0 0 .25rem
+}
+::selection {
+background:#ffdac0;
+}
+footer {
+font-size:.833rem;
+color:#777;
+padding:0 1rem;
+width:100%;
+max-width:min(calc(750px + 2rem), calc(100vw - 1rem));
+margin:0 auto;
+}
+footer p {
+text-align:center;
+margin:0 0 .75rem;
+}
+#footer-image {
+margin:0 auto;
+cursor:pointer;
+}
+#article-logo {
+line-height:1.25;
+margin:.5rem 0 0;
+font-size:1.44rem;
+font-weight:700;
+position:relative;
+}
+#article-logo a {
+text-decoration:none;
+}
+#article-title {
+margin:1.5rem 0 0;
+position:relative;
+}
+#article-meta {
+font-size:.833rem;
+color:#777;
+}
+#article-container {
+margin:0 auto;
+padding:1rem;
+max-width:min(calc(750px + 2rem), calc(100vw - 1rem));
+width:100%;
+}
+.anchor {
+position: absolute;
+text-decoration: none;
+width:1.75ex;
+margin-left:-1.4ex;
+visibility:hidden;
+font-size:.8em;
+padding-top:.2em;
+color:#aaa;
+}
+h2:hover .anchor,
+h3:hover .anchor,
+h4:hover .anchor,
+h5:hover .anchor,
+h6:hover .anchor,
+summary:hover .anchor {
+visibility:visible;
+}
+.anchor::before {
+content:"#";
+}
+code {
+background:#f5f5f5;
+padding:.125rem .25rem;
+font-size:.833rem
+}
+</style>
+<link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed.xml"/>
+<link rel="canonical" href="https://muxup.com/2023q4/storing-data-in-pointers"/>
+</head>
+<body>
+<div id="article-container">
+<div>
+<div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></a></div>
+</div>
+<h1 id="article-title"><span id="title-highlight">Storing data in pointers</span></h1>
+<div id="article-meta"><span title="2023-11-26">2023Q4</span>.</div>
+<h2 id="introduction"><a href="#introduction" class="anchor" aria-hidden="true" tabindex="-1"></a>Introduction</h2>
+<p>I think it&#x27;s quite well known that on a 64-bit system, the maximum bit-width
+of a virtual address is somewhat lower (commonly 48-bits). This gives an
+opportunity to repurpose those unused bits for data storage, if you&#x27;re willing
+to mask them out before using your pointer (or have a hardware feature that
+does that for you - more on this later). I wondered what happens to userspace
+programs relying on such tricks as processors gain support for wider virtual
+addresses, hence this little blog post. TL;DR is that there&#x27;s no real change
+unless certain hint values to enable use of wider addresses are passed to
+<code>mmap</code>, but read on for more details as well as other notes about the general
+topic of storing data in pointers.</p>
+<h2 id="storage-in-upper-bits-assuming-48-bit-virtual-addresses"><a href="#storage-in-upper-bits-assuming-48-bit-virtual-addresses" class="anchor" aria-hidden="true" tabindex="-1"></a>Storage in upper bits assuming 48-bit virtual addresses</h2>
+<p>Assuming your platform has 48-bit wide virtual addresses, this is pretty
+straightforward. You can stash whatever you want in those 16 bits, but you&#x27;ll
+need to ensure you masking them out for every load and store (which is cheap,
+but has at least some cost) and would want to be confident that there&#x27;s no
+other attempted users for these bits. The masking would be slightly different
+in kernel space due to rules on how the upper bits are set:</p>
+<ul>
+<li>x86-64 defines a <a href="https://cdrdv2.intel.com/v1/dl/getContent/671200">canonical form of
+addresses</a> (see 3.3.7.1).
+This describes how on an implementation with 48-bit virtual addresses, bits
+63:48 must be set to the value of bit 47 (i.e. sign extended). The <a href="https://docs.kernel.org/arch/x86/x86_64/mm.html">memory
+map used by the Linux
+kernel</a> uses bit 47 to
+split the address space between kernel and user addresses, so that bit will
+always be 0 for user-space addresses meaning bits 63:48 must also be 0 to be
+in canonical form.</li>
+<li>RISC-V has essentially the same restriction (see <a href="https://github.com/riscv/riscv-isa-manual/releases/download/Priv-v1.12/riscv-privileged-20211203.pdf">4.5.1 in the RISC-V
+privileged
+specification</a>)
+&quot;instruction fetch addresses and load and store effective addresses, which
+are 64 bits, must have bits 63-48 all equal to bit 47, or else a page-fault
+exception will occur.&quot; The virtual memory layout used by the Linux kernel
+<a href="https://docs.kernel.org/arch/riscv/vm-layout.html">uses the same approach as for
+x86-64</a>.</li>
+<li>AArch64 has a slight variant on the above which essentially provides a
+49-bit address space (meaning user-space virtual memory can cover 256TiB
+rather than 128TiB). As <a href="https://documentation-service.arm.com/static/5efa1d23dbdee951c1ccdec5?token=">described in the Armv8-A address translation
+documentation</a>
+(section 3), for a 48-bit address space bits 63:48 must be all 0s or all 1s.
+However, they don&#x27;t need to be a copy of bit 47, and a different address
+translation table is used depending on whether bits 63:48 are 1 or 0. This
+<a href="https://docs.kernel.org/arch/arm64/memory.html">allows splitting kernel/user addresses without giving up bit
+47</a>.</li>
+</ul>
+<h2 id="what-if-virtual-addresses-are-wider-than-48-bits"><a href="#what-if-virtual-addresses-are-wider-than-48-bits" class="anchor" aria-hidden="true" tabindex="-1"></a>What if virtual addresses are wider than 48 bits?</h2>
+<p>So we&#x27;ve covered the easy case, where you can freely (ab)use the upper 16 bits
+for your own purposes. But what if you&#x27;re running on a system that has wider
+than 48 bit virtual addresses? How do you know that&#x27;s the case? And is it
+possible to limit virtual addresses to the 48-bit range if you&#x27;re sure you
+don&#x27;t need the extra bits?</p>
+<p>You can query the virtual address width from the command-line by <code>cat</code>ting
+<code>/proc/cpuinfo</code>, which might include a line like <code>address sizes	: 39 bits physical, 48 bits virtual</code>. I&#x27;d hope there&#x27;s a way to get the same information
+without parsing <code>/proc/cpuinfo</code>, but I haven&#x27;t been able to find it.</p>
+<p>As for how to keep using those upper bits on a system with wider virtual
+addresses, helpfully the behaviour of <code>mmap</code> is defined with this
+compatibility in mind. It&#x27;s explicitly documented <a href="https://docs.kernel.org/arch/x86/x86_64/5level-paging.html#user-space-and-large-virtual-address-space">for
+x86-64</a>,
+<a href="https://docs.kernel.org/arch/arm64/memory.html#bit-userspace-vas">for
+AArch64</a> and
+<a href="https://docs.kernel.org/arch/riscv/vm-layout.html#userspace-vas">for RISC-V</a>
+that addresses beyond 48-bits won&#x27;t be returned unless a hint parameter beyond
+a certain width is used (the details are slightly different for each target).
+This means if you&#x27;re confident that nothing within your process is going to be
+passing such hints to <code>mmap</code> (including e.g. your <code>malloc</code> implementation), or
+at least that you&#x27;ll never need to try to reuse upper bits of addresses
+produced in this way, then you&#x27;re free to presume the system uses no more than
+48 bits of virtual address.</p>
+<h2 id="top-byte-ignore-and-similar-features"><a href="#top-byte-ignore-and-similar-features" class="anchor" aria-hidden="true" tabindex="-1"></a>Top byte ignore and similar features</h2>
+<p>Up to this point I&#x27;ve completely skipped over the various architectural
+features that allow some of the upper bits to be ignored upon dereference,
+essentially providing hardware support for this type of storage of additional
+data within pointeres by making additional masking unnecessary.</p>
+<ul>
+<li>x86-64 keeps things interesting by having slightly different variants of
+this for Intel and AMD.
+<ul>
+<li>Intel introduced Linear Address Masking (LAM), documented in chapter 6 of
+<a href="https://cdrdv2.intel.com/v1/dl/getContent/671368">their document on instruction set extensions and future
+features</a>. If enabled
+this modifies the canonicality check so that, for instance, on a system
+with 48-bit virtual addresses bit 47 must be equal to bit 63. This would
+allow bits 62:48 (15 bits) can be freely used with no masking needed.
+&quot;LAM57&quot; allows 62:57 to be used (6 bits). It seems as if Linux is
+currently opting to <a href="https://lwn.net/Articles/902094/">only support LAM57 and not
+LAM48</a>. Support for LAM can be
+configured separately for user and supervisor mode, but I&#x27;ll refer you to
+the Intel docs for details.</li>
+<li>AMD instead <a href="https://www.amd.com/content/dam/amd/en/documents/processor-tech-docs/programmer-references/24593.pdf">describes Upper Address
+Ignore</a>
+(see section 5.10) which allows bits 63:57 (7 bits) to be used, and unlike
+LAM doesn&#x27;t require bit 63 to match the upper bit of the virtual address.
+As documented in LWN, this <a href="https://lwn.net/Articles/888914/">caused some concern from the Linux kernel
+community</a>. Unless I&#x27;m missing it, there
+doesn&#x27;t seem to be any level of support merged in the Linux kernel at the
+time of writing.</li>
+</ul>
+</li>
+<li>RISC-V has the proposed <a href="https://github.com/riscv/riscv-j-extension/blob/1c7cf98295e678e015750ff0b7fdc54ed213b95e/zjpm-spec.pdf">pointer masking
+extension</a>
+which defines new supervisor-level extensions to control it, allowing
+<code>PMLEN</code> to potentially be set to 7 (masking the upper 7 bits) or 16 (masking
+the upper 16 bits). In usual RISC-V style, it&#x27;s not mandated which of these
+are supported, but the <a href="https://github.com/riscv/riscv-profiles/blob/ff79c48f975f93c25f6359d47d0f578b3ecb8555/rva23-profile.adoc">draft RVA23 profile mandates that PMLEN=7 must be
+supported at a
+minimum</a>.
+Eagle-eyed readers will note that the proposed approach has the same issue
+that caused concern with AMD&#x27;s Upper Address Ignore, namely that the most
+significant bit is no longer required to be the same as the top bit of the
+virtual address. This is
+<a href="https://github.com/riscv/riscv-j-extension/blob/1c7cf98295e678e015750ff0b7fdc54ed213b95e/zjpm/background.adoc#pointer-masking-and-privilege-modes">noted</a>
+in the spec, with the suggestion that this is solvable at the ABI level and
+some operating systems may choose to mandate that the MSB not be used for
+tagging.</li>
+<li>AArch64 has the <a href="https://developer.arm.com/documentation/den0024/a/ch12s05s01">Top Byte
+Ignore</a> (TBI)
+feature, which as the name suggests just means that the top 8 bits of a
+virtual address are ignored when used for memory accesses and can be used to
+store data. Any other bits between the virtual address width and top byte
+must be set to all 0s or all 1s, as before. TBI is also used by Arm&#x27;s
+<a href="https://developer.arm.com/-/media/Arm%20Developer%20Community/PDF/Arm_Memory_Tagging_Extension_Whitepaper.pdf">Memory Tagging
+Extension</a>
+(MTE), which uses 4 of those bits as the &quot;key&quot; to be compared against the
+&quot;lock&quot; tag bits associated with a memory location being accessed.</li>
+</ul>
+<h2 id="storing-data-in-least-significant-bits"><a href="#storing-data-in-least-significant-bits" class="anchor" aria-hidden="true" tabindex="-1"></a>Storing data in least significant bits</h2>
+<p>Another commonly used trick I&#x27;d be remiss not to mention is repurposing a
+small number of the least significant bits in a pointer. If you know a certain
+set of pointers will only ever be used to point to memory with a given minimal
+alignment, you can exploit the fact that the lower bits corresponding to that
+alignment will always be zero and store your own data there. As before,
+masking out the unused bits is of course necessary before using the pointer.</p>
+<h2 id="some-real-world-examples"><a href="#some-real-world-examples" class="anchor" aria-hidden="true" tabindex="-1"></a>Some real-world examples</h2>
+<p>To state what I hope is obvious, this is far from an exhaustive list. The
+point of this quick blog post was really to discuss cases where additional
+data is stored alongside a pointer, but of course unused bits can also be
+exploited to allow a more efficient tagged union representation (and this is
+arguably more common), so I&#x27;ve included some examples of that below:</p>
+<ul>
+<li>The <a href="https://www.cipht.net/2017/10/29/fixie-tries.html">fixie trie</a>, is a
+variant of the trie that uses 16 bits in each pointer to store a bitmap used
+as part of the lookup logic. It also exploits the minimum alignment of
+pointers to repurpose the least significant bit to indicate if a value is a
+branch or a leaf.</li>
+<li>On the topic of storing data in the least significant bits, we have a handy
+<a href="https://github.com/llvm/llvm-project/blob/dc8b055c71d2ff2f43c0f4cac66e15a210b91e3b/llvm/include/llvm/ADT/PointerIntPair.h#L64">PointerIntPair</a>
+class in LLVM to allow the easy implementation of this optimisation. There&#x27;s
+also an <a href="https://github.com/rust-lang/rfcs/pull/3204">&#x27;alignment niches&#x27;
+proposal</a> for Rust which would
+allow this kind of optimisation to be done automatically for <code>enum</code>s (tagged
+unions).</li>
+<li>Go repurposes both upper and lower bits in its
+<a href="https://github.com/golang/go/blob/master/src/runtime/tagptr_64bit.go">taggedPointer</a>,
+used internally in its runtime implementation.</li>
+<li>If you have complete control over your heap then there&#x27;s more you can do to
+make use of embedded metadata, including using additional bits by avoiding
+allocation outside of a certain range and using redundant mappings to avoid
+or reduce the need for masking. OpenJDK&#x27;s ZGC <a href="https://dinfuehr.github.io/blog/a-first-look-into-zgc/">is a good example of
+this</a>, utilising a
+42-bit address space for objects and upon allocation mapping pages to
+different aliases to allow pointers using their metadata bits to be
+dereferenced without masking.</li>
+<li>A fairly common trick in language runtimes is to exploit the fact that
+values can be stored inside the payload of double floating point NaN (not a
+number) values and overlap it with pointers (knowing that the full 64 bits
+aren&#x27;t needed) and even small integers. There&#x27;s a nice description of this
+<a href="https://github.com/WebKit/WebKit/blob/0a64dd54421137c48a57e6e0aab15a99139a8776/Source/JavaScriptCore/runtime/JSCJSValue.h#L403">in
+JavaScriptCore</a>,
+but it was famously used in
+<a href="http://lua-users.org/lists/lua-l/2009-11/msg00089.html">LuaJIT</a>. Andy Wingo
+also has a <a href="https://wingolog.org/archives/2011/05/18/value-representation-in-javascript-implementations">helpful
+write-up</a>.
+Along similar lines, OCaml steals just the least significant bit in order to
+<a href="https://blog.janestreet.com/what-is-gained-and-lost-with-63-bit-integers/">efficiently support unboxed
+integers</a>
+(meaning integers are 63-bit on 64-bit platforms and 31-bit on 32-bit
+platforms).</li>
+<li>V8 opts to limit the heap used for V8 objects to 4GiB using <a href="https://v8.dev/blog/pointer-compression">pointer
+compression</a>, where an offset is
+used alongside the 32-bit value (which itself might be a pointer or a 31-bit
+integer, depending on the least significant bit) to refer to the memory
+location.</li>
+<li>As this list is becoming more of a list of things slightly outside the scope
+of this article I might as well round it off with <a href="https://en.wikipedia.org/wiki/XOR_linked_list">the XOR linked
+list</a>, which reduces the
+storage requirements for double linked list by exploiting the reversibility
+of the XOR operation.</li>
+</ul>
+<h2 id="fin"><a href="#fin" class="anchor" aria-hidden="true" tabindex="-1"></a>Fin</h2>
+<p>What did I miss? What did I get wrong? Let me know <a href="https://fosstodon.org/@asb">on
+Mastodon</a> or email (asb@asbradbury.org).</p>
+
+</div>
+<footer class="footer">
+<img id="footer-image" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E" width="50" height="50"/>
+<p>Curated by Alex Bradbury | &copy; <a href="/">Muxup</a> contributors | <a href="/about">About</a> | <a href="https://github.com/muxup">GitHub</a> | <a href="https://twitter.com/muxup">Twitter</a></p>
+</footer>
+<script>
+const t="http://www.w3.org/2000/svg";function o(t){return Math.random()*(2*t)-t}function n(t){const n=t.t.getBoundingClientRect();const e=t.o.getClientRects();let c="";for(const t of e){const e=t.x-n.x,f=t.y-n.y,s=t.width,r=t.height;const i=f+r/2;let u=s<75?3:s<300?6:8;const l=.2+.2*Math.random();c=`${c}\n      M${e+o(u)} ${i+o(u)}\n      C${e+s*l+o(u)} ${i+o(u)},\n       ${e+2*s*l+o(u)} ${i+o(u)}\n       ${e+s+o(u)} ${i+o(u)}`}t.i=c;t.strokeWidth=.85*e[0].height}const e=new Map;let c=new ResizeObserver((t=>{for(const o of t){const t=e.get(o.target);if(!t.i)n(t)}for(const o of t){s(e.get(o.target))}}));function f(o){const n=document.createElementNS(t,"svg");n.style.position="absolute";n.style.zIndex=-1;n.style.top="0";n.style.left="0";n.style.overflow="visible";const e=document.createElementNS(t,"path");e.setAttribute("fill","none");e.setAttribute("stroke",o.u);n.appendChild(e);o.o.insertAdjacentElement("beforebegin",n);o.t=n}function s(t){if(!t.i){n(t)}const o=t.t.children[0];o.setAttribute("stroke-width",t.strokeWidth);o.setAttribute("d",t.i);t.i=null}function r(){for(const t of e.values()){f(t)}for(const t of e.values()){n(t)}for(const t of e.keys()){c.observe(t)}document.fonts.ready.then((()=>i()))}function i(){for(const t of e.values()){n(t)}for(const t of e.values()){s(t)}}function u(t,o){let n;t.addEventListener("mouseover",(()=>{s(o);n=setInterval((()=>s(o)),240)}),false);t.addEventListener("mouseout",(()=>{clearInterval(n)}));t.addEventListener("click",(()=>{clearInterval(n)}))}function l(t,o,n){let c={o:t,l:o,u:n};e.set(o,c);return c}let a=new Set([window.location.pathname]);const h=document.querySelector("#footer-image");let d=null;function m(){let t=Math.floor(Math.random()*282);d="/static/footer/"+String(t).padStart(4,"0")+".svg"}function g(t){h.src=d;m();if(!t)v()}function v(){if(a.has(d))return;a.add(d);fetch(d)}m();g(true);const w=[{transform:"rotate(0)"},{transform:"rotate(360deg)"}];const $={duration:600,h:1};h.addEventListener("click",(()=>{h.animate(w,$);g()}));function M(){h.animate(w,$);v()}h.addEventListener("mouseover",M);h.addEventListener("touchstart",M,{passive:true});function k(t){const o=t.currentTarget.getAttribute("href").split("#")[0];if(a.has(o))return;a.add(o);fetch(o)}const p=document.getElementsByTagName("a");for(const t of p){const o=(t.getAttribute("href")??"").split("#")[0];if(o.includes("?")||!o.startsWith("/")||o.slice(o.lastIndexOf("/")+1).includes(".")){continue}t.addEventListener("mouseover",k);t.addEventListener("touchstart",k,{passive:true})}const b=["#ffdef2","#f2e2ff","#e2eeff","#ddfffc","#ffffe3"];const I=document.querySelector("#title-highlight");l(I,I.parentNode,b[Math.floor(Math.random()*b.length)]);const C=document.querySelector("#logo-highlight");const E=l(C,C.parentNode,"#ffdac0");r();u(C,E);
+
+</script>
+</body>
+</html>
