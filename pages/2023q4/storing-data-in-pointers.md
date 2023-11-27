@@ -224,7 +224,7 @@ arguably more common), so I've included some examples of that below:
   [documented](https://www.mikeash.com/pyblog/friday-qa-2012-07-27-lets-build-tagged-pointers.html)
   [in](https://www.mikeash.com/pyblog/friday-qa-2013-09-27-arm64-and-you.html)
   [detail](https://www.mikeash.com/pyblog/friday-qa-2015-07-31-tagged-pointer-strings.html)
-  on Mike Ash'es excellent blog. Inlining the reference count (falling back to
+  on Mike Ash's excellent blog. Inlining the reference count (falling back to
   a hash lookup upon overflow) is a fun one.
 * V8 opts to limit the heap used for V8 objects to 4GiB using [pointer
   compression](https://v8.dev/blog/pointer-compression), where an offset is
@@ -236,6 +236,18 @@ arguably more common), so I've included some examples of that below:
   list](https://en.wikipedia.org/wiki/XOR_linked_list), which reduces the
   storage requirements for doubly linked lists by exploiting the reversibility
   of the XOR operation.
+* I've focused on storing data in conventional pointers on current commodity
+  architectures but there is of course a huge wealth of work involving tagged
+  memory (also an area where [I've
+  dabbled](https://github.com/lowRISC/lowrisc-site/blob/master/static/downloads/lowRISC-memo-2014-001.pdf) -
+  something for a future blog post perhaps) and/or alternative pointer
+  representations. I've touched on this with MTE (mentioned due to its
+  interaction with TBI), but another prominent example is of course
+  [CHERI](https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-941.pdf) which moves
+  to using 128-bit capabilities in order to fit in additional inline metadata.
+  David Chisnall provided some [observations based on porting code to CHERI
+  that relies on the kind of tricks described in this
+  post](https://lobste.rs/s/5417dx/storing_data_pointers#c_j12qr0).
 
 ## Fin
 
@@ -250,6 +262,10 @@ or [on Mastodon](https://fosstodon.org/@asb/111478289261238134).
 
 ## Article changelog
 * 2023-11-27: (minor)
+  * Mention CHERI is the list of "real world examples" which is becoming
+    dominated by instances of things somewhat different to what I was
+    describing! Thanks to Paul Butcher [for the
+    suggestion](https://www.linkedin.com/feed/update/urn:li:activity:7134613236737302528).
   * Link to relevant posts on Mike Ash's blog
     ([suggested](https://lobste.rs/s/5417dx/storing_data_pointers#c_la63sf) by
     Jens Alfke).
