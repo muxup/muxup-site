@@ -6,16 +6,16 @@ description = "Some notes on storing data in pointers and the impact of >48-bit 
 # Storing data in pointers
 
 ## Introduction
-I think it's quite well known that on a 64-bit system, the maximum bit-width
-of a virtual address is somewhat lower (commonly 48-bits). This gives an
-opportunity to repurpose those unused bits for data storage, if you're willing
-to mask them out before using your pointer (or have a hardware feature that
-does that for you - more on this later). I wondered what happens to userspace
-programs relying on such tricks as processors gain support for wider virtual
-addresses, hence this little blog post. TL;DR is that there's no real change
-unless certain hint values to enable use of wider addresses are passed to
-`mmap`, but read on for more details as well as other notes about the general
-topic of storing data in pointers.
+On mainstream 64-bit systems, the maximum bit-width
+of a virtual address is somewhat lower than 64 bits (commonly 48 bits). This
+gives an opportunity to repurpose those unused bits for data storage, if
+you're willing to mask them out before using your pointer (or have a hardware
+feature that does that for you - more on this later). I wondered what happens
+to userspace programs relying on such tricks as processors gain support for
+wider virtual addresses, hence this little blog post. TL;DR is that there's no
+real change unless certain hint values to enable use of wider addresses are
+passed to `mmap`, but read on for more details as well as other notes about
+the general topic of storing data in pointers.
 
 ## Storage in upper bits assuming 48-bit virtual addresses
 
@@ -219,7 +219,7 @@ arguably more common), so I've included some examples of that below:
   integers](https://blog.janestreet.com/what-is-gained-and-lost-with-63-bit-integers/)
   (meaning integers are 63-bit on 64-bit platforms and 31-bit on 32-bit
   platforms).
-* Apple's ObjectiveC implementation makes heavy use of unused pointer bits,
+* Apple's Objective-C implementation makes heavy use of unused pointer bits,
   with some examples
   [documented](https://www.mikeash.com/pyblog/friday-qa-2012-07-27-lets-build-tagged-pointers.html)
   [in](https://www.mikeash.com/pyblog/friday-qa-2013-09-27-arm64-and-you.html)
@@ -262,6 +262,11 @@ or [on Mastodon](https://fosstodon.org/@asb/111478289261238134).
 
 ## Article changelog
 * 2023-11-27: (minor)
+  * Reworded the intro so as not to claim "it's quite well known" that the
+    maximum virtual address width is typically less than 64 bits. This might
+    be interpreted as shaming readers for not being aware of that, which
+    wasn't my intent.  Thanks to HN reader jonasmerlin for [pointing this
+    out](https://news.ycombinator.com/item?id=38430812).
   * Mention CHERI is the list of "real world examples" which is becoming
     dominated by instances of things somewhat different to what I was
     describing! Thanks to Paul Butcher [for the
