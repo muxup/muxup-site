@@ -14,16 +14,16 @@
 <id>https://muxup.com/2023q4/storing-data-in-pointers</id>
 <content type="html">
 &lt;h2 id=&quot;introduction&quot;&gt;&lt;a href=&quot;#introduction&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Introduction&lt;/h2&gt;
-&lt;p&gt;I think it&amp;#x27;s quite well known that on a 64-bit system, the maximum bit-width
-of a virtual address is somewhat lower (commonly 48-bits). This gives an
-opportunity to repurpose those unused bits for data storage, if you&amp;#x27;re willing
-to mask them out before using your pointer (or have a hardware feature that
-does that for you - more on this later). I wondered what happens to userspace
-programs relying on such tricks as processors gain support for wider virtual
-addresses, hence this little blog post. TL;DR is that there&amp;#x27;s no real change
-unless certain hint values to enable use of wider addresses are passed to
-&lt;code&gt;mmap&lt;/code&gt;, but read on for more details as well as other notes about the general
-topic of storing data in pointers.&lt;/p&gt;
+&lt;p&gt;On mainstream 64-bit systems, the maximum bit-width
+of a virtual address is somewhat lower than 64 bits (commonly 48 bits). This
+gives an opportunity to repurpose those unused bits for data storage, if
+you&amp;#x27;re willing to mask them out before using your pointer (or have a hardware
+feature that does that for you - more on this later). I wondered what happens
+to userspace programs relying on such tricks as processors gain support for
+wider virtual addresses, hence this little blog post. TL;DR is that there&amp;#x27;s no
+real change unless certain hint values to enable use of wider addresses are
+passed to &lt;code&gt;mmap&lt;/code&gt;, but read on for more details as well as other notes about
+the general topic of storing data in pointers.&lt;/p&gt;
 &lt;h2 id=&quot;storage-in-upper-bits-assuming-48-bit-virtual-addresses&quot;&gt;&lt;a href=&quot;#storage-in-upper-bits-assuming-48-bit-virtual-addresses&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Storage in upper bits assuming 48-bit virtual addresses&lt;/h2&gt;
 &lt;p&gt;Assuming your platform has 48-bit wide virtual addresses, this is pretty
 straightforward. You can stash whatever you want in those 16 bits, but you&amp;#x27;ll
@@ -218,7 +218,7 @@ Along similar lines, OCaml steals just the least significant bit in order to
 integers&lt;/a&gt;
 (meaning integers are 63-bit on 64-bit platforms and 31-bit on 32-bit
 platforms).&lt;/li&gt;
-&lt;li&gt;Apple&amp;#x27;s ObjectiveC implementation makes heavy use of unused pointer bits,
+&lt;li&gt;Apple&amp;#x27;s Objective-C implementation makes heavy use of unused pointer bits,
 with some examples
 &lt;a href=&quot;https://www.mikeash.com/pyblog/friday-qa-2012-07-27-lets-build-tagged-pointers.html&quot;&gt;documented&lt;/a&gt;
 &lt;a href=&quot;https://www.mikeash.com/pyblog/friday-qa-2013-09-27-arm64-and-you.html&quot;&gt;in&lt;/a&gt;
@@ -260,6 +260,11 @@ or &lt;a href=&quot;https://fosstodon.org/@asb/111478289261238134&quot;&gt;on Ma
 &lt;ul&gt;
 &lt;li&gt;2023-11-27:
 &lt;ul&gt;
+&lt;li&gt;Reworded the intro so as not to claim &amp;quot;it&amp;#x27;s quite well known&amp;quot; that the
+maximum virtual address width is typically less than 64 bits. This might
+be interpreted as shaming readers for not being aware of that, which
+wasn&amp;#x27;t my intent.  Thanks to HN reader jonasmerlin for &lt;a href=&quot;https://news.ycombinator.com/item?id=38430812&quot;&gt;pointing this
+out&lt;/a&gt;.&lt;/li&gt;
 &lt;li&gt;Mention CHERI is the list of &amp;quot;real world examples&amp;quot; which is becoming
 dominated by instances of things somewhat different to what I was
 describing! Thanks to Paul Butcher &lt;a href=&quot;https://www.linkedin.com/feed/update/urn:li:activity:7134613236737302528&quot;&gt;for the
