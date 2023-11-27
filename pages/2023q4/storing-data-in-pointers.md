@@ -140,6 +140,11 @@ data within pointeres by making additional masking unnecessary.
   which uses 11 to 31 bits depending on the virtual address width if TBI isn't
   being used, or 3 to 23 bits if it is.
 
+A relevant historical note that multiple people pointed out: the original
+Motorola 68000 had a 24-bit address bus and so the top byte was simply
+ignored which caused [well documented porting issues when trying to expand the
+address space](https://macgui.com/news/article.php?t=527).
+
 ## Storing data in least significant bits
 
 Another commonly used trick I'd be remiss not to mention is repurposing a
@@ -214,13 +219,20 @@ arguably more common), so I've included some examples of that below:
   integers](https://blog.janestreet.com/what-is-gained-and-lost-with-63-bit-integers/)
   (meaning integers are 63-bit on 64-bit platforms and 31-bit on 32-bit
   platforms).
+* Apple's ObjectiveC implementation makes heavy use of unused pointer bits,
+  with some examples
+  [documented](https://www.mikeash.com/pyblog/friday-qa-2012-07-27-lets-build-tagged-pointers.html)
+  [in](https://www.mikeash.com/pyblog/friday-qa-2013-09-27-arm64-and-you.html)
+  [detail](https://www.mikeash.com/pyblog/friday-qa-2015-07-31-tagged-pointer-strings.html)
+  on Mike Ash'es excellent blog. Inlining the reference count (falling back to
+  a hash lookup upon overflow) is a fun one.
 * V8 opts to limit the heap used for V8 objects to 4GiB using [pointer
   compression](https://v8.dev/blog/pointer-compression), where an offset is
   used alongside the 32-bit value (which itself might be a pointer or a 31-bit
   integer, depending on the least significant bit) to refer to the memory
   location.
-* As this list is becoming more of a list of things slightly outside the scope
-  of this article I might as well round it off with [the XOR linked
+* As this list is becoming more of a collection of things slightly outside the
+  scope of this article I might as well round it off with [the XOR linked
   list](https://en.wikipedia.org/wiki/XOR_linked_list), which reduces the
   storage requirements for doubly linked lists by exploiting the reversibility
   of the XOR operation.
@@ -230,7 +242,22 @@ arguably more common), so I've included some examples of that below:
 What did I miss? What did I get wrong? Let me know [on
 Mastodon](https://fosstodon.org/@asb) or email (asb@asbradbury.org).
 
+You might be interested in the discussion of this article [on
+lobste.rs](https://lobste.rs/s/5417dx/storing_data_pointers), [on
+HN](https://news.ycombinator.com/item?id=38424090), [on various
+subreddits](https://old.reddit.com/r/cpp/duplicates/184n4bd/storing_data_in_pointers/),
+or [on Mastodon](https://fosstodon.org/@asb/111478289261238134).
+
 ## Article changelog
+* 2023-11-27: (minor)
+  * Link to relevant posts on Mike Ash's blog
+    ([suggested](https://lobste.rs/s/5417dx/storing_data_pointers#c_la63sf) by
+    Jens Alfke).
+  * Link to the various places this article is being discussed.
+  * Add link to M68k article
+    [suggested](https://fosstodon.org/@christer@mastodon.gamedev.place/111480158347208956)
+    by Christer Ericson (with multiple others suggesting something similar -
+    thanks!).
 * 2023-11-26: (minor)
   * Minor typo fixes and rewordings.
   * Note the Linux kernel repurposing the LSB as a spin lock (thanks to Vegard

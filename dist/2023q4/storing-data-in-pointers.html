@@ -197,7 +197,7 @@ content: " «";
 <div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></a></div>
 </div>
 <h1 id="article-title"><span id="title-highlight">Storing data in pointers</span></h1>
-<div id="article-meta"><span title="2023-11-26">2023Q4</span>. Last update <span title="2023-11-26">26 Nov 2023</span>. <a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
+<div id="article-meta"><span title="2023-11-26">2023Q4</span>. Last update <span title="2023-11-27">27 Nov 2023</span>. <a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
 <h2 id="introduction"><a href="#introduction" class="anchor" aria-hidden="true" tabindex="-1"></a>Introduction</h2>
 <p>I think it&#x27;s quite well known that on a 64-bit system, the maximum bit-width
 of a virtual address is somewhat lower (commonly 48-bits). This gives an
@@ -299,11 +299,11 @@ time of writing.</li>
 </li>
 <li>RISC-V has the proposed <a href="https://github.com/riscv/riscv-j-extension/blob/1c7cf98295e678e015750ff0b7fdc54ed213b95e/zjpm-spec.pdf">pointer masking
 extension</a>
-which defines new supervisor-level extensions to control it, allowing
-<code>PMLEN</code> to potentially be set to 7 (masking the upper 7 bits) or 16 (masking
-the upper 16 bits). In usual RISC-V style, it&#x27;s not mandated which of these
-are supported, but the <a href="https://github.com/riscv/riscv-profiles/blob/ff79c48f975f93c25f6359d47d0f578b3ecb8555/rva23-profile.adoc">draft RVA23 profile mandates that PMLEN=7 must be
-supported at a
+which defines new supervisor-level extensions Ssnpm, Smnpm, and Smmpm to
+control it. These allow <code>PMLEN</code> to potentially be set to 7 (masking the
+upper 7 bits) or 16 (masking the upper 16 bits). In usual RISC-V style, it&#x27;s
+not mandated which of these are supported, but the <a href="https://github.com/riscv/riscv-profiles/blob/ff79c48f975f93c25f6359d47d0f578b3ecb8555/rva23-profile.adoc">draft RVA23 profile
+mandates that PMLEN=7 must be supported at a
 minimum</a>.
 Eagle-eyed readers will note that the proposed approach has the same issue
 that caused concern with AMD&#x27;s Upper Address Ignore, namely that the most
@@ -329,6 +329,10 @@ authentication</a>
 which uses 11 to 31 bits depending on the virtual address width if TBI isn&#x27;t
 being used, or 3 to 23 bits if it is.</li>
 </ul>
+<p>A relevant historical note that multiple people pointed out: the original
+Motorola 68000 had a 24-bit address bus and so the top byte was simply
+ignored which caused <a href="https://macgui.com/news/article.php?t=527">well documented porting issues when trying to expand the
+address space</a>.</p>
 <h2 id="storing-data-in-least-significant-bits"><a href="#storing-data-in-least-significant-bits" class="anchor" aria-hidden="true" tabindex="-1"></a>Storing data in least significant bits</h2>
 <p>Another commonly used trick I&#x27;d be remiss not to mention is repurposing a
 small number of the least significant bits in a pointer. If you know a certain
@@ -399,24 +403,49 @@ Along similar lines, OCaml steals just the least significant bit in order to
 integers</a>
 (meaning integers are 63-bit on 64-bit platforms and 31-bit on 32-bit
 platforms).</li>
+<li>Apple&#x27;s ObjectiveC implementation makes heavy use of unused pointer bits,
+with some examples
+<a href="https://www.mikeash.com/pyblog/friday-qa-2012-07-27-lets-build-tagged-pointers.html">documented</a>
+<a href="https://www.mikeash.com/pyblog/friday-qa-2013-09-27-arm64-and-you.html">in</a>
+<a href="https://www.mikeash.com/pyblog/friday-qa-2015-07-31-tagged-pointer-strings.html">detail</a>
+on Mike Ash&#x27;es excellent blog. Inlining the reference count (falling back to
+a hash lookup upon overflow) is a fun one.</li>
 <li>V8 opts to limit the heap used for V8 objects to 4GiB using <a href="https://v8.dev/blog/pointer-compression">pointer
 compression</a>, where an offset is
 used alongside the 32-bit value (which itself might be a pointer or a 31-bit
 integer, depending on the least significant bit) to refer to the memory
 location.</li>
-<li>As this list is becoming more of a list of things slightly outside the scope
-of this article I might as well round it off with <a href="https://en.wikipedia.org/wiki/XOR_linked_list">the XOR linked
+<li>As this list is becoming more of a collection of things slightly outside the
+scope of this article I might as well round it off with <a href="https://en.wikipedia.org/wiki/XOR_linked_list">the XOR linked
 list</a>, which reduces the
-storage requirements for double linked list by exploiting the reversibility
+storage requirements for doubly linked lists by exploiting the reversibility
 of the XOR operation.</li>
 </ul>
 <h2 id="fin"><a href="#fin" class="anchor" aria-hidden="true" tabindex="-1"></a>Fin</h2>
 <p>What did I miss? What did I get wrong? Let me know <a href="https://fosstodon.org/@asb">on
 Mastodon</a> or email (asb@asbradbury.org).</p>
+<p>You might be interested in the discussion of this article <a href="https://lobste.rs/s/5417dx/storing_data_pointers">on
+lobste.rs</a>, <a href="https://news.ycombinator.com/item?id=38424090">on
+HN</a>, <a href="https://old.reddit.com/r/cpp/duplicates/184n4bd/storing_data_in_pointers/">on various
+subreddits</a>,
+or <a href="https://fosstodon.org/@asb/111478289261238134">on Mastodon</a>.</p>
 <hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor "aria-hidden="true" tabindex="-1"></a>Article changelog</summary>
 <ul>
+<li>2023-11-27:
+<ul>
+<li>Link to relevant posts on Mike Ash&#x27;s blog
+(<a href="https://lobste.rs/s/5417dx/storing_data_pointers#c_la63sf">suggested</a> by
+Jens Alfke).</li>
+<li>Link to the various places this article is being discussed.</li>
+<li>Add link to M68k article
+<a href="https://fosstodon.org/@christer@mastodon.gamedev.place/111480158347208956">suggested</a>
+by Christer Ericson (with multiple others suggesting something similar -
+thanks!).</li>
+</ul>
+</li>
 <li>2023-11-26:
 <ul>
+<li>Minor typo fixes and rewordings.</li>
 <li>Note the Linux kernel repurposing the LSB as a spin lock (thanks to Vegard
 Nossum for the
 <a href="https://fosstodon.org/@vegard@mastodon.social/111478755690419785">suggestion</a>).</li>
