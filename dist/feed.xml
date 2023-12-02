@@ -223,8 +223,11 @@ with some examples
 &lt;a href=&quot;https://www.mikeash.com/pyblog/friday-qa-2012-07-27-lets-build-tagged-pointers.html&quot;&gt;documented&lt;/a&gt;
 &lt;a href=&quot;https://www.mikeash.com/pyblog/friday-qa-2013-09-27-arm64-and-you.html&quot;&gt;in&lt;/a&gt;
 &lt;a href=&quot;https://www.mikeash.com/pyblog/friday-qa-2015-07-31-tagged-pointer-strings.html&quot;&gt;detail&lt;/a&gt;
-on Mike Ash&amp;#x27;s excellent blog. Inlining the reference count (falling back to
-a hash lookup upon overflow) is a fun one.&lt;/li&gt;
+on Mike Ash&amp;#x27;s excellent blog (with a more recent scheme &lt;a href=&quot;https://alwaysprocessing.blog/2023/03/19/objc-tagged-ptr&quot;&gt;described on Brian
+T. Kelley&amp;#x27;s blog&lt;/a&gt;.
+Inlining the reference count (falling back to a hash lookup upon overflow)
+is a fun one. Another example of using the LSB
+to store small strings in-line is &lt;a href=&quot;https://squoze.org/&quot;&gt;squoze&lt;/a&gt;.&lt;/li&gt;
 &lt;li&gt;V8 opts to limit the heap used for V8 objects to 4GiB using &lt;a href=&quot;https://v8.dev/blog/pointer-compression&quot;&gt;pointer
 compression&lt;/a&gt;, where an offset is
 used alongside the 32-bit value (which itself might be a pointer or a 31-bit
@@ -258,8 +261,17 @@ subreddits&lt;/a&gt;,
 or &lt;a href=&quot;https://fosstodon.org/@asb/111478289261238134&quot;&gt;on Mastodon&lt;/a&gt;.&lt;/p&gt;
 &lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
 &lt;ul&gt;
+&lt;li&gt;2023-12-02:
+&lt;ul&gt;
+&lt;li&gt;Reference Brian T. Kelley&amp;#x27;s blog providing a more up-to-date description
+of &amp;quot;pointer tagging&amp;quot; in Objective-C. &lt;a href=&quot;https://fosstodon.org/@uliwitness@chaos.social/111510381669628525&quot;&gt;Spotted on
+Mastodon&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
 &lt;li&gt;2023-11-27:
 &lt;ul&gt;
+&lt;li&gt;Mention Squoze (thanks to &lt;a href=&quot;https://fosstodon.org/@vanderZwan@vis.social/111482795620805222&quot;&gt;Job van der
+Zwan&lt;/a&gt;).&lt;/li&gt;
 &lt;li&gt;Reworded the intro so as not to claim &amp;quot;it&amp;#x27;s quite well known&amp;quot; that the
 maximum virtual address width is typically less than 64 bits. This might
 be interpreted as shaming readers for not being aware of that, which

@@ -224,8 +224,11 @@ arguably more common), so I've included some examples of that below:
   [documented](https://www.mikeash.com/pyblog/friday-qa-2012-07-27-lets-build-tagged-pointers.html)
   [in](https://www.mikeash.com/pyblog/friday-qa-2013-09-27-arm64-and-you.html)
   [detail](https://www.mikeash.com/pyblog/friday-qa-2015-07-31-tagged-pointer-strings.html)
-  on Mike Ash's excellent blog. Inlining the reference count (falling back to
-  a hash lookup upon overflow) is a fun one.
+  on Mike Ash's excellent blog (with a more recent scheme [described on Brian
+  T. Kelley's blog](https://alwaysprocessing.blog/2023/03/19/objc-tagged-ptr).
+  Inlining the reference count (falling back to a hash lookup upon overflow)
+  is a fun one. Another example of using the LSB
+  to store small strings in-line is [squoze](https://squoze.org/).
 * V8 opts to limit the heap used for V8 objects to 4GiB using [pointer
   compression](https://v8.dev/blog/pointer-compression), where an offset is
   used alongside the 32-bit value (which itself might be a pointer or a 31-bit
@@ -261,7 +264,13 @@ subreddits](https://old.reddit.com/r/cpp/duplicates/184n4bd/storing_data_in_poin
 or [on Mastodon](https://fosstodon.org/@asb/111478289261238134).
 
 ## Article changelog
+* 2023-12-02: (minor)
+  * Reference Brian T. Kelley's blog providing a more up-to-date description
+    of "pointer tagging" in Objective-C. [Spotted on
+    Mastodon](https://fosstodon.org/@uliwitness@chaos.social/111510381669628525).
 * 2023-11-27: (minor)
+  * Mention Squoze (thanks to [Job van der
+    Zwan](https://fosstodon.org/@vanderZwan@vis.social/111482795620805222)).
   * Reworded the intro so as not to claim "it's quite well known" that the
     maximum virtual address width is typically less than 64 bits. This might
     be interpreted as shaming readers for not being aware of that, which
