@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:title" content="Ownership you can count on"/>
+<meta property="og:site_name" content="Muxup">
+<meta property="og:description" content="The never (academically) cited 2007 memory management paper that&#x27;s had more influence than you might expect"/>
+<meta property="og:type" content="article"/>
+<meta property="og:url" content="https://muxup.com/2023q4/ownership-you-can-count-on"/>
+<meta property="og:image" content="https://v1.screenshot.11ty.dev/https%3A%2F%2Fmuxup.com%2F2023q4%2Fownership-you-can-count-on/opengraph/ar/bigger"/>
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:site" content="@muxup">
+<meta property="twitter:creator" content="@asbradbury">
+<title>Ownership you can count on - Muxup</title>
+<link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg xmlns='http:%2F%2Fwww.w3.org%2F2000%2Fsvg' viewBox='0 0 100 100'%3E%3Ctext y='80' font-size='110'%3E▨%3C%2Ftext%3E%3C%2Fsvg%3E">
+<meta name="description" content="The never (academically) cited 2007 memory management paper that&#x27;s had more influence than you might expect">
+<style>
+@font-face {
+font-family:'Nunito Var';
+src:url('/static/Nunito.var.v2.woff2') format('woff2-variations');
+font-display:swap;
+font-weight: 200 1000;
+}
+*, *::before, *::after {
+box-sizing:border-box;
+}
+* {
+margin:0;
+}
+input, button, textarea, select {
+font:inherit;
+}
+img, picture, video, canvas, svg {
+display:block;
+max-width:100%;
+}
+html {
+font-family:'Nunito Var', sans-serif;
+height:100%;
+font-size:16px;
+-webkit-tap-highlight-color:transparent;
+}
+@media screen and (min-width:640px) {
+html {
+font-size:18px;
+}
+}
+body {
+line-height:1.5;
+color:#222;
+display:grid;
+height:100%;
+grid-template-rows:1fr auto;
+background:#fff no-repeat 0% 0% / 100% .7rem linear-gradient(120deg, #ffffe3 20%, #ddfffc 20%, #ddfffc 40%, #e2eeff 40%, #e2eeff 60%, #f2e2ff 60%, #f2e2ff 80%, #ffdef2 80%, #ffdef2 100%);
+tab-size:4;
+}
+h1, h2, h3, h4, h5, h6 {
+line-height:1.25;
+font-weight:600;
+overflow-wrap:break-word;
+letter-spacing:-.025em;
+margin:1.75rem 0 .75rem;
+}
+h1 {
+font-size:2.986rem
+}
+h2 {
+font-size:2.488rem
+}
+p {
+margin:.75rem 0;
+font-weight:400;
+overflow-wrap:break-word;
+}
+a {
+color:inherit;
+text-decoration:underline;
+text-decoration-color:#aaa;
+text-underline-offset:.15em;
+}
+a:hover {
+text-decoration-thickness:2px;
+}
+ol, ul {
+margin:0 0 0 1.5rem;
+padding-left:0;
+}
+li {
+margin:0 0 .25rem
+}
+::selection {
+background:#ffdac0;
+}
+footer {
+font-size:.833rem;
+color:#777;
+padding:0 1rem;
+width:100%;
+max-width:min(calc(750px + 2rem), calc(100vw - 1rem));
+margin:0 auto;
+}
+footer p {
+text-align:center;
+margin:0 0 .75rem;
+}
+#footer-image {
+margin:0 auto;
+cursor:pointer;
+}
+#article-logo {
+line-height:1.25;
+margin:.5rem 0 0;
+font-size:1.44rem;
+font-weight:700;
+position:relative;
+}
+#article-logo a {
+text-decoration:none;
+}
+#article-title {
+margin:1.5rem 0 0;
+position:relative;
+}
+#article-meta {
+font-size:.833rem;
+color:#777;
+}
+#article-container {
+margin:0 auto;
+padding:1rem;
+max-width:min(calc(750px + 2rem), calc(100vw - 1rem));
+width:100%;
+}
+.anchor {
+position: absolute;
+text-decoration: none;
+width:1.75ex;
+margin-left:-1.4ex;
+visibility:hidden;
+font-size:.8em;
+padding-top:.2em;
+color:#aaa;
+}
+h2:hover .anchor,
+h3:hover .anchor,
+h4:hover .anchor,
+h5:hover .anchor,
+h6:hover .anchor,
+summary:hover .anchor {
+visibility:visible;
+}
+.anchor::before {
+content:"#";
+}
+code {
+background:#f5f5f5;
+padding:.125rem .25rem;
+font-size:.833rem
+}
+</style>
+<link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed.xml"/>
+<link rel="canonical" href="https://muxup.com/2023q4/ownership-you-can-count-on"/>
+</head>
+<body>
+<div id="article-container">
+<div>
+<div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></a></div>
+</div>
+<h1 id="article-title"><span id="title-highlight">Ownership you can count on</span></h1>
+<div id="article-meta"><span title="2023-12-20">2023Q4</span>.</div>
+<h2 id="introduction"><a href="#introduction" class="anchor" aria-hidden="true" tabindex="-1"></a>Introduction</h2>
+<p>I came across the paper <a href="https://web.archive.org/web/20220111001720/https://researcher.watson.ibm.com/researcher/files/us-bacon/Dingle07Ownership.pdf">Ownership You Can Count
+On</a>
+(by Adam Dingle and David F. Bacon, seemingly written in 2007) some years ago
+and it stuck with me as being an interesting variant on traditional reference
+counting. Since then I&#x27;ve come across references to it multiple times in the
+programming language design and implementation community and thought it might
+be worth jotting down some notes on the paper itself and the various attempts
+to adopt its ideas.</p>
+<h2 id="ownership-you-can-count-on-and-the-gel-language"><a href="#ownership-you-can-count-on-and-the-gel-language" class="anchor" aria-hidden="true" tabindex="-1"></a>Ownership you can count on and the Gel language</h2>
+<p>The basic idea is very straight-forward. Introduce the idea of an owning
+pointer type (not dissimilar to <code>std::unique_ptr</code> in C++) where each object
+may have only a single owning pointer and the object is freed when that
+pointer goes out of scope. In addition to that allow an arbitrary number of
+non-owning pointers to the object, but require that all non-owning pointers
+have been destroyed by the time the object is freed. This requirement
+prevents use-after-free and is implemented using run-time checks.
+A reference count is incremented or decremented whenever a non-owning pointer
+is created or destroyed (referred to as alias counting in the paper). That
+count is checked when the object is freed and if it still has non-owning
+references (i.e. the count is non-zero), then the program exits with an error.</p>
+<p>Contrast this with a conventional reference counting system, where objects are
+freed when their refcount reaches zero. In the alias counting scheme, the
+refcount stored on the object is simply decremented when a non-owning
+reference goes out of scope, and this refcount needs to be compared to 0 only
+upon the owning pointer going out of scope rather than upon every decrement
+(as an object is never freed as a result of the non-owning pointer count
+reaching zero). Additionally, refcount manipulation is never needed when
+passing around the owning pointer. The paper also describes an analysis
+that allows many refcount operations to be elided in regions where there
+aren&#x27;t modifications to owned pointers of the owned object&#x27;s
+subclass/class/superclass (which guarantees the pointed-to object can&#x27;t be
+destructed in this region). The paper also claims support for destroying data
+structures with pointer cycles that can&#x27;t be automatically destroyed with
+traditional reference counting. The authors suggest for cases where you might
+otherwise reach for multiple ownership, (e.g. an arbitrary graph) to allocate
+an array of owning pointers to hold your nodes, then use non-owning pointers
+between them.</p>
+<p>The paper describes a C# derived language called Gel which only requires two
+additional syntactic constructs to support the alias counting model: owned
+pointers indicated by a <code>^</code> (e.g. <code>Foo ^f = new Foo();</code> and a <code>take</code> operator
+to take ownership of a value from an owning field. Non-owning pointers are
+written just as <code>Foo f</code>. They also achieve a rather neat <em>erasure</em>
+property, whereby if you take a Gel program and remove all <code>^</code> and <code>take</code>
+you&#x27;ll have a C# program that is valid as long as the original Gel program was
+valid.</p>
+<p>That all sounds pretty great, right? Does this mean we can have it all: full
+memory safety, deterministic destruction, low runtime and annotation overhead? As you&#x27;d
+expect, there are some challenges:</p>
+<ul>
+<li>The usability in practice is going to depend a lot on how easy it is for a
+programmer to maintain the invariant that no unowned pointers outlive the
+owned pointer, especially as failure to do so results in a runtime crash.
+<ul>
+<li>Several languages have looked at integrating the idea, so there&#x27;s some
+information later in this article on their experiences.</li>
+</ul>
+</li>
+<li>Although data structures with pointer cycles that couldn&#x27;t be automatically
+destroyed by reference counting an be handled, there are also significant
+limitations. Gel can&#x27;t destroy graphs containing non-owning pointers to
+non-ancestor nodes unless the programmer writes logic to null out those
+pointers. This could be frustrating and error-prone to handle.
+<ul>
+<li>The authors present a multi-phase object destruction mechanism aiming to
+address these limitations, though the cost (potentially recursively
+descending the graph of the ownership tree 3 times) depends on how much
+can be optimised away.</li>
+</ul>
+</li>
+<li>Although it&#x27;s not a fundamental limitation of the approach, Gel doesn&#x27;t yet
+provide any kind of polymorphism between owned and unowned references. This
+would be necessary for any modern language with support for generics.</li>
+<li>The reference count elimination optimisation described in the paper assumes
+single-threaded execution.
+<ul>
+<li>Though as noted there, thread escape analysis or structuring groups of
+objects into independent regions (also see <a href="https://dl.acm.org/doi/10.1145/3622846">recent work on
+Verona</a>) could provide a solution.</li>
+</ul>
+</li>
+</ul>
+<p>So in summary, an interesting idea that is meaningfully different to
+traditional reference counting, but the largest program written using this
+scheme is the Gel compiler itself and many of the obvious questions require
+larger scale usage to judge the practicality of the scheme.</p>
+<h2 id="influence-and-adoption-of-the-paperx27s-ideas"><a href="#influence-and-adoption-of-the-paperx27s-ideas" class="anchor" aria-hidden="true" tabindex="-1"></a>Influence and adoption of the paper&#x27;s ideas</h2>
+<p>Ownership You Can Count On was written around 2007 and as far as I can tell
+never published in the proceedings of a conference or workshop, or in a
+journal. Flicking through the <a href="https://code.google.com/archive/p/gel2/source/default/source">Gel language
+repository</a> and
+applying some world-class logical deduction based on the directory name
+holding a draft version of the paper leads to me suspect it was submitted to
+PLDI though. Surprisingly it has no academic citations, despite being shared
+publicly on David F. Bacon&#x27;s site (and Bacon has a range of widely cited
+papers related to reference counting / garbage collection). Yet, the work
+has been used as the basis for memory management in one language
+(<a href="https://inko-lang.org/">Inko</a>) and was seriously evaluated (partially
+implemented?) for both <a href="https://nim-lang.org/">Nim</a> and
+<a href="https://vale.dev/">Vale</a>.</p>
+<p>Inko started out with a garbage collector, but its creator Yorick Peterse
+announced in 2021 <a href="https://yorickpeterse.com/articles/friendship-ended-with-the-garbage-collector/">a plan to adopt the scheme from Ownership You Can Count
+on</a>,
+who then <a href="https://yorickpeterse.com/articles/im-leaving-gitlab-to-work-on-inko-full-time/">left his job to work on Inko
+full-time</a>
+and <a href="https://inko-lang.org/news/inko-0-10-0-released/#header-what-happened-since-the-last-release">successfully transitioned to the new memory management scheme in the
+Inko 0.10.0
+release</a>
+about a year later. Inko as a language is more ambitious than Gel - featuring
+parametric polymorphism, lightweight processes for concurrency, and more. Yet
+it&#x27;s still early days and it&#x27;s not yet, for instance, good for drawing
+conclusions about performance on modern systems as <a href="https://github.com/jinyus/related_post_gen/pull/440#issuecomment-1816583612">optimisations aren&#x27;t
+currently
+applied</a>.
+Dusty Phillips wrote a blog post earlier this year <a href="https://dusty.phillips.codes/2023/06/26/understanding-inko-memory-management-through-data-structures/">explaining Inko&#x27;s memory
+management through some example data
+structures</a>,
+which also includes some thoughts on the usability of the system and some
+drawbacks. Some of the issues may be more of a result of the language being
+young, e.g. the author notes it took a lot of trial and error to figure out
+some of the described techniques (perhaps this will be easier once common
+patterns are better documented and potentially supported by library functions
+or syntax?), or that debuggability is poor when the program exits with a
+dangling reference error.</p>
+<p>Nim was at one point going to move to Gel&#x27;s scheme (see the <a href="https://nim-lang.org/araq/ownedrefs.html">blog
+post</a> and
+(<a href="https://github.com/nim-lang/RFCs/issues/144">RFC</a>). I haven&#x27;t been able to
+find a detailed explanation for the reasons why it was rejected, though
+Andreas Rumpf (Nim language creator) commented on a <a href="https://forum.dlang.org/post/ejvshljmezqovmfprkww@forum.dlang.org">Dlang forum discussion
+thread</a>
+about the paper that &quot;Nim tried to use this in production before moving to ORC
+and I&#x27;m not looking back, &#x27;ownership you can count on&#x27; was actually quite a
+pain to work with...&quot;. Nim has since <a href="https://nim-lang.org/blog/2020/10/15/introduction-to-arc-orc-in-nim.html">adopted a more conventional non-atomic
+reference counted
+scheme</a>
+(ARC), with an optional cycle collector (ORC).</p>
+<p>Vale was <a href="https://verdagon.dev/blog/raii-next-steps">previously adopting the Gel / Ownership You Can Count On
+scheme</a> (calling the unowned
+references &quot;constraint references&quot;), but has since changed path slightly and
+now uses &quot;<a href="https://verdagon.dev/blog/generational-references">generational
+references</a>&quot; Rather than a
+reference count, each allocation includes a generation counter which is
+incremented each time it is reused. Fat pointers that include the expected
+value of the generation counter are used, and checked before dereferencing. If
+they don&#x27;t match, that indicates the memory location was since reallocated and
+the program will fault. This also puts restrictions on the allocator&#x27;s
+ability to reuse freed allocations without compromising safety. Vale&#x27;s memory
+management scheme retains similarities to Gel: the language is still based
+around single ownership and this is exploited to elide checks on owning
+references/pointers.</p>
+<h1 id="conclusion-and-other-related-work"><a href="#conclusion-and-other-related-work" class="anchor" aria-hidden="true" tabindex="-1"></a>Conclusion and other related work</h1>
+<p>Some tangentially related things that didn&#x27;t make it into the main body of
+text above:</p>
+<ul>
+<li>A language that references Gel in its design but goes in a slightly
+different direction is Wouter van Oortmerssen&#x27;s
+<a href="https://strlen.com/lobster/">Lobster</a>.  Its <a href="https://aardappel.github.io/lobster/memory_management.html">memory management
+scheme</a> attempts
+to infer ownership (and optimise in the case where single ownership can be
+inferred) rather than requiring single ownership like the languages listed
+above.</li>
+<li>One of the discussions on Ownership You Can Count On referenced this
+<a href="https://insights.sei.cmu.edu/documents/351/2013_019_001_55008.pdf">Pointer Ownership
+Model</a>
+paper as having similarities. It chooses to categorise pointers as either
+&quot;responsible&quot; or &quot;irresponsible&quot; - cute!</li>
+</ul>
+<p>And, that&#x27;s about it. If you&#x27;re hoping for a definitive answer on whether
+alias counting is a winning idea or not I&#x27;m sorry to disappoint, but I&#x27;ve at
+least succeeded in collecting together the various places I&#x27;ve seen it
+explored and am looking forward to seeing how Inko&#x27;s adoption of it evolves.
+I&#x27;d be very interested to hear any experience reports of adopting alias
+counting or using a language like Inko that tries to use it.</p>
+
+</div>
+<footer class="footer">
+<img id="footer-image" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E" width="50" height="50"/>
+<p>Curated by Alex Bradbury | &copy; <a href="/">Muxup</a> contributors | <a href="/about">About</a> | <a href="https://github.com/muxup">GitHub</a> | <a href="https://twitter.com/muxup">Twitter</a></p>
+</footer>
+<script>
+const t="http://www.w3.org/2000/svg";function o(t){return Math.random()*(2*t)-t}function n(t){const n=t.t.getBoundingClientRect();const e=t.o.getClientRects();let c="";for(const t of e){const e=t.x-n.x,f=t.y-n.y,s=t.width,r=t.height;const i=f+r/2;let u=s<75?3:s<300?6:8;const l=.2+.2*Math.random();c=`${c}\n      M${e+o(u)} ${i+o(u)}\n      C${e+s*l+o(u)} ${i+o(u)},\n       ${e+2*s*l+o(u)} ${i+o(u)}\n       ${e+s+o(u)} ${i+o(u)}`}t.i=c;t.strokeWidth=.85*e[0].height}const e=new Map;let c=new ResizeObserver((t=>{for(const o of t){const t=e.get(o.target);if(!t.i)n(t)}for(const o of t){s(e.get(o.target))}}));function f(o){const n=document.createElementNS(t,"svg");n.style.position="absolute";n.style.zIndex=-1;n.style.top="0";n.style.left="0";n.style.overflow="visible";const e=document.createElementNS(t,"path");e.setAttribute("fill","none");e.setAttribute("stroke",o.u);n.appendChild(e);o.o.insertAdjacentElement("beforebegin",n);o.t=n}function s(t){if(!t.i){n(t)}const o=t.t.children[0];o.setAttribute("stroke-width",t.strokeWidth);o.setAttribute("d",t.i);t.i=null}function r(){for(const t of e.values()){f(t)}for(const t of e.values()){n(t)}for(const t of e.keys()){c.observe(t)}document.fonts.ready.then((()=>i()))}function i(){for(const t of e.values()){n(t)}for(const t of e.values()){s(t)}}function u(t,o){let n;t.addEventListener("mouseover",(()=>{s(o);n=setInterval((()=>s(o)),240)}),false);t.addEventListener("mouseout",(()=>{clearInterval(n)}));t.addEventListener("click",(()=>{clearInterval(n)}))}function l(t,o,n){let c={o:t,l:o,u:n};e.set(o,c);return c}let a=new Set([window.location.pathname]);const h=document.querySelector("#footer-image");let d=null;function m(){let t=Math.floor(Math.random()*282);d="/static/footer/"+String(t).padStart(4,"0")+".svg"}function g(t){h.src=d;m();if(!t)v()}function v(){if(a.has(d))return;a.add(d);fetch(d)}m();g(true);const w=[{transform:"rotate(0)"},{transform:"rotate(360deg)"}];const $={duration:600,h:1};h.addEventListener("click",(()=>{h.animate(w,$);g()}));function M(){h.animate(w,$);v()}h.addEventListener("mouseover",M);h.addEventListener("touchstart",M,{passive:true});function k(t){const o=t.currentTarget.getAttribute("href").split("#")[0];if(a.has(o))return;a.add(o);fetch(o)}const p=document.getElementsByTagName("a");for(const t of p){const o=(t.getAttribute("href")??"").split("#")[0];if(o.includes("?")||!o.startsWith("/")||o.slice(o.lastIndexOf("/")+1).includes(".")){continue}t.addEventListener("mouseover",k);t.addEventListener("touchstart",k,{passive:true})}const b=["#ffdef2","#f2e2ff","#e2eeff","#ddfffc","#ffffe3"];const I=document.querySelector("#title-highlight");l(I,I.parentNode,b[Math.floor(Math.random()*b.length)]);const C=document.querySelector("#logo-highlight");const E=l(C,C.parentNode,"#ffdac0");r();u(C,E);
+
+</script>
+</body>
+</html>

@@ -4,8 +4,190 @@
 <subtitle>Adventures in collaborative open source development</subtitle>
 <link href="https://muxup.com/feed.xml" rel="self" type="application/atom+xml"/>
 <link href="https://muxup.com"/>
-<updated>2023-11-26T12:00:00Z</updated>
+<updated>2023-12-20T12:00:00Z</updated>
 <id>https://muxup.com/feed.xml</id>
+<entry>
+<title>Ownership you can count on</title>
+<published>2023-12-20T12:00:00Z</published>
+<updated>2023-12-20T12:00:00Z</updated>
+<link rel="alternate" href="https://muxup.com/2023q4/ownership-you-can-count-on"/>
+<id>https://muxup.com/2023q4/ownership-you-can-count-on</id>
+<content type="html">
+&lt;h2 id=&quot;introduction&quot;&gt;&lt;a href=&quot;#introduction&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;I came across the paper &lt;a href=&quot;https://web.archive.org/web/20220111001720/https://researcher.watson.ibm.com/researcher/files/us-bacon/Dingle07Ownership.pdf&quot;&gt;Ownership You Can Count
+On&lt;/a&gt;
+(by Adam Dingle and David F. Bacon, seemingly written in 2007) some years ago
+and it stuck with me as being an interesting variant on traditional reference
+counting. Since then I&amp;#x27;ve come across references to it multiple times in the
+programming language design and implementation community and thought it might
+be worth jotting down some notes on the paper itself and the various attempts
+to adopt its ideas.&lt;/p&gt;
+&lt;h2 id=&quot;ownership-you-can-count-on-and-the-gel-language&quot;&gt;&lt;a href=&quot;#ownership-you-can-count-on-and-the-gel-language&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Ownership you can count on and the Gel language&lt;/h2&gt;
+&lt;p&gt;The basic idea is very straight-forward. Introduce the idea of an owning
+pointer type (not dissimilar to &lt;code&gt;std::unique_ptr&lt;/code&gt; in C++) where each object
+may have only a single owning pointer and the object is freed when that
+pointer goes out of scope. In addition to that allow an arbitrary number of
+non-owning pointers to the object, but require that all non-owning pointers
+have been destroyed by the time the object is freed. This requirement
+prevents use-after-free and is implemented using run-time checks.
+A reference count is incremented or decremented whenever a non-owning pointer
+is created or destroyed (referred to as alias counting in the paper). That
+count is checked when the object is freed and if it still has non-owning
+references (i.e. the count is non-zero), then the program exits with an error.&lt;/p&gt;
+&lt;p&gt;Contrast this with a conventional reference counting system, where objects are
+freed when their refcount reaches zero. In the alias counting scheme, the
+refcount stored on the object is simply decremented when a non-owning
+reference goes out of scope, and this refcount needs to be compared to 0 only
+upon the owning pointer going out of scope rather than upon every decrement
+(as an object is never freed as a result of the non-owning pointer count
+reaching zero). Additionally, refcount manipulation is never needed when
+passing around the owning pointer. The paper also describes an analysis
+that allows many refcount operations to be elided in regions where there
+aren&amp;#x27;t modifications to owned pointers of the owned object&amp;#x27;s
+subclass/class/superclass (which guarantees the pointed-to object can&amp;#x27;t be
+destructed in this region). The paper also claims support for destroying data
+structures with pointer cycles that can&amp;#x27;t be automatically destroyed with
+traditional reference counting. The authors suggest for cases where you might
+otherwise reach for multiple ownership, (e.g. an arbitrary graph) to allocate
+an array of owning pointers to hold your nodes, then use non-owning pointers
+between them.&lt;/p&gt;
+&lt;p&gt;The paper describes a C# derived language called Gel which only requires two
+additional syntactic constructs to support the alias counting model: owned
+pointers indicated by a &lt;code&gt;^&lt;/code&gt; (e.g. &lt;code&gt;Foo ^f = new Foo();&lt;/code&gt; and a &lt;code&gt;take&lt;/code&gt; operator
+to take ownership of a value from an owning field. Non-owning pointers are
+written just as &lt;code&gt;Foo f&lt;/code&gt;. They also achieve a rather neat &lt;em&gt;erasure&lt;/em&gt;
+property, whereby if you take a Gel program and remove all &lt;code&gt;^&lt;/code&gt; and &lt;code&gt;take&lt;/code&gt;
+you&amp;#x27;ll have a C# program that is valid as long as the original Gel program was
+valid.&lt;/p&gt;
+&lt;p&gt;That all sounds pretty great, right? Does this mean we can have it all: full
+memory safety, deterministic destruction, low runtime and annotation overhead? As you&amp;#x27;d
+expect, there are some challenges:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The usability in practice is going to depend a lot on how easy it is for a
+programmer to maintain the invariant that no unowned pointers outlive the
+owned pointer, especially as failure to do so results in a runtime crash.
+&lt;ul&gt;
+&lt;li&gt;Several languages have looked at integrating the idea, so there&amp;#x27;s some
+information later in this article on their experiences.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Although data structures with pointer cycles that couldn&amp;#x27;t be automatically
+destroyed by reference counting an be handled, there are also significant
+limitations. Gel can&amp;#x27;t destroy graphs containing non-owning pointers to
+non-ancestor nodes unless the programmer writes logic to null out those
+pointers. This could be frustrating and error-prone to handle.
+&lt;ul&gt;
+&lt;li&gt;The authors present a multi-phase object destruction mechanism aiming to
+address these limitations, though the cost (potentially recursively
+descending the graph of the ownership tree 3 times) depends on how much
+can be optimised away.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Although it&amp;#x27;s not a fundamental limitation of the approach, Gel doesn&amp;#x27;t yet
+provide any kind of polymorphism between owned and unowned references. This
+would be necessary for any modern language with support for generics.&lt;/li&gt;
+&lt;li&gt;The reference count elimination optimisation described in the paper assumes
+single-threaded execution.
+&lt;ul&gt;
+&lt;li&gt;Though as noted there, thread escape analysis or structuring groups of
+objects into independent regions (also see &lt;a href=&quot;https://dl.acm.org/doi/10.1145/3622846&quot;&gt;recent work on
+Verona&lt;/a&gt;) could provide a solution.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;So in summary, an interesting idea that is meaningfully different to
+traditional reference counting, but the largest program written using this
+scheme is the Gel compiler itself and many of the obvious questions require
+larger scale usage to judge the practicality of the scheme.&lt;/p&gt;
+&lt;h2 id=&quot;influence-and-adoption-of-the-paperx27s-ideas&quot;&gt;&lt;a href=&quot;#influence-and-adoption-of-the-paperx27s-ideas&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Influence and adoption of the paper&amp;#x27;s ideas&lt;/h2&gt;
+&lt;p&gt;Ownership You Can Count On was written around 2007 and as far as I can tell
+never published in the proceedings of a conference or workshop, or in a
+journal. Flicking through the &lt;a href=&quot;https://code.google.com/archive/p/gel2/source/default/source&quot;&gt;Gel language
+repository&lt;/a&gt; and
+applying some world-class logical deduction based on the directory name
+holding a draft version of the paper leads to me suspect it was submitted to
+PLDI though. Surprisingly it has no academic citations, despite being shared
+publicly on David F. Bacon&amp;#x27;s site (and Bacon has a range of widely cited
+papers related to reference counting / garbage collection). Yet, the work
+has been used as the basis for memory management in one language
+(&lt;a href=&quot;https://inko-lang.org/&quot;&gt;Inko&lt;/a&gt;) and was seriously evaluated (partially
+implemented?) for both &lt;a href=&quot;https://nim-lang.org/&quot;&gt;Nim&lt;/a&gt; and
+&lt;a href=&quot;https://vale.dev/&quot;&gt;Vale&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Inko started out with a garbage collector, but its creator Yorick Peterse
+announced in 2021 &lt;a href=&quot;https://yorickpeterse.com/articles/friendship-ended-with-the-garbage-collector/&quot;&gt;a plan to adopt the scheme from Ownership You Can Count
+on&lt;/a&gt;,
+who then &lt;a href=&quot;https://yorickpeterse.com/articles/im-leaving-gitlab-to-work-on-inko-full-time/&quot;&gt;left his job to work on Inko
+full-time&lt;/a&gt;
+and &lt;a href=&quot;https://inko-lang.org/news/inko-0-10-0-released/#header-what-happened-since-the-last-release&quot;&gt;successfully transitioned to the new memory management scheme in the
+Inko 0.10.0
+release&lt;/a&gt;
+about a year later. Inko as a language is more ambitious than Gel - featuring
+parametric polymorphism, lightweight processes for concurrency, and more. Yet
+it&amp;#x27;s still early days and it&amp;#x27;s not yet, for instance, good for drawing
+conclusions about performance on modern systems as &lt;a href=&quot;https://github.com/jinyus/related_post_gen/pull/440#issuecomment-1816583612&quot;&gt;optimisations aren&amp;#x27;t
+currently
+applied&lt;/a&gt;.
+Dusty Phillips wrote a blog post earlier this year &lt;a href=&quot;https://dusty.phillips.codes/2023/06/26/understanding-inko-memory-management-through-data-structures/&quot;&gt;explaining Inko&amp;#x27;s memory
+management through some example data
+structures&lt;/a&gt;,
+which also includes some thoughts on the usability of the system and some
+drawbacks. Some of the issues may be more of a result of the language being
+young, e.g. the author notes it took a lot of trial and error to figure out
+some of the described techniques (perhaps this will be easier once common
+patterns are better documented and potentially supported by library functions
+or syntax?), or that debuggability is poor when the program exits with a
+dangling reference error.&lt;/p&gt;
+&lt;p&gt;Nim was at one point going to move to Gel&amp;#x27;s scheme (see the &lt;a href=&quot;https://nim-lang.org/araq/ownedrefs.html&quot;&gt;blog
+post&lt;/a&gt; and
+(&lt;a href=&quot;https://github.com/nim-lang/RFCs/issues/144&quot;&gt;RFC&lt;/a&gt;). I haven&amp;#x27;t been able to
+find a detailed explanation for the reasons why it was rejected, though
+Andreas Rumpf (Nim language creator) commented on a &lt;a href=&quot;https://forum.dlang.org/post/ejvshljmezqovmfprkww@forum.dlang.org&quot;&gt;Dlang forum discussion
+thread&lt;/a&gt;
+about the paper that &amp;quot;Nim tried to use this in production before moving to ORC
+and I&amp;#x27;m not looking back, &amp;#x27;ownership you can count on&amp;#x27; was actually quite a
+pain to work with...&amp;quot;. Nim has since &lt;a href=&quot;https://nim-lang.org/blog/2020/10/15/introduction-to-arc-orc-in-nim.html&quot;&gt;adopted a more conventional non-atomic
+reference counted
+scheme&lt;/a&gt;
+(ARC), with an optional cycle collector (ORC).&lt;/p&gt;
+&lt;p&gt;Vale was &lt;a href=&quot;https://verdagon.dev/blog/raii-next-steps&quot;&gt;previously adopting the Gel / Ownership You Can Count On
+scheme&lt;/a&gt; (calling the unowned
+references &amp;quot;constraint references&amp;quot;), but has since changed path slightly and
+now uses &amp;quot;&lt;a href=&quot;https://verdagon.dev/blog/generational-references&quot;&gt;generational
+references&lt;/a&gt;&amp;quot; Rather than a
+reference count, each allocation includes a generation counter which is
+incremented each time it is reused. Fat pointers that include the expected
+value of the generation counter are used, and checked before dereferencing. If
+they don&amp;#x27;t match, that indicates the memory location was since reallocated and
+the program will fault. This also puts restrictions on the allocator&amp;#x27;s
+ability to reuse freed allocations without compromising safety. Vale&amp;#x27;s memory
+management scheme retains similarities to Gel: the language is still based
+around single ownership and this is exploited to elide checks on owning
+references/pointers.&lt;/p&gt;
+&lt;h1 id=&quot;conclusion-and-other-related-work&quot;&gt;&lt;a href=&quot;#conclusion-and-other-related-work&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Conclusion and other related work&lt;/h1&gt;
+&lt;p&gt;Some tangentially related things that didn&amp;#x27;t make it into the main body of
+text above:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;A language that references Gel in its design but goes in a slightly
+different direction is Wouter van Oortmerssen&amp;#x27;s
+&lt;a href=&quot;https://strlen.com/lobster/&quot;&gt;Lobster&lt;/a&gt;.  Its &lt;a href=&quot;https://aardappel.github.io/lobster/memory_management.html&quot;&gt;memory management
+scheme&lt;/a&gt; attempts
+to infer ownership (and optimise in the case where single ownership can be
+inferred) rather than requiring single ownership like the languages listed
+above.&lt;/li&gt;
+&lt;li&gt;One of the discussions on Ownership You Can Count On referenced this
+&lt;a href=&quot;https://insights.sei.cmu.edu/documents/351/2013_019_001_55008.pdf&quot;&gt;Pointer Ownership
+Model&lt;/a&gt;
+paper as having similarities. It chooses to categorise pointers as either
+&amp;quot;responsible&amp;quot; or &amp;quot;irresponsible&amp;quot; - cute!&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;And, that&amp;#x27;s about it. If you&amp;#x27;re hoping for a definitive answer on whether
+alias counting is a winning idea or not I&amp;#x27;m sorry to disappoint, but I&amp;#x27;ve at
+least succeeded in collecting together the various places I&amp;#x27;ve seen it
+explored and am looking forward to seeing how Inko&amp;#x27;s adoption of it evolves.
+I&amp;#x27;d be very interested to hear any experience reports of adopting alias
+counting or using a language like Inko that tries to use it.&lt;/p&gt;
+</content>
+</entry>
 <entry>
 <title>Storing data in pointers</title>
 <published>2023-11-26T12:00:00Z</published>
@@ -3133,340 +3315,6 @@ repo&lt;/a&gt;.&lt;/li&gt;
 &lt;li&gt;2022-09-11: Removed incorrect statement about &lt;code&gt;sessionStorage&lt;/code&gt; usage being
 redundant if &lt;code&gt;enableByDefault = true&lt;/code&gt; (it does mean disabling reloading will
 persist).&lt;/li&gt;
-&lt;li&gt;2022-09-10: Initial publication date.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/details&gt;
-</content>
-</entry>
-<entry>
-<title>Muxup implementation notes</title>
-<published>2022-09-10T12:00:00Z</published>
-<updated>2022-09-10T12:00:00Z</updated>
-<link rel="alternate" href="https://muxup.com/2022q3/muxup-implementation-notes"/>
-<id>https://muxup.com/2022q3/muxup-implementation-notes</id>
-<content type="html">
-&lt;p&gt;This article contains a few notes on various implementation decisions made
-when creating &lt;a href=&quot;https://muxup.com&quot;&gt;the Muxup website&lt;/a&gt;. They&amp;#x27;re intended primarily as a
-reference for myself, but some parts may be of wider interest. See
-&lt;a href=&quot;/about&quot;&gt;about&lt;/a&gt; for more information about things like site
-structure.&lt;/p&gt;
-&lt;h2 id=&quot;site-generation&quot;&gt;&lt;a href=&quot;#site-generation&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Site generation&lt;/h2&gt;
-&lt;p&gt;I ended up writing my own script for generating the site pages from a tree of
-Markdown files. &lt;a href=&quot;https://www.getzola.org/&quot;&gt;Zola&lt;/a&gt; seems like an excellent
-option, but as I had a very specific idea on how I wanted pages to be
-represented in source form and the format and structure of the output, writing
-my own was the easier option (see
-&lt;a href=&quot;https://github.com/muxup/muxup-site/blob/main/build.py&quot;&gt;build.py&lt;/a&gt;). Plus,
-yak-shaving is fun.&lt;/p&gt;
-&lt;p&gt;I opted to use &lt;a href=&quot;https://github.com/miyuchina/mistletoe&quot;&gt;mistletoe&lt;/a&gt; for
-Markdown parsing. I found &lt;a href=&quot;https://github.com/miyuchina/mistletoe/pull/157&quot;&gt;a&lt;/a&gt;
-&lt;a href=&quot;https://github.com/miyuchina/mistletoe/pull/158&quot;&gt;few&lt;/a&gt;
-&lt;a href=&quot;https://github.com/miyuchina/mistletoe/pull/159&quot;&gt;bugs&lt;/a&gt; in the &lt;code&gt;traverse&lt;/code&gt;
-helper function when implementing some transformations on the generated AST,
-but upstream was very responsive about reviewing and merging my PRs. The main
-wart I&amp;#x27;ve found is that &lt;a href=&quot;https://github.com/miyuchina/mistletoe/issues/56&quot;&gt;parsing and rendering aren&amp;#x27;t fully
-separated&lt;/a&gt;, although this
-doesn&amp;#x27;t pose any real practical concern for my use case and will hopefully be
-fixed in the future. &lt;a href=&quot;https://github.com/lepture/mistune&quot;&gt;mistune&lt;/a&gt; also seemed
-promising, but has &lt;a href=&quot;https://github.com/lepture/mistune/issues/296&quot;&gt;some conformance
-issues&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;One goal was to keep everything possible in standard Markdown format. This
-means, for instance, avoiding custom frontmatter entries or link formats if
-the same information could be extracted from the file). Therefore:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;There is no &lt;code&gt;title&lt;/code&gt; frontmatter entry - the title is extracted by grabbing
-the first level 1 heading from the Markdown AST (and erroring if it isn&amp;#x27;t
-present).&lt;/li&gt;
-&lt;li&gt;All internal links are written as &lt;code&gt;[foo](/relative/to/root/foo.md)&lt;/code&gt;. The
-generator will error if the file can&amp;#x27;t be found, and will otherwise
-translate the target to refer to the appropriate permalink.
-&lt;ul&gt;
-&lt;li&gt;This has the additional advantage that links are still usable if viewing
-the Markdown on GitHub, which can be handy if reviewing a previous
-revision of an article.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Article changelogs are just a standard Markdown list under the &amp;quot;Article
-changelog&amp;quot; heading, which is checked and transformed at the Markdown AST
-level in order to produce the desired output (emitting the list using a
-&lt;code&gt;&amp;lt;details&amp;gt;&lt;/code&gt; and &lt;code&gt;&amp;lt;summary&amp;gt;&lt;/code&gt;).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;All CSS was written through the usual mix of experimentation (see
-&lt;a href=&quot;/simple-reload&quot;&gt;simple-reload&lt;/a&gt; for the page reloading solution I
-used to aid iterative development) and learning from the CSS used by other
-sites.&lt;/p&gt;
-&lt;h2 id=&quot;randomly-generated-title-highlights&quot;&gt;&lt;a href=&quot;#randomly-generated-title-highlights&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Randomly generated title highlights&lt;/h2&gt;
-&lt;p&gt;The main visual element throughout the site is the randomised, roughly drawn
-highlight used for the site name and article headings. This takes some
-inspiration from the &lt;a href=&quot;https://roughnotation.com/&quot;&gt;RoughNotation library&lt;/a&gt; (see
-also the &lt;a href=&quot;https://shihn.ca/posts/2020/roughjs-algorithms/&quot;&gt;author&amp;#x27;s description of the algorithms
-used&lt;/a&gt;), but uses my own
-implementation that&amp;#x27;s much more tightly linked to my use case.&lt;/p&gt;
-&lt;p&gt;The core logic for drawing these highlights is based around drawing the SVG
-path:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Determine the position and size of the text element to be highlight (keeping
-in mind it might be described by multiple rectangles if split across several
-lines).&lt;/li&gt;
-&lt;li&gt;For each rectangle, draw a bezier curve starting from the middle of the left
-hand side through to the right hand side, with its two control points at
-between 20-40% and 40-80% of the width.&lt;/li&gt;
-&lt;li&gt;Apply randomised offsets in the x and y directions for every point.
-&lt;ul&gt;
-&lt;li&gt;The range of the randomised offsets should depend on length of the text.
-Generally speaking, a smaller offsets should be used for a shorter piece
-of text.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;This logic is implemented in
-&lt;a href=&quot;https://github.com/muxup/muxup-site/blob/main/fragments/common.js&quot;&gt;&lt;code&gt;preparePath&lt;/code&gt;&lt;/a&gt;
-and reproduced below (with the knowledge the &lt;code&gt;offset(delta)&lt;/code&gt; is a helper to
-return a random number between &lt;code&gt;delta&lt;/code&gt; and &lt;code&gt;-delta&lt;/code&gt;, hopefully it&amp;#x27;s clear how
-this relates to the logic described above):&lt;/p&gt;
-&lt;div class=&quot;highlight&quot; style=&quot;background: #ffffff&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span style=&quot;color: #A90D91&quot;&gt;function&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;preparePath&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;hlInfo&lt;/span&gt;) {
-  &lt;span style=&quot;color: #A90D91&quot;&gt;const&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;parentRect&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;hlInfo&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;svg&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;getBoundingClientRect&lt;/span&gt;();
-  &lt;span style=&quot;color: #A90D91&quot;&gt;const&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;rects&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;hlInfo&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;hlEl&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;getClientRects&lt;/span&gt;();
-  &lt;span style=&quot;color: #A90D91&quot;&gt;let&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;pathD&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&amp;quot;&lt;/span&gt;;
-  &lt;span style=&quot;color: #A90D91&quot;&gt;for&lt;/span&gt; (&lt;span style=&quot;color: #A90D91&quot;&gt;const&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;rect&lt;/span&gt; &lt;span style=&quot;color: #A90D91&quot;&gt;of&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;rects&lt;/span&gt;) {
-    &lt;span style=&quot;color: #A90D91&quot;&gt;const&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;x&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;rect&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;x&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;-&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;parentRect&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;x&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;y&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;rect&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;y&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;-&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;parentRect&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;y&lt;/span&gt;,
-          &lt;span style=&quot;color: #000000&quot;&gt;w&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;rect&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;width&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;h&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;rect&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;height&lt;/span&gt;;
-    &lt;span style=&quot;color: #A90D91&quot;&gt;const&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;mid_y&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;y&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;h&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;/&lt;/span&gt; &lt;span style=&quot;color: #1C01CE&quot;&gt;2&lt;/span&gt;;
-    &lt;span style=&quot;color: #A90D91&quot;&gt;let&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;maxOff&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;w&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span style=&quot;color: #1C01CE&quot;&gt;75&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;?&lt;/span&gt; &lt;span style=&quot;color: #1C01CE&quot;&gt;3&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;:&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;w&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span style=&quot;color: #1C01CE&quot;&gt;300&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;?&lt;/span&gt; &lt;span style=&quot;color: #1C01CE&quot;&gt;6&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;:&lt;/span&gt; &lt;span style=&quot;color: #1C01CE&quot;&gt;8&lt;/span&gt;;
-    &lt;span style=&quot;color: #A90D91&quot;&gt;const&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;divergePoint&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #1C01CE&quot;&gt;.2&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+&lt;/span&gt; &lt;span style=&quot;color: #1C01CE&quot;&gt;.2&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;*&lt;/span&gt; &lt;span style=&quot;color: #A90D91&quot;&gt;Math&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;random&lt;/span&gt;();
-    &lt;span style=&quot;color: #000000&quot;&gt;pathD&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;`${&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;pathD&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;}&lt;/span&gt;
-&lt;span style=&quot;color: #C41A16&quot;&gt;      M${&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;x+offset&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;maxOff&lt;/span&gt;)&lt;span style=&quot;color: #C41A16&quot;&gt;} ${&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;mid_y+offset&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;maxOff&lt;/span&gt;)&lt;span style=&quot;color: #C41A16&quot;&gt;}&lt;/span&gt;
-&lt;span style=&quot;color: #C41A16&quot;&gt;      C${&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;x+w*divergePoint+offset&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;maxOff&lt;/span&gt;)&lt;span style=&quot;color: #C41A16&quot;&gt;} ${&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;mid_y+offset&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;maxOff&lt;/span&gt;)&lt;span style=&quot;color: #C41A16&quot;&gt;},&lt;/span&gt;
-&lt;span style=&quot;color: #C41A16&quot;&gt;       ${&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;x+&lt;/span&gt;&lt;span style=&quot;color: #1C01CE&quot;&gt;2&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;*w*divergePoint+offset&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;maxOff&lt;/span&gt;)&lt;span style=&quot;color: #C41A16&quot;&gt;} ${&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;mid_y+offset&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;maxOff&lt;/span&gt;)&lt;span style=&quot;color: #C41A16&quot;&gt;}&lt;/span&gt;
-&lt;span style=&quot;color: #C41A16&quot;&gt;       ${&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;x+w+offset&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;maxOff&lt;/span&gt;)&lt;span style=&quot;color: #C41A16&quot;&gt;} ${&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;mid_y+offset&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;maxOff&lt;/span&gt;)&lt;span style=&quot;color: #C41A16&quot;&gt;}`&lt;/span&gt;;
-  }
-  &lt;span style=&quot;color: #000000&quot;&gt;hlInfo&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;nextPathD&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;pathD&lt;/span&gt;;
-  &lt;span style=&quot;color: #000000&quot;&gt;hlInfo&lt;/span&gt;.&lt;span style=&quot;color: #000000&quot;&gt;strokeWidth&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #1C01CE&quot;&gt;0.85&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;*rects&lt;/span&gt;[&lt;span style=&quot;color: #1C01CE&quot;&gt;0&lt;/span&gt;].&lt;span style=&quot;color: #000000&quot;&gt;height&lt;/span&gt;;
-}
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;I took some care to avoid &lt;a href=&quot;https://gist.github.com/paulirish/5d52fb081b3570c81e3a&quot;&gt;forced
-layout/reflow&lt;/a&gt; by
-batching together reads and writes of the DOM into separate phases when
-drawing the initial set of highlights for the page, which is why this function
-is generates the path but doesn&amp;#x27;t modify the SVG directly. Separate logic adds
-handlers to links that are highlighted continuously redraw the highlight (I
-liked the visual effect).&lt;/p&gt;
-&lt;h2 id=&quot;minification-and-optimisation&quot;&gt;&lt;a href=&quot;#minification-and-optimisation&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Minification and optimisation&lt;/h2&gt;
-&lt;p&gt;I primarily targeted the low-hanging fruit here, and avoided adding in too
-many dependencies (e.g. separate HTML and CSS minifiers) during the build.
-muxup.com is a very lightweight site - the main extravagance I&amp;#x27;ve allowed
-myself is the use of a webfont (Nunito) but that only weighs in at ~36KiB (the
-&lt;a href=&quot;https://github.com/googlefonts/nunito/tree/main/fonts/variable&quot;&gt;variable
-width&lt;/a&gt; version
-converted to woff2 and subsetted using &lt;code&gt;pyftsubset&lt;/code&gt; from
-&lt;a href=&quot;https://github.com/fonttools/fonttools&quot;&gt;fontTools&lt;/a&gt;). As the CSS and JS
-payload is so small, it&amp;#x27;s inlined into each page.&lt;/p&gt;
-&lt;p&gt;The required JS for the article pages and the home page is assembled and then
-minified using &lt;a href=&quot;https://github.com/terser/terser&quot;&gt;terser&lt;/a&gt;. This reduces the
-size of the JS required for the page you&amp;#x27;re reading from 5077 bytes to 2620
-bytes uncompressed (1450 bytes to 991 bytes if compressing the result with
-Brotli, though in practice the impact will be a bit different when compressing
-the JS together with the rest of the page + CSS). When first published, the
-page you are reading (including inlined CSS and JS) was ~27.7KiB uncompressed
-(7.7KiB Brotli compressed), which compares to 14.4KiB for its source Markdown
-(4.9KiB Brotli compressed).&lt;/p&gt;
-&lt;p&gt;Each page contains an embedded stylesheet with a conservative approximation of
-the minimal CSS needed. The total amount of CSS is small enough that it&amp;#x27;s easy
-to manually split between the CSS that is common across the site, the CSS only
-needed for the home page, the CSS common to all articles, and then other CSS
-rules that may or may not be needed depending on the page content. For the
-latter case, CSS snippets to include are gated on matching a given string
-(e.g. &lt;code&gt;&amp;lt;kbd&lt;/code&gt; for use of the &lt;code&gt;&amp;lt;kbd&amp;gt;&lt;/code&gt; tag). For my particular use case, this is
-more straight forward and faster than e.g. relying on
-&lt;a href=&quot;https://purgecss.com/&quot;&gt;PurgeCSS&lt;/a&gt; as part of the build process.&lt;/p&gt;
-&lt;p&gt;The final trick on the frontend is prefetching. Upon hovering on an internal
-link, it will be fetched (see the logic at the end of
-&lt;a href=&quot;https://github.com/muxup/muxup-site/blob/main/fragments/common.js&quot;&gt;common.js&lt;/a&gt;
-for the implementation approach), meaning that in the common case any link you
-click will already have been loaded and cached. More complex approaches could
-be used to e.g. hook the mouse click event and directly update the DOM
-using the retrieved data. But this would require work to provide UI feedback
-during the load and the incremental benefit over prefetching to prime the
-cache seems small.&lt;/p&gt;
-&lt;h2 id=&quot;serving-using-caddy&quot;&gt;&lt;a href=&quot;#serving-using-caddy&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Serving using Caddy&lt;/h2&gt;
-&lt;p&gt;I had a few goals in setting up &lt;a href=&quot;https://caddyserver.com/&quot;&gt;Caddy&lt;/a&gt; to serve
-this site:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Enable new and shiny things like HTTP3 and serving Brotli compressed
-content.
-&lt;ul&gt;
-&lt;li&gt;Both are very widely supported on the browser side (and Brotli really
-isn&amp;#x27;t &amp;quot;new&amp;quot; any more), but require non-standard modules or custom builds
-on Nginx.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Redirect &lt;code&gt;wwww.muxup.com/*&lt;/code&gt; URLs to &lt;code&gt;muxup.com/*&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;HTTP request methods other than &lt;code&gt;GET&lt;/code&gt; or &lt;code&gt;HEAD&lt;/code&gt; should return error 405.&lt;/li&gt;
-&lt;li&gt;Set appropriate &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control&quot;&gt;Cache-Control
-headers&lt;/a&gt;
-in order to avoid unnecessary re-fetching content. Set shorter lifetimes for
-served .html and 308 redirects vs other assets. Leave 404 responses with
-no Cache-Control header.&lt;/li&gt;
-&lt;li&gt;Avoid serving the same content at multiple URLs (unless explicitly asked
-for) and don&amp;#x27;t expose the internal filenames of content served via a
-different canonical URL. Also, prefer URLs without a trailing slash, but
-ensure not to issue a redirect if the target file doesn&amp;#x27;t exist. This
-means (for example):
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;muxup.com/about/&lt;/code&gt; should redirect to &lt;code&gt;muxup.com/about&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;muxup.com/2022q3////muxup-implementation-notes&lt;/code&gt; should 404 or redirect.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;muxup.com/about/./././&lt;/code&gt; should 404 or redirect&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;muxup.com/index.html&lt;/code&gt; should 404.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;muxup.com/index.html.br&lt;/code&gt; (referring to the precompressed brotli file)
-should 404.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;muxup.com/non-existing-path/&lt;/code&gt; should 404.&lt;/li&gt;
-&lt;li&gt;If there is a directory &lt;code&gt;foo&lt;/code&gt; and a &lt;code&gt;foo.html&lt;/code&gt; at the same level, serve
-&lt;code&gt;foo.html&lt;/code&gt; for &lt;code&gt;GET /foo&lt;/code&gt; (and redirect to it for &lt;code&gt;GET /foo/&lt;/code&gt;).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Never try to serve &lt;code&gt;*/index.html&lt;/code&gt; or similar (except in the special case of
-&lt;code&gt;GET /&lt;/code&gt;).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Perhaps because my requirements were so specific, this turned out to be a
-little more involved than I expected. If seeking to understand the &lt;code&gt;Caddyfile&lt;/code&gt;
-format and Caddy configuration in general, I&amp;#x27;d strongly recommend getting a
-good understanding of the key ideas by reading &lt;a href=&quot;https://caddyserver.com/docs/caddyfile/concepts&quot;&gt;Caddyfile
-concepts&lt;/a&gt;, understanding &lt;a href=&quot;https://caddyserver.com/docs/caddyfile/directives#directive-order&quot;&gt;the
-order in which directives are handled by
-default&lt;/a&gt;
-and how you might control the execution order of directives using the
-&lt;a href=&quot;https://caddyserver.com/docs/caddyfile/directives/route&quot;&gt;route&lt;/a&gt; directive or
-use the &lt;a href=&quot;https://caddyserver.com/docs/caddyfile/directives/handle&quot;&gt;handle&lt;/a&gt;
-directive to specify groups of directives in a mutually exclusive fashion
-based on different matchers. The &lt;a href=&quot;https://caddy.community/t/composing-in-the-caddyfile/8291&quot;&gt;Composing in the
-Caddyfile&lt;/a&gt; article
-provides a good discussion of these options).&lt;/p&gt;
-&lt;p&gt;Ultimately, I &lt;a href=&quot;https://github.com/muxup/muxup-site/blob/main/utils/server_test.sh&quot;&gt;wrote a quick test
-script&lt;/a&gt;
-for the desired properties and came up with the following Caddyfile that meets
-almost all goals:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;{
-	servers {
-		protocol {
-			experimental_http3
-		}
-	}
-	email asb@asbradbury.org
-}
-
-(muxup_file_server) {
-	file_server {
-		index &amp;quot;&amp;quot;
-		precompressed br
-		disable_canonical_uris
-	}
-}
-www.muxup.com {
-	redir https://muxup.com{uri} 308
-	header Cache-Control &amp;quot;max-age=2592000, stale-while-revalidate=2592000&amp;quot;
-}
-muxup.com {
-	root * /var/www/muxup.com/htdocs
-	encode gzip
-	log {
-		output file /var/log/caddy/muxup.com.access.log
-	}
-	header Strict-Transport-Security &amp;quot;max-age=31536000; includeSubDomains; preload&amp;quot;
-
-	vars short_cache_control &amp;quot;max-age=3600&amp;quot;
-	vars long_cache_control &amp;quot;max-age=2592000, stale-while-revalidate=2592000&amp;quot;
-
-	@method_isnt_GET_or_HEAD not method GET HEAD
-	@path_is_suffixed_with_html_or_br path *.html *.html/ *.br *.br/
-	@path_or_html_suffixed_path_exists file {path}.html {path}
-	@html_suffixed_path_exists file {path}.html
-	@path_or_html_suffixed_path_doesnt_exist not file {path}.html {path}
-	@path_is_root path /
-	@path_has_trailing_slash path_regexp ^/(.*)/$
-
-	handle @method_isnt_GET_or_HEAD {
-		error 405
-	}
-	handle @path_is_suffixed_with_html_or_br {
-		error 404
-	}
-	handle @path_has_trailing_slash {
-		route {
-			uri strip_suffix /
-			header @path_or_html_suffixed_path_exists Cache-Control &amp;quot;{vars.long_cache_control}&amp;quot;
-			redir @path_or_html_suffixed_path_exists {path} 308
-			error @path_or_html_suffixed_path_doesnt_exist 404
-		}
-	}
-	handle @path_is_root {
-		rewrite index.html
-		header Cache-Control &amp;quot;{vars.short_cache_control}&amp;quot;
-		import muxup_file_server
-	}
-	handle @html_suffixed_path_exists {
-		rewrite {path}.html
-		header Cache-Control &amp;quot;{vars.short_cache_control}&amp;quot;
-		import muxup_file_server
-	}
-	handle * {
-		header Cache-Control &amp;quot;{vars.long_cache_control}&amp;quot;
-		import muxup_file_server
-	}
-	handle_errors {
-		header -Cache-Control
-		respond &amp;quot;{err.status_code} {err.status_text}&amp;quot;
-	}
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;A few notes on the above:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;It isn&amp;#x27;t currently possible to match URLs with &lt;code&gt;//&lt;/code&gt; due to the
-canonicalisation Caddy performs, but 2.6.0 including
-&lt;a href=&quot;https://github.com/caddyserver/caddy/pull/4948&quot;&gt;PR #4948&lt;/a&gt; hopefully
-provides a solution. Hopefully to allow matching &lt;code&gt;/./&lt;/code&gt; too.&lt;/li&gt;
-&lt;li&gt;HTTP3 should &lt;a href=&quot;https://github.com/caddyserver/caddy/pull/4707&quot;&gt;enabled by
-default&lt;/a&gt; in Caddy 2.6.0.&lt;/li&gt;
-&lt;li&gt;Surprisingly, you need to explicitly opt in to enabling gzip compression
-(see &lt;a href=&quot;https://news.ycombinator.com/item?id=32769612&quot;&gt;this discussion&lt;/a&gt; with
-the author of Caddy about that choice).&lt;/li&gt;
-&lt;li&gt;The combination of &lt;code&gt;try_files&lt;/code&gt; and &lt;code&gt;file_server&lt;/code&gt; provides a large chunk of
-the basics, but something like the above handlers is needed to get the
-precise desired behaviour for things like redirects, &lt;code&gt;*.html&lt;/code&gt; and &lt;code&gt;*.br&lt;/code&gt;
-etc.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;route&lt;/code&gt; is needed within &lt;code&gt;handle @path_has_trailing_slash&lt;/code&gt; because the
-default execution order of directives has &lt;code&gt;uri&lt;/code&gt; occurring some time after
-&lt;code&gt;redir&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;Caddy doesn&amp;#x27;t support dynamically brotli compressing responses, so the
-&lt;code&gt;precompressed br&lt;/code&gt; option of &lt;code&gt;file_server&lt;/code&gt; is used to serve pre-compressed
-files (as prepared by the &lt;a href=&quot;https://github.com/muxup/muxup-site/blob/main/deploy.sh&quot;&gt;deploy
-script&lt;/a&gt;).&lt;/li&gt;
-&lt;li&gt;I&amp;#x27;ve &lt;a href=&quot;https://caddy.community/t/suggestions-for-simplifying-my-caddyfile/17135&quot;&gt;asked for
-advice&lt;/a&gt;
-on improving the above Caddyfile on the Caddy Discourse.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&quot;analytics&quot;&gt;&lt;a href=&quot;#analytics&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Analytics&lt;/h2&gt;
-&lt;p&gt;The simplest possible solution - don&amp;#x27;t have any.&lt;/p&gt;
-&lt;h2 id=&quot;footer-images&quot;&gt;&lt;a href=&quot;#footer-images&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Footer images&lt;/h2&gt;
-&lt;p&gt;Last but by no means least, is the randomly selected doodle at the bottom of
-each page. I select images from the &lt;a href=&quot;https://github.com/googlecreativelab/quickdraw-dataset&quot;&gt;Quick, Draw!
-dataset&lt;/a&gt; and export
-them to SVG to be randomly selected on each page load. A rather &lt;a href=&quot;https://github.com/muxup/muxup-site/blob/main/utils/footer_image_helper.py&quot;&gt;scrappy
-script&lt;/a&gt;
-contains logic to generate SVGs from the dataset&amp;#x27;s NDJSON format and contains
-a simple a Flask application that allows selecting desired images from
-randomly displayed batches from each dataset.&lt;/p&gt;
-&lt;p&gt;With examples such as O&amp;#x27;Reilly&amp;#x27;s beautiful &lt;a href=&quot;https://www.oreilly.com/content/a-short-history-of-the-oreilly-animals/&quot;&gt;engravings of
-animals&lt;/a&gt;
-on their book covers there&amp;#x27;s a well established tradition of animal
-illustrations on technical content - and what better way to honour that
-tradition than with a hastily drawn doodle by a random person on the internet
-that spins when your mouse hovers over it?&lt;/p&gt;
-&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
-&lt;ul&gt;
-&lt;li&gt;2022-09-11: Add HSTS, tweak no-www redirect, and reject HTTP methods
-other than GET or POST in Caddyfile. Also link to thread requesting
-suggestions for this Caddyfile on Caddy&amp;#x27;s Discourse.&lt;/li&gt;
 &lt;li&gt;2022-09-10: Initial publication date.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/details&gt;
