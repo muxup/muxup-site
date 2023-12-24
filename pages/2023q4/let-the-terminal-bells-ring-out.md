@@ -69,7 +69,13 @@ workflow of course.
 You _could_ put `\a` in your terminal prompt (`$PS1`), meaning a bell is
 triggered after every command finishes. For me this would lead to too many
 notifications for commands I didn't want to carefully monitor the output for,
-but your mileage may vary.
+but your mileage may vary. After publishing this article, my
+[Igalia](https://igalia.com) colleague Adrian Perez pointed me to a slight
+variant on this that he uses: in Zsh `$TTYIDLE` makes it easy to configure
+behaviour based on the duration of a command and [he configures zsh so a bell
+is produced for commands that take longer than 30
+seconds to
+complete](https://github.com/aperezdc/dotfiles/blob/ce6a240bcbcac7b796895da581f0a6c5f23f31d5/dot.zsh--rc.zsh#L392).
 
 ## Terminal emulator support
 
@@ -93,3 +99,7 @@ the X11 urgent hint:
 * konsole: As far as I can tell it isn't supported. Creating a new profile and
   setting the "Terminal bell mode" to "Visual Bell" doesn't seem to result in
   the urgent hint being set.
+
+## Article changelog
+* 2023-12-24: (minor) Add note about configuring a bell for commands taking
+  longer than a certain threshold duration in Zsh.
