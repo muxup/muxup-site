@@ -65,7 +65,13 @@ workflow of course.&lt;/p&gt;
 &lt;p&gt;You &lt;em&gt;could&lt;/em&gt; put &lt;code&gt;\a&lt;/code&gt; in your terminal prompt (&lt;code&gt;$PS1&lt;/code&gt;), meaning a bell is
 triggered after every command finishes. For me this would lead to too many
 notifications for commands I didn&amp;#x27;t want to carefully monitor the output for,
-but your mileage may vary.&lt;/p&gt;
+but your mileage may vary. After publishing this article, my
+&lt;a href=&quot;https://igalia.com&quot;&gt;Igalia&lt;/a&gt; colleague Adrian Perez pointed me to a slight
+variant on this that he uses: in Zsh &lt;code&gt;$TTYIDLE&lt;/code&gt; makes it easy to configure
+behaviour based on the duration of a command and &lt;a href=&quot;https://github.com/aperezdc/dotfiles/blob/ce6a240bcbcac7b796895da581f0a6c5f23f31d5/dot.zsh--rc.zsh#L392&quot;&gt;he configures zsh so a bell
+is produced for commands that take longer than 30
+seconds to
+complete&lt;/a&gt;.&lt;/p&gt;
 &lt;h2 id=&quot;terminal-emulator-support&quot;&gt;&lt;a href=&quot;#terminal-emulator-support&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Terminal emulator support&lt;/h2&gt;
 &lt;p&gt;Unfortunately, setting the urgent hint upon a bell is not supported by
 gnome-terminal, with a &lt;a href=&quot;https://gitlab.gnome.org/GNOME/gnome-terminal/-/issues/6698&quot;&gt;15 year-old issue left
@@ -88,6 +94,13 @@ supported&lt;/a&gt;.&lt;/li&gt;
 setting the &amp;quot;Terminal bell mode&amp;quot; to &amp;quot;Visual Bell&amp;quot; doesn&amp;#x27;t seem to result in
 the urgent hint being set.&lt;/li&gt;
 &lt;/ul&gt;
+&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
+&lt;ul&gt;
+&lt;li&gt;2023-12-24: Add note about configuring a bell for commands taking
+longer than a certain threshold duration in Zsh.&lt;/li&gt;
+&lt;li&gt;2023-12-24: Initial publication date.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/details&gt;
 </content>
 </entry>
 <entry>
