@@ -4,8 +4,230 @@
 <subtitle>Adventures in collaborative open source development</subtitle>
 <link href="https://muxup.com/feed.xml" rel="self" type="application/atom+xml"/>
 <link href="https://muxup.com"/>
-<updated>2023-12-24T12:00:00Z</updated>
+<updated>2024-01-01T12:00:00Z</updated>
 <id>https://muxup.com/feed.xml</id>
+<entry>
+<title>Reflections on ten years of LLVM Weekly</title>
+<published>2024-01-01T12:00:00Z</published>
+<updated>2024-01-01T12:00:00Z</updated>
+<link rel="alternate" href="https://muxup.com/2024q1/reflections-on-ten-years-of-llvm-weekly"/>
+<id>https://muxup.com/2024q1/reflections-on-ten-years-of-llvm-weekly</id>
+<content type="html">
+&lt;p&gt;Today, with &lt;a href=&quot;https://llvmweekly.org/issue/522&quot;&gt;Issue #522&lt;/a&gt; I&amp;#x27;m marking ten
+years of authoring &lt;a href=&quot;https://llvmweekly.org/&quot;&gt;LLVM Weekly&lt;/a&gt;, a newsletter
+summarising developments on projects under the LLVM umbrella (LLVM, Clang,
+MLIR, Flang, libcxx, compiler-rt, lld, LLDB, ...). Somehow I&amp;#x27;ve managed to
+keep up an unbroken streak, publishing every single Monday since the first
+issue back on &lt;a href=&quot;https://llvmweekly.org/issue/1&quot;&gt;Jan 6th 2014&lt;/a&gt; (the first Monday
+of 2014 - you can also see the format hasn&amp;#x27;t changed much!). With a milestone
+like that, now is the perfect moment to jot down some reflections on the
+newsletter and thoughts for the future.&lt;/p&gt;
+&lt;h2 id=&quot;motivation-and-purpose&quot;&gt;&lt;a href=&quot;#motivation-and-purpose&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Motivation and purpose&lt;/h2&gt;
+&lt;p&gt;Way back when I started &lt;a href=&quot;https://llvmweekly.org/&quot;&gt;LLVM Weekly&lt;/a&gt;, I&amp;#x27;d been
+working with LLVM for a few years as part of developing and supporting a
+downstream compiler for a novel
+research architecture. This was a very educational yet somewhat lonely
+experience, and I sought to more closely follow upstream LLVM development
+to keep better abreast of changes that might impact or help my work, to
+learn more about parts of the compiler I wasn&amp;#x27;t actively using, and also to
+feel more of a connection to the wider LLVM community given my compiler work
+was a solo effort. The calculus for kicking off an LLVM development newsletter
+was dead simple: I found value in tracking development anyway, the
+incremental effort to write up and share with others wasn&amp;#x27;t &lt;em&gt;too&lt;/em&gt; great, and I
+felt quite sure others would benefit as well.&lt;/p&gt;
+&lt;p&gt;Looking back at my notes (I have a huge Markdown file with daily notes going back
+to 2011 - a file of this rough size and format is also a good
+&lt;a href=&quot;https://github.com/mawww/kakoune/issues/4685#issuecomment-1208129806&quot;&gt;stress&lt;/a&gt;
+&lt;a href=&quot;https://github.com/helix-editor/helix/issues/3072#issuecomment-1208133990&quot;&gt;test&lt;/a&gt;
+for text editors!) it seems I thought seriously about the idea of starting
+something up at the beginning of December 2013. I brainstormed the format,
+looked at other newsletters I might want to emulate, and went ahead and just
+did it starting in the new year. It really was as simple as that. I figured
+better to give it a try and stop it if it gets no traction rather than waste
+lots of time putting out feelers on level of interest and format. As a
+sidenote, I was delighted to see many of the newsletters I studied at the time
+are still going: &lt;a href=&quot;https://this-week-in-rust.org/&quot;&gt;This Week in Rust&lt;/a&gt;
+&lt;a href=&quot;https://perlweekly.com/&quot;&gt;Perl Weekly&lt;/a&gt; (I&amp;#x27;ll admit this surprised me!),
+&lt;a href=&quot;https://discourse.ubuntu.com/c/uwn/124&quot;&gt;Ubuntu Weekly News&lt;/a&gt;, &lt;a href=&quot;https://alan.petitepomme.net/cwn/index.html&quot;&gt;OCaml Weekly
+News&lt;/a&gt;, and &lt;a href=&quot;https://wiki.haskell.org/Haskell_Weekly_News&quot;&gt;Haskell Weekly
+News&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&quot;readership-and-content&quot;&gt;&lt;a href=&quot;#readership-and-content&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Readership and content&lt;/h2&gt;
+&lt;p&gt;The basic format of LLVM Weekly is incredibly simple - highlight relevant news
+articles and blog posts, pick out some forum/mailing discussions (sometimes
+trying to summarise complex debates - but this is very challenging and time
+intensive), and highlight some noteworthy commits from across the project.
+More recently I&amp;#x27;ve taken to advertising the scheduled &lt;a href=&quot;https://llvm.org/docs/GettingInvolved.html#online-sync-ups&quot;&gt;online
+sync-ups&lt;/a&gt; and
+&lt;a href=&quot;https://llvm.org/docs/GettingInvolved.html#office-hours&quot;&gt;office hours&lt;/a&gt; for
+the week. Notably absent are any kind of ads or paid content. I respect that
+others have made successful businesses in this kind of space, but although I&amp;#x27;ve
+always written LLVM Weekly on my own personal time I&amp;#x27;ve never felt comfortable
+trying to monetise other people&amp;#x27;s attention or my relationship with the
+community in this way.&lt;/p&gt;
+&lt;p&gt;The target audience is really anyone with an interest in keeping track of LLVM
+development, though I don&amp;#x27;t tend to expand every acronym or give a
+from-basics explanation for every term, so some familiarity with the project
+is assumed if you want to understand every line. The newsletter is posted to
+LLVM&amp;#x27;s Discourse, to &lt;a href=&quot;https://llvmweekly.org/&quot;&gt;llvmweekly.org&lt;/a&gt;, and delivered
+direct to people&amp;#x27;s inboxes. I additionally post &lt;a href=&quot;https://twitter.com/llvmweekly&quot;&gt;on
+Twitter&lt;/a&gt; and &lt;a href=&quot;https://fosstodon.org/@llvmweekly&quot;&gt;on
+Mastodon&lt;/a&gt; linking to each issue. I don&amp;#x27;t
+attempt to track open rates or have functioning analytics, so only have a
+rough idea of readership. There are ~3.5k active subscribers directly to the
+mailing list, ~7.5k Twitter followers, ~180 followers on Mastodon (introduced
+much more recently), and an unknown number of people reading via
+llvmweekly.org or RSS. I&amp;#x27;m pretty confident that I&amp;#x27;m not just shouting in the
+void at least.&lt;/p&gt;
+&lt;p&gt;There are some gaps or blind spots of course. I make no attempt to try to link
+to patches that are under-review, even though many might have interesting
+review discussions because it would simply be too much work to sort through
+them and if the discussion is particularly contentious or requires input
+from a wider cross-section of the LLVM community you&amp;#x27;d expect an RFC
+to be posted anyway. Although I do try to highlight MLIR threads or commits,
+as it&amp;#x27;s not an area of LLVM I&amp;#x27;m working right now I probably miss some things.
+Thankfully Javed Absar has taken up writing an &lt;a href=&quot;https://discourse.llvm.org/c/mlir/mlir-news-mlir-newsletter/37&quot;&gt;MLIR
+newsletter&lt;/a&gt;
+that helps plug those gaps. I&amp;#x27;m also not currently trawling through repos
+under the &lt;a href=&quot;https://github.com/llvm/&quot;&gt;LLVM GitHub organisation&lt;/a&gt; other than the
+main llvm-project monorepo, though perhaps I should...&lt;/p&gt;
+&lt;p&gt;I&amp;#x27;ve shied away from reposting job posts as the overhead is just too high.  I
+found dealing with requests to re-advertise (and considering if this is useful
+to the community) or determining if ads are sufficiently LLVM related just
+wasnt a good use of time when there&amp;#x27;s a good alternative. People can &lt;a href=&quot;https://discourse.llvm.org/c/community/job-postings/&quot;&gt;check
+the job post
+category on LLVM
+discourse&lt;/a&gt; or search for
+LLVM on their favourite jobs site.&lt;/p&gt;
+&lt;h2 id=&quot;how-it-works&quot;&gt;&lt;a href=&quot;#how-it-works&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;How it works&lt;/h2&gt;
+&lt;p&gt;There are really two questions to be answered here: how I go about writing it
+each week, and what tools and services are used. In terms of writing:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;I have a checklist I follow just to ensure nothing gets missed and help dive
+back in quickly if splitting work across multiple days.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;tig --since=$LAST_WEEK_DATE $DIR&lt;/code&gt; to step through commits in the past week
+for each sub-project within the monorepo.
+&lt;a href=&quot;https://jonas.github.io/tig/&quot;&gt;Tig&lt;/a&gt; is a fantastic text interface for git,
+and I of course have an ugly script that I bind to a key that generates the
+&lt;code&gt;[shorthash](github_link)&lt;/code&gt; style links I insert for each chosen commit.&lt;/li&gt;
+&lt;li&gt;I make a judgement call as to whether I think a commit might be of interest
+to others. This is bound to be somewhat flawed, but hopefully better than
+ramdom selection! I always really appreciate feedback if you think I missed
+something important, or tips on things you think I should include next week.
+&lt;ul&gt;
+&lt;li&gt;There&amp;#x27;s a cheat that practically guarantees a mention in LLVM Weekly
+without even needing to drop me a note though - write documentation! It&amp;#x27;s
+very rare I see a commit that adds more docs and fail to highlight it.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Similarly, I scan through &lt;a href=&quot;https://discourse.llvm.org/&quot;&gt;LLVM Discourse&lt;/a&gt;
+posts over the past week and pick out discussions I think readers may be
+interested in. Most RFCs will be picked up as part of this. In some cases if
+there&amp;#x27;s a lengthy discussion I might attempt to summarise or point to key
+messages, but honestly this is rarer than I&amp;#x27;d like as it can be incredibly
+time consuming. I try very hard to remain a neutral voice and no to insert
+personal views on technical discussions.&lt;/li&gt;
+&lt;li&gt;Many ask how long it takes to write, and the answer is of course that it
+varies. It&amp;#x27;s easy to spend a lot of time trying to figure out the importance
+of commits or discussions in parts of the compiler I don&amp;#x27;t work with much,
+or to better summarise content. The amount of activity can also vary a lot
+week to week (especially on Discourse). It&amp;#x27;s mostly in the 2.5-3.5h range
+(very rarely any more than 4 hours) to write, copyedit, and send.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;There&amp;#x27;s not much to be said on the tooling said, except that I could probably
+benefit from refreshing my helper scripts. Mail sending is handled by
+&lt;a href=&quot;https://www.mailgun.com/&quot;&gt;Mailgun&lt;/a&gt;, who have changed ownership three times
+since I started. I handle double opt-in via a simple Python script on the
+server-side and mail sending costs me $3-5 a month. Otherwise, I generate the
+static HTML with some scripts that could do with a bit more love. The only
+other running costs are the domain name fees and a VPS that hosts some other
+things as well, so quite insignificant compared to the time commitment.&lt;/p&gt;
+&lt;h2 id=&quot;how-you-can-help&quot;&gt;&lt;a href=&quot;#how-you-can-help&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;How you can help&lt;/h2&gt;
+&lt;p&gt;I cannot emphasise enough that I&amp;#x27;m not an expert on all parts of LLVM, and I&amp;#x27;m
+also only human and can easily miss things. If you did something you think
+people may be interested in and I failed to cover it, I almost certainly
+didn&amp;#x27;t explicitly review it and deem it not worthy. Please do continue to help
+me out by dropping links and suggestions. Writing commit messages that make it
+clear if a change has wider impact also helps increase the chance I&amp;#x27;ll pick it
+up.&lt;/p&gt;
+&lt;p&gt;I noted above that it is particularly time consuming to summarise back and
+forth in lengthy RFC threads. Sometimes people step up and do this and I
+always try to link to it when this happens. The person who initiated a thread
+or proposal is best placed write such a summary, and it&amp;#x27;s also a useful tool
+to check that you interpreted people&amp;#x27;s suggestions/feedback correctly, but it
+can still be helpful if others provide a similar service.&lt;/p&gt;
+&lt;p&gt;Many people have fed back they find LLVM Weekly useful to stay on top of LLVM
+developments. This is gratifying, but also a pretty huge responsibility. If
+you have thoughts on things I could be doing differently to serve the
+community even better without a big difference in time commitment, I&amp;#x27;m always
+keen to hear ideas and suggestions.&lt;/p&gt;
+&lt;h2 id=&quot;miscellaneous-thoughts&quot;&gt;&lt;a href=&quot;#miscellaneous-thoughts&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Miscellaneous thoughts&lt;/h2&gt;
+&lt;p&gt;To state the obvious, ten years is kind of a long time. A lot has happened
+with me in that time - I&amp;#x27;ve got married, had a son, co-founded and helped grow a
+company, and then moved on from that, kicked off the upstream RISC-V LLVM
+backend, and much more. One of the things I love working with compilers is
+that there&amp;#x27;s always new things to learn, and writing LLVM Weekly helps me
+learn at least a little more each week in areas outside of where I&amp;#x27;m currently
+working.  There&amp;#x27;s been a lot of changes in LLVM as well. Off the top off my
+head: there&amp;#x27;s been the move from SVN to Git, moving the Git repo to GitHub,
+moving from Phabricator to GitHub PRs, Bugzilla to GitHub issues, mailing
+lists to Discourse, relicensing to Apache 2.0 with LLVM exception, the wider
+adoption of office hours and area-specific sync-up calls, and more. I think
+even the LLVM Foundation was set up a little bit after LLVM Weekly started.
+It&amp;#x27;s comforting to see the &lt;a href=&quot;https://web.archive.org/web/20140102034931/http://llvm.org/&quot;&gt;llvm.org website design remains unchanged
+though!&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;It&amp;#x27;s also been a time period where I&amp;#x27;ve become increasingly involved in LLVM.
+Upstream work - most notably initiating the RISC-V LLVM backend, organising an
+LLVM conference, many talks, serving on various program committees for LLVM
+conferences, etc etc. When I started I felt a lot like someone outside the
+community looking in and documenting what I saw. That was probably accurate
+too, given the majority of my work was downstream. While I don&amp;#x27;t feel like an
+LLVM &amp;quot;insider&amp;quot; (if such a thing exists?!), I certainly feel a lot more part of
+the community than I did way back then.&lt;/p&gt;
+&lt;p&gt;An obvious question is whether there are other ways of pulling together the
+newsletter that are worth pursuing. My experience with large language models
+so far has been that they haven&amp;#x27;t been very helpful in reducing the effort for
+the more time consuming aspects of producing LLVM Weekly, but perhaps that
+will change in the future. If I could be automated away then that&amp;#x27;s great -
+perhaps I&amp;#x27;m misjudging how much of my editorial input is signal rather than
+just noise, but I don&amp;#x27;t think we&amp;#x27;re there yet for AI. More collaborative
+approaches to producing content would be another avenue to explore. For the
+current format, the risk is that the communication overhead and stress of
+seeing if various contributions actually materialise before the intended
+publication date is quite high. If I did want to spread the load or hand it
+over, then a rotating editorship would probably be most interesting to me.
+Even if multiple people contribute, each week a single would act as a backstop
+to make sure something goes out.&lt;/p&gt;
+&lt;p&gt;The unbroken streak of LLVM Weekly editions each Monday has become a bit
+totemic. It&amp;#x27;s certainly not always convenient having this fixed commitment,
+but it can also be nice to have this rhythm to the week. Even if it&amp;#x27;s a bad
+week, at least it&amp;#x27;s something in the bag that people seem to appreciate.
+Falling into bad habits and frequently missing weeks would be good for nobody,
+but I suspect that a schedule that allowed the odd break now and then would be
+just fine. Either way, I feel a sense of relief having hit the 10 year
+unbroken streak. I don&amp;#x27;t intend to start skipping weeks, but should life get
+in the way and the streak gets broken I&amp;#x27;ll feel rather more relaxed about it
+having hit that arbitrary milestone.&lt;/p&gt;
+&lt;h2 id=&quot;looking-forwards-and-thanks&quot;&gt;&lt;a href=&quot;#looking-forwards-and-thanks&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Looking forwards and thanks&lt;/h2&gt;
+&lt;p&gt;So what&amp;#x27;s next? LLVM Weekly continues, much as before. I don&amp;#x27;t know of I&amp;#x27;ll
+still be writing it in another 10 years time, but I&amp;#x27;m not planning to stop
+soon. If it ceases to be a good use of my time, ceases to have values for
+others, or I find there&amp;#x27;s a better way of generating similar impact then it
+would only be logical to move on. But for now, onwards and upwards.&lt;/p&gt;
+&lt;p&gt;Many thanks are due. Thank you to the people who make LLVM
+what it is - both technically and in terms of its community that I&amp;#x27;ve learned
+so much from. Thank you to &lt;a href=&quot;https://www.igalia.com/&quot;&gt;Igalia&lt;/a&gt; where I work for
+creating an environment where I&amp;#x27;m privileged enough to be paid to contribute
+upstream to LLVM (&lt;a href=&quot;https://www.igalia.com/contact/&quot;&gt;get in touch&lt;/a&gt; if you have
+LLVM needs!). Thanks to my family for ongoing support and
+of course putting up with the times my LLVM Weekly commitment is inconvenient.
+Thank you to everyone who has been reading LLVM Weekly and especially those
+sending in feedback or tips or suggestions for future issues.&lt;/p&gt;
+&lt;p&gt;On a final note, if you&amp;#x27;ve got this far you should make sure you are
+&lt;a href=&quot;https://llvmweekly.org/&quot;&gt;subscribed&lt;/a&gt; to LLVM Weekly and &lt;a href=&quot;https://fosstodon.org/@llvmweekly&quot;&gt;follow on
+Mastodon&lt;/a&gt; or &lt;a href=&quot;https://twitter.com/llvmweekly&quot;&gt;on
+Twitter&lt;/a&gt;.&lt;/p&gt;
+</content>
+</entry>
 <entry>
 <title>Let the (terminal) bells ring out</title>
 <published>2023-12-24T12:00:00Z</published>
@@ -17,8 +239,8 @@
 is a helpful and perhaps overlooked tool for anyone who does a lot of their
 work out of a terminal window. First, an important clarification. Bells
 ringing, chiming, or (as is appropriate for the season) jingling all sounds
-very noisy - but although you can configure your terminal emulator to make
-noise for the terminal bell, I&amp;#x27;m actually advocating for configuring a
+very noisy - but although you can configure your terminal emulator to emit a
+sound for the terminal bell, I&amp;#x27;m actually advocating for configuring a
 non-intrusive but persistent visual notification.&lt;/p&gt;
 &lt;h2 id=&quot;bel&quot;&gt;&lt;a href=&quot;#bel&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;BEL&lt;/h2&gt;
 &lt;p&gt;Our goal is to generate a visual indicator on demand (e.g. when a long-running
@@ -86,7 +308,7 @@ is ticked.&lt;/li&gt;
 &lt;li&gt;xterm: Set &lt;code&gt;XTerm.vt100.bellIsUrgent: true&lt;/code&gt; in your &lt;code&gt;.Xresources&lt;/code&gt; file.&lt;/li&gt;
 &lt;li&gt;rxvt-unicode (urxvt): Set &lt;code&gt;URxvt.urgentOnBell: true&lt;/code&gt; in your &lt;code&gt;.Xresources&lt;/code&gt;
 file.&lt;/li&gt;
-&lt;li&gt;alacritty: Supported. Works out of the box with not additional configuration
+&lt;li&gt;alacritty: Supported. Works out of the box with no additional configuration
 needed.&lt;/li&gt;
 &lt;li&gt;gnome-terminal: &lt;a href=&quot;https://gitlab.gnome.org/GNOME/gnome-terminal/-/issues/6698&quot;&gt;Not
 supported&lt;/a&gt;.&lt;/li&gt;
@@ -3084,208 +3306,6 @@ supported by the PC802 Andes N25F clusters.&lt;/li&gt;
 &lt;li&gt;2023-03-03: Initial publication date.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/details&gt;
-</content>
-</entry>
-<entry>
-<title>What&#x27;s new for RISC-V in LLVM 15</title>
-<published>2022-09-21T12:00:00Z</published>
-<updated>2022-09-21T12:00:00Z</updated>
-<link rel="alternate" href="https://muxup.com/2022q3/whats-new-for-risc-v-in-llvm-15"/>
-<id>https://muxup.com/2022q3/whats-new-for-risc-v-in-llvm-15</id>
-<content type="html">
-&lt;p&gt;LLVM 15.0.0 was
-&lt;a href=&quot;https://discourse.llvm.org/t/llvm-15-0-0-release/65099&quot;&gt;released&lt;/a&gt; around
-about two weeks ago now, and I wanted to highlight some of RISC-V specific
-changes or improvements that were introduced while going into a little more
-detail than I was able to in the &lt;a href=&quot;https://releases.llvm.org/15.0.0/docs/ReleaseNotes.html#changes-to-the-risc-v-backend&quot;&gt;release
-notes&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;In case you&amp;#x27;re not familiar with LLVM&amp;#x27;s release schedule, it&amp;#x27;s worth noting
-that there are two major LLVM releases a year (i.e. one roughly every 6
-months) and these are timed releases as opposed to being cut when a pre-agreed
-set of feature targets have been met. We&amp;#x27;re very fortunate to benefit from an
-active and growing set of contributors working on RISC-V support in LLVM
-projects, who are responsible for the work I describe below - thank you!
-I coordinate biweekly sync-up calls for RISC-V LLVM contributors, so if you&amp;#x27;re
-working in this area please &lt;a href=&quot;https://discourse.llvm.org/c/code-generation/riscv/57&quot;&gt;consider dropping
-in&lt;/a&gt;.&lt;/p&gt;
-&lt;h2 id=&quot;linker-relaxation&quot;&gt;&lt;a href=&quot;#linker-relaxation&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Linker relaxation&lt;/h2&gt;
-&lt;p&gt;Linker relaxation is a mechanism for allowing the linker to optimise code
-sequences at link time. A code sequence to jump to a symbol might
-conservatively take two instructions, but once the target address is known at
-link-time it might be small enough to fit in the immediate of a single
-instruction, meaning the other can be deleted. Because a linker performing
-relaxation may delete bytes (rather than just patching them), offsets
-including those for jumps within a function may be changed. To allow this to
-happen without breaking program semantics, even local branches that might
-typically be resolved by the assembler must be emitted as a relocation when
-linker relaxation is enabled. See the &lt;a href=&quot;https://github.com/riscv-non-isa/riscv-elf-psabi-doc/blob/master/riscv-elf.adoc#linker-relaxation&quot;&gt;description in the RISC-V
-psABI&lt;/a&gt;
-or &lt;a href=&quot;https://www.sifive.com/blog/all-aboard-part-3-linker-relaxation-in-riscv-toolchain&quot;&gt;Palmer Dabbelt&amp;#x27;s blog post on linker
-relaxation&lt;/a&gt;
-for more background.&lt;/p&gt;
-&lt;p&gt;Although LLVM has supported codegen for linker relaxation for a long time, LLD
-(the LLVM linker) has until now lacked support for processing these
-relaxations. Relaxation is primarily an optimisation, but processing of
-&lt;code&gt;R_RISCV_ALIGN&lt;/code&gt; (the alignment relocation) is necessary for correctness when
-linker relaxation is enabled, meaning it&amp;#x27;s not possible to link such object
-files correctly without at least some minimal support. Fangrui Song
-implemented support for
-&lt;code&gt;R_RISCV_ALIGN/R_RISCV_CALL/R_RISCV_CALL_PLT/R_RISCV_TPREL_*&lt;/code&gt; relocations in
-LLVM 15 and wrote up a &lt;a href=&quot;https://maskray.me/blog/2022-07-10-riscv-linker-relaxation-in-lld&quot;&gt;blog post with more implementation
-details&lt;/a&gt;,
-which is a major step in bringing us to parity with the GCC/binutils
-toolchain.&lt;/p&gt;
-&lt;h2 id=&quot;optimisations&quot;&gt;&lt;a href=&quot;#optimisations&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Optimisations&lt;/h2&gt;
-&lt;p&gt;As with any release, there&amp;#x27;s been a large number of codegen improvements, both
-target-independent and target-dependent. One addition to highlight in the
-RISC-V backend is the new &lt;a href=&quot;https://github.com/llvm/llvm-project/blob/release/15.x/llvm/lib/Target/RISCV/RISCVCodeGenPrepare.cpp&quot;&gt;RISCVCodeGenPrepare
-pass&lt;/a&gt;.
-This is the latest piece of a long-running campaign (largely led by Craig
-Topper) to improve code generation related to sign/zero extensions on RV64.
-&lt;a href=&quot;https://llvm.org/docs/Passes.html#codegenprepare-optimize-for-code-generation&quot;&gt;CodeGenPrepare&lt;/a&gt;
-is a target-independent pass that performs some late-stage transformations to
-the input ahead of lowering to SelectionDAG. The RISC-V specific version looks
-for opportunities to convert zero-extension to i64 with a sign-extension
-(which is cheaper).&lt;/p&gt;
-&lt;p&gt;Another new pass that may be of interest is
-&lt;a href=&quot;https://github.com/llvm/llvm-project/blob/release/15.x/llvm/lib/Target/RISCV/RISCVMakeCompressible.cpp&quot;&gt;RISCVMakeCompressible&lt;/a&gt;
-(contributed by Lewis Revill and Craig Blackmore).  Rather than trying to
-improve generated code performance, this is solely focused on reducing code
-size, and may increase the static instruction count in order to do so (which
-is why it&amp;#x27;s currently only enabled at the &lt;code&gt;-Oz&lt;/code&gt; optimisation level). It looks
-for cases where an instruction has been selected which can&amp;#x27;t be represented by
-one of the compressed (16-bit as opposed to 32-bit wide) instruction forms.
-For instance due to the register not being one of the registers addressable
-from the compressed instruction, or the offset being out of range). It will
-then look for opportunities to transform the input to make the instructions
-compressible. Grabbing two examples from the header comment of the pass:&lt;/p&gt;
-&lt;div class=&quot;highlight&quot; style=&quot;background: #ffffff&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span style=&quot;color: #177500&quot;&gt;; &amp;#39;zero&amp;#39; register not addressable in compressed store.&lt;/span&gt;
-                 &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;li&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;0&lt;/span&gt;
-&lt;span style=&quot;color: #000000&quot;&gt;sw&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;zero&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;0&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;)   &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;c.sw&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;0&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;)
-&lt;span style=&quot;color: #000000&quot;&gt;sw&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;zero&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;8&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;)   &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;c.sw&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;8&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;)
-&lt;span style=&quot;color: #000000&quot;&gt;sw&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;zero&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;4&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;)   &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;c.sw&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;4&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;)
-&lt;span style=&quot;color: #000000&quot;&gt;sw&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;zero&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;24&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;)  &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;c.sw&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;24&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;) 
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;and&lt;/p&gt;
-&lt;div class=&quot;highlight&quot; style=&quot;background: #ffffff&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span style=&quot;color: #177500&quot;&gt;; compressed stores support limited offsets&lt;/span&gt;
-&lt;span style=&quot;color: #000000&quot;&gt;lui&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a2&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;983065&lt;/span&gt;     &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;lui&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a2&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;983065&lt;/span&gt; 
-                   &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;addi&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a3&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;a2&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;-256&lt;/span&gt;
-&lt;span style=&quot;color: #000000&quot;&gt;sw&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;-236&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a2&lt;/span&gt;)   &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;c.sw&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;20&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a3&lt;/span&gt;)
-&lt;span style=&quot;color: #000000&quot;&gt;sw&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;-240&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a2&lt;/span&gt;)   &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;c.sw&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;16&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a3&lt;/span&gt;)
-&lt;span style=&quot;color: #000000&quot;&gt;sw&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;-244&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a2&lt;/span&gt;)   &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;c.sw&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;12&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a3&lt;/span&gt;)
-&lt;span style=&quot;color: #000000&quot;&gt;sw&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;-248&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a2&lt;/span&gt;)   &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;c.sw&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;8&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a3&lt;/span&gt;)
-&lt;span style=&quot;color: #000000&quot;&gt;sw&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;-252&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a2&lt;/span&gt;)   &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;c.sw&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;4&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a3&lt;/span&gt;)
-&lt;span style=&quot;color: #000000&quot;&gt;sw&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;-256&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a2&lt;/span&gt;)   &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;   &lt;span style=&quot;color: #000000&quot;&gt;c.sw&lt;/span&gt;  &lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;0&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a3&lt;/span&gt;)
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;There&amp;#x27;s a whole range of other backend codegen improvements, including
-additions to existing RISC-V specific passes but unfortunately it&amp;#x27;s not
-feasible to enumerate them all.&lt;/p&gt;
-&lt;p&gt;One improvement to note from the Clang frontend is that &lt;a href=&quot;https://reviews.llvm.org/rG7a5cb15ea6fa&quot;&gt;the C intrinsics for
-the RISC-V Vector extension are now lazily
-generated&lt;/a&gt;, avoiding the need to
-parse a huge pre-generated header file and improving compile times.&lt;/p&gt;
-&lt;h2 id=&quot;support-for-new-instruction-set-extensions&quot;&gt;&lt;a href=&quot;#support-for-new-instruction-set-extensions&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Support for new instruction set extensions&lt;/h2&gt;
-&lt;p&gt;A batch of new instruction set extensions &lt;a href=&quot;https://riscv.org/announcements/2021/12/riscv-ratifies-15-new-specifications/&quot;&gt;were ratified at the end of last
-year&lt;/a&gt;
-(see also the &lt;a href=&quot;https://wiki.riscv.org/display/HOME/Recently+Ratified+Extensions&quot;&gt;recently ratified extension
-list&lt;/a&gt;.  LLVM
-14 already &lt;a href=&quot;https://releases.llvm.org/14.0.0/docs/ReleaseNotes.html#changes-to-the-risc-v-target&quot;&gt;featured a number of
-these&lt;/a&gt;
-(with the vector and ratified bit manipulation extensions no longer being
-marked as experimental). In LLVM 15 we were able to fill in some of the gaps,
-adding support for additional ratified extensions as well as some new
-experimental extensions.&lt;/p&gt;
-&lt;p&gt;In particular:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Assembler and disassembler support for the &lt;a href=&quot;https://github.com/riscv/riscv-zfinx/blob/main/zfinx-1.0.0.pdf&quot;&gt;Zdinx, Zfinx, Zhinx, and Zhinxmin
-extensions&lt;/a&gt;.
-Cores that implement these extensions store double/single/half precision
-floating point values in the integer register file (GPRs) as opposed to having a
-separate floating-point register file (FPRs).
-&lt;ul&gt;
-&lt;li&gt;The instructions defined in the conventional floating point extensions are
-defined to instead operate on the general purpose registers, and
-instructions that become redundant (namely those that involve moving
-values from FPRs to GPRs) are removed.&lt;/li&gt;
-&lt;li&gt;Cores might implement these extensions rather than the conventional
-floating-point in order to reduce the amount of architectural state that
-is needed, reducing area and context-switch cost. The downside is of
-course that register pressure for the GPRs will be increased.&lt;/li&gt;
-&lt;li&gt;Codegen for these extensions is not yet supported (i.e. the extensions are
-only supported for assembly input or inline assembly). A patch to provide
-this support &lt;a href=&quot;https://reviews.llvm.org/D122918&quot;&gt;is under review&lt;/a&gt; though.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Assembler and disassembler support for the &lt;a href=&quot;https://github.com/riscv/riscv-CMOs/blob/master/specifications/cmobase-v1.0.pdf&quot;&gt;Zicbom, Zicbop, and Zicboz
-extensions&lt;/a&gt;.
-These cache management operation (CMO) extensions add new instructions for
-invalidating, cleaning, and flushing cache blocks (Zicbom), zeroing cache
-blocks (Zicboz), and prefetching cache blocks (Zicbop).
-&lt;ul&gt;
-&lt;li&gt;These operations aren&amp;#x27;t currently exposed via C intrinsics, but these will
-be added once the appropriate naming has been agreed.&lt;/li&gt;
-&lt;li&gt;One of the questions raised during implementation was about the &lt;a href=&quot;https://github.com/riscv/riscv-CMOs/issues/47&quot;&gt;preferred
-textual format for the
-operands&lt;/a&gt;. Specifically,
-whether it should be e.g. &lt;code&gt;cbo.clean (a0)&lt;/code&gt;/&lt;code&gt;cbo.clean 0(a0)&lt;/code&gt; to match the
-format used for other memory operations, or &lt;code&gt;cbo.clean a0&lt;/code&gt; as was used in
-an early binutils patch. We were able to agree between the CMO working
-group, LLVM, and GCC developers on the former approach.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Assembler, disassembler, and codegen support for the &lt;a href=&quot;https://github.com/riscv/riscv-isa-manual/commit/f518c259c008f926eba4aba67804f62531b6e94b&quot;&gt;Zmmul
-extension&lt;/a&gt;.
-This extension is just a subset of the &amp;#x27;M&amp;#x27; extension providing just the
-multiplication instructions without the division instructions.&lt;/li&gt;
-&lt;li&gt;Assembler and disassembler support for the additional CSRs (control and
-status registers) and instructions introduced by the &lt;a href=&quot;https://github.com/riscv/riscv-isa-manual/commit/f518c259c008f926eba4aba67804f62531b6e94b&quot;&gt;hypervisor and
-Svinval additions to the privileged architecture
-specification&lt;/a&gt;.
-Svinval provides fine-grained address-translation cache invalidation and
-fencing, while the hypervisor extension provides support for efficiently
-virtualising the supervisor-level architecture (used to implement KVM for
-RISC-V).&lt;/li&gt;
-&lt;li&gt;Assembler and disassembler support for the
-&lt;a href=&quot;https://github.com/riscv/riscv-isa-manual/blob/266f3759c9c88b0ae18cfca70f875662d89b52db/src/zihintpause.tex&quot;&gt;Zihintpause
-extension&lt;/a&gt;.
-This adds the &lt;code&gt;pause&lt;/code&gt; instruction intended for use as a hint within
-spin-wait loops.
-&lt;ul&gt;
-&lt;li&gt;Zihintpause was actually the first extension to &lt;a href=&quot;https://riscv.org/announcements/2021/02/risc-v-international-unveils-fast-track-architecture-extension-process-and-ratifies-zihintpause-extension/&quot;&gt;go
-through&lt;/a&gt;
-RISC-V International&amp;#x27;s fast-track architecture extension process back in
-early 2021. We were clearly slow to add it to LLVM, but are trying to keep
-a closer eye on ratified extensions going forwards.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Support was added for the not yet ratified &lt;a href=&quot;https://github.com/riscv/riscv-v-spec/pull/780&quot;&gt;Zvfh
-extension&lt;/a&gt;, providing
-support for half precision floating point values in RISC-V vectors.
-&lt;ul&gt;
-&lt;li&gt;Unlike the extensions listed above, support for Zvfh is experimental. This
-is a status we use within the RISC-V backend for extensions that are not
-yet ratified and may change from release to release with no guarantees on
-backwards compatibility. Enabling support for such extensions requires
-passing &lt;code&gt;-menable-experimental-extensions&lt;/code&gt; to Clang and specifying the
-extension&amp;#x27;s version when listing it in the &lt;code&gt;-march&lt;/code&gt; string.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;It&amp;#x27;s not present in LLVM 15, but LLVM 16 onwards will feature a
-&lt;a href=&quot;https://github.com/llvm/llvm-project/blob/main/llvm/docs/RISCVUsage.rst&quot;&gt;user guide for the RISC-V
-target&lt;/a&gt;
-summarising the level of support for each extension (huge thanks to Philip
-Reames for kicking off this effort).&lt;/p&gt;
-&lt;h2 id=&quot;other-changes&quot;&gt;&lt;a href=&quot;#other-changes&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Other changes&lt;/h2&gt;
-&lt;p&gt;In case I haven&amp;#x27;t said it enough times, there&amp;#x27;s far more interesting changes
-than I could reasonably cover. Apologies if I&amp;#x27;ve missed your favourite new
-feature or improvement. In particular, I&amp;#x27;ve said relatively little about
-RISC-V Vector support. There&amp;#x27;s been a long series of improvements and
-correctness fixes in the LLVM 15 development window, after RVV was made
-non-experimental in LLVM 14 and there&amp;#x27;s much more to come in LLVM 16 (e.g.
-scalable vectorisation becoming enabled by default).&lt;/p&gt;
 </content>
 </entry>
 </feed>

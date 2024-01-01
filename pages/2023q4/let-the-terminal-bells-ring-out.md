@@ -9,8 +9,8 @@ I just wanted to take a few minutes to argue that the venerable terminal bell
 is a helpful and perhaps overlooked tool for anyone who does a lot of their
 work out of a terminal window. First, an important clarification. Bells
 ringing, chiming, or (as is appropriate for the season) jingling all sounds
-very noisy - but although you can configure your terminal emulator to make
-noise for the terminal bell, I'm actually advocating for configuring a
+very noisy - but although you can configure your terminal emulator to emit a
+sound for the terminal bell, I'm actually advocating for configuring a
 non-intrusive but persistent visual notification.
 
 ## BEL
@@ -92,7 +92,7 @@ the X11 urgent hint:
 * xterm: Set `XTerm.vt100.bellIsUrgent: true` in your `.Xresources` file.
 * rxvt-unicode (urxvt): Set `URxvt.urgentOnBell: true` in your `.Xresources`
   file.
-* alacritty: Supported. Works out of the box with not additional configuration
+* alacritty: Supported. Works out of the box with no additional configuration
   needed.
 * gnome-terminal: [Not
   supported](https://gitlab.gnome.org/GNOME/gnome-terminal/-/issues/6698).

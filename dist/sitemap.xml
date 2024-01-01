@@ -2,7 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
 <loc>https://muxup.com</loc>
-<lastmod>2023-12-24</lastmod>
+<lastmod>2024-01-01</lastmod>
+</url>
+<url>
+<loc>https://muxup.com/2024q1/reflections-on-ten-years-of-llvm-weekly</loc>
+<lastmod>2024-01-01</lastmod>
 </url>
 <url>
 <loc>https://muxup.com/2023q4/let-the-terminal-bells-ring-out</loc>
