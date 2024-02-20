@@ -224,7 +224,7 @@ makes a different set of trade-offs. Please read this section carefully to
 determine if simple-reload makes sense for you:</p>
 <p><strong>Cons</strong>:</p>
 <ul>
-<li>Reload won&#x27;t take place until the page is focused by the user, which
+<li>Reload won't take place until the page is focused by the user, which
 requires manual interaction.
 <ul>
 <li>This is significantly less burdensome if using focus follows pointer in
@@ -301,23 +301,23 @@ exposing a port as for LiveReload).</li>
 <p>Paste the above code into the <code>&lt;head&gt;</code> or <code>&lt;body&gt;</code> of a HTML file. You can
 then enable the reload behaviour by double-clicking on a page (double-click
 again to disable again). The title is prefixed with ⟳ while reload-on-focus is
-enabled. If you&#x27;d like reload-on-focus enabled by default, just flip the
+enabled. If you'd like reload-on-focus enabled by default, just flip the
 <code>enableByDefault</code> variable to <code>true</code>. You could either modify
-whatever you&#x27;re using to emit HTML to include this code when in development
+whatever you're using to emit HTML to include this code when in development
 mode, or configure your web server of choice to inject it for you.</p>
 <p>The enabled/disabled state of the reload logic is scoped to the current tab,
 so will be maintained if navigating to different pages within the same domain
 in that tab.</p>
 <p>In terms of licensing, the implementation is so straight-forward it hardly
-feels copyrightable. Please consider it public domain, or MIT if you&#x27;re more
+feels copyrightable. Please consider it public domain, or MIT if you're more
 comfortable with an explicit license.</p>
 <h2 id="implementation-notes"><a href="#implementation-notes" class="anchor" aria-hidden="true" tabindex="-1"></a>Implementation notes</h2>
 <ul>
-<li>In case it&#x27;s not clear, &quot;blur&quot; events mentioned above are events fired when
+<li>In case it's not clear, "blur" events mentioned above are events fired when
 an element is no longer in focus.</li>
 <li>As noted in the code comment, Firefox (under dwm in Linux at least) seems to
 trigger blur+focus events when resizing the window using a keybinding while
-Chrome doesn&#x27;t. Being able to remove the logic to deal with this issue would
+Chrome doesn't. Being able to remove the logic to deal with this issue would
 be a good additional simplification.</li>
 </ul>
 <hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor "aria-hidden="true" tabindex="-1"></a>Article changelog</summary>

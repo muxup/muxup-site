@@ -170,28 +170,28 @@ font-size:.833rem
 <h1 id="article-title"><span id="title-highlight">What&#x27;s new for RISC-V in LLVM 17</span></h1>
 <div id="article-meta"><span title="2023-10-10">2023Q4</span>.</div>
 <p>LLVM 17 was <a href="https://discourse.llvm.org/t/llvm-17-0-1-released/73549">released in the past few
-weeks</a>, and I&#x27;m
+weeks</a>, and I'm
 <a href="/2023q1/whats-new-for-risc-v-in-llvm-16">continuing</a> the
 <a href="/2022q3/whats-new-for-risc-v-in-llvm-15">tradition</a>
-of writing up some selective highlights of what&#x27;s new as far as RISC-V is
-concerned in this release. If you want more general, regular updates on what&#x27;s
+of writing up some selective highlights of what's new as far as RISC-V is
+concerned in this release. If you want more general, regular updates on what's
 going on in LLVM you should of course <a href="https://llvmweekly.org/">subscribe to my
 newsletter</a>.</p>
-<p>In case you&#x27;re not familiar with LLVM&#x27;s release schedule, it&#x27;s worth noting
+<p>In case you're not familiar with LLVM's release schedule, it's worth noting
 that there are two major LLVM releases a year (i.e. one roughly every 6
 months) and these are timed releases as opposed to being cut when a pre-agreed
-set of feature targets have been met. We&#x27;re very fortunate to benefit from an
+set of feature targets have been met. We're very fortunate to benefit from an
 active and growing set of contributors working on RISC-V support in LLVM
 projects, who are responsible for the work I describe below - thank you!
-I coordinate biweekly sync-up calls for RISC-V LLVM contributors, so if you&#x27;re
+I coordinate biweekly sync-up calls for RISC-V LLVM contributors, so if you're
 working in this area please <a href="https://discourse.llvm.org/c/code-generation/riscv/57">consider dropping
 in</a>.</p>
 <h2 id="code-size-reduction-extensions"><a href="#code-size-reduction-extensions" class="anchor" aria-hidden="true" tabindex="-1"></a>Code size reduction extensions</h2>
 <p>A family of extensions referred to as the <a href="https://github.com/riscv/riscv-code-size-reduction/releases/download/v1.0.4-2/Zc_1.0.4-2.pdf">RISC-V code size reduction
 extensions</a>
 was ratified earlier this year. One aspect of this is providing ways of
-referring to subsets of the standard compressed &#x27;C&#x27; (16-bit instructions)
-extension that don&#x27;t include floating point loads/stores, as well as other
+referring to subsets of the standard compressed 'C' (16-bit instructions)
+extension that don't include floating point loads/stores, as well as other
 variants. But the more meaningful additions are the <code>Zcmp</code> and <code>Zcmt</code>
 extensions, in both cases targeted at embedded rather than application cores,
 reusing encodings for double-precision FP store.</p>
@@ -218,7 +218,7 @@ impact of these
 extensions</a>
 produced using <a href="https://github.com/riscv/riscv-code-size-reduction/tree/main/benchmarks">this analysis
 script</a>.
-I&#x27;m not aware of whether a comparison has been made to the real-world results
+I'm not aware of whether a comparison has been made to the real-world results
 of implementing support for the extensions in LLVM, but that would certainly
 be interesting.</p>
 <h2 id="vectorization"><a href="#vectorization" class="anchor" aria-hidden="true" tabindex="-1"></a>Vectorization</h2>
@@ -228,8 +228,8 @@ vectorizer and the SLP (superword-level parallelism) vectorizer. The loop
 vectorizer was enabled during the LLVM 16 development cycle, while the SLP
 vectorizer <a href="https://github.com/llvm/llvm-project/commit/7f26c27e03f1">was
 enabled</a> for this
-release. Beyond that, there&#x27;s been a huge number of incremental improvements
-for vector codegen such that isn&#x27;t always easy to pick out particular
+release. Beyond that, there's been a huge number of incremental improvements
+for vector codegen such that isn't always easy to pick out particular
 highlights. But to pick a small set of changes:</p>
 <ul>
 <li><a href="https://github.com/riscv-non-isa/rvv-intrinsic-doc/releases/tag/v0.12.0">Version 0.12 of the RISC-V vector C intrinsics
@@ -241,17 +241,17 @@ will not be new incompatibilities introduced prior to v1.0.</li>
 pass</a> to avoid
 additional unnecessary insertions <code>vsetivli</code> instruction that is used to
 modify the <code>vtype</code> control register.</li>
-<li>It&#x27;s not particularly user visible, but there was a lot of refactoring of
+<li>It's not particularly user visible, but there was a lot of refactoring of
 vector pseudoinstructions used internally during instruction selection
 (following <a href="https://discourse.llvm.org/t/riscv-transition-in-vector-pseudo-structure-policy-variants/71295">this
 thread</a>.
 The <a href="https://github.com/llvm/llvm-project/commit/691618a7a959">added
 documentation</a>
-will likely be helpful if you&#x27;re hoping to better understand this.</li>
+will likely be helpful if you're hoping to better understand this.</li>
 <li>You might be aware that <code>LMUL</code> in the RISC-V vector extension controls
 grouping of vector registers, for instance rather than 32 vector registers,
 you might want to set LMUL=4 to treat them as 8 registers that are 4 times
-as large. The &quot;best&quot; LMUL is going to vary depending on both the target
+as large. The "best" LMUL is going to vary depending on both the target
 microarchitecture and factors such as register pressure, but a change was
 made so <a href="https://github.com/llvm/llvm-project/commit/8d16c6809a08">LMUL=2 is the new
 default</a>.</li>
@@ -263,8 +263,8 @@ llvm-mca and RISC-V vector support: <a href="https://github.com/llvm/llvm-projec
 SiFive7 cores</a>
 (which of course is used outside of llvm-mca as well), and support for
 <a href="https://github.com/llvm/llvm-project/commit/ecf372f993fa">vsetivli/vsetvli</a>
-&#x27;instruments&#x27;. llvm-mca has the concept of an &#x27;<a href="https://llvm.org/docs/CommandGuide/llvm-mca.html#instrument-regions">instrument
-region</a>&#x27;,
+'instruments'. llvm-mca has the concept of an '<a href="https://llvm.org/docs/CommandGuide/llvm-mca.html#instrument-regions">instrument
+region</a>',
 a section of assembly with an LLVM-MCA comment that can (for instance)
 indicate the value of a control register that would affect scheduling. This
 can be used to set <code>LMUL</code> (register grouping) for RISC-V, however in the
@@ -272,21 +272,21 @@ case of the immediate forms of <code>vsetvl</code> occuring in the input, <code>
 statically determined.</li>
 </ul>
 <p>If you want to find out more about RISC-V vector support in LLVM, be sure to
-check out <a href="https://llvm.swoogo.com/2023devmtg/session/1767411/vector-codegen-in-the-risc-v-backend">my Igalia colleague Luke Lau&#x27;s
+check out <a href="https://llvm.swoogo.com/2023devmtg/session/1767411/vector-codegen-in-the-risc-v-backend">my Igalia colleague Luke Lau's
 talk</a>
-at the LLVM Dev Meeting this week (I&#x27;ll update this article when
+at the LLVM Dev Meeting this week (I'll update this article when
 slides+recording are available).</p>
 <h2 id="other-isa-extensions"><a href="#other-isa-extensions" class="anchor" aria-hidden="true" tabindex="-1"></a>Other ISA extensions</h2>
-<p>It wouldn&#x27;t be a RISC-V article without a list of hard to interpret strings
+<p>It wouldn't be a RISC-V article without a list of hard to interpret strings
 that claim to be ISA extension names (Zvfbfwma is a real extension, I
 promise!). In addition to the code size reduction extension listed above
-there&#x27;s been lots of newly added or updated extensions in this release cycle.
+there's been lots of newly added or updated extensions in this release cycle.
 Do refer to the <a href="https://releases.llvm.org/17.0.1/docs/RISCVUsage.html">RISCVUsage
 documentation</a> for
 something that aims to be a complete list of what is supported (occasionally
 there are omissions) as well as clarity on what we mean by an extension being
-marked as &quot;experimental&quot;.</p>
-<p>Here&#x27;s a partial list:</p>
+marked as "experimental".</p>
+<p>Here's a partial list:</p>
 <ul>
 <li>Code generation support for the <a href="https://github.com/riscv/riscv-isa-manual/blob/main/src/zfinx.adoc">Zfinx, Zdinx, Zhinx, and Zhinxmin
 extensions</a>.
@@ -313,26 +313,26 @@ format</a>.
 <a href="https://github.com/riscv/riscv-zacas">Zacas</a> extension (atomic
 compare-and-swap).</li>
 </ul>
-<p>It landed after the 17.x branch so isn&#x27;t in this release, but in the future
-you&#x27;ll be able to use <code>--print-supported-extensions</code> with Clang to have it
+<p>It landed after the 17.x branch so isn't in this release, but in the future
+you'll be able to use <code>--print-supported-extensions</code> with Clang to have it
 print a table of supported ISA extensions (the same flag has now been
 implemented for Arm and AArch64 too).</p>
 <h2 id="other-additions-and-improvements"><a href="#other-additions-and-improvements" class="anchor" aria-hidden="true" tabindex="-1"></a>Other additions and improvements</h2>
-<p>As always, it&#x27;s not possible to go into detail on every change. A selection of
-other changes that I&#x27;m not able to delve into more detail on:</p>
+<p>As always, it's not possible to go into detail on every change. A selection of
+other changes that I'm not able to delve into more detail on:</p>
 <ul>
-<li>Initial RISC-V support was added to <a href="https://github.com/llvm/llvm-project/blob/main/bolt/README.md">LLVM&#x27;s BOLT post-link
+<li>Initial RISC-V support was added to <a href="https://github.com/llvm/llvm-project/blob/main/bolt/README.md">LLVM's BOLT post-link
 optimizer</a>
 and various fixes / feature additions made to
 <a href="https://llvm.org/docs/JITLink.html">JITLink</a>, thanks to the work of my
-Igalia colleague Job Noorman. There&#x27;s actually a lot to say about this work,
-but I don&#x27;t need to because Job has written up and <a href="https://blogs.igalia.com/compilers/2023/06/30/porting-bolt-to-risc-v/">excellent blog post on
+Igalia colleague Job Noorman. There's actually a lot to say about this work,
+but I don't need to because Job has written up and <a href="https://blogs.igalia.com/compilers/2023/06/30/porting-bolt-to-risc-v/">excellent blog post on
 it</a>
 that I highly encourage you go and read.</li>
 <li>LLD <a href="https://github.com/llvm/llvm-project/commit/85444794cdde">gained
 support</a> for some
 of the relaxations involving the global pointer.</li>
-<li>I expect there&#x27;ll be more to say about this in future releases, but there&#x27;s
+<li>I expect there'll be more to say about this in future releases, but there's
 been incremental progress on RISC-V
 <a href="https://llvm.org/docs/GlobalISel/index.html">GlobalISel</a> in the LLVM 17
 development cycle (which has continued after). You might be interested in
@@ -355,10 +355,10 @@ specific versions. There will of course be further updates for LLVM 18,
 including the work from my colleague Mikhail R Gadelha on 32-bit RISC-V
 support.</li>
 </ul>
-<p>Apologies if I&#x27;ve missed
+<p>Apologies if I've missed
 your favourite new feature or improvement - the <a href="https://releases.llvm.org/17.0.1/docs/ReleaseNotes.html#changes-to-the-risc-v-backend">LLVM release
 notes</a>
-will include some things I haven&#x27;t had space for here. Thanks again for
+will include some things I haven't had space for here. Thanks again for
 everyone who has been contributing to make the RISC-V in LLVM even better.</p>
 <p>If you have a RISC-V project you think me and my colleagues and at Igalia may
 be able to help with, then do <a href="https://www.igalia.com/contact/">get in touch</a>

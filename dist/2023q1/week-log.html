@@ -212,11 +212,11 @@ recent fixes to <code>llvm-objdump</code> (and related tools) when encountering
 unrecognised RISC-V base or ISA extension versions, or unrecognised ISA
 extension names.</li>
 <li>Landed a tweak to the RISC-V ISA manual to <a href="https://github.com/riscv/riscv-isa-manual/pull/1001">make it clear that HINT
-encodings aren&#x27;t
-&quot;reserved&quot;</a> in terms of
-being part of the defined &quot;reserved instruction-set category&quot;. Thanks to
+encodings aren't
+"reserved"</a> in terms of
+being part of the defined "reserved instruction-set category". Thanks to
 Andrew Waterman for suggesting a simpler fix than my first attempt.</li>
-<li>I&#x27;m now on Mastodon, at <a href="https://fosstodon.org/@asb">@asb@fosstodon.org</a> and
+<li>I'm now on Mastodon, at <a href="https://fosstodon.org/@asb">@asb@fosstodon.org</a> and
 <a href="https://fosstodon.org/@llvmweekly">@llvmweekly@fosstodon.org</a>.</li>
 <li>Proposed <a href="https://reviews.llvm.org/D147183#4233360">alternate wording for the RISC-V LLVM doc updates reflecting
 recent ISA versioning
@@ -286,24 +286,24 @@ the riscv-bfloat16 spec.</li>
 <a href="https://github.com/muxup/muxup-site/commit/a1cb4d4256815bcfa8a6a4c5174a03ae077ee8c6#diff-4e9f5b15205b49dff89e5050a5a899e63213f1f015daeca45b76270bb2c009dd">more</a>
 footer images for this site from the Quick Draw dataset. Thanks to my son
 (Archie, 5) for the assistance.</li>
-<li>Reviewed submissions for <a href="https://llvm.org/devmtg/2023-05/">EuroLLVM</a> (I&#x27;m
+<li>Reviewed submissions for <a href="https://llvm.org/devmtg/2023-05/">EuroLLVM</a> (I'm
 on the program committee).</li>
 <li>Added note to the <a href="/2023q1/commercially-available-risc-v-silicon">commercially available RISC-V silicon
 post</a> about a
 hardware bug in the Renesas RZ/Five.</li>
-<li>Finished writing and published <a href="/2023q1/whats-new-for-risc-v-in-llvm-16">what&#x27;s new for RISC-V in LLVM 16
+<li>Finished writing and published <a href="/2023q1/whats-new-for-risc-v-in-llvm-16">what's new for RISC-V in LLVM 16
 article</a> and took part in
 some of the discussions in the
 <a href="https://news.ycombinator.com/item?id=35215826">HN</a> and <a href="https://old.reddit.com/r/RISCV/comments/11veftz/whats_new_for_riscv_in_llvm_16/">Reddit
 threads</a>
-(it&#x27;s <a href="https://lobste.rs/s/qcu7fc/what_s_new_for_risc_v_llvm_16">on lobste.rs
+(it's <a href="https://lobste.rs/s/qcu7fc/what_s_new_for_risc_v_llvm_16">on lobste.rs
 too</a>, but that
-didn&#x27;t generate any comments).</li>
+didn't generate any comments).</li>
 <li>Investigated an issue where inline asm with the <code>m</code> constraint was
 generating worse code on LLVM vs GCC, finding that LLVM conservatively
 lowers this to a single register, while GCC treats <code>m</code> as reg+imm, relying
 on users indicating <code>A</code> when using a memory operand with an instruction that
-can&#x27;t take an immediate offset. Worked with a colleague who posted
+can't take an immediate offset. Worked with a colleague who posted
 <a href="https://reviews.llvm.org/D146245">D146245</a> to fix this.</li>
 <li>Set
 <a href="https://discourse.llvm.org/t/risc-v-llvm-sync-up-call-16th-march-2023-note-daylight-savings-impact/69244">agenda</a>
@@ -322,8 +322,8 @@ landed <a href="https://reviews.llvm.org/D146037">D146037</a> to fix this by run
 machine copy propagation earlier in the pipeline, though a more principled
 fix would be desirable.</li>
 <li>Filed a PR against the riscv-isa-manual to <a href="https://github.com/riscv/riscv-isa-manual/pull/990">disambiguate the use of the term
-&quot;reserved&quot; for HINT
-instructions</a>. I&#x27;ve also
+"reserved" for HINT
+instructions</a>. I've also
 been looking at the proposed bfloat16 extension recently and filed an
 <a href="https://github.com/riscv/riscv-bfloat16/issues/27">issue</a> to clarify if
 Zfbfinxmin will be defined (as all the other floating point extensions so
@@ -374,7 +374,7 @@ sessions.</li>
 <li>Posted and committed an LLVM patch to <a href="https://reviews.llvm.org/D145570">migrate the RISC-V backend to using
 shared MCELFStreamer code for attribute
 emission</a>. The initial implementation was
-largely derived from Arm&#x27;s version of the same feature but a later
+largely derived from Arm's version of the same feature but a later
 refactoring managed to move this logic to common code, which we can now
 reuse.</li>
 <li>Some small tasks related to the RISC-V LLVM build-bot: trying to find a path
@@ -383,7 +383,7 @@ libcxx</a>, and <a href="https://reviews.llvm.org/D144465">clarifying how often 
 staging buildmaster configuration is
 updated</a>.</li>
 <li>Posted a docs patch to <a href="https://reviews.llvm.org/D145564">clarify
-Clang&#x27;s <code>-fexceptions</code></a> in follow-up to
+Clang's <code>-fexceptions</code></a> in follow-up to
 discussion in <a href="https://github.com/llvm/llvm-project/issues/61216">issue
 61216</a>.</li>
 <li>Did some final preparations for the LLVM 16.0.0 release - committing some
@@ -397,7 +397,7 @@ tests</a>.</li>
 <ul>
 <li>Completed (to the point I was happy to publish at least) my attempt to
 enumerate the <a href="/2023q1/commercially-available-risc-v-silicon">commercially available RISC-V
-SoCs</a>. I&#x27;m very
+SoCs</a>. I'm very
 grateful to have received a whole range of suggested additions and
 clarifications over the weekend, which have all been incorporated.</li>
 <li>Ran the usual biweekly <a href="https://discourse.llvm.org/t/risc-v-llvm-sync-up-call-2nd-march-2023/68876">RISC-V LLVM sync-up
@@ -409,7 +409,7 @@ to fix and LLD regression was merged), an overview off <code>_Float16</code> ABI
 lowering fixes, GP relaxation in LLD, my recent RISC-V buildbot, and some
 vectorisation related issues.</li>
 <li>Investigated and largely resolved a issues related to ABI lowering of
-<code>_Float16</code> for RISC-V. Primarily, we weren&#x27;t handling the cases where a
+<code>_Float16</code> for RISC-V. Primarily, we weren't handling the cases where a
 GPR+FPR or a pair of FPRs are used to pass small structs including
 <code>_Float16</code>.
 <ul>
@@ -440,7 +440,7 @@ Meetup</a>.</li>
 lobste.rs</a>, retried my previously
 shared <a href="https://github.com/helix-editor/helix/issues/3072#issuecomment-1208133990">large Markdown file test
 case</a>.
-Unfortunately it&#x27;s still unusably slow to edit, seemingly due to a
+Unfortunately it's still unusably slow to edit, seemingly due to a
 tree-sitter related issue.</li>
 <li>Cleaned up the static site generator used for this site a bit. e.g. now my
 fixes (<a href="https://github.com/miyuchina/mistletoe/pull/157">#157</a>,
@@ -518,10 +518,10 @@ merging RISC-V attributes.</li>
 <li>Organised agenda for and ran the bi-weekly <a href="https://discourse.llvm.org/t/risc-v-llvm-sync-up-call-16th-february-2023/68500">RISC-V LLVM contributor
 call</a>.
 Key discussion items were the extension versioning related compatibility
-issue mentioned below and support for emulated TLS (where I&#x27;d <a href="https://reviews.llvm.org/D143708#4118468">left some
+issue mentioned below and support for emulated TLS (where I'd <a href="https://reviews.llvm.org/D143708#4118468">left some
 comments</a> the previous week).</li>
 <li>Updated my patch (<a href="https://reviews.llvm.org/D143172">D143172</a>) to register
-and configure a RISC-V qemu-user based builder with LLVM&#x27;s staging
+and configure a RISC-V qemu-user based builder with LLVM's staging
 buildmaster, based on review feedback.</li>
 <li>A variety of upstream LLVM reviews. Also landed
 <a href="https://reviews.llvm.org/D143507">D143407</a>, marking Zawrs as
@@ -537,10 +537,10 @@ This is a follow-up to the <a href="https://github.com/riscv-non-isa/riscv-elf-p
 filed</a> on
 this issue (where I have <a href="https://reviews.llvm.org/D142327">D142327</a> queued
 up for LLVM to fix our incorrect handling).</li>
-<li>Responded to a question on LLVM&#x27;s Discourse <a href="https://discourse.llvm.org/t/support-for-zicsr-and-zifencei-extensions/68369/2">about zicsr and zifencei
+<li>Responded to a question on LLVM's Discourse <a href="https://discourse.llvm.org/t/support-for-zicsr-and-zifencei-extensions/68369/2">about zicsr and zifencei
 support in
 LLVM</a>.
-As noted, the issue is that we haven&#x27;t moved RV32I/RV64I 2.1 yet which split
+As noted, the issue is that we haven't moved RV32I/RV64I 2.1 yet which split
 out Zicsr and Zifencei. Unfortunately this is a backwards-incompatible
 change so requires some care.</li>
 <li>Worked with a colleague trying to reproduce an assertion failure in his

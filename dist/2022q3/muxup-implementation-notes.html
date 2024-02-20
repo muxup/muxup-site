@@ -211,7 +211,7 @@ content: " «";
 <h1 id="article-title"><span id="title-highlight">Muxup implementation notes</span></h1>
 <div id="article-meta"><span title="2022-09-10">2022Q3</span>. Last update <span title="2022-09-11">2022Q3</span>. <a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
 <p>This article contains a few notes on various implementation decisions made
-when creating <a href="https://muxup.com">the Muxup website</a>. They&#x27;re intended primarily as a
+when creating <a href="https://muxup.com">the Muxup website</a>. They're intended primarily as a
 reference for myself, but some parts may be of wider interest. See
 <a href="/about">about</a> for more information about things like site
 structure.</p>
@@ -229,9 +229,9 @@ Markdown parsing. I found <a href="https://github.com/miyuchina/mistletoe/pull/1
 <a href="https://github.com/miyuchina/mistletoe/pull/159">bugs</a> in the <code>traverse</code>
 helper function when implementing some transformations on the generated AST,
 but upstream was very responsive about reviewing and merging my PRs. The main
-wart I&#x27;ve found is that <a href="https://github.com/miyuchina/mistletoe/issues/56">parsing and rendering aren&#x27;t fully
+wart I've found is that <a href="https://github.com/miyuchina/mistletoe/issues/56">parsing and rendering aren't fully
 separated</a>, although this
-doesn&#x27;t pose any real practical concern for my use case and will hopefully be
+doesn't pose any real practical concern for my use case and will hopefully be
 fixed in the future. <a href="https://github.com/lepture/mistune">mistune</a> also seemed
 promising, but has <a href="https://github.com/lepture/mistune/issues/296">some conformance
 issues</a>.</p>
@@ -240,10 +240,10 @@ means, for instance, avoiding custom frontmatter entries or link formats if
 the same information could be extracted from the file). Therefore:</p>
 <ul>
 <li>There is no <code>title</code> frontmatter entry - the title is extracted by grabbing
-the first level 1 heading from the Markdown AST (and erroring if it isn&#x27;t
+the first level 1 heading from the Markdown AST (and erroring if it isn't
 present).</li>
 <li>All internal links are written as <code>[foo](/relative/to/root/foo.md)</code>. The
-generator will error if the file can&#x27;t be found, and will otherwise
+generator will error if the file can't be found, and will otherwise
 translate the target to refer to the appropriate permalink.
 <ul>
 <li>This has the additional advantage that links are still usable if viewing
@@ -251,8 +251,8 @@ the Markdown on GitHub, which can be handy if reviewing a previous
 revision of an article.</li>
 </ul>
 </li>
-<li>Article changelogs are just a standard Markdown list under the &quot;Article
-changelog&quot; heading, which is checked and transformed at the Markdown AST
+<li>Article changelogs are just a standard Markdown list under the "Article
+changelog" heading, which is checked and transformed at the Markdown AST
 level in order to produce the desired output (emitting the list using a
 <code>&lt;details&gt;</code> and <code>&lt;summary&gt;</code>).</li>
 </ul>
@@ -264,9 +264,9 @@ sites.</p>
 <p>The main visual element throughout the site is the randomised, roughly drawn
 highlight used for the site name and article headings. This takes some
 inspiration from the <a href="https://roughnotation.com/">RoughNotation library</a> (see
-also the <a href="https://shihn.ca/posts/2020/roughjs-algorithms/">author&#x27;s description of the algorithms
+also the <a href="https://shihn.ca/posts/2020/roughjs-algorithms/">author's description of the algorithms
 used</a>), but uses my own
-implementation that&#x27;s much more tightly linked to my use case.</p>
+implementation that's much more tightly linked to my use case.</p>
 <p>The core logic for drawing these highlights is based around drawing the SVG
 path:</p>
 <ul>
@@ -287,7 +287,7 @@ of text.</li>
 <p>This logic is implemented in
 <a href="https://github.com/muxup/muxup-site/blob/main/fragments/common.js"><code>preparePath</code></a>
 and reproduced below (with the knowledge the <code>offset(delta)</code> is a helper to
-return a random number between <code>delta</code> and <code>-delta</code>, hopefully it&#x27;s clear how
+return a random number between <code>delta</code> and <code>-delta</code>, hopefully it's clear how
 this relates to the logic described above):</p>
 <div class="highlight" style="background: #ffffff"><pre style="line-height: 125%;"><span></span><code><span style="color: #A90D91">function</span> <span style="color: #000000">preparePath</span>(<span style="color: #000000">hlInfo</span>) {
   <span style="color: #A90D91">const</span> <span style="color: #000000">parentRect</span> <span style="color: #000000">=</span> <span style="color: #000000">hlInfo</span>.<span style="color: #000000">svg</span>.<span style="color: #000000">getBoundingClientRect</span>();
@@ -314,22 +314,22 @@ this relates to the logic described above):</p>
 layout/reflow</a> by
 batching together reads and writes of the DOM into separate phases when
 drawing the initial set of highlights for the page, which is why this function
-is generates the path but doesn&#x27;t modify the SVG directly. Separate logic adds
+is generates the path but doesn't modify the SVG directly. Separate logic adds
 handlers to links that are highlighted continuously redraw the highlight (I
 liked the visual effect).</p>
 <h2 id="minification-and-optimisation"><a href="#minification-and-optimisation" class="anchor" aria-hidden="true" tabindex="-1"></a>Minification and optimisation</h2>
 <p>I primarily targeted the low-hanging fruit here, and avoided adding in too
 many dependencies (e.g. separate HTML and CSS minifiers) during the build.
-muxup.com is a very lightweight site - the main extravagance I&#x27;ve allowed
+muxup.com is a very lightweight site - the main extravagance I've allowed
 myself is the use of a webfont (Nunito) but that only weighs in at ~36KiB (the
 <a href="https://github.com/googlefonts/nunito/tree/main/fonts/variable">variable
 width</a> version
 converted to woff2 and subsetted using <code>pyftsubset</code> from
 <a href="https://github.com/fonttools/fonttools">fontTools</a>). As the CSS and JS
-payload is so small, it&#x27;s inlined into each page.</p>
+payload is so small, it's inlined into each page.</p>
 <p>The required JS for the article pages and the home page is assembled and then
 minified using <a href="https://github.com/terser/terser">terser</a>. This reduces the
-size of the JS required for the page you&#x27;re reading from 5077 bytes to 2620
+size of the JS required for the page you're reading from 5077 bytes to 2620
 bytes uncompressed (1450 bytes to 991 bytes if compressing the result with
 Brotli, though in practice the impact will be a bit different when compressing
 the JS together with the rest of the page + CSS). When first published, the
@@ -337,7 +337,7 @@ page you are reading (including inlined CSS and JS) was ~27.7KiB uncompressed
 (7.7KiB Brotli compressed), which compares to 14.4KiB for its source Markdown
 (4.9KiB Brotli compressed).</p>
 <p>Each page contains an embedded stylesheet with a conservative approximation of
-the minimal CSS needed. The total amount of CSS is small enough that it&#x27;s easy
+the minimal CSS needed. The total amount of CSS is small enough that it's easy
 to manually split between the CSS that is common across the site, the CSS only
 needed for the home page, the CSS common to all articles, and then other CSS
 rules that may or may not be needed depending on the page content. For the
@@ -362,7 +362,7 @@ this site:</p>
 content.
 <ul>
 <li>Both are very widely supported on the browser side (and Brotli really
-isn&#x27;t &quot;new&quot; any more), but require non-standard modules or custom builds
+isn't "new" any more), but require non-standard modules or custom builds
 on Nginx.</li>
 </ul>
 </li>
@@ -374,9 +374,9 @@ in order to avoid unnecessary re-fetching content. Set shorter lifetimes for
 served .html and 308 redirects vs other assets. Leave 404 responses with
 no Cache-Control header.</li>
 <li>Avoid serving the same content at multiple URLs (unless explicitly asked
-for) and don&#x27;t expose the internal filenames of content served via a
+for) and don't expose the internal filenames of content served via a
 different canonical URL. Also, prefer URLs without a trailing slash, but
-ensure not to issue a redirect if the target file doesn&#x27;t exist. This
+ensure not to issue a redirect if the target file doesn't exist. This
 means (for example):
 <ul>
 <li><code>muxup.com/about/</code> should redirect to <code>muxup.com/about</code></li>
@@ -395,7 +395,7 @@ should 404.</li>
 </ul>
 <p>Perhaps because my requirements were so specific, this turned out to be a
 little more involved than I expected. If seeking to understand the <code>Caddyfile</code>
-format and Caddy configuration in general, I&#x27;d strongly recommend getting a
+format and Caddy configuration in general, I'd strongly recommend getting a
 good understanding of the key ideas by reading <a href="https://caddyserver.com/docs/caddyfile/concepts">Caddyfile
 concepts</a>, understanding <a href="https://caddyserver.com/docs/caddyfile/directives#directive-order">the
 order in which directives are handled by
@@ -422,14 +422,14 @@ almost all goals:</p>
 
 (muxup_file_server) {
 	file_server {
-		index &quot;&quot;
+		index ""
 		precompressed br
 		disable_canonical_uris
 	}
 }
 www.muxup.com {
 	redir https://muxup.com{uri} 308
-	header Cache-Control &quot;max-age=2592000, stale-while-revalidate=2592000&quot;
+	header Cache-Control "max-age=2592000, stale-while-revalidate=2592000"
 }
 muxup.com {
 	root * /var/www/muxup.com/htdocs
@@ -437,10 +437,10 @@ muxup.com {
 	log {
 		output file /var/log/caddy/muxup.com.access.log
 	}
-	header Strict-Transport-Security &quot;max-age=31536000; includeSubDomains; preload&quot;
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 
-	vars short_cache_control &quot;max-age=3600&quot;
-	vars long_cache_control &quot;max-age=2592000, stale-while-revalidate=2592000&quot;
+	vars short_cache_control "max-age=3600"
+	vars long_cache_control "max-age=2592000, stale-while-revalidate=2592000"
 
 	@method_isnt_GET_or_HEAD not method GET HEAD
 	@path_is_suffixed_with_html_or_br path *.html *.html/ *.br *.br/
@@ -459,34 +459,34 @@ muxup.com {
 	handle @path_has_trailing_slash {
 		route {
 			uri strip_suffix /
-			header @path_or_html_suffixed_path_exists Cache-Control &quot;{vars.long_cache_control}&quot;
+			header @path_or_html_suffixed_path_exists Cache-Control "{vars.long_cache_control}"
 			redir @path_or_html_suffixed_path_exists {path} 308
 			error @path_or_html_suffixed_path_doesnt_exist 404
 		}
 	}
 	handle @path_is_root {
 		rewrite index.html
-		header Cache-Control &quot;{vars.short_cache_control}&quot;
+		header Cache-Control "{vars.short_cache_control}"
 		import muxup_file_server
 	}
 	handle @html_suffixed_path_exists {
 		rewrite {path}.html
-		header Cache-Control &quot;{vars.short_cache_control}&quot;
+		header Cache-Control "{vars.short_cache_control}"
 		import muxup_file_server
 	}
 	handle * {
-		header Cache-Control &quot;{vars.long_cache_control}&quot;
+		header Cache-Control "{vars.long_cache_control}"
 		import muxup_file_server
 	}
 	handle_errors {
 		header -Cache-Control
-		respond &quot;{err.status_code} {err.status_text}&quot;
+		respond "{err.status_code} {err.status_text}"
 	}
 }
 </code></pre>
 <p>A few notes on the above:</p>
 <ul>
-<li>It isn&#x27;t currently possible to match URLs with <code>//</code> due to the
+<li>It isn't currently possible to match URLs with <code>//</code> due to the
 canonicalisation Caddy performs, but 2.6.0 including
 <a href="https://github.com/caddyserver/caddy/pull/4948">PR #4948</a> hopefully
 provides a solution. Hopefully to allow matching <code>/./</code> too.</li>
@@ -502,28 +502,28 @@ etc.</li>
 <li><code>route</code> is needed within <code>handle @path_has_trailing_slash</code> because the
 default execution order of directives has <code>uri</code> occurring some time after
 <code>redir</code> and <code>error</code>.</li>
-<li>Caddy doesn&#x27;t support dynamically brotli compressing responses, so the
+<li>Caddy doesn't support dynamically brotli compressing responses, so the
 <code>precompressed br</code> option of <code>file_server</code> is used to serve pre-compressed
 files (as prepared by the <a href="https://github.com/muxup/muxup-site/blob/main/deploy.sh">deploy
 script</a>).</li>
-<li>I&#x27;ve <a href="https://caddy.community/t/suggestions-for-simplifying-my-caddyfile/17135">asked for
+<li>I've <a href="https://caddy.community/t/suggestions-for-simplifying-my-caddyfile/17135">asked for
 advice</a>
 on improving the above Caddyfile on the Caddy Discourse.</li>
 </ul>
 <h2 id="analytics"><a href="#analytics" class="anchor" aria-hidden="true" tabindex="-1"></a>Analytics</h2>
-<p>The simplest possible solution - don&#x27;t have any.</p>
+<p>The simplest possible solution - don't have any.</p>
 <h2 id="footer-images"><a href="#footer-images" class="anchor" aria-hidden="true" tabindex="-1"></a>Footer images</h2>
 <p>Last but by no means least, is the randomly selected doodle at the bottom of
 each page. I select images from the <a href="https://github.com/googlecreativelab/quickdraw-dataset">Quick, Draw!
 dataset</a> and export
 them to SVG to be randomly selected on each page load. A rather <a href="https://github.com/muxup/muxup-site/blob/main/utils/footer_image_helper.py">scrappy
 script</a>
-contains logic to generate SVGs from the dataset&#x27;s NDJSON format and contains
+contains logic to generate SVGs from the dataset's NDJSON format and contains
 a simple a Flask application that allows selecting desired images from
 randomly displayed batches from each dataset.</p>
-<p>With examples such as O&#x27;Reilly&#x27;s beautiful <a href="https://www.oreilly.com/content/a-short-history-of-the-oreilly-animals/">engravings of
+<p>With examples such as O'Reilly's beautiful <a href="https://www.oreilly.com/content/a-short-history-of-the-oreilly-animals/">engravings of
 animals</a>
-on their book covers there&#x27;s a well established tradition of animal
+on their book covers there's a well established tradition of animal
 illustrations on technical content - and what better way to honour that
 tradition than with a hastily drawn doodle by a random person on the internet
 that spins when your mouse hovers over it?</p>
@@ -531,7 +531,7 @@ that spins when your mouse hovers over it?</p>
 <ul>
 <li>2022-09-11: Add HSTS, tweak no-www redirect, and reject HTTP methods
 other than GET or POST in Caddyfile. Also link to thread requesting
-suggestions for this Caddyfile on Caddy&#x27;s Discourse.</li>
+suggestions for this Caddyfile on Caddy's Discourse.</li>
 <li>2022-09-10: Initial publication date.</li>
 </ul>
 </details>

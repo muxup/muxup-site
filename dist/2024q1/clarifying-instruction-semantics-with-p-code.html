@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:title" content="Clarifying instruction semantics with P-Code"/>
+<meta property="og:site_name" content="Muxup">
+<meta property="og:description" content="Helper script to dump P-Code for a hex-encoded instruction"/>
+<meta property="og:type" content="article"/>
+<meta property="og:url" content="https://muxup.com/2024q1/clarifying-instruction-semantics-with-p-code"/>
+<meta property="og:image" content="https://v1.screenshot.11ty.dev/https%3A%2F%2Fmuxup.com%2F2024q1%2Fclarifying-instruction-semantics-with-p-code/opengraph/ar/bigger"/>
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:site" content="@muxup">
+<meta property="twitter:creator" content="@asbradbury">
+<title>Clarifying instruction semantics with P-Code - Muxup</title>
+<link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg xmlns='http:%2F%2Fwww.w3.org%2F2000%2Fsvg' viewBox='0 0 100 100'%3E%3Ctext y='80' font-size='110'%3E▨%3C%2Ftext%3E%3C%2Fsvg%3E">
+<meta name="description" content="Helper script to dump P-Code for a hex-encoded instruction">
+<style>
+@font-face {
+font-family:'Nunito Var';
+src:url('/static/Nunito.var.v2.woff2') format('woff2-variations');
+font-display:swap;
+font-weight: 200 1000;
+}
+*, *::before, *::after {
+box-sizing:border-box;
+}
+* {
+margin:0;
+}
+input, button, textarea, select {
+font:inherit;
+}
+img, picture, video, canvas, svg {
+display:block;
+max-width:100%;
+}
+html {
+font-family:'Nunito Var', sans-serif;
+height:100%;
+font-size:16px;
+-webkit-tap-highlight-color:transparent;
+}
+@media screen and (min-width:640px) {
+html {
+font-size:18px;
+}
+}
+body {
+line-height:1.5;
+color:#222;
+display:grid;
+height:100%;
+grid-template-rows:1fr auto;
+background:#fff no-repeat 0% 0% / 100% .7rem linear-gradient(120deg, #ffffe3 20%, #ddfffc 20%, #ddfffc 40%, #e2eeff 40%, #e2eeff 60%, #f2e2ff 60%, #f2e2ff 80%, #ffdef2 80%, #ffdef2 100%);
+tab-size:4;
+}
+h1, h2, h3, h4, h5, h6 {
+line-height:1.25;
+font-weight:600;
+overflow-wrap:break-word;
+letter-spacing:-.025em;
+margin:1.75rem 0 .75rem;
+}
+h1 {
+font-size:2.986rem
+}
+h2 {
+font-size:2.488rem
+}
+p {
+margin:.75rem 0;
+font-weight:400;
+overflow-wrap:break-word;
+}
+a {
+color:inherit;
+text-decoration:underline;
+text-decoration-color:#aaa;
+text-underline-offset:.15em;
+}
+a:hover {
+text-decoration-thickness:2px;
+}
+ol, ul {
+margin:0 0 0 1.5rem;
+padding-left:0;
+}
+li {
+margin:0 0 .25rem
+}
+::selection {
+background:#ffdac0;
+}
+footer {
+font-size:.833rem;
+color:#777;
+padding:0 1rem;
+width:100%;
+max-width:min(calc(750px + 2rem), calc(100vw - 1rem));
+margin:0 auto;
+}
+footer p {
+text-align:center;
+margin:0 0 .75rem;
+}
+#footer-image {
+margin:0 auto;
+cursor:pointer;
+}
+#article-logo {
+line-height:1.25;
+margin:.5rem 0 0;
+font-size:1.44rem;
+font-weight:700;
+position:relative;
+}
+#article-logo a {
+text-decoration:none;
+}
+#article-title {
+margin:1.5rem 0 0;
+position:relative;
+}
+#article-meta {
+font-size:.833rem;
+color:#777;
+}
+#article-container {
+margin:0 auto;
+padding:1rem;
+max-width:min(calc(750px + 2rem), calc(100vw - 1rem));
+width:100%;
+}
+.anchor {
+position: absolute;
+text-decoration: none;
+width:1.75ex;
+margin-left:-1.4ex;
+visibility:hidden;
+font-size:.8em;
+padding-top:.2em;
+color:#aaa;
+}
+h2:hover .anchor,
+h3:hover .anchor,
+h4:hover .anchor,
+h5:hover .anchor,
+h6:hover .anchor,
+summary:hover .anchor {
+visibility:visible;
+}
+.anchor::before {
+content:"#";
+}
+code {
+background:#f5f5f5;
+padding:.125rem .25rem;
+font-size:.833rem
+}
+pre > code {
+padding:0;
+background:#fff;
+}
+pre {
+word-wrap:break-word;
+overflow-x:auto;
+padding:.5rem 1rem;
+margin:1rem -1rem;
+border-radius:.4rem;
+border:1px solid #d2d2d2;
+}
+</style>
+<link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed.xml"/>
+<link rel="canonical" href="https://muxup.com/2024q1/clarifying-instruction-semantics-with-p-code"/>
+</head>
+<body>
+<div id="article-container">
+<div>
+<div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></a></div>
+</div>
+<h1 id="article-title"><span id="title-highlight">Clarifying instruction semantics with P-Code</span></h1>
+<div id="article-meta"><span title="2024-02-20">2024Q1</span>.</div>
+<p>I've recently had a need to step through quite a bit of disassembly for
+different architectures, and although some architectures have well-written ISA
+manuals it can be a bit jarring switching between very different assembly
+syntaxes (like "source, destination" for AT&amp;T vs "destination, source" for
+just about everything else) or tedious looking up different ISA manuals to
+clarify the precise semantics. I've been using a very simple script to help
+convert an encoded instruction to a target-independent description of its
+semantics, and thought I may as well share it as well as some thoughts on
+its limitations.</p>
+<h2 id="a-hrefhttpsgithubcommuxupmedleyinstruction_to_pcodea"><a href="#a-hrefhttpsgithubcommuxupmedleyinstruction_to_pcodea" class="anchor" aria-hidden="true" tabindex="-1"></a><a href="https://github.com/muxup/medley">instruction_to_pcode</a></h2>
+<p><a href="https://github.com/muxup/medley">The script</a> is simplicity itself, thanks to
+the <a href="https://github.com/angr/pypcode">pypcode</a> bindings to
+<a href="https://en.wikipedia.org/wiki/Ghidra">Ghidra</a>'s SLEIGH library which provides
+an interface to convert an input to the P-Code representation. Articles like
+<a href="https://riverloopsecurity.com/blog/2019/05/pcode/">this one</a> provide an
+introduction and there's the <a href="https://htmlpreview.github.io/?https://github.com/NationalSecurityAgency/ghidra/blob/master/GhidraDocs/languages/html/pcoderef.html">reference manual in the Ghidra
+repo</a>
+but it's probably easiest to just look at a few examples. P-Code is used as
+the basis of Ghidra's decompiler and provides a consistent human-readable
+description of the semantics of instructions for supported targets.</p>
+<p>Here's an example aarch64 instruction:</p>
+<pre><code>$ ./instruction_to_pcode aarch64 b874c925
+-- 0x0: ldr w5, [x9, w20, SXTW #0x0]
+0) unique[0x5f80:8] = sext(w20)
+1) unique[0x7200:8] = unique[0x5f80:8]
+2) unique[0x7200:8] = unique[0x7200:8] &lt;&lt; 0x0
+3) unique[0x7580:8] = x9 + unique[0x7200:8]
+4) unique[0x28b80:4] = *[ram]unique[0x7580:8]
+5) x5 = zext(unique[0x28b80:4])
+</code></pre>
+<p>In the above you can see that the disassembly for the instruction is dumped,
+and then 5 P-Code instructions are printed showing the semantics. These P-Code
+instructions directly use the register names for architectural registers (as a
+reminder, <a href="https://developer.arm.com/documentation/dui0801/l/Overview-of-AArch64-state/Registers-in-AArch64-state?lang=en">AArch64 has 64-bit GPRs X0-X30 with the bottom halves acessible
+through
+W-W30</a>). Intermediate state is stored in <code>unique[addr:width]</code> locations. So the above instruction sign-extends <code>w20</code>, adds to <code>x9</code>, and reads a 32-bit value from the resulting address, then zero-extends to 64-bits when storing into <code>x5</code>.</p>
+<p>The output is somewhat more verbose for architectures with flag registers,
+e.g. <code>cmpb $0x2f,-0x1(%r11)</code> produces:</p>
+<pre><code>./instruction_to_pcode x86-64 --no-reverse-input "41 80 7b ff 2f"
+-- 0x0: CMP byte ptr [R11 + -0x1],0x2f
+0) unique[0x3100:8] = R11 + 0xffffffffffffffff
+1) unique[0xbd80:1] = *[ram]unique[0x3100:8]
+2) CF = unique[0xbd80:1] &lt; 0x2f
+3) unique[0xbd80:1] = *[ram]unique[0x3100:8]
+4) OF = sborrow(unique[0xbd80:1], 0x2f)
+5) unique[0xbd80:1] = *[ram]unique[0x3100:8]
+6) unique[0x28e00:1] = unique[0xbd80:1] - 0x2f
+7) SF = unique[0x28e00:1] s&lt; 0x0
+8) ZF = unique[0x28e00:1] == 0x0
+9) unique[0x13180:1] = unique[0x28e00:1] &amp; 0xff
+10) unique[0x13200:1] = popcount(unique[0x13180:1])
+11) unique[0x13280:1] = unique[0x13200:1] &amp; 0x1
+12) PF = unique[0x13280:1] == 0x0
+</code></pre>
+<p>But simple instructions that don't set flags do produce concise P-Code:</p>
+<pre><code>$ ./instruction_to_pcode riscv64 "9d2d"
+-- 0x0: c.addw a0,a1
+0) unique[0x15880:4] = a0 + a1
+1) a0 = sext(unique[0x15880:4])
+</code></pre>
+<h2 id="other-approaches"><a href="#other-approaches" class="anchor" aria-hidden="true" tabindex="-1"></a>Other approaches</h2>
+<p>P-Code was an intermediate language I'd encountered before and of course
+benefits from having an easy to use Python wrapper and fairly good support for
+a range of ISAs in Ghidra. But there are lots of other options -
+<a href="https://angr.io/">angr</a> (which
+uses Vex, taken from Valgrind) <a href="https://docs.angr.io/en/latest/faq.html#why-did-you-choose-vex-instead-of-another-ir-such-as-llvm-reil-bap-etc">compares some
+options</a>
+and there's <a href="https://softsec.kaist.ac.kr/~soomink/paper/ase17main-mainp491-p.pdf">more in this
+paper</a>.
+Radare2 has <a href="https://book.rada.re/disassembling/esil.html">ESIL</a>, but while
+I'm sure you'd get used to it, it doesn't pass the readability test for me.
+The <a href="https://rev.ng/">rev.ng</a> project uses QEMU's
+<a href="https://www.qemu.org/docs/master/devel/tcg-ops.html">TCG</a>. This is an
+attractive approach because you benefit from more testing and ISA extension
+support for some targets vs P-Code (Ghidra support <a href="https://github.com/NationalSecurityAgency/ghidra/pull/5778">is
+lacking</a> for RVV,
+bitmanip, and crypto extensions).</p>
+<p>Another route would be to pull out the semantic definitions from a formal spec
+(like <a href="https://www.cl.cam.ac.uk/~pes20/sail/">Sail</a>) or even an easy to read
+simulator (e.g. <a href="https://github.com/riscv-software-src/riscv-isa-sim">Spike</a>
+for RISC-V). But in both cases, definitions are written to minimise repetition
+to some degree, while when expanding the semantics we prefer explicitness, so
+would want to expand to a form that differs a bit from the Sail/Spike code as
+written.</p>
+
+</div>
+<footer class="footer">
+<img id="footer-image" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E" width="50" height="50"/>
+<p>Curated by Alex Bradbury | &copy; <a href="/">Muxup</a> contributors | <a href="/about">About</a> | <a href="https://github.com/muxup">GitHub</a> | <a href="https://twitter.com/muxup">Twitter</a></p>
+</footer>
+<script>
+const t="http://www.w3.org/2000/svg";function o(t){return Math.random()*(2*t)-t}function n(t){const n=t.t.getBoundingClientRect();const e=t.o.getClientRects();let c="";for(const t of e){const e=t.x-n.x,f=t.y-n.y,s=t.width,r=t.height;const i=f+r/2;let u=s<75?3:s<300?6:8;const l=.2+.2*Math.random();c=`${c}\n      M${e+o(u)} ${i+o(u)}\n      C${e+s*l+o(u)} ${i+o(u)},\n       ${e+2*s*l+o(u)} ${i+o(u)}\n       ${e+s+o(u)} ${i+o(u)}`}t.i=c;t.strokeWidth=.85*e[0].height}const e=new Map;let c=new ResizeObserver((t=>{for(const o of t){const t=e.get(o.target);if(!t.i)n(t)}for(const o of t){s(e.get(o.target))}}));function f(o){const n=document.createElementNS(t,"svg");n.style.position="absolute";n.style.zIndex=-1;n.style.top="0";n.style.left="0";n.style.overflow="visible";const e=document.createElementNS(t,"path");e.setAttribute("fill","none");e.setAttribute("stroke",o.u);n.appendChild(e);o.o.insertAdjacentElement("beforebegin",n);o.t=n}function s(t){if(!t.i){n(t)}const o=t.t.children[0];o.setAttribute("stroke-width",t.strokeWidth);o.setAttribute("d",t.i);t.i=null}function r(){for(const t of e.values()){f(t)}for(const t of e.values()){n(t)}for(const t of e.keys()){c.observe(t)}document.fonts.ready.then((()=>i()))}function i(){for(const t of e.values()){n(t)}for(const t of e.values()){s(t)}}function u(t,o){let n;t.addEventListener("mouseover",(()=>{s(o);n=setInterval((()=>s(o)),240)}),false);t.addEventListener("mouseout",(()=>{clearInterval(n)}));t.addEventListener("click",(()=>{clearInterval(n)}))}function l(t,o,n){let c={o:t,l:o,u:n};e.set(o,c);return c}let a=new Set([window.location.pathname]);const h=document.querySelector("#footer-image");let d=null;function m(){let t=Math.floor(Math.random()*282);d="/static/footer/"+String(t).padStart(4,"0")+".svg"}function g(t){h.src=d;m();if(!t)v()}function v(){if(a.has(d))return;a.add(d);fetch(d)}m();g(true);const w=[{transform:"rotate(0)"},{transform:"rotate(360deg)"}];const $={duration:600,h:1};h.addEventListener("click",(()=>{h.animate(w,$);g()}));function M(){h.animate(w,$);v()}h.addEventListener("mouseover",M);h.addEventListener("touchstart",M,{passive:true});function k(t){const o=t.currentTarget.getAttribute("href").split("#")[0];if(a.has(o))return;a.add(o);fetch(o)}const p=document.getElementsByTagName("a");for(const t of p){const o=(t.getAttribute("href")??"").split("#")[0];if(o.includes("?")||!o.startsWith("/")||o.slice(o.lastIndexOf("/")+1).includes(".")){continue}t.addEventListener("mouseover",k);t.addEventListener("touchstart",k,{passive:true})}const b=["#ffdef2","#f2e2ff","#e2eeff","#ddfffc","#ffffe3"];const I=document.querySelector("#title-highlight");l(I,I.parentNode,b[Math.floor(Math.random()*b.length)]);const C=document.querySelector("#logo-highlight");const E=l(C,C.parentNode,"#ffdac0");r();u(C,E);
+
+</script>
+</body>
+</html>

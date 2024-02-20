@@ -205,14 +205,14 @@ text-align:right;
 </div>
 <h1 id="article-title"><span id="title-highlight">Updating Wren&#x27;s benchmarks</span></h1>
 <div id="article-meta"><span title="2023-04-10">2023Q2</span>.</div>
-<p><a href="https://wren.io/">Wren</a> is a &quot;small, fast, class-based, concurrent scripting
-language&quot;, originally designed by Bob Nystrom (who you might recognise as the
+<p><a href="https://wren.io/">Wren</a> is a "small, fast, class-based, concurrent scripting
+language", originally designed by Bob Nystrom (who you might recognise as the
 author of <a href="https://gameprogrammingpatterns.com/">Game Programming Patterns</a>
-and <a href="https://craftinginterpreters.com/">Crafting Interpreters</a>. It&#x27;s a really
+and <a href="https://craftinginterpreters.com/">Crafting Interpreters</a>. It's a really
 fun language to study - the implementation is compact and easily readable, and
-although class-based languages aren&#x27;t considered very hip these days there&#x27;s a
-real elegance to its design. I saw Wren&#x27;s <a href="https://wren.io/performance.html">performance
-page</a> hadn&#x27;t been updated for a very long
+although class-based languages aren't considered very hip these days there's a
+real elegance to its design. I saw Wren's <a href="https://wren.io/performance.html">performance
+page</a> hadn't been updated for a very long
 time, and especially given the recent upstream interpreter performance work on
 Python, was interested in seeing how performance on these microbencharks has
 changed. Hence this quick post to share some new numbers.</p>
@@ -332,11 +332,11 @@ current Arch Linux).</p>
     <th>python3.10</th><td><div class="chart-bar" style="width: 100%;">0.252s&nbsp;</div></td>
   </tr>
 </table>
-<p>I&#x27;ve used essentially the same presentation and methodology as in the original
+<p>I've used essentially the same presentation and methodology as in the original
 benchmark, partly to save time pondering the optimal approach, partly so I can
 redirect any critiques to the original author (sorry Bob!). Benchmarks do not
 measure interpreter startup time, and each benchmark is run ten times with the
-median used (thermal throttling could potentially mean this isn&#x27;t the best
+median used (thermal throttling could potentially mean this isn't the best
 methodology, but changing the number of test repetitions to e.g. 1000 seems to
 have little effect).</p>
 <p>The tests were run on a machine with an AMD Ryzen 9 5950X processor. wren 0.4
@@ -350,15 +350,15 @@ was used as well as the following Arch Linux packages:</p>
 <li>luajit-2.1.0.beta3.r471.g505e2c03-1</li>
 <li>mruby-3.1.0-1</li>
 <li>python-3.10.10-1</li>
-<li>python-3.11.3-1 (taken from Arch Linux&#x27;s staging repo)</li>
+<li>python-3.11.3-1 (taken from Arch Linux's staging repo)</li>
 <li>ruby2.7-2.7.7-1</li>
 <li>ruby-3.0.5-1</li>
 </ul>
 <p>The Python 3.10 and 3.11 packages were compiled with the same GCC version
-(12.2.1 according to <code>python -VV</code>), though this won&#x27;t necessarily be true for
+(12.2.1 according to <code>python -VV</code>), though this won't necessarily be true for
 all other packages (e.g. the lua52 and lua53 packages are several years old so
 will have been built an older GCC).</p>
-<p>I&#x27;ve submitted a <a href="https://github.com/wren-lang/wren/pull/1164">pull request to update the Wren performance
+<p>I've submitted a <a href="https://github.com/wren-lang/wren/pull/1164">pull request to update the Wren performance
 page</a>.</p>
 <h2 id="old-results"><a href="#old-results" class="anchor" aria-hidden="true" tabindex="-1"></a>Old results</h2>
 <p>The following results are copied from the <a href="https://wren.io/performance.html">Wren performance
@@ -444,7 +444,7 @@ Lua 5.2.3, LuaJIT 2.0.2, Python 2.7.5, Python 3.3.4, ruby 2.0.0p247.</p>
 <h2 id="observations"><a href="#observations" class="anchor" aria-hidden="true" tabindex="-1"></a>Observations</h2>
 <p>A few takeaways:</p>
 <ul>
-<li>LuaJIT&#x27;s bytecode interpreter remains incredibly fast (though see <a href="https://sillycross.github.io/2022/11/22/2022-11-22/">this blog
+<li>LuaJIT's bytecode interpreter remains incredibly fast (though see <a href="https://sillycross.github.io/2022/11/22/2022-11-22/">this blog
 post</a> for a methodology
 to produce an even faster interpreter).</li>
 <li>The performance improvements in Python 3.11 were <a href="https://docs.python.org/3/whatsnew/3.11.html#whatsnew311-faster-cpython">well
@@ -458,11 +458,11 @@ release</a> however did note improved
 performance on a range of benchmarks.</li>
 <li>Wren remains speedy (for these workloads at least), but engineering work on
 other interpreters has narrowed that gap for some of these benchmarks.</li>
-<li>I haven&#x27;t taken the time to compare the January 2015 version of Wren used
+<li>I haven't taken the time to compare the January 2015 version of Wren used
 for the benchmarks vs present-day Wren 0.4. It would be interesting to
 explore that though.</li>
 <li>A tiny number of microbenchmarks have been used in this performance test. It
-wouldn&#x27;t be wise to draw general conclusions - this is just a bit of fun.</li>
+wouldn't be wise to draw general conclusions - this is just a bit of fun.</li>
 </ul>
 <h2 id="appendix-benchmark-script"><a href="#appendix-benchmark-script" class="anchor" aria-hidden="true" tabindex="-1"></a>Appendix: Benchmark script</h2>
 <p>Health warning: this is incredibly quick and dirty (especially the repeated

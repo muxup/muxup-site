@@ -187,13 +187,13 @@ about two weeks ago now, and I wanted to highlight some of RISC-V specific
 changes or improvements that were introduced while going into a little more
 detail than I was able to in the <a href="https://releases.llvm.org/15.0.0/docs/ReleaseNotes.html#changes-to-the-risc-v-backend">release
 notes</a>.</p>
-<p>In case you&#x27;re not familiar with LLVM&#x27;s release schedule, it&#x27;s worth noting
+<p>In case you're not familiar with LLVM's release schedule, it's worth noting
 that there are two major LLVM releases a year (i.e. one roughly every 6
 months) and these are timed releases as opposed to being cut when a pre-agreed
-set of feature targets have been met. We&#x27;re very fortunate to benefit from an
+set of feature targets have been met. We're very fortunate to benefit from an
 active and growing set of contributors working on RISC-V support in LLVM
 projects, who are responsible for the work I describe below - thank you!
-I coordinate biweekly sync-up calls for RISC-V LLVM contributors, so if you&#x27;re
+I coordinate biweekly sync-up calls for RISC-V LLVM contributors, so if you're
 working in this area please <a href="https://discourse.llvm.org/c/code-generation/riscv/57">consider dropping
 in</a>.</p>
 <h2 id="linker-relaxation"><a href="#linker-relaxation" class="anchor" aria-hidden="true" tabindex="-1"></a>Linker relaxation</h2>
@@ -208,14 +208,14 @@ happen without breaking program semantics, even local branches that might
 typically be resolved by the assembler must be emitted as a relocation when
 linker relaxation is enabled. See the <a href="https://github.com/riscv-non-isa/riscv-elf-psabi-doc/blob/master/riscv-elf.adoc#linker-relaxation">description in the RISC-V
 psABI</a>
-or <a href="https://www.sifive.com/blog/all-aboard-part-3-linker-relaxation-in-riscv-toolchain">Palmer Dabbelt&#x27;s blog post on linker
+or <a href="https://www.sifive.com/blog/all-aboard-part-3-linker-relaxation-in-riscv-toolchain">Palmer Dabbelt's blog post on linker
 relaxation</a>
 for more background.</p>
 <p>Although LLVM has supported codegen for linker relaxation for a long time, LLD
 (the LLVM linker) has until now lacked support for processing these
 relaxations. Relaxation is primarily an optimisation, but processing of
 <code>R_RISCV_ALIGN</code> (the alignment relocation) is necessary for correctness when
-linker relaxation is enabled, meaning it&#x27;s not possible to link such object
+linker relaxation is enabled, meaning it's not possible to link such object
 files correctly without at least some minimal support. Fangrui Song
 implemented support for
 <code>R_RISCV_ALIGN/R_RISCV_CALL/R_RISCV_CALL_PLT/R_RISCV_TPREL_*</code> relocations in
@@ -224,7 +224,7 @@ details</a>,
 which is a major step in bringing us to parity with the GCC/binutils
 toolchain.</p>
 <h2 id="optimisations"><a href="#optimisations" class="anchor" aria-hidden="true" tabindex="-1"></a>Optimisations</h2>
-<p>As with any release, there&#x27;s been a large number of codegen improvements, both
+<p>As with any release, there's been a large number of codegen improvements, both
 target-independent and target-dependent. One addition to highlight in the
 RISC-V backend is the new <a href="https://github.com/llvm/llvm-project/blob/release/15.x/llvm/lib/Target/RISCV/RISCVCodeGenPrepare.cpp">RISCVCodeGenPrepare
 pass</a>.
@@ -240,8 +240,8 @@ for opportunities to convert zero-extension to i64 with a sign-extension
 (contributed by Lewis Revill and Craig Blackmore).  Rather than trying to
 improve generated code performance, this is solely focused on reducing code
 size, and may increase the static instruction count in order to do so (which
-is why it&#x27;s currently only enabled at the <code>-Oz</code> optimisation level). It looks
-for cases where an instruction has been selected which can&#x27;t be represented by
+is why it's currently only enabled at the <code>-Oz</code> optimisation level). It looks
+for cases where an instruction has been selected which can't be represented by
 one of the compressed (16-bit as opposed to 32-bit wide) instruction forms.
 For instance due to the register not being one of the registers addressable
 from the compressed instruction, or the offset being out of range). It will
@@ -267,8 +267,8 @@ compressible. Grabbing two examples from the header comment of the pass:</p>
 <span style="color: #000000">sw</span>  <span style="color: #000000">a0</span>, <span style="color: #1C01CE">-256</span>(<span style="color: #000000">a2</span>)   <span style="color: #000000">=&gt;</span>   <span style="color: #000000">c.sw</span>  <span style="color: #000000">a0</span>, <span style="color: #1C01CE">0</span>(<span style="color: #000000">a3</span>)
 </code></pre></div>
 
-<p>There&#x27;s a whole range of other backend codegen improvements, including
-additions to existing RISC-V specific passes but unfortunately it&#x27;s not
+<p>There's a whole range of other backend codegen improvements, including
+additions to existing RISC-V specific passes but unfortunately it's not
 feasible to enumerate them all.</p>
 <p>One improvement to note from the Clang frontend is that <a href="https://reviews.llvm.org/rG7a5cb15ea6fa">the C intrinsics for
 the RISC-V Vector extension are now lazily
@@ -312,7 +312,7 @@ These cache management operation (CMO) extensions add new instructions for
 invalidating, cleaning, and flushing cache blocks (Zicbom), zeroing cache
 blocks (Zicboz), and prefetching cache blocks (Zicbop).
 <ul>
-<li>These operations aren&#x27;t currently exposed via C intrinsics, but these will
+<li>These operations aren't currently exposed via C intrinsics, but these will
 be added once the appropriate naming has been agreed.</li>
 <li>One of the questions raised during implementation was about the <a href="https://github.com/riscv/riscv-CMOs/issues/47">preferred
 textual format for the
@@ -325,7 +325,7 @@ group, LLVM, and GCC developers on the former approach.</li>
 </li>
 <li>Assembler, disassembler, and codegen support for the <a href="https://github.com/riscv/riscv-isa-manual/commit/f518c259c008f926eba4aba67804f62531b6e94b">Zmmul
 extension</a>.
-This extension is just a subset of the &#x27;M&#x27; extension providing just the
+This extension is just a subset of the 'M' extension providing just the
 multiplication instructions without the division instructions.</li>
 <li>Assembler and disassembler support for the additional CSRs (control and
 status registers) and instructions introduced by the <a href="https://github.com/riscv/riscv-isa-manual/commit/f518c259c008f926eba4aba67804f62531b6e94b">hypervisor and
@@ -343,7 +343,7 @@ spin-wait loops.
 <ul>
 <li>Zihintpause was actually the first extension to <a href="https://riscv.org/announcements/2021/02/risc-v-international-unveils-fast-track-architecture-extension-process-and-ratifies-zihintpause-extension/">go
 through</a>
-RISC-V International&#x27;s fast-track architecture extension process back in
+RISC-V International's fast-track architecture extension process back in
 early 2021. We were clearly slow to add it to LLVM, but are trying to keep
 a closer eye on ratified extensions going forwards.</li>
 </ul>
@@ -357,22 +357,22 @@ is a status we use within the RISC-V backend for extensions that are not
 yet ratified and may change from release to release with no guarantees on
 backwards compatibility. Enabling support for such extensions requires
 passing <code>-menable-experimental-extensions</code> to Clang and specifying the
-extension&#x27;s version when listing it in the <code>-march</code> string.</li>
+extension's version when listing it in the <code>-march</code> string.</li>
 </ul>
 </li>
 </ul>
-<p>It&#x27;s not present in LLVM 15, but LLVM 16 onwards will feature a
+<p>It's not present in LLVM 15, but LLVM 16 onwards will feature a
 <a href="https://github.com/llvm/llvm-project/blob/main/llvm/docs/RISCVUsage.rst">user guide for the RISC-V
 target</a>
 summarising the level of support for each extension (huge thanks to Philip
 Reames for kicking off this effort).</p>
 <h2 id="other-changes"><a href="#other-changes" class="anchor" aria-hidden="true" tabindex="-1"></a>Other changes</h2>
-<p>In case I haven&#x27;t said it enough times, there&#x27;s far more interesting changes
-than I could reasonably cover. Apologies if I&#x27;ve missed your favourite new
-feature or improvement. In particular, I&#x27;ve said relatively little about
-RISC-V Vector support. There&#x27;s been a long series of improvements and
+<p>In case I haven't said it enough times, there's far more interesting changes
+than I could reasonably cover. Apologies if I've missed your favourite new
+feature or improvement. In particular, I've said relatively little about
+RISC-V Vector support. There's been a long series of improvements and
 correctness fixes in the LLVM 15 development window, after RVV was made
-non-experimental in LLVM 14 and there&#x27;s much more to come in LLVM 16 (e.g.
+non-experimental in LLVM 14 and there's much more to come in LLVM 16 (e.g.
 scalable vectorisation becoming enabled by default).</p>
 
 </div>

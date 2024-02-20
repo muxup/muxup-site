@@ -263,7 +263,7 @@ this</a>.
 RISC-V
 psABI</a>,
 including a slightly altered lowering of some primitives in order to allow
-for forwards compatibility with &quot;table A.7&quot;.</li>
+for forwards compatibility with "table A.7".</li>
 <li>Usual mix of upstream LLVM reviews, and a number of RISC-V psABI or ASM
 manual reviews.</li>
 <li><a href="https://llvmweekly.org/issue/489">LLVM Weekly #489</a>.</li>
@@ -285,7 +285,7 @@ extension).
 <li><a href="https://github.com/riscv/riscv-zacas/pull/8">#8</a> made the
 dependency on the A extension explicit.</li>
 <li><a href="https://github.com/riscv/riscv-zacas/pull/7">#7</a> attempted to explicitly
-reference the extension for misaligned atomics, though it seems won&#x27;t be
+reference the extension for misaligned atomics, though it seems won't be
 merged. I do feel uncomfortable with RISC-V extensions that can have their
 semantics changed by other standard extensions without this possibility
 being called out very explicitly. As I note in the PR, failure to
@@ -300,7 +300,7 @@ profiles</a>.</li>
 fixed in <a href="https://reviews.llvm.org/D148615">D148615</a> which built on the
 <a href="https://reviews.llvm.org/rGa35e67fc5be6">pre-committed test case</a>.</li>
 <li>A whole bunch of upstream LLVM reviews. As noted in
-<a href="https://reviews.llvm.org/D148315#4279486">D148315</a> I&#x27;m thinking we should
+<a href="https://reviews.llvm.org/D148315#4279486">D148315</a> I'm thinking we should
 probably relaxing the ordering rules for ISA strings in <code>-march</code> in order to
 avoid issues due to spec changes and incompatibilities between GCC and
 Clang.</li>

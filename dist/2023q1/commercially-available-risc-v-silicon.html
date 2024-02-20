@@ -201,47 +201,47 @@ content: " «";
 <p>The RISC-V instruction set architecture has seen huge excitement and growth in
 recent years (<a href="https://venturebeat.com/ai/how-risc-v-has-become-a-viable-third-processor-architecture-calista-redmond/">10B cores estimated to have shipped as of Dec
 2022</a>)
-and I&#x27;ve been keeping very busy with RISC-V related work <a href="https://www.igalia.com/contact/">at
+and I've been keeping very busy with RISC-V related work <a href="https://www.igalia.com/contact/">at
 Igalia</a>. I thought it would be fun to look
-beyond the cores I&#x27;ve been working with and to enumerate the SoCs that are
+beyond the cores I've been working with and to enumerate the SoCs that are
 available for direct purchase or in development boards that feature RISC-V
-cores programmable by the end user. I&#x27;m certain to be missing some
+cores programmable by the end user. I'm certain to be missing some
 SoCs or have some mistakes or missing information - any corrections very
 gratefully received at asb@muxup.com or
-<a href="https://twitter.com/asbradbury">@asbradbury</a>. I&#x27;m focusing almost
-exclusively on the RISC-V aspects of each SoC - i.e. don&#x27;t expect a detailed
+<a href="https://twitter.com/asbradbury">@asbradbury</a>. I'm focusing almost
+exclusively on the RISC-V aspects of each SoC - i.e. don't expect a detailed
 listing of other on-chip peripherals or accelerators.</p>
 <h2 id="a-few-thoughts"><a href="#a-few-thoughts" class="anchor" aria-hidden="true" tabindex="-1"></a>A few thoughts</h2>
 <ul>
 <li>It was absolutely astonishing how difficult it was to get basic information
 about the RISC-V specification implemented by many of these SoCs. In a
-number of cases, just a description of a &quot;RV32 core at xxMHz&quot; with further
+number of cases, just a description of a "RV32 core at xxMHz" with further
 detective work being needed to find any information at all about even the
 standard instruction set extensions supported.</li>
-<li>The way I&#x27;ve focused on the details of individual cores does a bit of a
+<li>The way I've focused on the details of individual cores does a bit of a
 disservice to those SoCs with compute clusters or interesting cache
 hierarchies. If I were to do this again (or if I revisit this in the
-future), I&#x27;d look to rectify that. There a whole bunch of other
+future), I'd look to rectify that. There a whole bunch of other
 micro-architectural details it would be interesting to detail too.
 <ul>
-<li>I&#x27;ve picked up CoreMark numbers where available, but of course that&#x27;s a
-very limited metric to compare cores. It&#x27;s also not always clear which
+<li>I've picked up CoreMark numbers where available, but of course that's a
+very limited metric to compare cores. It's also not always clear which
 compiler was used, which extensions were targeted and so on. Plus when the
 figure is taken from an IP core product page, the numbers may refer to a
 newer version of the IP. Where there are multiple numbers floating about
-I&#x27;ve listed them all.</li>
+I've listed them all.</li>
 </ul>
 </li>
-<li>There&#x27;s a lot of chips here - but although I&#x27;ve likely missed some, not so
-many that it&#x27;s impossible to enumerate. RISC-V is growing rapidly, so
+<li>There's a lot of chips here - but although I've likely missed some, not so
+many that it's impossible to enumerate. RISC-V is growing rapidly, so
 perhaps this will change in the next year or two.</li>
 <li>A large proportion of the SoC designs listed are based on proprietary core
 designs. The exceptions are the collection of SoCs based on the T-Head
 cores, the SiFive E31 and Kendryte K210 (Rocket-derived) and the GreenWaves
 GAP8/GAP9 (PULP-derived). As a long-term proponent of open source silicon
-I&#x27;d hope to see this change over time. Once a company has moved from a
-proprietary ISA to an open standard (RISC-V), there&#x27;s a much easier
-transition path to switch from a proprietary IP core to one that&#x27;s open
+I'd hope to see this change over time. Once a company has moved from a
+proprietary ISA to an open standard (RISC-V), there's a much easier
+transition path to switch from a proprietary IP core to one that's open
 source.</li>
 </ul>
 <h2 id="64-bit-linux-capable-application-processors"><a href="#64-bit-linux-capable-application-processors" class="anchor" aria-hidden="true" tabindex="-1"></a>64-bit Linux-capable application processors</h2>
@@ -320,7 +320,7 @@ GitHub</a> under the Apache
 License (see <a href="https://news.ycombinator.com/item?id=30691980">discussion</a>
 on what is included).</li>
 <li>At least early versions of the chip <a href="https://bugs.llvm.org/show_bug.cgi?id=50746">incorrectly trapped on
-<code>fence.tso</code></a>. It&#x27;s unclear if
+<code>fence.tso</code></a>. It's unclear if
 this has been fixed in later revisions.</li>
 </ul>
 </li>
@@ -351,7 +351,7 @@ cores and 1 x RV32IMAFC <a href="https://www.sifive.com/cores/e24">SiFive E24</a
 </li>
 <li><strong>Key stats</strong>:
 <ul>
-<li>1.2GHz (as listed on <a href="https://www.starfivetech.com/en/site/soc">StarFive&#x27;s
+<li>1.2GHz (as listed on <a href="https://www.starfivetech.com/en/site/soc">StarFive's
 page</a> but articles about the V1
 board claimed 1.5GHz), presumably fabbed on TSMC 28nm (the <a href="https://riscv.or.jp/wp-content/uploads/day3_StarFive_risc-v_tokyo_day2022Autumn.pdf">JH7110
 is</a>).</li>
@@ -377,7 +377,7 @@ board</a>.</li>
 (<a href="https://lore.kernel.org/all/48e10b3d-12f3-a65c-8017-99c780c63040@gmail.com/">reportedly</a>
 implementations of the open-source
 <a href="https://github.com/chipsalliance/rocket-chip">Rocket</a> core design).</li>
-<li>If it&#x27;s correct the K210 uses Rocket, it&#x27;s a single-issue in-order
+<li>If it's correct the K210 uses Rocket, it's a single-issue in-order
 pipeline with 5 stages.</li>
 <li>Has a non-standard (older version of the privileged spec?) MMU
 (<a href="https://github.com/riscv-software-src/opensbi/pull/206#issuecomment-821726609">ref</a>,
@@ -421,7 +421,7 @@ fabbed on a 28nm node
 <li><strong>Development board</strong>:
 <ul>
 <li>Available in the
-<a href="https://www.microsemi.com/existing-parts/parts/152514">&#x27;Icicle&#x27;</a>
+<a href="https://www.microsemi.com/existing-parts/parts/152514">'Icicle'</a>
 development board.</li>
 </ul>
 </li>
@@ -434,9 +434,9 @@ FU740</a>
 <ul>
 <li>4 x RV64GC <a href="https://www.sifive.com/cores/u74">SFive U74</a> application
 cores, 1 x RV64IMAC SiFive S71 monitor core.</li>
-<li>It&#x27;s hard to find details for the S71 core, the FU740 manual refers to
+<li>It's hard to find details for the S71 core, the FU740 manual refers to
 it as an S7 while the HiFive Unmatched refers to it as the S71 - but
-neither have a page on SiFive&#x27;s site. I&#x27;m told that the S71 has the same
+neither have a page on SiFive's site. I'm told that the S71 has the same
 pipeline as the <a href="https://www.sifive.com/cores/s76">S76</a>, just no support
 for the F and D extensions.</li>
 <li>The U74 is a dual-issue in-order pipeline with 8 stages.</li>
@@ -516,8 +516,8 @@ RZ/Five</a>
 <ul>
 <li>1 x RV64GC <a href="http://www.andestech.com/en/products-solutions/andescore-processors/riscv-ax45mp/">Andes
 AX45MP</a>
-application core with additional Andes extensions (draft of the &#x27;P&#x27;
-packed SIMD spec, Andes &#x27;V5&#x27; extensions).</li>
+application core with additional Andes extensions (draft of the 'P'
+packed SIMD spec, Andes 'V5' extensions).</li>
 <li>Unfortunately has a hardware bug where <a href="https://lore.kernel.org/all/OSZPR01MB70191A1A9FD7FAE4EF4F8FF0AA129@OSZPR01MB7019.jpnprd01.prod.outlook.com/">virtual addresses in a certain
 range are always treated as physical
 addresses</a>.</li>
@@ -566,20 +566,20 @@ developer kit is available.</li>
 <ul>
 <li><strong>Core design</strong>:
 <ul>
-<li>4 x &quot;RV64GBC&quot; SiFive P550 application cores (docs not yet available, but
+<li>4 x "RV64GBC" SiFive P550 application cores (docs not yet available, but
 <a href="https://www.cnx-software.com/2021/06/23/sifive-performance-p550-fastest-64-bit-risc-v-processor/">an overview is
 here</a>).
-As the &#x27;B&#x27; extension was broken up into smaller sub-extensions, this is
+As the 'B' extension was broken up into smaller sub-extensions, this is
 perhaps RV64GC_Zba_Zbb like the SiFive U74.</li>
 <li>13 stage, 3 issue, out-of-order pipeline.</li>
 <li>As the bit manipulation extension was split into a range of
-sub-extensions it&#x27;s unclear exactly which of the &#x27;B&#x27; family extensions
+sub-extensions it's unclear exactly which of the 'B' family extensions
 will be supported.</li>
 </ul>
 </li>
 <li><strong>Key stats</strong>:
 <ul>
-<li>2.2 GHz, fabbed on Intel&#x27;s &#x27;4&#x27; process node
+<li>2.2 GHz, fabbed on Intel's '4' process node
 (<a href="https://fuse.wikichip.org/news/7277/intel-sifive-demo-high-performance-risc-v-horse-creek-dev-platform-on-intel-4-process/">ref</a>).</li>
 </ul>
 </li>
@@ -666,9 +666,9 @@ series</a>
 <li><strong>Core design</strong>:
 <ul>
 <li>1 x RV32IMAC Nuclei <a href="https://github.com/nucleisys/Bumblebee_Core_Doc">Bumblebee
-N200</a> (&quot;jointly
-developed by Nuclei System Technology and Andes Technology.&quot;)</li>
-<li>No support for PMP (Physical Memory Protection), includes the &#x27;ECLIC&#x27;
+N200</a> ("jointly
+developed by Nuclei System Technology and Andes Technology.")</li>
+<li>No support for PMP (Physical Memory Protection), includes the 'ECLIC'
 interrupt controller derived from the CLIC design.</li>
 <li>Single-issue, in-order pipeline with 2 stages.</li>
 </ul>
@@ -700,7 +700,7 @@ extensions</a>.</li>
 </li>
 <li><strong>Key stats</strong>:
 <ul>
-<li>175 MHz Fabric Controller, 250 MHz cluster. Fabbed on TSMC&#x27;s 55nm
+<li>175 MHz Fabric Controller, 250 MHz cluster. Fabbed on TSMC's 55nm
 process (<a href="https://en.wikichip.org/wiki/greenwaves/gap8">ref</a>).</li>
 <li>22.65 GOPS at 4.24mW/GOP
 (<a href="https://greenwaves-technologies.com/low-power-processor/">ref</a>).</li>
@@ -776,7 +776,7 @@ R9A02G020</a>
 <ul>
 <li>1 x RV32IMC <a href="http://www.andestech.com/en/products-solutions/andescore-processors/riscv-n22/">AndesCore
 N22</a>
-(additionally supporting the Andes &#x27;Performance&#x27; and &#x27;CoDense&#x27;
+(additionally supporting the Andes 'Performance' and 'CoDense'
 instruction set extensions).</li>
 <li>Single-issue in-order with a 2-stage pipeline.</li>
 </ul>
@@ -920,7 +920,7 @@ BL616/BL618</a>
 <li><strong>Core design</strong>:
 <ul>
 <li>1 x RV32GC core of unknown design, also with support for the unratified
-&#x27;P&#x27; packed SIMD extension
+'P' packed SIMD extension
 (<a href="https://wiki.sipeed.com/hardware/en/maixzero/m0s/m0s.html">ref</a>).</li>
 </ul>
 </li>
@@ -962,7 +962,7 @@ evaluation board.</li>
 <li><strong>Other</strong>:
 <ul>
 <li>The <a href="https://en.bouffalolab.com/product/?type=detail&amp;id=4">BL702</a>
-appears to have the same core, so I haven&#x27;t listed it separately.</li>
+appears to have the same core, so I haven't listed it separately.</li>
 </ul>
 </li>
 </ul>
@@ -995,10 +995,10 @@ development board.</li>
 <li><strong>Core design</strong>:
 <ul>
 <li>1 x RV32IMAC <a href="http://www.wch-ic.com/downloads/file/367.html">QingKe V4a</a>
-core, which also supports a &quot;hardware prologue/epilogue&quot; extension.</li>
+core, which also supports a "hardware prologue/epilogue" extension.</li>
 <li>Single issue in-order pipeline with 2 stages.</li>
-<li>Unlike the other QingKe V4 series core designs, the V4a doesn&#x27;t support
-the custom &#x27;extended instruction&#x27; (XW) instruction set extension.</li>
+<li>Unlike the other QingKe V4 series core designs, the V4a doesn't support
+the custom 'extended instruction' (XW) instruction set extension.</li>
 </ul>
 </li>
 <li><strong>Key stats</strong>:
@@ -1041,7 +1041,7 @@ available</a>.</li>
 <ul>
 <li>1 x RV32IMAC <a href="http://www.wch-ic.com/downloads/file/367.html">QingKe
 V4c</a> core with custom
-instruction set extensions (&#x27;XW&#x27; for sign-extended byte and half word
+instruction set extensions ('XW' for sign-extended byte and half word
 operations).</li>
 </ul>
 </li>
@@ -1058,7 +1058,7 @@ operations).</li>
 <li><strong>Other</strong>:
 <ul>
 <li>The <a href="http://www.wch-ic.com/products/CH32V203.html">CH32V203</a> is also
-available but I haven&#x27;t listed it separately as it&#x27;s not clear how the
+available but I haven't listed it separately as it's not clear how the
 QingKe V4b core in that chip differs to the V4c in this one.</li>
 </ul>
 </li>
@@ -1092,7 +1092,7 @@ CH32V103</a>.</li>
 <li><strong>Core design</strong>:
 <ul>
 <li>1 x RV32EC <a href="http://www.wch-ic.com/downloads/file/369.html">QingKe V2A</a>
-with custom instruction set extensions (&#x27;XW&#x27; for sign-extended byte and
+with custom instruction set extensions ('XW' for sign-extended byte and
 half word operations).</li>
 </ul>
 </li>
@@ -1166,7 +1166,7 @@ HPM6750</a>
 <ul>
 <li>2 x RV32IMAFDC cores (<a href="http://www.andestech.com/en/products-solutions/andescore-processors/riscv-d45/">AndesCore
 D45</a>)
-with an implementation of the draft &#x27;P&#x27; packed SIMD spec
+with an implementation of the draft 'P' packed SIMD spec
 (<a href="https://riscv.org/news/2021/12/hpmicro-semiconductor-announces-the-release-of-the-hpm6000-series-of-microcontrollers-with-andescore-dual-d45-cores-andes-technology/">ref</a>).</li>
 <li>In-order dual-issue 8-stage pipeline.</li>
 </ul>
@@ -1209,20 +1209,20 @@ with additional vendor-specific instruction set extensions.</li>
 </ul>
 </li>
 </ul>
-<h2 id="bonus-other-socs-that-donx27t-match-the-above-criteria-or-where-therex27s-insufficient-info"><a href="#bonus-other-socs-that-donx27t-match-the-above-criteria-or-where-therex27s-insufficient-info" class="anchor" aria-hidden="true" tabindex="-1"></a>Bonus: Other SoCs that don&#x27;t match the above criteria or where there&#x27;s insufficient info</h2>
+<h2 id="bonus-other-socs-that-dont-match-the-above-criteria-or-where-theres-insufficient-info"><a href="#bonus-other-socs-that-dont-match-the-above-criteria-or-where-theres-insufficient-info" class="anchor" aria-hidden="true" tabindex="-1"></a>Bonus: Other SoCs that don't match the above criteria or where there's insufficient info</h2>
 <ul>
 <li>The <a href="https://www.espressif.com/en/news/ESP32-P4">Espressif ESP32-P4</a> was
-announced, featuring a dual-core 400MHz RISC-V CPU with &quot;an AI instructions
-extension&quot;. I look forward to incorporating it into the list above when more
+announced, featuring a dual-core 400MHz RISC-V CPU with "an AI instructions
+extension". I look forward to incorporating it into the list above when more
 information is available.</li>
-<li>I won&#x27;t try to enumerate every use of RISC-V in chips that aren&#x27;t
-programmable by end users or where development boards aren&#x27;t available, but
-it&#x27;s worth noting the <a href="https://www.androidauthority.com/titan-m2-google-3261547/">use of RISC-V Google&#x27;s Titan
+<li>I won't try to enumerate every use of RISC-V in chips that aren't
+programmable by end users or where development boards aren't available, but
+it's worth noting the <a href="https://www.androidauthority.com/titan-m2-google-3261547/">use of RISC-V Google's Titan
 M2</a></li>
 <li>In January 2022 Intel Mobileye
 <a href="https://www.anandtech.com/show/17165/mobileye-announces-eyeq-ultra-l4-auto-soc">announced</a>
 the EyeQ Ultra featuring 12 RISC-V cores (of unknown design), but there
-hasn&#x27;t been any news since.</li>
+hasn't been any news since.</li>
 </ul>
 <hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor "aria-hidden="true" tabindex="-1"></a>Article changelog</summary>
 <ul>

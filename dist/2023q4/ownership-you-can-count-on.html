@@ -174,7 +174,7 @@ font-size:.833rem
 On</a>
 (by Adam Dingle and David F. Bacon, seemingly written in 2007) some years ago
 and it stuck with me as being an interesting variant on traditional reference
-counting. Since then I&#x27;ve come across references to it multiple times in the
+counting. Since then I've come across references to it multiple times in the
 programming language design and implementation community and thought it might
 be worth jotting down some notes on the paper itself and the various attempts
 to adopt its ideas.</p>
@@ -199,10 +199,10 @@ upon the owning pointer going out of scope rather than upon every decrement
 reaching zero). Additionally, refcount manipulation is never needed when
 passing around the owning pointer. The paper also describes an analysis
 that allows many refcount operations to be elided in regions where there
-aren&#x27;t modifications to owned pointers of the owned object&#x27;s
-subclass/class/superclass (which guarantees the pointed-to object can&#x27;t be
+aren't modifications to owned pointers of the owned object's
+subclass/class/superclass (which guarantees the pointed-to object can't be
 destructed in this region). The paper also claims support for destroying data
-structures with pointer cycles that can&#x27;t be automatically destroyed with
+structures with pointer cycles that can't be automatically destroyed with
 traditional reference counting. The authors suggest for cases where you might
 otherwise reach for multiple ownership, (e.g. an arbitrary graph) to allocate
 an array of owning pointers to hold your nodes, then use non-owning pointers
@@ -213,23 +213,23 @@ pointers indicated by a <code>^</code> (e.g. <code>Foo ^f = new Foo();</code> an
 to take ownership of a value from an owning field. Non-owning pointers are
 written just as <code>Foo f</code>. They also achieve a rather neat <em>erasure</em>
 property, whereby if you take a Gel program and remove all <code>^</code> and <code>take</code>
-you&#x27;ll have a C# program that is valid as long as the original Gel program was
+you'll have a C# program that is valid as long as the original Gel program was
 valid.</p>
 <p>That all sounds pretty great, right? Does this mean we can have it all: full
-memory safety, deterministic destruction, low runtime and annotation overhead? As you&#x27;d
+memory safety, deterministic destruction, low runtime and annotation overhead? As you'd
 expect, there are some challenges:</p>
 <ul>
 <li>The usability in practice is going to depend a lot on how easy it is for a
 programmer to maintain the invariant that no unowned pointers outlive the
 owned pointer, especially as failure to do so results in a runtime crash.
 <ul>
-<li>Several languages have looked at integrating the idea, so there&#x27;s some
+<li>Several languages have looked at integrating the idea, so there's some
 information later in this article on their experiences.</li>
 </ul>
 </li>
-<li>Although data structures with pointer cycles that couldn&#x27;t be automatically
+<li>Although data structures with pointer cycles that couldn't be automatically
 destroyed by reference counting an be handled, there are also significant
-limitations. Gel can&#x27;t destroy graphs containing non-owning pointers to
+limitations. Gel can't destroy graphs containing non-owning pointers to
 non-ancestor nodes unless the programmer writes logic to null out those
 pointers. This could be frustrating and error-prone to handle.
 <ul>
@@ -239,7 +239,7 @@ descending the graph of the ownership tree 3 times) depends on how much
 can be optimised away.</li>
 </ul>
 </li>
-<li>Although it&#x27;s not a fundamental limitation of the approach, Gel doesn&#x27;t yet
+<li>Although it's not a fundamental limitation of the approach, Gel doesn't yet
 provide any kind of polymorphism between owned and unowned references. This
 would be necessary for any modern language with support for generics.</li>
 <li>The reference count elimination optimisation described in the paper assumes
@@ -255,7 +255,7 @@ Verona</a>) could provide a solution.</li>
 traditional reference counting, but the largest program written using this
 scheme is the Gel compiler itself and many of the obvious questions require
 larger scale usage to judge the practicality of the scheme.</p>
-<h2 id="influence-and-adoption-of-the-paperx27s-ideas"><a href="#influence-and-adoption-of-the-paperx27s-ideas" class="anchor" aria-hidden="true" tabindex="-1"></a>Influence and adoption of the paper&#x27;s ideas</h2>
+<h2 id="influence-and-adoption-of-the-papers-ideas"><a href="#influence-and-adoption-of-the-papers-ideas" class="anchor" aria-hidden="true" tabindex="-1"></a>Influence and adoption of the paper's ideas</h2>
 <p>Ownership You Can Count On was written around 2007 and as far as I can tell
 never published in the proceedings of a conference or workshop, or in a
 journal. Flicking through the <a href="https://code.google.com/archive/p/gel2/source/default/source">Gel language
@@ -263,7 +263,7 @@ repository</a> and
 applying some world-class logical deduction based on the directory name
 holding a draft version of the paper leads to me suspect it was submitted to
 PLDI though. Surprisingly it has no academic citations, despite being shared
-publicly on David F. Bacon&#x27;s site (and Bacon has a range of widely cited
+publicly on David F. Bacon's site (and Bacon has a range of widely cited
 papers related to reference counting / garbage collection). Yet, the work
 has been used as the basis for memory management in one language
 (<a href="https://inko-lang.org/">Inko</a>) and was seriously evaluated (partially
@@ -279,11 +279,11 @@ Inko 0.10.0
 release</a>
 about a year later. Inko as a language is more ambitious than Gel - featuring
 parametric polymorphism, lightweight processes for concurrency, and more. Yet
-it&#x27;s still early days and it&#x27;s not yet, for instance, good for drawing
-conclusions about performance on modern systems as <a href="https://github.com/jinyus/related_post_gen/pull/440#issuecomment-1816583612">optimisations aren&#x27;t
+it's still early days and it's not yet, for instance, good for drawing
+conclusions about performance on modern systems as <a href="https://github.com/jinyus/related_post_gen/pull/440#issuecomment-1816583612">optimisations aren't
 currently
 applied</a>.
-Dusty Phillips wrote a blog post earlier this year <a href="https://dusty.phillips.codes/2023/06/26/understanding-inko-memory-management-through-data-structures/">explaining Inko&#x27;s memory
+Dusty Phillips wrote a blog post earlier this year <a href="https://dusty.phillips.codes/2023/06/26/understanding-inko-memory-management-through-data-structures/">explaining Inko's memory
 management through some example data
 structures</a>,
 which also includes some thoughts on the usability of the system and some
@@ -293,38 +293,38 @@ some of the described techniques (perhaps this will be easier once common
 patterns are better documented and potentially supported by library functions
 or syntax?), or that debuggability is poor when the program exits with a
 dangling reference error.</p>
-<p>Nim was at one point going to move to Gel&#x27;s scheme (see the <a href="https://nim-lang.org/araq/ownedrefs.html">blog
+<p>Nim was at one point going to move to Gel's scheme (see the <a href="https://nim-lang.org/araq/ownedrefs.html">blog
 post</a> and
-(<a href="https://github.com/nim-lang/RFCs/issues/144">RFC</a>). I haven&#x27;t been able to
+(<a href="https://github.com/nim-lang/RFCs/issues/144">RFC</a>). I haven't been able to
 find a detailed explanation for the reasons why it was rejected, though
 Andreas Rumpf (Nim language creator) commented on a <a href="https://forum.dlang.org/post/ejvshljmezqovmfprkww@forum.dlang.org">Dlang forum discussion
 thread</a>
-about the paper that &quot;Nim tried to use this in production before moving to ORC
-and I&#x27;m not looking back, &#x27;ownership you can count on&#x27; was actually quite a
-pain to work with...&quot;. Nim has since <a href="https://nim-lang.org/blog/2020/10/15/introduction-to-arc-orc-in-nim.html">adopted a more conventional non-atomic
+about the paper that "Nim tried to use this in production before moving to ORC
+and I'm not looking back, 'ownership you can count on' was actually quite a
+pain to work with...". Nim has since <a href="https://nim-lang.org/blog/2020/10/15/introduction-to-arc-orc-in-nim.html">adopted a more conventional non-atomic
 reference counted
 scheme</a>
 (ARC), with an optional cycle collector (ORC).</p>
 <p>Vale was <a href="https://verdagon.dev/blog/raii-next-steps">previously adopting the Gel / Ownership You Can Count On
 scheme</a> (calling the unowned
-references &quot;constraint references&quot;), but has since changed path slightly and
-now uses &quot;<a href="https://verdagon.dev/blog/generational-references">generational
-references</a>&quot; Rather than a
+references "constraint references"), but has since changed path slightly and
+now uses "<a href="https://verdagon.dev/blog/generational-references">generational
+references</a>" Rather than a
 reference count, each allocation includes a generation counter which is
 incremented each time it is reused. Fat pointers that include the expected
 value of the generation counter are used, and checked before dereferencing. If
-they don&#x27;t match, that indicates the memory location was since reallocated and
-the program will fault. This also puts restrictions on the allocator&#x27;s
-ability to reuse freed allocations without compromising safety. Vale&#x27;s memory
+they don't match, that indicates the memory location was since reallocated and
+the program will fault. This also puts restrictions on the allocator's
+ability to reuse freed allocations without compromising safety. Vale's memory
 management scheme retains similarities to Gel: the language is still based
 around single ownership and this is exploited to elide checks on owning
 references/pointers.</p>
 <h1 id="conclusion-and-other-related-work"><a href="#conclusion-and-other-related-work" class="anchor" aria-hidden="true" tabindex="-1"></a>Conclusion and other related work</h1>
-<p>Some tangentially related things that didn&#x27;t make it into the main body of
+<p>Some tangentially related things that didn't make it into the main body of
 text above:</p>
 <ul>
 <li>A language that references Gel in its design but goes in a slightly
-different direction is Wouter van Oortmerssen&#x27;s
+different direction is Wouter van Oortmerssen's
 <a href="https://strlen.com/lobster/">Lobster</a>.  Its <a href="https://aardappel.github.io/lobster/memory_management.html">memory management
 scheme</a> attempts
 to infer ownership (and optimise in the case where single ownership can be
@@ -334,13 +334,13 @@ above.</li>
 <a href="https://insights.sei.cmu.edu/documents/351/2013_019_001_55008.pdf">Pointer Ownership
 Model</a>
 paper as having similarities. It chooses to categorise pointers as either
-&quot;responsible&quot; or &quot;irresponsible&quot; - cute!</li>
+"responsible" or "irresponsible" - cute!</li>
 </ul>
-<p>And, that&#x27;s about it. If you&#x27;re hoping for a definitive answer on whether
-alias counting is a winning idea or not I&#x27;m sorry to disappoint, but I&#x27;ve at
-least succeeded in collecting together the various places I&#x27;ve seen it
-explored and am looking forward to seeing how Inko&#x27;s adoption of it evolves.
-I&#x27;d be very interested to hear any experience reports of adopting alias
+<p>And, that's about it. If you're hoping for a definitive answer on whether
+alias counting is a winning idea or not I'm sorry to disappoint, but I've at
+least succeeded in collecting together the various places I've seen it
+explored and am looking forward to seeing how Inko's adoption of it evolves.
+I'd be very interested to hear any experience reports of adopting alias
 counting or using a language like Inko that tries to use it.</p>
 
 </div>

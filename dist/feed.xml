@@ -4,8 +4,101 @@
 <subtitle>Adventures in collaborative open source development</subtitle>
 <link href="https://muxup.com/feed.xml" rel="self" type="application/atom+xml"/>
 <link href="https://muxup.com"/>
-<updated>2024-01-01T12:00:00Z</updated>
+<updated>2024-02-20T12:00:00Z</updated>
 <id>https://muxup.com/feed.xml</id>
+<entry>
+<title>Clarifying instruction semantics with P-Code</title>
+<published>2024-02-20T12:00:00Z</published>
+<updated>2024-02-20T12:00:00Z</updated>
+<link rel="alternate" href="https://muxup.com/2024q1/clarifying-instruction-semantics-with-p-code"/>
+<id>https://muxup.com/2024q1/clarifying-instruction-semantics-with-p-code</id>
+<content type="html">
+&lt;p&gt;I&#x27;ve recently had a need to step through quite a bit of disassembly for
+different architectures, and although some architectures have well-written ISA
+manuals it can be a bit jarring switching between very different assembly
+syntaxes (like &quot;source, destination&quot; for AT&amp;amp;T vs &quot;destination, source&quot; for
+just about everything else) or tedious looking up different ISA manuals to
+clarify the precise semantics. I&#x27;ve been using a very simple script to help
+convert an encoded instruction to a target-independent description of its
+semantics, and thought I may as well share it as well as some thoughts on
+its limitations.&lt;/p&gt;
+&lt;h2 id=&quot;a-hrefhttpsgithubcommuxupmedleyinstruction_to_pcodea&quot;&gt;&lt;a href=&quot;#a-hrefhttpsgithubcommuxupmedleyinstruction_to_pcodea&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;&lt;a href=&quot;https://github.com/muxup/medley&quot;&gt;instruction_to_pcode&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/muxup/medley&quot;&gt;The script&lt;/a&gt; is simplicity itself, thanks to
+the &lt;a href=&quot;https://github.com/angr/pypcode&quot;&gt;pypcode&lt;/a&gt; bindings to
+&lt;a href=&quot;https://en.wikipedia.org/wiki/Ghidra&quot;&gt;Ghidra&lt;/a&gt;&#x27;s SLEIGH library which provides
+an interface to convert an input to the P-Code representation. Articles like
+&lt;a href=&quot;https://riverloopsecurity.com/blog/2019/05/pcode/&quot;&gt;this one&lt;/a&gt; provide an
+introduction and there&#x27;s the &lt;a href=&quot;https://htmlpreview.github.io/?https://github.com/NationalSecurityAgency/ghidra/blob/master/GhidraDocs/languages/html/pcoderef.html&quot;&gt;reference manual in the Ghidra
+repo&lt;/a&gt;
+but it&#x27;s probably easiest to just look at a few examples. P-Code is used as
+the basis of Ghidra&#x27;s decompiler and provides a consistent human-readable
+description of the semantics of instructions for supported targets.&lt;/p&gt;
+&lt;p&gt;Here&#x27;s an example aarch64 instruction:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ ./instruction_to_pcode aarch64 b874c925
+-- 0x0: ldr w5, [x9, w20, SXTW #0x0]
+0) unique[0x5f80:8] = sext(w20)
+1) unique[0x7200:8] = unique[0x5f80:8]
+2) unique[0x7200:8] = unique[0x7200:8] &amp;lt;&amp;lt; 0x0
+3) unique[0x7580:8] = x9 + unique[0x7200:8]
+4) unique[0x28b80:4] = *[ram]unique[0x7580:8]
+5) x5 = zext(unique[0x28b80:4])
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;In the above you can see that the disassembly for the instruction is dumped,
+and then 5 P-Code instructions are printed showing the semantics. These P-Code
+instructions directly use the register names for architectural registers (as a
+reminder, &lt;a href=&quot;https://developer.arm.com/documentation/dui0801/l/Overview-of-AArch64-state/Registers-in-AArch64-state?lang=en&quot;&gt;AArch64 has 64-bit GPRs X0-X30 with the bottom halves acessible
+through
+W-W30&lt;/a&gt;). Intermediate state is stored in &lt;code&gt;unique[addr:width]&lt;/code&gt; locations. So the above instruction sign-extends &lt;code&gt;w20&lt;/code&gt;, adds to &lt;code&gt;x9&lt;/code&gt;, and reads a 32-bit value from the resulting address, then zero-extends to 64-bits when storing into &lt;code&gt;x5&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;The output is somewhat more verbose for architectures with flag registers,
+e.g. &lt;code&gt;cmpb $0x2f,-0x1(%r11)&lt;/code&gt; produces:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;./instruction_to_pcode x86-64 --no-reverse-input &quot;41 80 7b ff 2f&quot;
+-- 0x0: CMP byte ptr [R11 + -0x1],0x2f
+0) unique[0x3100:8] = R11 + 0xffffffffffffffff
+1) unique[0xbd80:1] = *[ram]unique[0x3100:8]
+2) CF = unique[0xbd80:1] &amp;lt; 0x2f
+3) unique[0xbd80:1] = *[ram]unique[0x3100:8]
+4) OF = sborrow(unique[0xbd80:1], 0x2f)
+5) unique[0xbd80:1] = *[ram]unique[0x3100:8]
+6) unique[0x28e00:1] = unique[0xbd80:1] - 0x2f
+7) SF = unique[0x28e00:1] s&amp;lt; 0x0
+8) ZF = unique[0x28e00:1] == 0x0
+9) unique[0x13180:1] = unique[0x28e00:1] &amp;amp; 0xff
+10) unique[0x13200:1] = popcount(unique[0x13180:1])
+11) unique[0x13280:1] = unique[0x13200:1] &amp;amp; 0x1
+12) PF = unique[0x13280:1] == 0x0
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;But simple instructions that don&#x27;t set flags do produce concise P-Code:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ ./instruction_to_pcode riscv64 &quot;9d2d&quot;
+-- 0x0: c.addw a0,a1
+0) unique[0x15880:4] = a0 + a1
+1) a0 = sext(unique[0x15880:4])
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&quot;other-approaches&quot;&gt;&lt;a href=&quot;#other-approaches&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Other approaches&lt;/h2&gt;
+&lt;p&gt;P-Code was an intermediate language I&#x27;d encountered before and of course
+benefits from having an easy to use Python wrapper and fairly good support for
+a range of ISAs in Ghidra. But there are lots of other options -
+&lt;a href=&quot;https://angr.io/&quot;&gt;angr&lt;/a&gt; (which
+uses Vex, taken from Valgrind) &lt;a href=&quot;https://docs.angr.io/en/latest/faq.html#why-did-you-choose-vex-instead-of-another-ir-such-as-llvm-reil-bap-etc&quot;&gt;compares some
+options&lt;/a&gt;
+and there&#x27;s &lt;a href=&quot;https://softsec.kaist.ac.kr/~soomink/paper/ase17main-mainp491-p.pdf&quot;&gt;more in this
+paper&lt;/a&gt;.
+Radare2 has &lt;a href=&quot;https://book.rada.re/disassembling/esil.html&quot;&gt;ESIL&lt;/a&gt;, but while
+I&#x27;m sure you&#x27;d get used to it, it doesn&#x27;t pass the readability test for me.
+The &lt;a href=&quot;https://rev.ng/&quot;&gt;rev.ng&lt;/a&gt; project uses QEMU&#x27;s
+&lt;a href=&quot;https://www.qemu.org/docs/master/devel/tcg-ops.html&quot;&gt;TCG&lt;/a&gt;. This is an
+attractive approach because you benefit from more testing and ISA extension
+support for some targets vs P-Code (Ghidra support &lt;a href=&quot;https://github.com/NationalSecurityAgency/ghidra/pull/5778&quot;&gt;is
+lacking&lt;/a&gt; for RVV,
+bitmanip, and crypto extensions).&lt;/p&gt;
+&lt;p&gt;Another route would be to pull out the semantic definitions from a formal spec
+(like &lt;a href=&quot;https://www.cl.cam.ac.uk/~pes20/sail/&quot;&gt;Sail&lt;/a&gt;) or even an easy to read
+simulator (e.g. &lt;a href=&quot;https://github.com/riscv-software-src/riscv-isa-sim&quot;&gt;Spike&lt;/a&gt;
+for RISC-V). But in both cases, definitions are written to minimise repetition
+to some degree, while when expanding the semantics we prefer explicitness, so
+would want to expand to a form that differs a bit from the Sail/Spike code as
+written.&lt;/p&gt;
+</content>
+</entry>
 <entry>
 <title>Reflections on ten years of LLVM Weekly</title>
 <published>2024-01-01T12:00:00Z</published>
@@ -13,27 +106,27 @@
 <link rel="alternate" href="https://muxup.com/2024q1/reflections-on-ten-years-of-llvm-weekly"/>
 <id>https://muxup.com/2024q1/reflections-on-ten-years-of-llvm-weekly</id>
 <content type="html">
-&lt;p&gt;Today, with &lt;a href=&quot;https://llvmweekly.org/issue/522&quot;&gt;Issue #522&lt;/a&gt; I&amp;#x27;m marking ten
+&lt;p&gt;Today, with &lt;a href=&quot;https://llvmweekly.org/issue/522&quot;&gt;Issue #522&lt;/a&gt; I&#x27;m marking ten
 years of authoring &lt;a href=&quot;https://llvmweekly.org/&quot;&gt;LLVM Weekly&lt;/a&gt;, a newsletter
 summarising developments on projects under the LLVM umbrella (LLVM, Clang,
-MLIR, Flang, libcxx, compiler-rt, lld, LLDB, ...). Somehow I&amp;#x27;ve managed to
+MLIR, Flang, libcxx, compiler-rt, lld, LLDB, ...). Somehow I&#x27;ve managed to
 keep up an unbroken streak, publishing every single Monday since the first
 issue back on &lt;a href=&quot;https://llvmweekly.org/issue/1&quot;&gt;Jan 6th 2014&lt;/a&gt; (the first Monday
-of 2014 - you can also see the format hasn&amp;#x27;t changed much!). With a milestone
+of 2014 - you can also see the format hasn&#x27;t changed much!). With a milestone
 like that, now is the perfect moment to jot down some reflections on the
 newsletter and thoughts for the future.&lt;/p&gt;
 &lt;h2 id=&quot;motivation-and-purpose&quot;&gt;&lt;a href=&quot;#motivation-and-purpose&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Motivation and purpose&lt;/h2&gt;
-&lt;p&gt;Way back when I started &lt;a href=&quot;https://llvmweekly.org/&quot;&gt;LLVM Weekly&lt;/a&gt;, I&amp;#x27;d been
+&lt;p&gt;Way back when I started &lt;a href=&quot;https://llvmweekly.org/&quot;&gt;LLVM Weekly&lt;/a&gt;, I&#x27;d been
 working with LLVM for a few years as part of developing and supporting a
 downstream compiler for a novel
 research architecture. This was a very educational yet somewhat lonely
 experience, and I sought to more closely follow upstream LLVM development
 to keep better abreast of changes that might impact or help my work, to
-learn more about parts of the compiler I wasn&amp;#x27;t actively using, and also to
+learn more about parts of the compiler I wasn&#x27;t actively using, and also to
 feel more of a connection to the wider LLVM community given my compiler work
 was a solo effort. The calculus for kicking off an LLVM development newsletter
 was dead simple: I found value in tracking development anyway, the
-incremental effort to write up and share with others wasn&amp;#x27;t &lt;em&gt;too&lt;/em&gt; great, and I
+incremental effort to write up and share with others wasn&#x27;t &lt;em&gt;too&lt;/em&gt; great, and I
 felt quite sure others would benefit as well.&lt;/p&gt;
 &lt;p&gt;Looking back at my notes (I have a huge Markdown file with daily notes going back
 to 2011 - a file of this rough size and format is also a good
@@ -47,7 +140,7 @@ better to give it a try and stop it if it gets no traction rather than waste
 lots of time putting out feelers on level of interest and format. As a
 sidenote, I was delighted to see many of the newsletters I studied at the time
 are still going: &lt;a href=&quot;https://this-week-in-rust.org/&quot;&gt;This Week in Rust&lt;/a&gt;
-&lt;a href=&quot;https://perlweekly.com/&quot;&gt;Perl Weekly&lt;/a&gt; (I&amp;#x27;ll admit this surprised me!),
+&lt;a href=&quot;https://perlweekly.com/&quot;&gt;Perl Weekly&lt;/a&gt; (I&#x27;ll admit this surprised me!),
 &lt;a href=&quot;https://discourse.ubuntu.com/c/uwn/124&quot;&gt;Ubuntu Weekly News&lt;/a&gt;, &lt;a href=&quot;https://alan.petitepomme.net/cwn/index.html&quot;&gt;OCaml Weekly
 News&lt;/a&gt;, and &lt;a href=&quot;https://wiki.haskell.org/Haskell_Weekly_News&quot;&gt;Haskell Weekly
 News&lt;/a&gt;.&lt;/p&gt;
@@ -56,44 +149,44 @@ News&lt;/a&gt;.&lt;/p&gt;
 articles and blog posts, pick out some forum/mailing discussions (sometimes
 trying to summarise complex debates - but this is very challenging and time
 intensive), and highlight some noteworthy commits from across the project.
-More recently I&amp;#x27;ve taken to advertising the scheduled &lt;a href=&quot;https://llvm.org/docs/GettingInvolved.html#online-sync-ups&quot;&gt;online
+More recently I&#x27;ve taken to advertising the scheduled &lt;a href=&quot;https://llvm.org/docs/GettingInvolved.html#online-sync-ups&quot;&gt;online
 sync-ups&lt;/a&gt; and
 &lt;a href=&quot;https://llvm.org/docs/GettingInvolved.html#office-hours&quot;&gt;office hours&lt;/a&gt; for
 the week. Notably absent are any kind of ads or paid content. I respect that
-others have made successful businesses in this kind of space, but although I&amp;#x27;ve
-always written LLVM Weekly on my own personal time I&amp;#x27;ve never felt comfortable
-trying to monetise other people&amp;#x27;s attention or my relationship with the
+others have made successful businesses in this kind of space, but although I&#x27;ve
+always written LLVM Weekly on my own personal time I&#x27;ve never felt comfortable
+trying to monetise other people&#x27;s attention or my relationship with the
 community in this way.&lt;/p&gt;
 &lt;p&gt;The target audience is really anyone with an interest in keeping track of LLVM
-development, though I don&amp;#x27;t tend to expand every acronym or give a
+development, though I don&#x27;t tend to expand every acronym or give a
 from-basics explanation for every term, so some familiarity with the project
 is assumed if you want to understand every line. The newsletter is posted to
-LLVM&amp;#x27;s Discourse, to &lt;a href=&quot;https://llvmweekly.org/&quot;&gt;llvmweekly.org&lt;/a&gt;, and delivered
-direct to people&amp;#x27;s inboxes. I additionally post &lt;a href=&quot;https://twitter.com/llvmweekly&quot;&gt;on
+LLVM&#x27;s Discourse, to &lt;a href=&quot;https://llvmweekly.org/&quot;&gt;llvmweekly.org&lt;/a&gt;, and delivered
+direct to people&#x27;s inboxes. I additionally post &lt;a href=&quot;https://twitter.com/llvmweekly&quot;&gt;on
 Twitter&lt;/a&gt; and &lt;a href=&quot;https://fosstodon.org/@llvmweekly&quot;&gt;on
-Mastodon&lt;/a&gt; linking to each issue. I don&amp;#x27;t
+Mastodon&lt;/a&gt; linking to each issue. I don&#x27;t
 attempt to track open rates or have functioning analytics, so only have a
 rough idea of readership. There are ~3.5k active subscribers directly to the
 mailing list, ~7.5k Twitter followers, ~180 followers on Mastodon (introduced
 much more recently), and an unknown number of people reading via
-llvmweekly.org or RSS. I&amp;#x27;m pretty confident that I&amp;#x27;m not just shouting in the
+llvmweekly.org or RSS. I&#x27;m pretty confident that I&#x27;m not just shouting in the
 void at least.&lt;/p&gt;
 &lt;p&gt;There are some gaps or blind spots of course. I make no attempt to try to link
 to patches that are under-review, even though many might have interesting
 review discussions because it would simply be too much work to sort through
 them and if the discussion is particularly contentious or requires input
-from a wider cross-section of the LLVM community you&amp;#x27;d expect an RFC
+from a wider cross-section of the LLVM community you&#x27;d expect an RFC
 to be posted anyway. Although I do try to highlight MLIR threads or commits,
-as it&amp;#x27;s not an area of LLVM I&amp;#x27;m working right now I probably miss some things.
+as it&#x27;s not an area of LLVM I&#x27;m working right now I probably miss some things.
 Thankfully Javed Absar has taken up writing an &lt;a href=&quot;https://discourse.llvm.org/c/mlir/mlir-news-mlir-newsletter/37&quot;&gt;MLIR
 newsletter&lt;/a&gt;
-that helps plug those gaps. I&amp;#x27;m also not currently trawling through repos
+that helps plug those gaps. I&#x27;m also not currently trawling through repos
 under the &lt;a href=&quot;https://github.com/llvm/&quot;&gt;LLVM GitHub organisation&lt;/a&gt; other than the
 main llvm-project monorepo, though perhaps I should...&lt;/p&gt;
-&lt;p&gt;I&amp;#x27;ve shied away from reposting job posts as the overhead is just too high.  I
+&lt;p&gt;I&#x27;ve shied away from reposting job posts as the overhead is just too high.  I
 found dealing with requests to re-advertise (and considering if this is useful
 to the community) or determining if ads are sufficiently LLVM related just
-wasnt a good use of time when there&amp;#x27;s a good alternative. People can &lt;a href=&quot;https://discourse.llvm.org/c/community/job-postings/&quot;&gt;check
+wasnt a good use of time when there&#x27;s a good alternative. People can &lt;a href=&quot;https://discourse.llvm.org/c/community/job-postings/&quot;&gt;check
 the job post
 category on LLVM
 discourse&lt;/a&gt; or search for
@@ -114,26 +207,26 @@ to others. This is bound to be somewhat flawed, but hopefully better than
 ramdom selection! I always really appreciate feedback if you think I missed
 something important, or tips on things you think I should include next week.
 &lt;ul&gt;
-&lt;li&gt;There&amp;#x27;s a cheat that practically guarantees a mention in LLVM Weekly
-without even needing to drop me a note though - write documentation! It&amp;#x27;s
+&lt;li&gt;There&#x27;s a cheat that practically guarantees a mention in LLVM Weekly
+without even needing to drop me a note though - write documentation! It&#x27;s
 very rare I see a commit that adds more docs and fail to highlight it.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;Similarly, I scan through &lt;a href=&quot;https://discourse.llvm.org/&quot;&gt;LLVM Discourse&lt;/a&gt;
 posts over the past week and pick out discussions I think readers may be
 interested in. Most RFCs will be picked up as part of this. In some cases if
-there&amp;#x27;s a lengthy discussion I might attempt to summarise or point to key
-messages, but honestly this is rarer than I&amp;#x27;d like as it can be incredibly
+there&#x27;s a lengthy discussion I might attempt to summarise or point to key
+messages, but honestly this is rarer than I&#x27;d like as it can be incredibly
 time consuming. I try very hard to remain a neutral voice and no to insert
 personal views on technical discussions.&lt;/li&gt;
 &lt;li&gt;Many ask how long it takes to write, and the answer is of course that it
-varies. It&amp;#x27;s easy to spend a lot of time trying to figure out the importance
-of commits or discussions in parts of the compiler I don&amp;#x27;t work with much,
+varies. It&#x27;s easy to spend a lot of time trying to figure out the importance
+of commits or discussions in parts of the compiler I don&#x27;t work with much,
 or to better summarise content. The amount of activity can also vary a lot
-week to week (especially on Discourse). It&amp;#x27;s mostly in the 2.5-3.5h range
+week to week (especially on Discourse). It&#x27;s mostly in the 2.5-3.5h range
 (very rarely any more than 4 hours) to write, copyedit, and send.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;There&amp;#x27;s not much to be said on the tooling said, except that I could probably
+&lt;p&gt;There&#x27;s not much to be said on the tooling said, except that I could probably
 benefit from refreshing my helper scripts. Mail sending is handled by
 &lt;a href=&quot;https://www.mailgun.com/&quot;&gt;Mailgun&lt;/a&gt;, who have changed ownership three times
 since I started. I handle double opt-in via a simple Python script on the
@@ -142,54 +235,54 @@ static HTML with some scripts that could do with a bit more love. The only
 other running costs are the domain name fees and a VPS that hosts some other
 things as well, so quite insignificant compared to the time commitment.&lt;/p&gt;
 &lt;h2 id=&quot;how-you-can-help&quot;&gt;&lt;a href=&quot;#how-you-can-help&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;How you can help&lt;/h2&gt;
-&lt;p&gt;I cannot emphasise enough that I&amp;#x27;m not an expert on all parts of LLVM, and I&amp;#x27;m
+&lt;p&gt;I cannot emphasise enough that I&#x27;m not an expert on all parts of LLVM, and I&#x27;m
 also only human and can easily miss things. If you did something you think
 people may be interested in and I failed to cover it, I almost certainly
-didn&amp;#x27;t explicitly review it and deem it not worthy. Please do continue to help
+didn&#x27;t explicitly review it and deem it not worthy. Please do continue to help
 me out by dropping links and suggestions. Writing commit messages that make it
-clear if a change has wider impact also helps increase the chance I&amp;#x27;ll pick it
+clear if a change has wider impact also helps increase the chance I&#x27;ll pick it
 up.&lt;/p&gt;
 &lt;p&gt;I noted above that it is particularly time consuming to summarise back and
 forth in lengthy RFC threads. Sometimes people step up and do this and I
 always try to link to it when this happens. The person who initiated a thread
-or proposal is best placed write such a summary, and it&amp;#x27;s also a useful tool
-to check that you interpreted people&amp;#x27;s suggestions/feedback correctly, but it
+or proposal is best placed write such a summary, and it&#x27;s also a useful tool
+to check that you interpreted people&#x27;s suggestions/feedback correctly, but it
 can still be helpful if others provide a similar service.&lt;/p&gt;
 &lt;p&gt;Many people have fed back they find LLVM Weekly useful to stay on top of LLVM
 developments. This is gratifying, but also a pretty huge responsibility. If
 you have thoughts on things I could be doing differently to serve the
-community even better without a big difference in time commitment, I&amp;#x27;m always
+community even better without a big difference in time commitment, I&#x27;m always
 keen to hear ideas and suggestions.&lt;/p&gt;
 &lt;h2 id=&quot;miscellaneous-thoughts&quot;&gt;&lt;a href=&quot;#miscellaneous-thoughts&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Miscellaneous thoughts&lt;/h2&gt;
 &lt;p&gt;To state the obvious, ten years is kind of a long time. A lot has happened
-with me in that time - I&amp;#x27;ve got married, we had a son, I co-founded and helped
+with me in that time - I&#x27;ve got married, we had a son, I co-founded and helped
 grow a company, and then moved on from that, kicked off the upstream RISC-V
 LLVM backend, and much more. One of the things I love working with compilers
-is that there&amp;#x27;s always new things to learn, and writing LLVM Weekly helps me
-learn at least a little more each week in areas outside of where I&amp;#x27;m currently
-working.  There&amp;#x27;s been a lot of changes in LLVM as well. Off the top off my
-head: there&amp;#x27;s been the move from SVN to Git, moving the Git repo to GitHub,
+is that there&#x27;s always new things to learn, and writing LLVM Weekly helps me
+learn at least a little more each week in areas outside of where I&#x27;m currently
+working.  There&#x27;s been a lot of changes in LLVM as well. Off the top off my
+head: there&#x27;s been the move from SVN to Git, moving the Git repo to GitHub,
 moving from Phabricator to GitHub PRs, Bugzilla to GitHub issues, mailing
 lists to Discourse, relicensing to Apache 2.0 with LLVM exception, the wider
 adoption of office hours and area-specific sync-up calls, and more. I think
 even the LLVM Foundation was set up a little bit after LLVM Weekly started.
-It&amp;#x27;s comforting to see the &lt;a href=&quot;https://web.archive.org/web/20140102034931/http://llvm.org/&quot;&gt;llvm.org website design remains unchanged
+It&#x27;s comforting to see the &lt;a href=&quot;https://web.archive.org/web/20140102034931/http://llvm.org/&quot;&gt;llvm.org website design remains unchanged
 though!&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;It&amp;#x27;s also been a time period where I&amp;#x27;ve become increasingly involved in LLVM.
+&lt;p&gt;It&#x27;s also been a time period where I&#x27;ve become increasingly involved in LLVM.
 Upstream work - most notably initiating the RISC-V LLVM backend, organising an
 LLVM conference, many talks, serving on various program committees for LLVM
 conferences, etc etc. When I started I felt a lot like someone outside the
 community looking in and documenting what I saw. That was probably accurate
-too, given the majority of my work was downstream. While I don&amp;#x27;t feel like an
-LLVM &amp;quot;insider&amp;quot; (if such a thing exists?!), I certainly feel a lot more part of
+too, given the majority of my work was downstream. While I don&#x27;t feel like an
+LLVM &quot;insider&quot; (if such a thing exists?!), I certainly feel a lot more part of
 the community than I did way back then.&lt;/p&gt;
 &lt;p&gt;An obvious question is whether there are other ways of pulling together the
 newsletter that are worth pursuing. My experience with large language models
-so far has been that they haven&amp;#x27;t been very helpful in reducing the effort for
+so far has been that they haven&#x27;t been very helpful in reducing the effort for
 the more time consuming aspects of producing LLVM Weekly, but perhaps that
-will change in the future. If I could be automated away then that&amp;#x27;s great -
-perhaps I&amp;#x27;m misjudging how much of my editorial input is signal rather than
-just noise, but I don&amp;#x27;t think we&amp;#x27;re there yet for AI. More collaborative
+will change in the future. If I could be automated away then that&#x27;s great -
+perhaps I&#x27;m misjudging how much of my editorial input is signal rather than
+just noise, but I don&#x27;t think we&#x27;re there yet for AI. More collaborative
 approaches to producing content would be another avenue to explore. For the
 current format, the risk is that the communication overhead and stress of
 seeing if various contributions actually materialise before the intended
@@ -198,31 +291,31 @@ over, then a rotating editorship would probably be most interesting to me.
 Even if multiple people contribute, each week a single would act as a backstop
 to make sure something goes out.&lt;/p&gt;
 &lt;p&gt;The unbroken streak of LLVM Weekly editions each Monday has become a bit
-totemic. It&amp;#x27;s certainly not always convenient having this fixed commitment,
-but it can also be nice to have this rhythm to the week. Even if it&amp;#x27;s a bad
-week, at least it&amp;#x27;s something in the bag that people seem to appreciate.
+totemic. It&#x27;s certainly not always convenient having this fixed commitment,
+but it can also be nice to have this rhythm to the week. Even if it&#x27;s a bad
+week, at least it&#x27;s something in the bag that people seem to appreciate.
 Falling into bad habits and frequently missing weeks would be good for nobody,
 but I suspect that a schedule that allowed the odd break now and then would be
 just fine. Either way, I feel a sense of relief having hit the 10 year
-unbroken streak. I don&amp;#x27;t intend to start skipping weeks, but should life get
-in the way and the streak gets broken I&amp;#x27;ll feel rather more relaxed about it
+unbroken streak. I don&#x27;t intend to start skipping weeks, but should life get
+in the way and the streak gets broken I&#x27;ll feel rather more relaxed about it
 having hit that arbitrary milestone.&lt;/p&gt;
 &lt;h2 id=&quot;looking-forwards-and-thanks&quot;&gt;&lt;a href=&quot;#looking-forwards-and-thanks&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Looking forwards and thanks&lt;/h2&gt;
-&lt;p&gt;So what&amp;#x27;s next? LLVM Weekly continues, much as before. I don&amp;#x27;t know of I&amp;#x27;ll
-still be writing it in another 10 years time, but I&amp;#x27;m not planning to stop
+&lt;p&gt;So what&#x27;s next? LLVM Weekly continues, much as before. I don&#x27;t know of I&#x27;ll
+still be writing it in another 10 years time, but I&#x27;m not planning to stop
 soon. If it ceases to be a good use of my time, ceases to have values for
-others, or I find there&amp;#x27;s a better way of generating similar impact then it
+others, or I find there&#x27;s a better way of generating similar impact then it
 would only be logical to move on. But for now, onwards and upwards.&lt;/p&gt;
 &lt;p&gt;Many thanks are due. Thank you to the people who make LLVM
-what it is - both technically and in terms of its community that I&amp;#x27;ve learned
+what it is - both technically and in terms of its community that I&#x27;ve learned
 so much from. Thank you to &lt;a href=&quot;https://www.igalia.com/&quot;&gt;Igalia&lt;/a&gt; where I work for
-creating an environment where I&amp;#x27;m privileged enough to be paid to contribute
+creating an environment where I&#x27;m privileged enough to be paid to contribute
 upstream to LLVM (&lt;a href=&quot;https://www.igalia.com/contact/&quot;&gt;get in touch&lt;/a&gt; if you have
 LLVM needs!). Thanks to my family for ongoing support and
 of course putting up with the times my LLVM Weekly commitment is inconvenient.
 Thank you to everyone who has been reading LLVM Weekly and especially those
 sending in feedback or tips or suggestions for future issues.&lt;/p&gt;
-&lt;p&gt;On a final note, if you&amp;#x27;ve got this far you should make sure you are
+&lt;p&gt;On a final note, if you&#x27;ve got this far you should make sure you are
 &lt;a href=&quot;https://llvmweekly.org/&quot;&gt;subscribed&lt;/a&gt; to LLVM Weekly and &lt;a href=&quot;https://fosstodon.org/@llvmweekly&quot;&gt;follow on
 Mastodon&lt;/a&gt; or &lt;a href=&quot;https://twitter.com/llvmweekly&quot;&gt;on
 Twitter&lt;/a&gt;.&lt;/p&gt;
@@ -240,7 +333,7 @@ is a helpful and perhaps overlooked tool for anyone who does a lot of their
 work out of a terminal window. First, an important clarification. Bells
 ringing, chiming, or (as is appropriate for the season) jingling all sounds
 very noisy - but although you can configure your terminal emulator to emit a
-sound for the terminal bell, I&amp;#x27;m actually advocating for configuring a
+sound for the terminal bell, I&#x27;m actually advocating for configuring a
 non-intrusive but persistent visual notification.&lt;/p&gt;
 &lt;h2 id=&quot;bel&quot;&gt;&lt;a href=&quot;#bel&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;BEL&lt;/h2&gt;
 &lt;p&gt;Our goal is to generate a visual indicator on demand (e.g. when a long-running
@@ -248,12 +341,12 @@ task has finished) and to do so with minimal fuss. This should work over ssh
 and without worrying about forwarding connections to some notification
 daemon. The ASCII &lt;code&gt;BEL&lt;/code&gt; control character (alternatively written as &lt;code&gt;BELL&lt;/code&gt; by
 those willing to spend characters extravagantly) meets these requirements.
-You&amp;#x27;ll just need co-operation from your terminal emulator and window manager
+You&#x27;ll just need co-operation from your terminal emulator and window manager
 to convert the bell to an appropriate notification.&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;BEL&lt;/code&gt; is &lt;code&gt;7&lt;/code&gt; in ASCII, but can be printed using &lt;code&gt;\a&lt;/code&gt; in &lt;code&gt;printf&lt;/code&gt; (including
 the &lt;code&gt;/usr/bin/printf&lt;/code&gt; you likely use from your shell, &lt;a href=&quot;https://pubs.opengroup.org/onlinepubs/9699919799/utilities/printf.html&quot;&gt;defined in
 POSIX&lt;/a&gt;).
-There&amp;#x27;s even a &lt;a href=&quot;https://rosettacode.org/wiki/Terminal_control/Ringing_the_terminal_bell&quot;&gt;Rosetta Code
+There&#x27;s even a &lt;a href=&quot;https://rosettacode.org/wiki/Terminal_control/Ringing_the_terminal_bell&quot;&gt;Rosetta Code
 page&lt;/a&gt;
 on ringing the terminal bell from various languages. Personally, I like to
 define a shell alias such as:&lt;/p&gt;
@@ -270,23 +363,23 @@ operation like an LLVM compile and test use something like:&lt;/p&gt;
 previous commands. All being well, this sets the urgent hint on the X11 window
 used by your terminal, and your window manager produces a subtle but
 persistent visual indicator that is dismissed after you next give focus to the
-source of the bell. Here&amp;#x27;s how it looks for me in
+source of the bell. Here&#x27;s how it looks for me in
 &lt;a href=&quot;https://dwm.suckless.org/&quot;&gt;DWM&lt;/a&gt;:&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;/static/bell_example.png&quot; alt=&quot;Screenshot of DWM showing a notification from abell&quot; title=&quot;DWM screenshot&quot; /&gt;&lt;/p&gt;
 &lt;p&gt;The above example shows 9 workspaces (some of them named), where the &lt;code&gt;llvm&lt;/code&gt;
-workspace has been highlighted because a bell was produced there. You&amp;#x27;ll also
+workspace has been highlighted because a bell was produced there. You&#x27;ll also
 spot that I have a &lt;code&gt;timers&lt;/code&gt; workspace, which I tend to use for miscellaneous
-timers. e.g. a reminder before a meeting is due to start, or when I&amp;#x27;m planning
+timers. e.g. a reminder before a meeting is due to start, or when I&#x27;m planning
 to switch a task. I have a small tool for this I might share in a future post.&lt;/p&gt;
 &lt;p&gt;A limitation versus triggering &lt;a href=&quot;https://specifications.freedesktop.org/notification-spec/latest/&quot;&gt;freedesktop.org Desktop
 Notifications&lt;/a&gt;
-is that there&amp;#x27;s no payload / associated message. For me this isn&amp;#x27;t a big deal,
-such messages are distracting, and it&amp;#x27;s easy enough to see the full context
-when switching workspaces. It&amp;#x27;s possible it&amp;#x27;s a problem for your preferred
+is that there&#x27;s no payload / associated message. For me this isn&#x27;t a big deal,
+such messages are distracting, and it&#x27;s easy enough to see the full context
+when switching workspaces. It&#x27;s possible it&#x27;s a problem for your preferred
 workflow of course.&lt;/p&gt;
 &lt;p&gt;You &lt;em&gt;could&lt;/em&gt; put &lt;code&gt;\a&lt;/code&gt; in your terminal prompt (&lt;code&gt;$PS1&lt;/code&gt;), meaning a bell is
 triggered after every command finishes. For me this would lead to too many
-notifications for commands I didn&amp;#x27;t want to carefully monitor the output for,
+notifications for commands I didn&#x27;t want to carefully monitor the output for,
 but your mileage may vary. After publishing this article, my
 &lt;a href=&quot;https://igalia.com&quot;&gt;Igalia&lt;/a&gt; colleague Adrian Perez pointed me to a slight
 variant on this that he uses: in Zsh &lt;code&gt;$TTYIDLE&lt;/code&gt; makes it easy to configure
@@ -303,7 +396,7 @@ the visual bell in preferences), and I switched solely due to this issue.&lt;/p&
 &lt;p&gt;From what I can tell, this is the status of visual bell support via setting
 the X11 urgent hint:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;xfce4-terminal: Supported. In Preferences -&amp;gt; Advanced ensure &amp;quot;Visual bell&amp;quot;
+&lt;li&gt;xfce4-terminal: Supported. In Preferences -&amp;gt; Advanced ensure &quot;Visual bell&quot;
 is ticked.&lt;/li&gt;
 &lt;li&gt;xterm: Set &lt;code&gt;XTerm.vt100.bellIsUrgent: true&lt;/code&gt; in your &lt;code&gt;.Xresources&lt;/code&gt; file.&lt;/li&gt;
 &lt;li&gt;rxvt-unicode (urxvt): Set &lt;code&gt;URxvt.urgentOnBell: true&lt;/code&gt; in your &lt;code&gt;.Xresources&lt;/code&gt;
@@ -312,8 +405,8 @@ file.&lt;/li&gt;
 needed.&lt;/li&gt;
 &lt;li&gt;gnome-terminal: &lt;a href=&quot;https://gitlab.gnome.org/GNOME/gnome-terminal/-/issues/6698&quot;&gt;Not
 supported&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;konsole: As far as I can tell it isn&amp;#x27;t supported. Creating a new profile and
-setting the &amp;quot;Terminal bell mode&amp;quot; to &amp;quot;Visual Bell&amp;quot; doesn&amp;#x27;t seem to result in
+&lt;li&gt;konsole: As far as I can tell it isn&#x27;t supported. Creating a new profile and
+setting the &quot;Terminal bell mode&quot; to &quot;Visual Bell&quot; doesn&#x27;t seem to result in
 the urgent hint being set.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
@@ -337,7 +430,7 @@ longer than a certain threshold duration in Zsh.&lt;/li&gt;
 On&lt;/a&gt;
 (by Adam Dingle and David F. Bacon, seemingly written in 2007) some years ago
 and it stuck with me as being an interesting variant on traditional reference
-counting. Since then I&amp;#x27;ve come across references to it multiple times in the
+counting. Since then I&#x27;ve come across references to it multiple times in the
 programming language design and implementation community and thought it might
 be worth jotting down some notes on the paper itself and the various attempts
 to adopt its ideas.&lt;/p&gt;
@@ -362,10 +455,10 @@ upon the owning pointer going out of scope rather than upon every decrement
 reaching zero). Additionally, refcount manipulation is never needed when
 passing around the owning pointer. The paper also describes an analysis
 that allows many refcount operations to be elided in regions where there
-aren&amp;#x27;t modifications to owned pointers of the owned object&amp;#x27;s
-subclass/class/superclass (which guarantees the pointed-to object can&amp;#x27;t be
+aren&#x27;t modifications to owned pointers of the owned object&#x27;s
+subclass/class/superclass (which guarantees the pointed-to object can&#x27;t be
 destructed in this region). The paper also claims support for destroying data
-structures with pointer cycles that can&amp;#x27;t be automatically destroyed with
+structures with pointer cycles that can&#x27;t be automatically destroyed with
 traditional reference counting. The authors suggest for cases where you might
 otherwise reach for multiple ownership, (e.g. an arbitrary graph) to allocate
 an array of owning pointers to hold your nodes, then use non-owning pointers
@@ -376,23 +469,23 @@ pointers indicated by a &lt;code&gt;^&lt;/code&gt; (e.g. &lt;code&gt;Foo ^f = ne
 to take ownership of a value from an owning field. Non-owning pointers are
 written just as &lt;code&gt;Foo f&lt;/code&gt;. They also achieve a rather neat &lt;em&gt;erasure&lt;/em&gt;
 property, whereby if you take a Gel program and remove all &lt;code&gt;^&lt;/code&gt; and &lt;code&gt;take&lt;/code&gt;
-you&amp;#x27;ll have a C# program that is valid as long as the original Gel program was
+you&#x27;ll have a C# program that is valid as long as the original Gel program was
 valid.&lt;/p&gt;
 &lt;p&gt;That all sounds pretty great, right? Does this mean we can have it all: full
-memory safety, deterministic destruction, low runtime and annotation overhead? As you&amp;#x27;d
+memory safety, deterministic destruction, low runtime and annotation overhead? As you&#x27;d
 expect, there are some challenges:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;The usability in practice is going to depend a lot on how easy it is for a
 programmer to maintain the invariant that no unowned pointers outlive the
 owned pointer, especially as failure to do so results in a runtime crash.
 &lt;ul&gt;
-&lt;li&gt;Several languages have looked at integrating the idea, so there&amp;#x27;s some
+&lt;li&gt;Several languages have looked at integrating the idea, so there&#x27;s some
 information later in this article on their experiences.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
-&lt;li&gt;Although data structures with pointer cycles that couldn&amp;#x27;t be automatically
+&lt;li&gt;Although data structures with pointer cycles that couldn&#x27;t be automatically
 destroyed by reference counting an be handled, there are also significant
-limitations. Gel can&amp;#x27;t destroy graphs containing non-owning pointers to
+limitations. Gel can&#x27;t destroy graphs containing non-owning pointers to
 non-ancestor nodes unless the programmer writes logic to null out those
 pointers. This could be frustrating and error-prone to handle.
 &lt;ul&gt;
@@ -402,7 +495,7 @@ descending the graph of the ownership tree 3 times) depends on how much
 can be optimised away.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
-&lt;li&gt;Although it&amp;#x27;s not a fundamental limitation of the approach, Gel doesn&amp;#x27;t yet
+&lt;li&gt;Although it&#x27;s not a fundamental limitation of the approach, Gel doesn&#x27;t yet
 provide any kind of polymorphism between owned and unowned references. This
 would be necessary for any modern language with support for generics.&lt;/li&gt;
 &lt;li&gt;The reference count elimination optimisation described in the paper assumes
@@ -418,7 +511,7 @@ Verona&lt;/a&gt;) could provide a solution.&lt;/li&gt;
 traditional reference counting, but the largest program written using this
 scheme is the Gel compiler itself and many of the obvious questions require
 larger scale usage to judge the practicality of the scheme.&lt;/p&gt;
-&lt;h2 id=&quot;influence-and-adoption-of-the-paperx27s-ideas&quot;&gt;&lt;a href=&quot;#influence-and-adoption-of-the-paperx27s-ideas&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Influence and adoption of the paper&amp;#x27;s ideas&lt;/h2&gt;
+&lt;h2 id=&quot;influence-and-adoption-of-the-papers-ideas&quot;&gt;&lt;a href=&quot;#influence-and-adoption-of-the-papers-ideas&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Influence and adoption of the paper&#x27;s ideas&lt;/h2&gt;
 &lt;p&gt;Ownership You Can Count On was written around 2007 and as far as I can tell
 never published in the proceedings of a conference or workshop, or in a
 journal. Flicking through the &lt;a href=&quot;https://code.google.com/archive/p/gel2/source/default/source&quot;&gt;Gel language
@@ -426,7 +519,7 @@ repository&lt;/a&gt; and
 applying some world-class logical deduction based on the directory name
 holding a draft version of the paper leads to me suspect it was submitted to
 PLDI though. Surprisingly it has no academic citations, despite being shared
-publicly on David F. Bacon&amp;#x27;s site (and Bacon has a range of widely cited
+publicly on David F. Bacon&#x27;s site (and Bacon has a range of widely cited
 papers related to reference counting / garbage collection). Yet, the work
 has been used as the basis for memory management in one language
 (&lt;a href=&quot;https://inko-lang.org/&quot;&gt;Inko&lt;/a&gt;) and was seriously evaluated (partially
@@ -442,11 +535,11 @@ Inko 0.10.0
 release&lt;/a&gt;
 about a year later. Inko as a language is more ambitious than Gel - featuring
 parametric polymorphism, lightweight processes for concurrency, and more. Yet
-it&amp;#x27;s still early days and it&amp;#x27;s not yet, for instance, good for drawing
-conclusions about performance on modern systems as &lt;a href=&quot;https://github.com/jinyus/related_post_gen/pull/440#issuecomment-1816583612&quot;&gt;optimisations aren&amp;#x27;t
+it&#x27;s still early days and it&#x27;s not yet, for instance, good for drawing
+conclusions about performance on modern systems as &lt;a href=&quot;https://github.com/jinyus/related_post_gen/pull/440#issuecomment-1816583612&quot;&gt;optimisations aren&#x27;t
 currently
 applied&lt;/a&gt;.
-Dusty Phillips wrote a blog post earlier this year &lt;a href=&quot;https://dusty.phillips.codes/2023/06/26/understanding-inko-memory-management-through-data-structures/&quot;&gt;explaining Inko&amp;#x27;s memory
+Dusty Phillips wrote a blog post earlier this year &lt;a href=&quot;https://dusty.phillips.codes/2023/06/26/understanding-inko-memory-management-through-data-structures/&quot;&gt;explaining Inko&#x27;s memory
 management through some example data
 structures&lt;/a&gt;,
 which also includes some thoughts on the usability of the system and some
@@ -456,38 +549,38 @@ some of the described techniques (perhaps this will be easier once common
 patterns are better documented and potentially supported by library functions
 or syntax?), or that debuggability is poor when the program exits with a
 dangling reference error.&lt;/p&gt;
-&lt;p&gt;Nim was at one point going to move to Gel&amp;#x27;s scheme (see the &lt;a href=&quot;https://nim-lang.org/araq/ownedrefs.html&quot;&gt;blog
+&lt;p&gt;Nim was at one point going to move to Gel&#x27;s scheme (see the &lt;a href=&quot;https://nim-lang.org/araq/ownedrefs.html&quot;&gt;blog
 post&lt;/a&gt; and
-(&lt;a href=&quot;https://github.com/nim-lang/RFCs/issues/144&quot;&gt;RFC&lt;/a&gt;). I haven&amp;#x27;t been able to
+(&lt;a href=&quot;https://github.com/nim-lang/RFCs/issues/144&quot;&gt;RFC&lt;/a&gt;). I haven&#x27;t been able to
 find a detailed explanation for the reasons why it was rejected, though
 Andreas Rumpf (Nim language creator) commented on a &lt;a href=&quot;https://forum.dlang.org/post/ejvshljmezqovmfprkww@forum.dlang.org&quot;&gt;Dlang forum discussion
 thread&lt;/a&gt;
-about the paper that &amp;quot;Nim tried to use this in production before moving to ORC
-and I&amp;#x27;m not looking back, &amp;#x27;ownership you can count on&amp;#x27; was actually quite a
-pain to work with...&amp;quot;. Nim has since &lt;a href=&quot;https://nim-lang.org/blog/2020/10/15/introduction-to-arc-orc-in-nim.html&quot;&gt;adopted a more conventional non-atomic
+about the paper that &quot;Nim tried to use this in production before moving to ORC
+and I&#x27;m not looking back, &#x27;ownership you can count on&#x27; was actually quite a
+pain to work with...&quot;. Nim has since &lt;a href=&quot;https://nim-lang.org/blog/2020/10/15/introduction-to-arc-orc-in-nim.html&quot;&gt;adopted a more conventional non-atomic
 reference counted
 scheme&lt;/a&gt;
 (ARC), with an optional cycle collector (ORC).&lt;/p&gt;
 &lt;p&gt;Vale was &lt;a href=&quot;https://verdagon.dev/blog/raii-next-steps&quot;&gt;previously adopting the Gel / Ownership You Can Count On
 scheme&lt;/a&gt; (calling the unowned
-references &amp;quot;constraint references&amp;quot;), but has since changed path slightly and
-now uses &amp;quot;&lt;a href=&quot;https://verdagon.dev/blog/generational-references&quot;&gt;generational
-references&lt;/a&gt;&amp;quot; Rather than a
+references &quot;constraint references&quot;), but has since changed path slightly and
+now uses &quot;&lt;a href=&quot;https://verdagon.dev/blog/generational-references&quot;&gt;generational
+references&lt;/a&gt;&quot; Rather than a
 reference count, each allocation includes a generation counter which is
 incremented each time it is reused. Fat pointers that include the expected
 value of the generation counter are used, and checked before dereferencing. If
-they don&amp;#x27;t match, that indicates the memory location was since reallocated and
-the program will fault. This also puts restrictions on the allocator&amp;#x27;s
-ability to reuse freed allocations without compromising safety. Vale&amp;#x27;s memory
+they don&#x27;t match, that indicates the memory location was since reallocated and
+the program will fault. This also puts restrictions on the allocator&#x27;s
+ability to reuse freed allocations without compromising safety. Vale&#x27;s memory
 management scheme retains similarities to Gel: the language is still based
 around single ownership and this is exploited to elide checks on owning
 references/pointers.&lt;/p&gt;
 &lt;h1 id=&quot;conclusion-and-other-related-work&quot;&gt;&lt;a href=&quot;#conclusion-and-other-related-work&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Conclusion and other related work&lt;/h1&gt;
-&lt;p&gt;Some tangentially related things that didn&amp;#x27;t make it into the main body of
+&lt;p&gt;Some tangentially related things that didn&#x27;t make it into the main body of
 text above:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;A language that references Gel in its design but goes in a slightly
-different direction is Wouter van Oortmerssen&amp;#x27;s
+different direction is Wouter van Oortmerssen&#x27;s
 &lt;a href=&quot;https://strlen.com/lobster/&quot;&gt;Lobster&lt;/a&gt;.  Its &lt;a href=&quot;https://aardappel.github.io/lobster/memory_management.html&quot;&gt;memory management
 scheme&lt;/a&gt; attempts
 to infer ownership (and optimise in the case where single ownership can be
@@ -497,13 +590,13 @@ above.&lt;/li&gt;
 &lt;a href=&quot;https://insights.sei.cmu.edu/documents/351/2013_019_001_55008.pdf&quot;&gt;Pointer Ownership
 Model&lt;/a&gt;
 paper as having similarities. It chooses to categorise pointers as either
-&amp;quot;responsible&amp;quot; or &amp;quot;irresponsible&amp;quot; - cute!&lt;/li&gt;
+&quot;responsible&quot; or &quot;irresponsible&quot; - cute!&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;And, that&amp;#x27;s about it. If you&amp;#x27;re hoping for a definitive answer on whether
-alias counting is a winning idea or not I&amp;#x27;m sorry to disappoint, but I&amp;#x27;ve at
-least succeeded in collecting together the various places I&amp;#x27;ve seen it
-explored and am looking forward to seeing how Inko&amp;#x27;s adoption of it evolves.
-I&amp;#x27;d be very interested to hear any experience reports of adopting alias
+&lt;p&gt;And, that&#x27;s about it. If you&#x27;re hoping for a definitive answer on whether
+alias counting is a winning idea or not I&#x27;m sorry to disappoint, but I&#x27;ve at
+least succeeded in collecting together the various places I&#x27;ve seen it
+explored and am looking forward to seeing how Inko&#x27;s adoption of it evolves.
+I&#x27;d be very interested to hear any experience reports of adopting alias
 counting or using a language like Inko that tries to use it.&lt;/p&gt;
 </content>
 </entry>
@@ -518,18 +611,18 @@ counting or using a language like Inko that tries to use it.&lt;/p&gt;
 &lt;p&gt;On mainstream 64-bit systems, the maximum bit-width
 of a virtual address is somewhat lower than 64 bits (commonly 48 bits). This
 gives an opportunity to repurpose those unused bits for data storage, if
-you&amp;#x27;re willing to mask them out before using your pointer (or have a hardware
+you&#x27;re willing to mask them out before using your pointer (or have a hardware
 feature that does that for you - more on this later). I wondered what happens
 to userspace programs relying on such tricks as processors gain support for
-wider virtual addresses, hence this little blog post. TL;DR is that there&amp;#x27;s no
+wider virtual addresses, hence this little blog post. TL;DR is that there&#x27;s no
 real change unless certain hint values to enable use of wider addresses are
 passed to &lt;code&gt;mmap&lt;/code&gt;, but read on for more details as well as other notes about
 the general topic of storing data in pointers.&lt;/p&gt;
 &lt;h2 id=&quot;storage-in-upper-bits-assuming-48-bit-virtual-addresses&quot;&gt;&lt;a href=&quot;#storage-in-upper-bits-assuming-48-bit-virtual-addresses&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Storage in upper bits assuming 48-bit virtual addresses&lt;/h2&gt;
 &lt;p&gt;Assuming your platform has 48-bit wide virtual addresses, this is pretty
-straightforward. You can stash whatever you want in those 16 bits, but you&amp;#x27;ll
+straightforward. You can stash whatever you want in those 16 bits, but you&#x27;ll
 need to ensure you masking them out for every load and store (which is cheap,
-but has at least some cost) and would want to be confident that there&amp;#x27;s no
+but has at least some cost) and would want to be confident that there&#x27;s no
 other attempted users for these bits. The masking would be slightly different
 in kernel space due to rules on how the upper bits are set:&lt;/p&gt;
 &lt;ul&gt;
@@ -545,9 +638,9 @@ in canonical form.&lt;/li&gt;
 &lt;li&gt;RISC-V has essentially the same restriction (see &lt;a href=&quot;https://github.com/riscv/riscv-isa-manual/releases/download/Priv-v1.12/riscv-privileged-20211203.pdf&quot;&gt;4.5.1 in the RISC-V
 privileged
 specification&lt;/a&gt;)
-&amp;quot;instruction fetch addresses and load and store effective addresses, which
+&quot;instruction fetch addresses and load and store effective addresses, which
 are 64 bits, must have bits 63-48 all equal to bit 47, or else a page-fault
-exception will occur.&amp;quot; The virtual memory layout used by the Linux kernel
+exception will occur.&quot; The virtual memory layout used by the Linux kernel
 &lt;a href=&quot;https://docs.kernel.org/arch/riscv/vm-layout.html&quot;&gt;uses the same approach as for
 x86-64&lt;/a&gt;.&lt;/li&gt;
 &lt;li&gt;AArch64 has a slight variant on the above which essentially provides a
@@ -555,36 +648,36 @@ x86-64&lt;/a&gt;.&lt;/li&gt;
 rather than 128TiB). As &lt;a href=&quot;https://documentation-service.arm.com/static/5efa1d23dbdee951c1ccdec5?token=&quot;&gt;described in the Armv8-A address translation
 documentation&lt;/a&gt;
 (section 3), for a 48-bit address space bits 63:48 must be all 0s or all 1s.
-However, they don&amp;#x27;t need to be a copy of bit 47, and a different address
+However, they don&#x27;t need to be a copy of bit 47, and a different address
 translation table is used depending on whether bits 63:48 are 1 or 0. This
 &lt;a href=&quot;https://docs.kernel.org/arch/arm64/memory.html&quot;&gt;allows splitting kernel/user addresses without giving up bit
 47&lt;/a&gt;.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&quot;what-if-virtual-addresses-are-wider-than-48-bits&quot;&gt;&lt;a href=&quot;#what-if-virtual-addresses-are-wider-than-48-bits&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;What if virtual addresses are wider than 48 bits?&lt;/h2&gt;
-&lt;p&gt;So we&amp;#x27;ve covered the easy case, where you can freely (ab)use the upper 16 bits
-for your own purposes. But what if you&amp;#x27;re running on a system that has wider
-than 48 bit virtual addresses? How do you know that&amp;#x27;s the case? And is it
-possible to limit virtual addresses to the 48-bit range if you&amp;#x27;re sure you
-don&amp;#x27;t need the extra bits?&lt;/p&gt;
+&lt;p&gt;So we&#x27;ve covered the easy case, where you can freely (ab)use the upper 16 bits
+for your own purposes. But what if you&#x27;re running on a system that has wider
+than 48 bit virtual addresses? How do you know that&#x27;s the case? And is it
+possible to limit virtual addresses to the 48-bit range if you&#x27;re sure you
+don&#x27;t need the extra bits?&lt;/p&gt;
 &lt;p&gt;You can query the virtual address width from the command-line by &lt;code&gt;cat&lt;/code&gt;ting
-&lt;code&gt;/proc/cpuinfo&lt;/code&gt;, which might include a line like &lt;code&gt;address sizes	: 39 bits physical, 48 bits virtual&lt;/code&gt;. I&amp;#x27;d hope there&amp;#x27;s a way to get the same information
-without parsing &lt;code&gt;/proc/cpuinfo&lt;/code&gt;, but I haven&amp;#x27;t been able to find it.&lt;/p&gt;
+&lt;code&gt;/proc/cpuinfo&lt;/code&gt;, which might include a line like &lt;code&gt;address sizes	: 39 bits physical, 48 bits virtual&lt;/code&gt;. I&#x27;d hope there&#x27;s a way to get the same information
+without parsing &lt;code&gt;/proc/cpuinfo&lt;/code&gt;, but I haven&#x27;t been able to find it.&lt;/p&gt;
 &lt;p&gt;As for how to keep using those upper bits on a system with wider virtual
 addresses, helpfully the behaviour of &lt;code&gt;mmap&lt;/code&gt; is defined with this
-compatibility in mind. It&amp;#x27;s explicitly documented &lt;a href=&quot;https://docs.kernel.org/arch/x86/x86_64/5level-paging.html#user-space-and-large-virtual-address-space&quot;&gt;for
+compatibility in mind. It&#x27;s explicitly documented &lt;a href=&quot;https://docs.kernel.org/arch/x86/x86_64/5level-paging.html#user-space-and-large-virtual-address-space&quot;&gt;for
 x86-64&lt;/a&gt;,
 &lt;a href=&quot;https://docs.kernel.org/arch/arm64/memory.html#bit-userspace-vas&quot;&gt;for
 AArch64&lt;/a&gt; and
 &lt;a href=&quot;https://docs.kernel.org/arch/riscv/vm-layout.html#userspace-vas&quot;&gt;for RISC-V&lt;/a&gt;
-that addresses beyond 48-bits won&amp;#x27;t be returned unless a hint parameter beyond
+that addresses beyond 48-bits won&#x27;t be returned unless a hint parameter beyond
 a certain width is used (the details are slightly different for each target).
-This means if you&amp;#x27;re confident that nothing within your process is going to be
+This means if you&#x27;re confident that nothing within your process is going to be
 passing such hints to &lt;code&gt;mmap&lt;/code&gt; (including e.g. your &lt;code&gt;malloc&lt;/code&gt; implementation), or
-at least that you&amp;#x27;ll never need to try to reuse upper bits of addresses
-produced in this way, then you&amp;#x27;re free to presume the system uses no more than
+at least that you&#x27;ll never need to try to reuse upper bits of addresses
+produced in this way, then you&#x27;re free to presume the system uses no more than
 48 bits of virtual address.&lt;/p&gt;
 &lt;h2 id=&quot;top-byte-ignore-and-similar-features&quot;&gt;&lt;a href=&quot;#top-byte-ignore-and-similar-features&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Top byte ignore and similar features&lt;/h2&gt;
-&lt;p&gt;Up to this point I&amp;#x27;ve completely skipped over the various architectural
+&lt;p&gt;Up to this point I&#x27;ve completely skipped over the various architectural
 features that allow some of the upper bits to be ignored upon dereference,
 essentially providing hardware support for this type of storage of additional
 data within pointeres by making additional masking unnecessary.&lt;/p&gt;
@@ -598,18 +691,18 @@ features&lt;/a&gt;. If enabled
 this modifies the canonicality check so that, for instance, on a system
 with 48-bit virtual addresses bit 47 must be equal to bit 63. This would
 allow bits 62:48 (15 bits) can be freely used with no masking needed.
-&amp;quot;LAM57&amp;quot; allows 62:57 to be used (6 bits). It seems as if Linux is
+&quot;LAM57&quot; allows 62:57 to be used (6 bits). It seems as if Linux is
 currently opting to &lt;a href=&quot;https://lwn.net/Articles/902094/&quot;&gt;only support LAM57 and not
 LAM48&lt;/a&gt;. Support for LAM can be
-configured separately for user and supervisor mode, but I&amp;#x27;ll refer you to
+configured separately for user and supervisor mode, but I&#x27;ll refer you to
 the Intel docs for details.&lt;/li&gt;
 &lt;li&gt;AMD instead &lt;a href=&quot;https://www.amd.com/content/dam/amd/en/documents/processor-tech-docs/programmer-references/24593.pdf&quot;&gt;describes Upper Address
 Ignore&lt;/a&gt;
 (see section 5.10) which allows bits 63:57 (7 bits) to be used, and unlike
-LAM doesn&amp;#x27;t require bit 63 to match the upper bit of the virtual address.
+LAM doesn&#x27;t require bit 63 to match the upper bit of the virtual address.
 As documented in LWN, this &lt;a href=&quot;https://lwn.net/Articles/888914/&quot;&gt;caused some concern from the Linux kernel
-community&lt;/a&gt;. Unless I&amp;#x27;m missing it, there
-doesn&amp;#x27;t seem to be any level of support merged in the Linux kernel at the
+community&lt;/a&gt;. Unless I&#x27;m missing it, there
+doesn&#x27;t seem to be any level of support merged in the Linux kernel at the
 time of writing.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
@@ -617,12 +710,12 @@ time of writing.&lt;/li&gt;
 extension&lt;/a&gt;
 which defines new supervisor-level extensions Ssnpm, Smnpm, and Smmpm to
 control it. These allow &lt;code&gt;PMLEN&lt;/code&gt; to potentially be set to 7 (masking the
-upper 7 bits) or 16 (masking the upper 16 bits). In usual RISC-V style, it&amp;#x27;s
+upper 7 bits) or 16 (masking the upper 16 bits). In usual RISC-V style, it&#x27;s
 not mandated which of these are supported, but the &lt;a href=&quot;https://github.com/riscv/riscv-profiles/blob/ff79c48f975f93c25f6359d47d0f578b3ecb8555/rva23-profile.adoc&quot;&gt;draft RVA23 profile
 mandates that PMLEN=7 must be supported at a
 minimum&lt;/a&gt;.
 Eagle-eyed readers will note that the proposed approach has the same issue
-that caused concern with AMD&amp;#x27;s Upper Address Ignore, namely that the most
+that caused concern with AMD&#x27;s Upper Address Ignore, namely that the most
 significant bit is no longer required to be the same as the top bit of the
 virtual address. This is
 &lt;a href=&quot;https://github.com/riscv/riscv-j-extension/blob/1c7cf98295e678e015750ff0b7fdc54ed213b95e/zjpm/background.adoc#pointer-masking-and-privilege-modes&quot;&gt;noted&lt;/a&gt;
@@ -634,15 +727,15 @@ Ignore&lt;/a&gt; (TBI)
 feature, which as the name suggests just means that the top 8 bits of a
 virtual address are ignored when used for memory accesses and can be used to
 store data. Any other bits between the virtual address width and top byte
-must be set to all 0s or all 1s, as before. TBI is also used by Arm&amp;#x27;s
+must be set to all 0s or all 1s, as before. TBI is also used by Arm&#x27;s
 &lt;a href=&quot;https://developer.arm.com/-/media/Arm%20Developer%20Community/PDF/Arm_Memory_Tagging_Extension_Whitepaper.pdf&quot;&gt;Memory Tagging
 Extension&lt;/a&gt;
-(MTE), which uses 4 of those bits as the &amp;quot;key&amp;quot; to be compared against the
-&amp;quot;lock&amp;quot; tag bits associated with a memory location being accessed. Armv8.3
+(MTE), which uses 4 of those bits as the &quot;key&quot; to be compared against the
+&quot;lock&quot; tag bits associated with a memory location being accessed. Armv8.3
 defines another potential consumer of otherwise unused address bits,
 &lt;a href=&quot;https://www.qualcomm.com/content/dam/qcomm-martech/dm-assets/documents/pointer-auth-v7.pdf&quot;&gt;pointer
 authentication&lt;/a&gt;
-which uses 11 to 31 bits depending on the virtual address width if TBI isn&amp;#x27;t
+which uses 11 to 31 bits depending on the virtual address width if TBI isn&#x27;t
 being used, or 3 to 23 bits if it is.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;A relevant historical note that multiple people pointed out: the original
@@ -650,20 +743,20 @@ Motorola 68000 had a 24-bit address bus and so the top byte was simply
 ignored which caused &lt;a href=&quot;https://macgui.com/news/article.php?t=527&quot;&gt;well documented porting issues when trying to expand the
 address space&lt;/a&gt;.&lt;/p&gt;
 &lt;h2 id=&quot;storing-data-in-least-significant-bits&quot;&gt;&lt;a href=&quot;#storing-data-in-least-significant-bits&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Storing data in least significant bits&lt;/h2&gt;
-&lt;p&gt;Another commonly used trick I&amp;#x27;d be remiss not to mention is repurposing a
+&lt;p&gt;Another commonly used trick I&#x27;d be remiss not to mention is repurposing a
 small number of the least significant bits in a pointer. If you know a certain
 set of pointers will only ever be used to point to memory with a given minimal
 alignment, you can exploit the fact that the lower bits corresponding to that
 alignment will always be zero and store your own data there. As before,
-you&amp;#x27;ll need to account for the bits you repurpose when accessing the pointer -
+you&#x27;ll need to account for the bits you repurpose when accessing the pointer -
 in this case either by masking, or by adjusting the offset used to access the
 address (if those least significant bits are known).&lt;/p&gt;
 &lt;p&gt;As &lt;a href=&quot;https://fosstodon.org/@pervognsen@mastodon.social/111478311705167492&quot;&gt;suggested by Per
 Vognsen&lt;/a&gt;,
-after this article was first published, you can exploit x86&amp;#x27;s &lt;a href=&quot;https://en.wikipedia.org/wiki/ModR/M#SIB_byte&quot;&gt;scaled index
+after this article was first published, you can exploit x86&#x27;s &lt;a href=&quot;https://en.wikipedia.org/wiki/ModR/M#SIB_byte&quot;&gt;scaled index
 addressing mode&lt;/a&gt; to use up
 to 3 bits that are unused due to alignment, but storing your data in the upper bits.
-The scaled index addressing mode meaning there&amp;#x27;s no need for separate pointer
+The scaled index addressing mode meaning there&#x27;s no need for separate pointer
 manipulation upon access. e.g. for an 8-byte aligned address, store it
 right-shifted by 3 and use the top 3 bits for metadata, then scaling by 8
 using SIB when accessing (which effectively ignores the top 3 bits).  This has
@@ -673,7 +766,7 @@ some trade-offs, but is such a neat trick I felt I have to include it!&lt;/p&gt;
 point of this quick blog post was really to discuss cases where additional
 data is stored alongside a pointer, but of course unused bits can also be
 exploited to allow a more efficient tagged union representation (and this is
-arguably more common), so I&amp;#x27;ve included some examples of that below:&lt;/p&gt;
+arguably more common), so I&#x27;ve included some examples of that below:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;The &lt;a href=&quot;https://www.cipht.net/2017/10/29/fixie-tries.html&quot;&gt;fixie trie&lt;/a&gt;, is a
 variant of the trie that uses 16 bits in each pointer to store a bitmap used
@@ -682,8 +775,8 @@ pointers to repurpose the least significant bit to indicate if a value is a
 branch or a leaf.&lt;/li&gt;
 &lt;li&gt;On the topic of storing data in the least significant bits, we have a handy
 &lt;a href=&quot;https://github.com/llvm/llvm-project/blob/dc8b055c71d2ff2f43c0f4cac66e15a210b91e3b/llvm/include/llvm/ADT/PointerIntPair.h#L64&quot;&gt;PointerIntPair&lt;/a&gt;
-class in LLVM to allow the easy implementation of this optimisation. There&amp;#x27;s
-also an &lt;a href=&quot;https://github.com/rust-lang/rfcs/pull/3204&quot;&gt;&amp;#x27;alignment niches&amp;#x27;
+class in LLVM to allow the easy implementation of this optimisation. There&#x27;s
+also an &lt;a href=&quot;https://github.com/rust-lang/rfcs/pull/3204&quot;&gt;&#x27;alignment niches&#x27;
 proposal&lt;/a&gt; for Rust which would
 allow this kind of optimisation to be done automatically for &lt;code&gt;enum&lt;/code&gt;s (tagged
 unions). Another example of repurposing the LSB found in the wild would be
@@ -691,15 +784,15 @@ the Linux kernel &lt;a href=&quot;https://git.kernel.org/pub/scm/linux/kernel/gi
 lock&lt;/a&gt;
 (thanks Vegard Nossum for the
 &lt;a href=&quot;https://fosstodon.org/@vegard@mastodon.social/111478755690419785&quot;&gt;tip&lt;/a&gt;, who
-notes this is used in the kernel&amp;#x27;s directory entry cache hashtable). There
+notes this is used in the kernel&#x27;s directory entry cache hashtable). There
 are surely many many more examples.&lt;/li&gt;
 &lt;li&gt;Go repurposes both upper and lower bits in its
 &lt;a href=&quot;https://github.com/golang/go/blob/master/src/runtime/tagptr_64bit.go&quot;&gt;taggedPointer&lt;/a&gt;,
 used internally in its runtime implementation.&lt;/li&gt;
-&lt;li&gt;If you have complete control over your heap then there&amp;#x27;s more you can do to
+&lt;li&gt;If you have complete control over your heap then there&#x27;s more you can do to
 make use of embedded metadata, including using additional bits by avoiding
 allocation outside of a certain range and using redundant mappings to avoid
-or reduce the need for masking. OpenJDK&amp;#x27;s ZGC &lt;a href=&quot;https://dinfuehr.github.io/blog/a-first-look-into-zgc/&quot;&gt;is a good example of
+or reduce the need for masking. OpenJDK&#x27;s ZGC &lt;a href=&quot;https://dinfuehr.github.io/blog/a-first-look-into-zgc/&quot;&gt;is a good example of
 this&lt;/a&gt;, utilising a
 42-bit address space for objects and upon allocation mapping pages to
 different aliases to allow pointers using their metadata bits to be
@@ -707,7 +800,7 @@ dereferenced without masking.&lt;/li&gt;
 &lt;li&gt;A fairly common trick in language runtimes is to exploit the fact that
 values can be stored inside the payload of double floating point NaN (not a
 number) values and overlap it with pointers (knowing that the full 64 bits
-aren&amp;#x27;t needed) and even small integers. There&amp;#x27;s a nice description of this
+aren&#x27;t needed) and even small integers. There&#x27;s a nice description of this
 &lt;a href=&quot;https://github.com/WebKit/WebKit/blob/0a64dd54421137c48a57e6e0aab15a99139a8776/Source/JavaScriptCore/runtime/JSCJSValue.h#L403&quot;&gt;in
 JavaScriptCore&lt;/a&gt;,
 but it was famously used in
@@ -719,13 +812,13 @@ Along similar lines, OCaml steals just the least significant bit in order to
 integers&lt;/a&gt;
 (meaning integers are 63-bit on 64-bit platforms and 31-bit on 32-bit
 platforms).&lt;/li&gt;
-&lt;li&gt;Apple&amp;#x27;s Objective-C implementation makes heavy use of unused pointer bits,
+&lt;li&gt;Apple&#x27;s Objective-C implementation makes heavy use of unused pointer bits,
 with some examples
 &lt;a href=&quot;https://www.mikeash.com/pyblog/friday-qa-2012-07-27-lets-build-tagged-pointers.html&quot;&gt;documented&lt;/a&gt;
 &lt;a href=&quot;https://www.mikeash.com/pyblog/friday-qa-2013-09-27-arm64-and-you.html&quot;&gt;in&lt;/a&gt;
 &lt;a href=&quot;https://www.mikeash.com/pyblog/friday-qa-2015-07-31-tagged-pointer-strings.html&quot;&gt;detail&lt;/a&gt;
-on Mike Ash&amp;#x27;s excellent blog (with a more recent scheme &lt;a href=&quot;https://alwaysprocessing.blog/2023/03/19/objc-tagged-ptr&quot;&gt;described on Brian
-T. Kelley&amp;#x27;s blog&lt;/a&gt;.
+on Mike Ash&#x27;s excellent blog (with a more recent scheme &lt;a href=&quot;https://alwaysprocessing.blog/2023/03/19/objc-tagged-ptr&quot;&gt;described on Brian
+T. Kelley&#x27;s blog&lt;/a&gt;.
 Inlining the reference count (falling back to a hash lookup upon overflow)
 is a fun one. Another example of using the LSB
 to store small strings in-line is &lt;a href=&quot;https://squoze.org/&quot;&gt;squoze&lt;/a&gt;.&lt;/li&gt;
@@ -739,12 +832,12 @@ scope of this article I might as well round it off with &lt;a href=&quot;https:/
 list&lt;/a&gt;, which reduces the
 storage requirements for doubly linked lists by exploiting the reversibility
 of the XOR operation.&lt;/li&gt;
-&lt;li&gt;I&amp;#x27;ve focused on storing data in conventional pointers on current commodity
+&lt;li&gt;I&#x27;ve focused on storing data in conventional pointers on current commodity
 architectures but there is of course a huge wealth of work involving tagged
-memory (also an area where &lt;a href=&quot;https://github.com/lowRISC/lowrisc-site/blob/master/static/downloads/lowRISC-memo-2014-001.pdf&quot;&gt;I&amp;#x27;ve
+memory (also an area where &lt;a href=&quot;https://github.com/lowRISC/lowrisc-site/blob/master/static/downloads/lowRISC-memo-2014-001.pdf&quot;&gt;I&#x27;ve
 dabbled&lt;/a&gt; -
 something for a future blog post perhaps) and/or alternative pointer
-representations. I&amp;#x27;ve touched on this with MTE (mentioned due to its
+representations. I&#x27;ve touched on this with MTE (mentioned due to its
 interaction with TBI), but another prominent example is of course
 &lt;a href=&quot;https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-941.pdf&quot;&gt;CHERI&lt;/a&gt; which moves
 to using 128-bit capabilities in order to fit in additional inline metadata.
@@ -764,8 +857,8 @@ or &lt;a href=&quot;https://fosstodon.org/@asb/111478289261238134&quot;&gt;on Ma
 &lt;ul&gt;
 &lt;li&gt;2023-12-02:
 &lt;ul&gt;
-&lt;li&gt;Reference Brian T. Kelley&amp;#x27;s blog providing a more up-to-date description
-of &amp;quot;pointer tagging&amp;quot; in Objective-C. &lt;a href=&quot;https://fosstodon.org/@uliwitness@chaos.social/111510381669628525&quot;&gt;Spotted on
+&lt;li&gt;Reference Brian T. Kelley&#x27;s blog providing a more up-to-date description
+of &quot;pointer tagging&quot; in Objective-C. &lt;a href=&quot;https://fosstodon.org/@uliwitness@chaos.social/111510381669628525&quot;&gt;Spotted on
 Mastodon&lt;/a&gt;.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
@@ -773,16 +866,16 @@ Mastodon&lt;/a&gt;.&lt;/li&gt;
 &lt;ul&gt;
 &lt;li&gt;Mention Squoze (thanks to &lt;a href=&quot;https://fosstodon.org/@vanderZwan@vis.social/111482795620805222&quot;&gt;Job van der
 Zwan&lt;/a&gt;).&lt;/li&gt;
-&lt;li&gt;Reworded the intro so as not to claim &amp;quot;it&amp;#x27;s quite well known&amp;quot; that the
+&lt;li&gt;Reworded the intro so as not to claim &quot;it&#x27;s quite well known&quot; that the
 maximum virtual address width is typically less than 64 bits. This might
 be interpreted as shaming readers for not being aware of that, which
-wasn&amp;#x27;t my intent.  Thanks to HN reader jonasmerlin for &lt;a href=&quot;https://news.ycombinator.com/item?id=38430812&quot;&gt;pointing this
+wasn&#x27;t my intent.  Thanks to HN reader jonasmerlin for &lt;a href=&quot;https://news.ycombinator.com/item?id=38430812&quot;&gt;pointing this
 out&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;Mention CHERI is the list of &amp;quot;real world examples&amp;quot; which is becoming
+&lt;li&gt;Mention CHERI is the list of &quot;real world examples&quot; which is becoming
 dominated by instances of things somewhat different to what I was
 describing! Thanks to Paul Butcher &lt;a href=&quot;https://www.linkedin.com/feed/update/urn:li:activity:7134613236737302528&quot;&gt;for the
 suggestion&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;Link to relevant posts on Mike Ash&amp;#x27;s blog
+&lt;li&gt;Link to relevant posts on Mike Ash&#x27;s blog
 (&lt;a href=&quot;https://lobste.rs/s/5417dx/storing_data_pointers#c_la63sf&quot;&gt;suggested&lt;/a&gt; by
 Jens Alfke).&lt;/li&gt;
 &lt;li&gt;Link to the various places this article is being discussed.&lt;/li&gt;
@@ -802,7 +895,7 @@ Nossum for the
 Vognsen&lt;/a&gt;.&lt;/li&gt;
 &lt;li&gt;Integrate note
 &lt;a href=&quot;https://fosstodon.org/@wingo@mastodon.social/111478367520587737&quot;&gt;suggested&lt;/a&gt;
-by Andy Wingo that explicit masking often isn&amp;#x27;t needed when the least
+by Andy Wingo that explicit masking often isn&#x27;t needed when the least
 significant pointer bits are repurposed.&lt;/li&gt;
 &lt;li&gt;Add a reference to Arm Pointer Authentication (thanks to the
 &lt;a href=&quot;https://twitter.com/tmikov/status/1728849257439150425&quot;&gt;suggestion&lt;/a&gt; from
@@ -822,28 +915,28 @@ Tzvetan Mikov).&lt;/li&gt;
 <id>https://muxup.com/2023q4/whats-new-for-risc-v-in-llvm-17</id>
 <content type="html">
 &lt;p&gt;LLVM 17 was &lt;a href=&quot;https://discourse.llvm.org/t/llvm-17-0-1-released/73549&quot;&gt;released in the past few
-weeks&lt;/a&gt;, and I&amp;#x27;m
+weeks&lt;/a&gt;, and I&#x27;m
 &lt;a href=&quot;/2023q1/whats-new-for-risc-v-in-llvm-16&quot;&gt;continuing&lt;/a&gt; the
 &lt;a href=&quot;/2022q3/whats-new-for-risc-v-in-llvm-15&quot;&gt;tradition&lt;/a&gt;
-of writing up some selective highlights of what&amp;#x27;s new as far as RISC-V is
-concerned in this release. If you want more general, regular updates on what&amp;#x27;s
+of writing up some selective highlights of what&#x27;s new as far as RISC-V is
+concerned in this release. If you want more general, regular updates on what&#x27;s
 going on in LLVM you should of course &lt;a href=&quot;https://llvmweekly.org/&quot;&gt;subscribe to my
 newsletter&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;In case you&amp;#x27;re not familiar with LLVM&amp;#x27;s release schedule, it&amp;#x27;s worth noting
+&lt;p&gt;In case you&#x27;re not familiar with LLVM&#x27;s release schedule, it&#x27;s worth noting
 that there are two major LLVM releases a year (i.e. one roughly every 6
 months) and these are timed releases as opposed to being cut when a pre-agreed
-set of feature targets have been met. We&amp;#x27;re very fortunate to benefit from an
+set of feature targets have been met. We&#x27;re very fortunate to benefit from an
 active and growing set of contributors working on RISC-V support in LLVM
 projects, who are responsible for the work I describe below - thank you!
-I coordinate biweekly sync-up calls for RISC-V LLVM contributors, so if you&amp;#x27;re
+I coordinate biweekly sync-up calls for RISC-V LLVM contributors, so if you&#x27;re
 working in this area please &lt;a href=&quot;https://discourse.llvm.org/c/code-generation/riscv/57&quot;&gt;consider dropping
 in&lt;/a&gt;.&lt;/p&gt;
 &lt;h2 id=&quot;code-size-reduction-extensions&quot;&gt;&lt;a href=&quot;#code-size-reduction-extensions&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Code size reduction extensions&lt;/h2&gt;
 &lt;p&gt;A family of extensions referred to as the &lt;a href=&quot;https://github.com/riscv/riscv-code-size-reduction/releases/download/v1.0.4-2/Zc_1.0.4-2.pdf&quot;&gt;RISC-V code size reduction
 extensions&lt;/a&gt;
 was ratified earlier this year. One aspect of this is providing ways of
-referring to subsets of the standard compressed &amp;#x27;C&amp;#x27; (16-bit instructions)
-extension that don&amp;#x27;t include floating point loads/stores, as well as other
+referring to subsets of the standard compressed &#x27;C&#x27; (16-bit instructions)
+extension that don&#x27;t include floating point loads/stores, as well as other
 variants. But the more meaningful additions are the &lt;code&gt;Zcmp&lt;/code&gt; and &lt;code&gt;Zcmt&lt;/code&gt;
 extensions, in both cases targeted at embedded rather than application cores,
 reusing encodings for double-precision FP store.&lt;/p&gt;
@@ -870,7 +963,7 @@ impact of these
 extensions&lt;/a&gt;
 produced using &lt;a href=&quot;https://github.com/riscv/riscv-code-size-reduction/tree/main/benchmarks&quot;&gt;this analysis
 script&lt;/a&gt;.
-I&amp;#x27;m not aware of whether a comparison has been made to the real-world results
+I&#x27;m not aware of whether a comparison has been made to the real-world results
 of implementing support for the extensions in LLVM, but that would certainly
 be interesting.&lt;/p&gt;
 &lt;h2 id=&quot;vectorization&quot;&gt;&lt;a href=&quot;#vectorization&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Vectorization&lt;/h2&gt;
@@ -880,8 +973,8 @@ vectorizer and the SLP (superword-level parallelism) vectorizer. The loop
 vectorizer was enabled during the LLVM 16 development cycle, while the SLP
 vectorizer &lt;a href=&quot;https://github.com/llvm/llvm-project/commit/7f26c27e03f1&quot;&gt;was
 enabled&lt;/a&gt; for this
-release. Beyond that, there&amp;#x27;s been a huge number of incremental improvements
-for vector codegen such that isn&amp;#x27;t always easy to pick out particular
+release. Beyond that, there&#x27;s been a huge number of incremental improvements
+for vector codegen such that isn&#x27;t always easy to pick out particular
 highlights. But to pick a small set of changes:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&quot;https://github.com/riscv-non-isa/rvv-intrinsic-doc/releases/tag/v0.12.0&quot;&gt;Version 0.12 of the RISC-V vector C intrinsics
@@ -893,17 +986,17 @@ will not be new incompatibilities introduced prior to v1.0.&lt;/li&gt;
 pass&lt;/a&gt; to avoid
 additional unnecessary insertions &lt;code&gt;vsetivli&lt;/code&gt; instruction that is used to
 modify the &lt;code&gt;vtype&lt;/code&gt; control register.&lt;/li&gt;
-&lt;li&gt;It&amp;#x27;s not particularly user visible, but there was a lot of refactoring of
+&lt;li&gt;It&#x27;s not particularly user visible, but there was a lot of refactoring of
 vector pseudoinstructions used internally during instruction selection
 (following &lt;a href=&quot;https://discourse.llvm.org/t/riscv-transition-in-vector-pseudo-structure-policy-variants/71295&quot;&gt;this
 thread&lt;/a&gt;.
 The &lt;a href=&quot;https://github.com/llvm/llvm-project/commit/691618a7a959&quot;&gt;added
 documentation&lt;/a&gt;
-will likely be helpful if you&amp;#x27;re hoping to better understand this.&lt;/li&gt;
+will likely be helpful if you&#x27;re hoping to better understand this.&lt;/li&gt;
 &lt;li&gt;You might be aware that &lt;code&gt;LMUL&lt;/code&gt; in the RISC-V vector extension controls
 grouping of vector registers, for instance rather than 32 vector registers,
 you might want to set LMUL=4 to treat them as 8 registers that are 4 times
-as large. The &amp;quot;best&amp;quot; LMUL is going to vary depending on both the target
+as large. The &quot;best&quot; LMUL is going to vary depending on both the target
 microarchitecture and factors such as register pressure, but a change was
 made so &lt;a href=&quot;https://github.com/llvm/llvm-project/commit/8d16c6809a08&quot;&gt;LMUL=2 is the new
 default&lt;/a&gt;.&lt;/li&gt;
@@ -915,8 +1008,8 @@ llvm-mca and RISC-V vector support: &lt;a href=&quot;https://github.com/llvm/llv
 SiFive7 cores&lt;/a&gt;
 (which of course is used outside of llvm-mca as well), and support for
 &lt;a href=&quot;https://github.com/llvm/llvm-project/commit/ecf372f993fa&quot;&gt;vsetivli/vsetvli&lt;/a&gt;
-&amp;#x27;instruments&amp;#x27;. llvm-mca has the concept of an &amp;#x27;&lt;a href=&quot;https://llvm.org/docs/CommandGuide/llvm-mca.html#instrument-regions&quot;&gt;instrument
-region&lt;/a&gt;&amp;#x27;,
+&#x27;instruments&#x27;. llvm-mca has the concept of an &#x27;&lt;a href=&quot;https://llvm.org/docs/CommandGuide/llvm-mca.html#instrument-regions&quot;&gt;instrument
+region&lt;/a&gt;&#x27;,
 a section of assembly with an LLVM-MCA comment that can (for instance)
 indicate the value of a control register that would affect scheduling. This
 can be used to set &lt;code&gt;LMUL&lt;/code&gt; (register grouping) for RISC-V, however in the
@@ -924,21 +1017,21 @@ case of the immediate forms of &lt;code&gt;vsetvl&lt;/code&gt; occuring in the i
 statically determined.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;If you want to find out more about RISC-V vector support in LLVM, be sure to
-check out &lt;a href=&quot;https://llvm.swoogo.com/2023devmtg/session/1767411/vector-codegen-in-the-risc-v-backend&quot;&gt;my Igalia colleague Luke Lau&amp;#x27;s
+check out &lt;a href=&quot;https://llvm.swoogo.com/2023devmtg/session/1767411/vector-codegen-in-the-risc-v-backend&quot;&gt;my Igalia colleague Luke Lau&#x27;s
 talk&lt;/a&gt;
-at the LLVM Dev Meeting this week (I&amp;#x27;ll update this article when
+at the LLVM Dev Meeting this week (I&#x27;ll update this article when
 slides+recording are available).&lt;/p&gt;
 &lt;h2 id=&quot;other-isa-extensions&quot;&gt;&lt;a href=&quot;#other-isa-extensions&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Other ISA extensions&lt;/h2&gt;
-&lt;p&gt;It wouldn&amp;#x27;t be a RISC-V article without a list of hard to interpret strings
+&lt;p&gt;It wouldn&#x27;t be a RISC-V article without a list of hard to interpret strings
 that claim to be ISA extension names (Zvfbfwma is a real extension, I
 promise!). In addition to the code size reduction extension listed above
-there&amp;#x27;s been lots of newly added or updated extensions in this release cycle.
+there&#x27;s been lots of newly added or updated extensions in this release cycle.
 Do refer to the &lt;a href=&quot;https://releases.llvm.org/17.0.1/docs/RISCVUsage.html&quot;&gt;RISCVUsage
 documentation&lt;/a&gt; for
 something that aims to be a complete list of what is supported (occasionally
 there are omissions) as well as clarity on what we mean by an extension being
-marked as &amp;quot;experimental&amp;quot;.&lt;/p&gt;
-&lt;p&gt;Here&amp;#x27;s a partial list:&lt;/p&gt;
+marked as &quot;experimental&quot;.&lt;/p&gt;
+&lt;p&gt;Here&#x27;s a partial list:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Code generation support for the &lt;a href=&quot;https://github.com/riscv/riscv-isa-manual/blob/main/src/zfinx.adoc&quot;&gt;Zfinx, Zdinx, Zhinx, and Zhinxmin
 extensions&lt;/a&gt;.
@@ -965,26 +1058,26 @@ format&lt;/a&gt;.
 &lt;a href=&quot;https://github.com/riscv/riscv-zacas&quot;&gt;Zacas&lt;/a&gt; extension (atomic
 compare-and-swap).&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;It landed after the 17.x branch so isn&amp;#x27;t in this release, but in the future
-you&amp;#x27;ll be able to use &lt;code&gt;--print-supported-extensions&lt;/code&gt; with Clang to have it
+&lt;p&gt;It landed after the 17.x branch so isn&#x27;t in this release, but in the future
+you&#x27;ll be able to use &lt;code&gt;--print-supported-extensions&lt;/code&gt; with Clang to have it
 print a table of supported ISA extensions (the same flag has now been
 implemented for Arm and AArch64 too).&lt;/p&gt;
 &lt;h2 id=&quot;other-additions-and-improvements&quot;&gt;&lt;a href=&quot;#other-additions-and-improvements&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Other additions and improvements&lt;/h2&gt;
-&lt;p&gt;As always, it&amp;#x27;s not possible to go into detail on every change. A selection of
-other changes that I&amp;#x27;m not able to delve into more detail on:&lt;/p&gt;
+&lt;p&gt;As always, it&#x27;s not possible to go into detail on every change. A selection of
+other changes that I&#x27;m not able to delve into more detail on:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;Initial RISC-V support was added to &lt;a href=&quot;https://github.com/llvm/llvm-project/blob/main/bolt/README.md&quot;&gt;LLVM&amp;#x27;s BOLT post-link
+&lt;li&gt;Initial RISC-V support was added to &lt;a href=&quot;https://github.com/llvm/llvm-project/blob/main/bolt/README.md&quot;&gt;LLVM&#x27;s BOLT post-link
 optimizer&lt;/a&gt;
 and various fixes / feature additions made to
 &lt;a href=&quot;https://llvm.org/docs/JITLink.html&quot;&gt;JITLink&lt;/a&gt;, thanks to the work of my
-Igalia colleague Job Noorman. There&amp;#x27;s actually a lot to say about this work,
-but I don&amp;#x27;t need to because Job has written up and &lt;a href=&quot;https://blogs.igalia.com/compilers/2023/06/30/porting-bolt-to-risc-v/&quot;&gt;excellent blog post on
+Igalia colleague Job Noorman. There&#x27;s actually a lot to say about this work,
+but I don&#x27;t need to because Job has written up and &lt;a href=&quot;https://blogs.igalia.com/compilers/2023/06/30/porting-bolt-to-risc-v/&quot;&gt;excellent blog post on
 it&lt;/a&gt;
 that I highly encourage you go and read.&lt;/li&gt;
 &lt;li&gt;LLD &lt;a href=&quot;https://github.com/llvm/llvm-project/commit/85444794cdde&quot;&gt;gained
 support&lt;/a&gt; for some
 of the relaxations involving the global pointer.&lt;/li&gt;
-&lt;li&gt;I expect there&amp;#x27;ll be more to say about this in future releases, but there&amp;#x27;s
+&lt;li&gt;I expect there&#x27;ll be more to say about this in future releases, but there&#x27;s
 been incremental progress on RISC-V
 &lt;a href=&quot;https://llvm.org/docs/GlobalISel/index.html&quot;&gt;GlobalISel&lt;/a&gt; in the LLVM 17
 development cycle (which has continued after). You might be interested in
@@ -1007,10 +1100,10 @@ specific versions. There will of course be further updates for LLVM 18,
 including the work from my colleague Mikhail R Gadelha on 32-bit RISC-V
 support.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;Apologies if I&amp;#x27;ve missed
+&lt;p&gt;Apologies if I&#x27;ve missed
 your favourite new feature or improvement - the &lt;a href=&quot;https://releases.llvm.org/17.0.1/docs/ReleaseNotes.html#changes-to-the-risc-v-backend&quot;&gt;LLVM release
 notes&lt;/a&gt;
-will include some things I haven&amp;#x27;t had space for here. Thanks again for
+will include some things I haven&#x27;t had space for here. Thanks again for
 everyone who has been contributing to make the RISC-V in LLVM even better.&lt;/p&gt;
 &lt;p&gt;If you have a RISC-V project you think me and my colleagues and at Igalia may
 be able to help with, then do &lt;a href=&quot;https://www.igalia.com/contact/&quot;&gt;get in touch&lt;/a&gt;
@@ -1089,7 +1182,7 @@ this&lt;/a&gt;.
 RISC-V
 psABI&lt;/a&gt;,
 including a slightly altered lowering of some primitives in order to allow
-for forwards compatibility with &amp;quot;table A.7&amp;quot;.&lt;/li&gt;
+for forwards compatibility with &quot;table A.7&quot;.&lt;/li&gt;
 &lt;li&gt;Usual mix of upstream LLVM reviews, and a number of RISC-V psABI or ASM
 manual reviews.&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/489&quot;&gt;LLVM Weekly #489&lt;/a&gt;.&lt;/li&gt;
@@ -1111,7 +1204,7 @@ extension).
 &lt;li&gt;&lt;a href=&quot;https://github.com/riscv/riscv-zacas/pull/8&quot;&gt;#8&lt;/a&gt; made the
 dependency on the A extension explicit.&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;https://github.com/riscv/riscv-zacas/pull/7&quot;&gt;#7&lt;/a&gt; attempted to explicitly
-reference the extension for misaligned atomics, though it seems won&amp;#x27;t be
+reference the extension for misaligned atomics, though it seems won&#x27;t be
 merged. I do feel uncomfortable with RISC-V extensions that can have their
 semantics changed by other standard extensions without this possibility
 being called out very explicitly. As I note in the PR, failure to
@@ -1126,7 +1219,7 @@ profiles&lt;/a&gt;.&lt;/li&gt;
 fixed in &lt;a href=&quot;https://reviews.llvm.org/D148615&quot;&gt;D148615&lt;/a&gt; which built on the
 &lt;a href=&quot;https://reviews.llvm.org/rGa35e67fc5be6&quot;&gt;pre-committed test case&lt;/a&gt;.&lt;/li&gt;
 &lt;li&gt;A whole bunch of upstream LLVM reviews. As noted in
-&lt;a href=&quot;https://reviews.llvm.org/D148315#4279486&quot;&gt;D148315&lt;/a&gt; I&amp;#x27;m thinking we should
+&lt;a href=&quot;https://reviews.llvm.org/D148315#4279486&quot;&gt;D148315&lt;/a&gt; I&#x27;m thinking we should
 probably relaxing the ordering rules for ISA strings in &lt;code&gt;-march&lt;/code&gt; in order to
 avoid issues due to spec changes and incompatibilities between GCC and
 Clang.&lt;/li&gt;
@@ -1192,14 +1285,14 @@ suggested some alternate wording.&lt;/li&gt;
 <link rel="alternate" href="https://muxup.com/2023q2/updating-wrens-benchmarks"/>
 <id>https://muxup.com/2023q2/updating-wrens-benchmarks</id>
 <content type="html">
-&lt;p&gt;&lt;a href=&quot;https://wren.io/&quot;&gt;Wren&lt;/a&gt; is a &amp;quot;small, fast, class-based, concurrent scripting
-language&amp;quot;, originally designed by Bob Nystrom (who you might recognise as the
+&lt;p&gt;&lt;a href=&quot;https://wren.io/&quot;&gt;Wren&lt;/a&gt; is a &quot;small, fast, class-based, concurrent scripting
+language&quot;, originally designed by Bob Nystrom (who you might recognise as the
 author of &lt;a href=&quot;https://gameprogrammingpatterns.com/&quot;&gt;Game Programming Patterns&lt;/a&gt;
-and &lt;a href=&quot;https://craftinginterpreters.com/&quot;&gt;Crafting Interpreters&lt;/a&gt;. It&amp;#x27;s a really
+and &lt;a href=&quot;https://craftinginterpreters.com/&quot;&gt;Crafting Interpreters&lt;/a&gt;. It&#x27;s a really
 fun language to study - the implementation is compact and easily readable, and
-although class-based languages aren&amp;#x27;t considered very hip these days there&amp;#x27;s a
-real elegance to its design. I saw Wren&amp;#x27;s &lt;a href=&quot;https://wren.io/performance.html&quot;&gt;performance
-page&lt;/a&gt; hadn&amp;#x27;t been updated for a very long
+although class-based languages aren&#x27;t considered very hip these days there&#x27;s a
+real elegance to its design. I saw Wren&#x27;s &lt;a href=&quot;https://wren.io/performance.html&quot;&gt;performance
+page&lt;/a&gt; hadn&#x27;t been updated for a very long
 time, and especially given the recent upstream interpreter performance work on
 Python, was interested in seeing how performance on these microbencharks has
 changed. Hence this quick post to share some new numbers.&lt;/p&gt;
@@ -1319,11 +1412,11 @@ current Arch Linux).&lt;/p&gt;
     &lt;th&gt;python3.10&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 100%;&quot;&gt;0.252s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
   &lt;/tr&gt;
 &lt;/table&gt;
-&lt;p&gt;I&amp;#x27;ve used essentially the same presentation and methodology as in the original
+&lt;p&gt;I&#x27;ve used essentially the same presentation and methodology as in the original
 benchmark, partly to save time pondering the optimal approach, partly so I can
 redirect any critiques to the original author (sorry Bob!). Benchmarks do not
 measure interpreter startup time, and each benchmark is run ten times with the
-median used (thermal throttling could potentially mean this isn&amp;#x27;t the best
+median used (thermal throttling could potentially mean this isn&#x27;t the best
 methodology, but changing the number of test repetitions to e.g. 1000 seems to
 have little effect).&lt;/p&gt;
 &lt;p&gt;The tests were run on a machine with an AMD Ryzen 9 5950X processor. wren 0.4
@@ -1337,15 +1430,15 @@ was used as well as the following Arch Linux packages:&lt;/p&gt;
 &lt;li&gt;luajit-2.1.0.beta3.r471.g505e2c03-1&lt;/li&gt;
 &lt;li&gt;mruby-3.1.0-1&lt;/li&gt;
 &lt;li&gt;python-3.10.10-1&lt;/li&gt;
-&lt;li&gt;python-3.11.3-1 (taken from Arch Linux&amp;#x27;s staging repo)&lt;/li&gt;
+&lt;li&gt;python-3.11.3-1 (taken from Arch Linux&#x27;s staging repo)&lt;/li&gt;
 &lt;li&gt;ruby2.7-2.7.7-1&lt;/li&gt;
 &lt;li&gt;ruby-3.0.5-1&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;The Python 3.10 and 3.11 packages were compiled with the same GCC version
-(12.2.1 according to &lt;code&gt;python -VV&lt;/code&gt;), though this won&amp;#x27;t necessarily be true for
+(12.2.1 according to &lt;code&gt;python -VV&lt;/code&gt;), though this won&#x27;t necessarily be true for
 all other packages (e.g. the lua52 and lua53 packages are several years old so
 will have been built an older GCC).&lt;/p&gt;
-&lt;p&gt;I&amp;#x27;ve submitted a &lt;a href=&quot;https://github.com/wren-lang/wren/pull/1164&quot;&gt;pull request to update the Wren performance
+&lt;p&gt;I&#x27;ve submitted a &lt;a href=&quot;https://github.com/wren-lang/wren/pull/1164&quot;&gt;pull request to update the Wren performance
 page&lt;/a&gt;.&lt;/p&gt;
 &lt;h2 id=&quot;old-results&quot;&gt;&lt;a href=&quot;#old-results&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Old results&lt;/h2&gt;
 &lt;p&gt;The following results are copied from the &lt;a href=&quot;https://wren.io/performance.html&quot;&gt;Wren performance
@@ -1431,7 +1524,7 @@ Lua 5.2.3, LuaJIT 2.0.2, Python 2.7.5, Python 3.3.4, ruby 2.0.0p247.&lt;/p&gt;
 &lt;h2 id=&quot;observations&quot;&gt;&lt;a href=&quot;#observations&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Observations&lt;/h2&gt;
 &lt;p&gt;A few takeaways:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;LuaJIT&amp;#x27;s bytecode interpreter remains incredibly fast (though see &lt;a href=&quot;https://sillycross.github.io/2022/11/22/2022-11-22/&quot;&gt;this blog
+&lt;li&gt;LuaJIT&#x27;s bytecode interpreter remains incredibly fast (though see &lt;a href=&quot;https://sillycross.github.io/2022/11/22/2022-11-22/&quot;&gt;this blog
 post&lt;/a&gt; for a methodology
 to produce an even faster interpreter).&lt;/li&gt;
 &lt;li&gt;The performance improvements in Python 3.11 were &lt;a href=&quot;https://docs.python.org/3/whatsnew/3.11.html#whatsnew311-faster-cpython&quot;&gt;well
@@ -1445,11 +1538,11 @@ release&lt;/a&gt; however did note improved
 performance on a range of benchmarks.&lt;/li&gt;
 &lt;li&gt;Wren remains speedy (for these workloads at least), but engineering work on
 other interpreters has narrowed that gap for some of these benchmarks.&lt;/li&gt;
-&lt;li&gt;I haven&amp;#x27;t taken the time to compare the January 2015 version of Wren used
+&lt;li&gt;I haven&#x27;t taken the time to compare the January 2015 version of Wren used
 for the benchmarks vs present-day Wren 0.4. It would be interesting to
 explore that though.&lt;/li&gt;
 &lt;li&gt;A tiny number of microbenchmarks have been used in this performance test. It
-wouldn&amp;#x27;t be wise to draw general conclusions - this is just a bit of fun.&lt;/li&gt;
+wouldn&#x27;t be wise to draw general conclusions - this is just a bit of fun.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&quot;appendix-benchmark-script&quot;&gt;&lt;a href=&quot;#appendix-benchmark-script&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Appendix: Benchmark script&lt;/h2&gt;
 &lt;p&gt;Health warning: this is incredibly quick and dirty (especially the repeated
@@ -1591,11 +1684,11 @@ recent fixes to &lt;code&gt;llvm-objdump&lt;/code&gt; (and related tools) when e
 unrecognised RISC-V base or ISA extension versions, or unrecognised ISA
 extension names.&lt;/li&gt;
 &lt;li&gt;Landed a tweak to the RISC-V ISA manual to &lt;a href=&quot;https://github.com/riscv/riscv-isa-manual/pull/1001&quot;&gt;make it clear that HINT
-encodings aren&amp;#x27;t
-&amp;quot;reserved&amp;quot;&lt;/a&gt; in terms of
-being part of the defined &amp;quot;reserved instruction-set category&amp;quot;. Thanks to
+encodings aren&#x27;t
+&quot;reserved&quot;&lt;/a&gt; in terms of
+being part of the defined &quot;reserved instruction-set category&quot;. Thanks to
 Andrew Waterman for suggesting a simpler fix than my first attempt.&lt;/li&gt;
-&lt;li&gt;I&amp;#x27;m now on Mastodon, at &lt;a href=&quot;https://fosstodon.org/@asb&quot;&gt;@asb@fosstodon.org&lt;/a&gt; and
+&lt;li&gt;I&#x27;m now on Mastodon, at &lt;a href=&quot;https://fosstodon.org/@asb&quot;&gt;@asb@fosstodon.org&lt;/a&gt; and
 &lt;a href=&quot;https://fosstodon.org/@llvmweekly&quot;&gt;@llvmweekly@fosstodon.org&lt;/a&gt;.&lt;/li&gt;
 &lt;li&gt;Proposed &lt;a href=&quot;https://reviews.llvm.org/D147183#4233360&quot;&gt;alternate wording for the RISC-V LLVM doc updates reflecting
 recent ISA versioning
@@ -1665,24 +1758,24 @@ the riscv-bfloat16 spec.&lt;/li&gt;
 &lt;a href=&quot;https://github.com/muxup/muxup-site/commit/a1cb4d4256815bcfa8a6a4c5174a03ae077ee8c6#diff-4e9f5b15205b49dff89e5050a5a899e63213f1f015daeca45b76270bb2c009dd&quot;&gt;more&lt;/a&gt;
 footer images for this site from the Quick Draw dataset. Thanks to my son
 (Archie, 5) for the assistance.&lt;/li&gt;
-&lt;li&gt;Reviewed submissions for &lt;a href=&quot;https://llvm.org/devmtg/2023-05/&quot;&gt;EuroLLVM&lt;/a&gt; (I&amp;#x27;m
+&lt;li&gt;Reviewed submissions for &lt;a href=&quot;https://llvm.org/devmtg/2023-05/&quot;&gt;EuroLLVM&lt;/a&gt; (I&#x27;m
 on the program committee).&lt;/li&gt;
 &lt;li&gt;Added note to the &lt;a href=&quot;/2023q1/commercially-available-risc-v-silicon&quot;&gt;commercially available RISC-V silicon
 post&lt;/a&gt; about a
 hardware bug in the Renesas RZ/Five.&lt;/li&gt;
-&lt;li&gt;Finished writing and published &lt;a href=&quot;/2023q1/whats-new-for-risc-v-in-llvm-16&quot;&gt;what&amp;#x27;s new for RISC-V in LLVM 16
+&lt;li&gt;Finished writing and published &lt;a href=&quot;/2023q1/whats-new-for-risc-v-in-llvm-16&quot;&gt;what&#x27;s new for RISC-V in LLVM 16
 article&lt;/a&gt; and took part in
 some of the discussions in the
 &lt;a href=&quot;https://news.ycombinator.com/item?id=35215826&quot;&gt;HN&lt;/a&gt; and &lt;a href=&quot;https://old.reddit.com/r/RISCV/comments/11veftz/whats_new_for_riscv_in_llvm_16/&quot;&gt;Reddit
 threads&lt;/a&gt;
-(it&amp;#x27;s &lt;a href=&quot;https://lobste.rs/s/qcu7fc/what_s_new_for_risc_v_llvm_16&quot;&gt;on lobste.rs
+(it&#x27;s &lt;a href=&quot;https://lobste.rs/s/qcu7fc/what_s_new_for_risc_v_llvm_16&quot;&gt;on lobste.rs
 too&lt;/a&gt;, but that
-didn&amp;#x27;t generate any comments).&lt;/li&gt;
+didn&#x27;t generate any comments).&lt;/li&gt;
 &lt;li&gt;Investigated an issue where inline asm with the &lt;code&gt;m&lt;/code&gt; constraint was
 generating worse code on LLVM vs GCC, finding that LLVM conservatively
 lowers this to a single register, while GCC treats &lt;code&gt;m&lt;/code&gt; as reg+imm, relying
 on users indicating &lt;code&gt;A&lt;/code&gt; when using a memory operand with an instruction that
-can&amp;#x27;t take an immediate offset. Worked with a colleague who posted
+can&#x27;t take an immediate offset. Worked with a colleague who posted
 &lt;a href=&quot;https://reviews.llvm.org/D146245&quot;&gt;D146245&lt;/a&gt; to fix this.&lt;/li&gt;
 &lt;li&gt;Set
 &lt;a href=&quot;https://discourse.llvm.org/t/risc-v-llvm-sync-up-call-16th-march-2023-note-daylight-savings-impact/69244&quot;&gt;agenda&lt;/a&gt;
@@ -1701,8 +1794,8 @@ landed &lt;a href=&quot;https://reviews.llvm.org/D146037&quot;&gt;D146037&lt;/a&
 machine copy propagation earlier in the pipeline, though a more principled
 fix would be desirable.&lt;/li&gt;
 &lt;li&gt;Filed a PR against the riscv-isa-manual to &lt;a href=&quot;https://github.com/riscv/riscv-isa-manual/pull/990&quot;&gt;disambiguate the use of the term
-&amp;quot;reserved&amp;quot; for HINT
-instructions&lt;/a&gt;. I&amp;#x27;ve also
+&quot;reserved&quot; for HINT
+instructions&lt;/a&gt;. I&#x27;ve also
 been looking at the proposed bfloat16 extension recently and filed an
 &lt;a href=&quot;https://github.com/riscv/riscv-bfloat16/issues/27&quot;&gt;issue&lt;/a&gt; to clarify if
 Zfbfinxmin will be defined (as all the other floating point extensions so
@@ -1753,7 +1846,7 @@ sessions.&lt;/li&gt;
 &lt;li&gt;Posted and committed an LLVM patch to &lt;a href=&quot;https://reviews.llvm.org/D145570&quot;&gt;migrate the RISC-V backend to using
 shared MCELFStreamer code for attribute
 emission&lt;/a&gt;. The initial implementation was
-largely derived from Arm&amp;#x27;s version of the same feature but a later
+largely derived from Arm&#x27;s version of the same feature but a later
 refactoring managed to move this logic to common code, which we can now
 reuse.&lt;/li&gt;
 &lt;li&gt;Some small tasks related to the RISC-V LLVM build-bot: trying to find a path
@@ -1762,7 +1855,7 @@ libcxx&lt;/a&gt;, and &lt;a href=&quot;https://reviews.llvm.org/D144465&quot;&gt
 staging buildmaster configuration is
 updated&lt;/a&gt;.&lt;/li&gt;
 &lt;li&gt;Posted a docs patch to &lt;a href=&quot;https://reviews.llvm.org/D145564&quot;&gt;clarify
-Clang&amp;#x27;s &lt;code&gt;-fexceptions&lt;/code&gt;&lt;/a&gt; in follow-up to
+Clang&#x27;s &lt;code&gt;-fexceptions&lt;/code&gt;&lt;/a&gt; in follow-up to
 discussion in &lt;a href=&quot;https://github.com/llvm/llvm-project/issues/61216&quot;&gt;issue
 61216&lt;/a&gt;.&lt;/li&gt;
 &lt;li&gt;Did some final preparations for the LLVM 16.0.0 release - committing some
@@ -1776,7 +1869,7 @@ tests&lt;/a&gt;.&lt;/li&gt;
 &lt;ul&gt;
 &lt;li&gt;Completed (to the point I was happy to publish at least) my attempt to
 enumerate the &lt;a href=&quot;/2023q1/commercially-available-risc-v-silicon&quot;&gt;commercially available RISC-V
-SoCs&lt;/a&gt;. I&amp;#x27;m very
+SoCs&lt;/a&gt;. I&#x27;m very
 grateful to have received a whole range of suggested additions and
 clarifications over the weekend, which have all been incorporated.&lt;/li&gt;
 &lt;li&gt;Ran the usual biweekly &lt;a href=&quot;https://discourse.llvm.org/t/risc-v-llvm-sync-up-call-2nd-march-2023/68876&quot;&gt;RISC-V LLVM sync-up
@@ -1788,7 +1881,7 @@ to fix and LLD regression was merged), an overview off &lt;code&gt;_Float16&lt;/
 lowering fixes, GP relaxation in LLD, my recent RISC-V buildbot, and some
 vectorisation related issues.&lt;/li&gt;
 &lt;li&gt;Investigated and largely resolved a issues related to ABI lowering of
-&lt;code&gt;_Float16&lt;/code&gt; for RISC-V. Primarily, we weren&amp;#x27;t handling the cases where a
+&lt;code&gt;_Float16&lt;/code&gt; for RISC-V. Primarily, we weren&#x27;t handling the cases where a
 GPR+FPR or a pair of FPRs are used to pass small structs including
 &lt;code&gt;_Float16&lt;/code&gt;.
 &lt;ul&gt;
@@ -1819,7 +1912,7 @@ Meetup&lt;/a&gt;.&lt;/li&gt;
 lobste.rs&lt;/a&gt;, retried my previously
 shared &lt;a href=&quot;https://github.com/helix-editor/helix/issues/3072#issuecomment-1208133990&quot;&gt;large Markdown file test
 case&lt;/a&gt;.
-Unfortunately it&amp;#x27;s still unusably slow to edit, seemingly due to a
+Unfortunately it&#x27;s still unusably slow to edit, seemingly due to a
 tree-sitter related issue.&lt;/li&gt;
 &lt;li&gt;Cleaned up the static site generator used for this site a bit. e.g. now my
 fixes (&lt;a href=&quot;https://github.com/miyuchina/mistletoe/pull/157&quot;&gt;#157&lt;/a&gt;,
@@ -1897,10 +1990,10 @@ merging RISC-V attributes.&lt;/li&gt;
 &lt;li&gt;Organised agenda for and ran the bi-weekly &lt;a href=&quot;https://discourse.llvm.org/t/risc-v-llvm-sync-up-call-16th-february-2023/68500&quot;&gt;RISC-V LLVM contributor
 call&lt;/a&gt;.
 Key discussion items were the extension versioning related compatibility
-issue mentioned below and support for emulated TLS (where I&amp;#x27;d &lt;a href=&quot;https://reviews.llvm.org/D143708#4118468&quot;&gt;left some
+issue mentioned below and support for emulated TLS (where I&#x27;d &lt;a href=&quot;https://reviews.llvm.org/D143708#4118468&quot;&gt;left some
 comments&lt;/a&gt; the previous week).&lt;/li&gt;
 &lt;li&gt;Updated my patch (&lt;a href=&quot;https://reviews.llvm.org/D143172&quot;&gt;D143172&lt;/a&gt;) to register
-and configure a RISC-V qemu-user based builder with LLVM&amp;#x27;s staging
+and configure a RISC-V qemu-user based builder with LLVM&#x27;s staging
 buildmaster, based on review feedback.&lt;/li&gt;
 &lt;li&gt;A variety of upstream LLVM reviews. Also landed
 &lt;a href=&quot;https://reviews.llvm.org/D143507&quot;&gt;D143407&lt;/a&gt;, marking Zawrs as
@@ -1916,10 +2009,10 @@ This is a follow-up to the &lt;a href=&quot;https://github.com/riscv-non-isa/ris
 filed&lt;/a&gt; on
 this issue (where I have &lt;a href=&quot;https://reviews.llvm.org/D142327&quot;&gt;D142327&lt;/a&gt; queued
 up for LLVM to fix our incorrect handling).&lt;/li&gt;
-&lt;li&gt;Responded to a question on LLVM&amp;#x27;s Discourse &lt;a href=&quot;https://discourse.llvm.org/t/support-for-zicsr-and-zifencei-extensions/68369/2&quot;&gt;about zicsr and zifencei
+&lt;li&gt;Responded to a question on LLVM&#x27;s Discourse &lt;a href=&quot;https://discourse.llvm.org/t/support-for-zicsr-and-zifencei-extensions/68369/2&quot;&gt;about zicsr and zifencei
 support in
 LLVM&lt;/a&gt;.
-As noted, the issue is that we haven&amp;#x27;t moved RV32I/RV64I 2.1 yet which split
+As noted, the issue is that we haven&#x27;t moved RV32I/RV64I 2.1 yet which split
 out Zicsr and Zifencei. Unfortunately this is a backwards-incompatible
 change so requires some care.&lt;/li&gt;
 &lt;li&gt;Worked with a colleague trying to reproduce an assertion failure in his
@@ -1971,18 +2064,18 @@ released today&lt;/a&gt;, and
 as &lt;a href=&quot;/2022q3/whats-new-for-risc-v-in-llvm-15&quot;&gt;I did for LLVM 15&lt;/a&gt;, I
 wanted to highlight some of the RISC-V specific changes and improvements. This
 is very much a tour of a chosen subset of additions rather than an attempt to
-be exhaustive. If you&amp;#x27;re interested in RISC-V, you may also want to check out
+be exhaustive. If you&#x27;re interested in RISC-V, you may also want to check out
 my recent attempt to enumerate the &lt;a href=&quot;/2023q1/commercially-available-risc-v-silicon&quot;&gt;commercially available RISC-V
 SoCs&lt;/a&gt; and if you want
-to find out what&amp;#x27;s going on in LLVM as a whole on a week-by-week basis, then
-I&amp;#x27;ve got &lt;a href=&quot;https://llvmweekly.org/&quot;&gt;the perfect newsletter for you&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;In case you&amp;#x27;re not familiar with LLVM&amp;#x27;s release schedule, it&amp;#x27;s worth noting
+to find out what&#x27;s going on in LLVM as a whole on a week-by-week basis, then
+I&#x27;ve got &lt;a href=&quot;https://llvmweekly.org/&quot;&gt;the perfect newsletter for you&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;In case you&#x27;re not familiar with LLVM&#x27;s release schedule, it&#x27;s worth noting
 that there are two major LLVM releases a year (i.e. one roughly every 6
 months) and these are timed releases as opposed to being cut when a pre-agreed
-set of feature targets have been met. We&amp;#x27;re very fortunate to benefit from an
+set of feature targets have been met. We&#x27;re very fortunate to benefit from an
 active and growing set of contributors working on RISC-V support in LLVM
 projects, who are responsible for the work I describe below - thank you!
-I coordinate biweekly sync-up calls for RISC-V LLVM contributors, so if you&amp;#x27;re
+I coordinate biweekly sync-up calls for RISC-V LLVM contributors, so if you&#x27;re
 working in this area please &lt;a href=&quot;https://discourse.llvm.org/c/code-generation/riscv/57&quot;&gt;consider dropping
 in&lt;/a&gt;.&lt;/p&gt;
 &lt;h2 id=&quot;documentation&quot;&gt;&lt;a href=&quot;#documentation&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Documentation&lt;/h2&gt;
@@ -1992,15 +2085,15 @@ in&lt;/a&gt;.&lt;/p&gt;
 long-standing gap in our documentation, whereby it was difficult to tell at a
 glance the expected level of support for the various RISC-V instruction set
 extensions (standard, vendor-specific, and experimental extensions of either
-type) in a given LLVM release. We&amp;#x27;ve tried to keep it concise but informative,
+type) in a given LLVM release. We&#x27;ve tried to keep it concise but informative,
 and add a brief note to describe any known limitations that end users should
 know about. Thanks again to Philip Reames for kicking this off, and the
-reviewers and contributors for ensuring it&amp;#x27;s kept up to date.&lt;/p&gt;
+reviewers and contributors for ensuring it&#x27;s kept up to date.&lt;/p&gt;
 &lt;h2 id=&quot;vectorization&quot;&gt;&lt;a href=&quot;#vectorization&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Vectorization&lt;/h2&gt;
 &lt;p&gt;LLVM 16 was a big release for vectorisation. As well as a long-running strand
 of work making incremental improvements (e.g. better cost modelling) and
 fixes, scalable vectorization was &lt;a href=&quot;https://reviews.llvm.org/rG15c645f7ee67&quot;&gt;enabled by
-default&lt;/a&gt;. This allows LLVM&amp;#x27;s &lt;a href=&quot;https://llvm.org/docs/Vectorizers.html#loop-vectorizer&quot;&gt;loop
+default&lt;/a&gt;. This allows LLVM&#x27;s &lt;a href=&quot;https://llvm.org/docs/Vectorizers.html#loop-vectorizer&quot;&gt;loop
 vectorizer&lt;/a&gt; to use
 scalable vectors when profitable. Follow-on work
 &lt;a href=&quot;https://reviews.llvm.org/rGb45a262679ab&quot;&gt;enabled&lt;/a&gt; support for loop
@@ -2022,18 +2115,18 @@ Vector Extension Intrinsics
 specification&lt;/a&gt; evolves
 towards a v1.0. In retrospect, it would have been better to keep the
 intrinsics behind an experimental flag when the vector codegen and MC layer
-(assembler/disassembler) support became stable, and this is something we&amp;#x27;ll be
+(assembler/disassembler) support became stable, and this is something we&#x27;ll be
 more careful of for future extensions. The good news is that thanks to
 Yueh-Ting Chen, headers &lt;a href=&quot;https://github.com/riscv-non-isa/rvv-intrinsic-doc/tree/master/auto-generated/rvv-v0p10-compatible-headers&quot;&gt;are
 available&lt;/a&gt;
 that provide the old-style intrinsics mapped to the new version.&lt;/p&gt;
 &lt;h2 id=&quot;support-for-new-instruction-set-extensions&quot;&gt;&lt;a href=&quot;#support-for-new-instruction-set-extensions&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Support for new instruction set extensions&lt;/h2&gt;
-&lt;p&gt;I refer to &amp;#x27;experimental&amp;#x27; support many times below. See the &lt;a href=&quot;https://releases.llvm.org/16.0.0/docs/RISCVUsage.html#experimental-extensions&quot;&gt;documentation on
+&lt;p&gt;I refer to &#x27;experimental&#x27; support many times below. See the &lt;a href=&quot;https://releases.llvm.org/16.0.0/docs/RISCVUsage.html#experimental-extensions&quot;&gt;documentation on
 experimental extensions within RISC-V
 LLVM&lt;/a&gt;
 for guidance on what that means. One point to highlight is that the extensions
 remain experimental until they are ratified, which is why some extensions on
-the list below are &amp;#x27;experimental&amp;#x27; despite the fact the LLVM support needed is
+the list below are &#x27;experimental&#x27; despite the fact the LLVM support needed is
 trivial. On to the list of newly added instruction set extensions:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Experimental support for the
@@ -2043,13 +2136,13 @@ instruction set extensions. These are all 16-bit instructions and are being
 defined as part of the output of the RISC-V code size reduction working
 group.
 &lt;ul&gt;
-&lt;li&gt;Zca is just a subset of the standard &amp;#x27;C&amp;#x27; compressed instruction set
+&lt;li&gt;Zca is just a subset of the standard &#x27;C&#x27; compressed instruction set
 extension but without floating point loads/stores.&lt;/li&gt;
-&lt;li&gt;Zcf is also a subset of the standard &amp;#x27;C&amp;#x27; compressed instruction set
+&lt;li&gt;Zcf is also a subset of the standard &#x27;C&#x27; compressed instruction set
 extension, including just the single precision floating point loads and
 stores (&lt;code&gt;c.flw&lt;/code&gt;, &lt;code&gt;c.flwsp&lt;/code&gt;, &lt;code&gt;c.fsw&lt;/code&gt;, &lt;code&gt;c.fswsp&lt;/code&gt;).&lt;/li&gt;
 &lt;li&gt;Zcd, as you might have guessed, just includes the double precision
-floating point loads and stores from the standard &amp;#x27;C&amp;#x27; compressed
+floating point loads and stores from the standard &#x27;C&#x27; compressed
 instruction set extension (&lt;code&gt;c.fld&lt;/code&gt;, &lt;code&gt;c.fldsp&lt;/code&gt;, &lt;code&gt;c.fsd&lt;/code&gt;, &lt;code&gt;c.fsdsp&lt;/code&gt;).&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
@@ -2084,7 +2177,7 @@ vendor extension, which implements vector integer four 8-bit multiple and
 &lt;/ul&gt;
 &lt;h2 id=&quot;lldb&quot;&gt;&lt;a href=&quot;#lldb&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;LLDB&lt;/h2&gt;
 &lt;p&gt;LLDB has started to become usable for RISC-V in this period due to
-work by contributor &amp;#x27;Emmer&amp;#x27;. As they &lt;a href=&quot;https://discourse.llvm.org/t/is-lldb-for-riscv-ready-to-use/68326/2&quot;&gt;summarise
+work by contributor &#x27;Emmer&#x27;. As they &lt;a href=&quot;https://discourse.llvm.org/t/is-lldb-for-riscv-ready-to-use/68326/2&quot;&gt;summarise
 here&lt;/a&gt;,
 LLDB should be usable for debugging RV64 programs locally but support is
 lacking for remote debug (e.g. via the gdb server protocol). During the LLVM
@@ -2098,11 +2191,11 @@ RISC-V&lt;/a&gt;, support in
 &lt;a href=&quot;https://reviews.llvm.org/rG2d7f43f9eaf3&quot;&gt;RV64F&lt;/a&gt;, and
 &lt;a href=&quot;https://reviews.llvm.org/rG6493fc4bccd2&quot;&gt;D&lt;/a&gt;.&lt;/p&gt;
 &lt;h2 id=&quot;short-forward-branch-optimisation&quot;&gt;&lt;a href=&quot;#short-forward-branch-optimisation&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Short forward branch optimisation&lt;/h2&gt;
-&lt;p&gt;Another improvement that&amp;#x27;s fun to look more closely at is support for &amp;quot;short
-forward branch optimisation&amp;quot; for the &lt;a href=&quot;https://www.sifive.com/press/sifive-core-ip-7-series-creates-new-class-of-embedded&quot;&gt;SiFive 7
+&lt;p&gt;Another improvement that&#x27;s fun to look more closely at is support for &quot;short
+forward branch optimisation&quot; for the &lt;a href=&quot;https://www.sifive.com/press/sifive-core-ip-7-series-creates-new-class-of-embedded&quot;&gt;SiFive 7
 series&lt;/a&gt;
-cores. What does this mean? Well, let&amp;#x27;s start by looking at the problem it&amp;#x27;s
-trying to solve. The base RISC-V ISA doesn&amp;#x27;t include conditional moves or
+cores. What does this mean? Well, let&#x27;s start by looking at the problem it&#x27;s
+trying to solve. The base RISC-V ISA doesn&#x27;t include conditional moves or
 predicated instructions, which can be a downside if your code features
 unpredictable short forward branches (with the ensuing cost in terms of
 branch mispredictions and bloating branch predictor state). The &lt;a href=&quot;https://github.com/riscv/riscv-isa-manual/releases/download/Ratified-IMAFDQC/riscv-spec-20191213.pdf&quot;&gt;ISA
@@ -2120,7 +2213,7 @@ sequences&lt;/a&gt; (i.e. branch over a
 register move) as well as for &lt;a href=&quot;https://reviews.llvm.org/rGda7415acdafb&quot;&gt;other ALU
 operations&lt;/a&gt;. The job of the
 compiler here is of course to emit a sequence compatible with the
-micro-architectural optimisation when possible and profitable. I&amp;#x27;m not aware
+micro-architectural optimisation when possible and profitable. I&#x27;m not aware
 of other RISC-V designs implementing a similar optimisation - although there
 are developments in terms of instructions to support such operations directly
 in the ISA which would avoid the need for such microarchitectural tricks. See
@@ -2132,15 +2225,15 @@ extension&lt;/a&gt;
 &lt;a href=&quot;https://github.com/riscv/riscv-zicond&quot;&gt;Zicond&lt;/a&gt; (integer conditional
 operations) standard extension.&lt;/p&gt;
 &lt;h2 id=&quot;atomics&quot;&gt;&lt;a href=&quot;#atomics&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Atomics&lt;/h2&gt;
-&lt;p&gt;It&amp;#x27;s perhaps not surprising that code generation for atomics can be tricky to
+&lt;p&gt;It&#x27;s perhaps not surprising that code generation for atomics can be tricky to
 understand, and the &lt;a href=&quot;https://llvm.org/docs/Atomics.html#atomics-and-codegen&quot;&gt;LLVM documentation on atomics codegen and
 libcalls&lt;/a&gt; is actually
-one of the best references on the topic I&amp;#x27;ve found. A particularly important
+one of the best references on the topic I&#x27;ve found. A particularly important
 note in that document is that if a backend supports any inline lock-free
 atomic operations at a given size, all operations of that size must be
 supported in a lock-free manner. If targeting a RISC-V CPU without the atomics
 extension, all atomics operations would usually be lowered to &lt;code&gt;__atomic_*&lt;/code&gt;
-libcalls. But if we know a bit more about the target, it&amp;#x27;s possible to do
+libcalls. But if we know a bit more about the target, it&#x27;s possible to do
 better - for instance, a single-core microcontroller could implement an atomic
 operation in a lock-free manner by disabling interrupts (and conventionally,
 lock-free implementations of atomics are provided through &lt;code&gt;__sync_*&lt;/code&gt;
@@ -2149,8 +2242,8 @@ feature&lt;/a&gt;
 enables, where atomic load/store can be lowered to a load/store with
 appropriate fences (as is supported in the base ISA) while other atomic
 operations generate a &lt;code&gt;__sync_*&lt;/code&gt; libcall.&lt;/p&gt;
-&lt;p&gt;There&amp;#x27;s also been a very minor improvement for targets with native atomics
-support (the &amp;#x27;A&amp;#x27; instruction set extension) that I may as well mention while
+&lt;p&gt;There&#x27;s also been a very minor improvement for targets with native atomics
+support (the &#x27;A&#x27; instruction set extension) that I may as well mention while
 on the topic. As you might know, atomic operations such as compare and swap
 that are lowered to an instruction sequence involving &lt;code&gt;lr.{w,d}&lt;/code&gt; (load reserved) and
 &lt;code&gt;sc.{w,d}&lt;/code&gt; (store conditional). There are very specific rules about these
@@ -2161,9 +2254,9 @@ which is why we expand to a fixed instruction sequence at a very late stage in
 compilation (see &lt;a href=&quot;https://lists.llvm.org/pipermail/llvm-dev/2018-June/123993.html&quot;&gt;original
 RFC&lt;/a&gt;). This
 means the sequence of instructions implementing the atomic operation are
-opaque to LLVM&amp;#x27;s optimisation passes and are treated as a single unit. The
-obvious disadvantage of avoiding LLVM&amp;#x27;s optimisations is that sometimes there
-are optimisations that would be helpful and wouldn&amp;#x27;t break that
+opaque to LLVM&#x27;s optimisation passes and are treated as a single unit. The
+obvious disadvantage of avoiding LLVM&#x27;s optimisations is that sometimes there
+are optimisations that would be helpful and wouldn&#x27;t break that
 forward-progress guarantee. One that came up in real-world code was the lack
 of branch folding, which would have simplified a branch in the expanded
 &lt;code&gt;cmpxchg&lt;/code&gt; sequence that just targets another branch with the same condition
@@ -2182,7 +2275,7 @@ resolved.&lt;/p&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;h2 id=&quot;assorted-optimisations&quot;&gt;&lt;a href=&quot;#assorted-optimisations&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Assorted optimisations&lt;/h2&gt;
-&lt;p&gt;As you can imagine, there&amp;#x27;s been a lot of incremental minor improvements over
+&lt;p&gt;As you can imagine, there&#x27;s been a lot of incremental minor improvements over
 the past ~6 months. I unfortunately only have space (and patience) to highight
 a few of them.&lt;/p&gt;
 &lt;p&gt;A new pre-regalloc pseudo instruction expansion pass was
@@ -2211,9 +2304,9 @@ floating point libcalls.&lt;/p&gt;
 encodings that map to a 32-bit longer form (with restrictions on addressable
 registers in the compressed form of course). The conversion 32-bit
 instructions 16-bit forms when possible happens at a very late stage, after
-instruction selection. But of course over time, we&amp;#x27;ve introduced more tuning
+instruction selection. But of course over time, we&#x27;ve introduced more tuning
 to influence codegen decisions in cases where a choice can be made to produce
-an instruction that can be compressed, rather than one that can&amp;#x27;t. A recent
+an instruction that can be compressed, rather than one that can&#x27;t. A recent
 addition to this was the &lt;a href=&quot;https://reviews.llvm.org/rGd64d3c5a8f81&quot;&gt;RISCVStripWSuffix
 pass&lt;/a&gt;, which for RV64 targets will
 convert &lt;code&gt;addw&lt;/code&gt; and &lt;code&gt;slliw&lt;/code&gt; to &lt;code&gt;add&lt;/code&gt; or &lt;code&gt;slli&lt;/code&gt; respectively when it can be
@@ -2222,10 +2315,10 @@ is a minor code size saving, as &lt;code&gt;slliw&lt;/code&gt; has no matching c
 and &lt;code&gt;c.addw&lt;/code&gt; can address a more restricted set of registers than &lt;code&gt;c.add&lt;/code&gt;.&lt;/p&gt;
 &lt;h2 id=&quot;other&quot;&gt;&lt;a href=&quot;#other&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Other&lt;/h2&gt;
 &lt;p&gt;At the risk of repeating myself, this has been a selective tour of some
-additions I thought it would be fun to write about. Apologies if I&amp;#x27;ve missed
+additions I thought it would be fun to write about. Apologies if I&#x27;ve missed
 your favourite new feature or improvement - the &lt;a href=&quot;https://releases.llvm.org/16.0.0/docs/ReleaseNotes.html#changes-to-the-risc-v-backend&quot;&gt;LLVM release
 notes&lt;/a&gt;
-will include some things I haven&amp;#x27;t had space for here. Thanks again for
+will include some things I haven&#x27;t had space for here. Thanks again for
 everyone who has been contributing to make the RISC-V in LLVM even better.&lt;/p&gt;
 &lt;p&gt;If you have a RISC-V project you think me and my colleagues and at Igalia may
 be able to help with, then do &lt;a href=&quot;https://www.igalia.com/contact/&quot;&gt;get in touch&lt;/a&gt;
@@ -2235,1075 +2328,6 @@ regarding our services.&lt;/p&gt;
 &lt;li&gt;2023-03-19: Clarified that Zawrs and Zihintntl support just involves
 the MC layer (assembler/disassembler).&lt;/li&gt;
 &lt;li&gt;2023-03-18: Initial publication date.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/details&gt;
-</content>
-</entry>
-<entry>
-<title>Commercially available RISC-V silicon</title>
-<published>2023-03-03T12:00:00Z</published>
-<updated>2023-03-03T12:00:00Z</updated>
-<link rel="alternate" href="https://muxup.com/2023q1/commercially-available-risc-v-silicon"/>
-<id>https://muxup.com/2023q1/commercially-available-risc-v-silicon</id>
-<content type="html">
-&lt;p&gt;The RISC-V instruction set architecture has seen huge excitement and growth in
-recent years (&lt;a href=&quot;https://venturebeat.com/ai/how-risc-v-has-become-a-viable-third-processor-architecture-calista-redmond/&quot;&gt;10B cores estimated to have shipped as of Dec
-2022&lt;/a&gt;)
-and I&amp;#x27;ve been keeping very busy with RISC-V related work &lt;a href=&quot;https://www.igalia.com/contact/&quot;&gt;at
-Igalia&lt;/a&gt;. I thought it would be fun to look
-beyond the cores I&amp;#x27;ve been working with and to enumerate the SoCs that are
-available for direct purchase or in development boards that feature RISC-V
-cores programmable by the end user. I&amp;#x27;m certain to be missing some
-SoCs or have some mistakes or missing information - any corrections very
-gratefully received at asb@muxup.com or
-&lt;a href=&quot;https://twitter.com/asbradbury&quot;&gt;@asbradbury&lt;/a&gt;. I&amp;#x27;m focusing almost
-exclusively on the RISC-V aspects of each SoC - i.e. don&amp;#x27;t expect a detailed
-listing of other on-chip peripherals or accelerators.&lt;/p&gt;
-&lt;h2 id=&quot;a-few-thoughts&quot;&gt;&lt;a href=&quot;#a-few-thoughts&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;A few thoughts&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;It was absolutely astonishing how difficult it was to get basic information
-about the RISC-V specification implemented by many of these SoCs. In a
-number of cases, just a description of a &amp;quot;RV32 core at xxMHz&amp;quot; with further
-detective work being needed to find any information at all about even the
-standard instruction set extensions supported.&lt;/li&gt;
-&lt;li&gt;The way I&amp;#x27;ve focused on the details of individual cores does a bit of a
-disservice to those SoCs with compute clusters or interesting cache
-hierarchies. If I were to do this again (or if I revisit this in the
-future), I&amp;#x27;d look to rectify that. There a whole bunch of other
-micro-architectural details it would be interesting to detail too.
-&lt;ul&gt;
-&lt;li&gt;I&amp;#x27;ve picked up CoreMark numbers where available, but of course that&amp;#x27;s a
-very limited metric to compare cores. It&amp;#x27;s also not always clear which
-compiler was used, which extensions were targeted and so on. Plus when the
-figure is taken from an IP core product page, the numbers may refer to a
-newer version of the IP. Where there are multiple numbers floating about
-I&amp;#x27;ve listed them all.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;There&amp;#x27;s a lot of chips here - but although I&amp;#x27;ve likely missed some, not so
-many that it&amp;#x27;s impossible to enumerate. RISC-V is growing rapidly, so
-perhaps this will change in the next year or two.&lt;/li&gt;
-&lt;li&gt;A large proportion of the SoC designs listed are based on proprietary core
-designs. The exceptions are the collection of SoCs based on the T-Head
-cores, the SiFive E31 and Kendryte K210 (Rocket-derived) and the GreenWaves
-GAP8/GAP9 (PULP-derived). As a long-term proponent of open source silicon
-I&amp;#x27;d hope to see this change over time. Once a company has moved from a
-proprietary ISA to an open standard (RISC-V), there&amp;#x27;s a much easier
-transition path to switch from a proprietary IP core to one that&amp;#x27;s open
-source.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&quot;64-bit-linux-capable-application-processors&quot;&gt;&lt;a href=&quot;#64-bit-linux-capable-application-processors&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;64-bit Linux-capable application processors&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;https://doc-en.rvspace.org/JH7110/TRM/JH7110_DS/highlighted_features.html&quot;&gt;StarFive
-JH7110&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;4 x RV64GC_Zba_Zbb &lt;a href=&quot;https://www.sifive.com/cores/u74&quot;&gt;SiFive U74&lt;/a&gt;
-application cores, 1 x RV64IMAC SiFive S7
-(&lt;a href=&quot;https://www.sifive.com/cores/s76&quot;&gt;this?&lt;/a&gt;) monitor core, and 1 x
-RV32IMFC &lt;a href=&quot;https://www.sifive.com/cores/e24&quot;&gt;SiFive E24&lt;/a&gt;
-(&lt;a href=&quot;https://doc-en.rvspace.org/JH7110/PDF/JH7110_Datasheet.pdf&quot;&gt;ref&lt;/a&gt;,
-&lt;a href=&quot;https://lore.kernel.org/lkml/dda144a8397a175f3ce092485f08896c9a66d232.camel@icenowy.me/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;li&gt;The U74 is a dual-issue in-order pipeline with 8 stages.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1.5 GHz, fabbed on TSMC 28nm
-(&lt;a href=&quot;https://riscv.or.jp/wp-content/uploads/day3_StarFive_risc-v_tokyo_day2022Autumn.pdf&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;li&gt;StarFive
-&lt;a href=&quot;https://riscv.or.jp/wp-content/uploads/day3_StarFive_risc-v_tokyo_day2022Autumn.pdf&quot;&gt;report&lt;/a&gt;
-a CoreMark/MHz of 5.09.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Available in the &lt;a href=&quot;https://www.kickstarter.com/projects/starfive/visionfive-2&quot;&gt;VisionFive
-2&lt;/a&gt;
-and &lt;a href=&quot;https://wiki.pine64.org/wiki/STAR64&quot;&gt;Pine64 Star64&lt;/a&gt; development
-boards.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://github.com/T-head-Semi/riscv-aosp&quot;&gt;T-Head C910 ICE&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;2 x RV64GC &lt;a href=&quot;https://www.t-head.cn/product/c910&quot;&gt;T-Head C910&lt;/a&gt; application
-cores and an additional T-Head C910 RV64GCV core (i.e., with the vector
-extension).&lt;/li&gt;
-&lt;li&gt;The C910 is a 3-issue out-of-order pipeline with 12 stages.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1.2 GHz, fabbed on a 28nm process
-(&lt;a href=&quot;https://github.com/T-head-Semi/riscv-aosp&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Available in the
-&lt;a href=&quot;https://www.aliexpress.com/item/1005003395978459.html&quot;&gt;RVB-ICE&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://d1.docs.aw-ol.com/en/&quot;&gt;Allwinner D1-H&lt;/a&gt;
-(&lt;a href=&quot;https://github.com/DongshanPI/Awesome_RISCV-AllwinnerD1/blob/master/Tina-SDK/Hardware%E7%A1%AC%E4%BB%B6%E7%B1%BB%E6%96%87%E6%A1%A3/%E8%8A%AF%E7%89%87%E6%89%8B%E5%86%8C/D1-H_Datasheet_V1.0.pdf&quot;&gt;datasheet&lt;/a&gt;,
-&lt;a href=&quot;https://github.com/DongshanPI/Awesome_RISCV-AllwinnerD1/blob/master/Tina-SDK/Hardware%E7%A1%AC%E4%BB%B6%E7%B1%BB%E6%96%87%E6%A1%A3/%E8%8A%AF%E7%89%87%E6%89%8B%E5%86%8C/D1-H_User%20Manual_V1.0.pdf&quot;&gt;user
-manual&lt;/a&gt;)
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1 x RV64GC &lt;a href=&quot;https://www.t-head.cn/product/c906?lang=en&quot;&gt;T-Head C906&lt;/a&gt;
-application core. Additionally supports the unratified, v0.7.1 RISC-V
-vector specification
-(&lt;a href=&quot;https://old.reddit.com/r/RISCV/comments/v1dvww/allwinner_d1_extensions/ialzm2q/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;li&gt;Single-issue in-order pipeline with 5 stages.&lt;/li&gt;
-&lt;li&gt;Verilog for the core is &lt;a href=&quot;https://github.com/T-head-Semi/openc906&quot;&gt;on
-GitHub&lt;/a&gt; under the Apache
-License (see &lt;a href=&quot;https://news.ycombinator.com/item?id=30691980&quot;&gt;discussion&lt;/a&gt;
-on what is included).&lt;/li&gt;
-&lt;li&gt;At least early versions of the chip &lt;a href=&quot;https://bugs.llvm.org/show_bug.cgi?id=50746&quot;&gt;incorrectly trapped on
-&lt;code&gt;fence.tso&lt;/code&gt;&lt;/a&gt;. It&amp;#x27;s unclear if
-this has been fixed in later revisions.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1GHz, taped out on a 22nm process node.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://linuxgizmos.com/99-sbc-runs-linux-on-risc-v-based-allwinner-d1/&quot;&gt;Reportedly&lt;/a&gt; 3.8 CoreMark/MHz.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Available in a number of development boards (e.g.  &lt;a href=&quot;https://d1.docs.aw-ol.com/en/d1_dev/&quot;&gt;Allwinner
-Nezha&lt;/a&gt;, &lt;a href=&quot;https://wiki.sipeed.com/hardware/en/lichee/RV/RV.html&quot;&gt;SiPeed Lichee
-RV&lt;/a&gt;, and
-&lt;a href=&quot;https://linux-sunxi.org/Category:D1_Boards&quot;&gt;more&lt;/a&gt;).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://starfivetech.com/uploads/JH7100%20Datasheet.pdf&quot;&gt;StarFive JH7100&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;2 x RV64GC &lt;a href=&quot;https://www.sifive.com/cores/u74&quot;&gt;SiFive U74&lt;/a&gt; application
-cores and 1 x RV32IMAFC &lt;a href=&quot;https://www.sifive.com/cores/e24&quot;&gt;SiFive E24&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;The U74 is a dual-issue in-order pipeline with 8 stages.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1.2GHz (as listed on &lt;a href=&quot;https://www.starfivetech.com/en/site/soc&quot;&gt;StarFive&amp;#x27;s
-page&lt;/a&gt; but articles about the V1
-board claimed 1.5GHz), presumably fabbed on TSMC 28nm (the &lt;a href=&quot;https://riscv.or.jp/wp-content/uploads/day3_StarFive_risc-v_tokyo_day2022Autumn.pdf&quot;&gt;JH7110
-is&lt;/a&gt;).&lt;/li&gt;
-&lt;li&gt;The current U74 product page claims 5.75 CoreMark/MHz (&lt;a href=&quot;https://linuxgizmos.com/hifive-unmatched-sbc-showcases-new-fu740-risc-v-soc/&quot;&gt;previous
-reports&lt;/a&gt;
-suggested 4.9 CoreMark/MHz).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Available on the &lt;a href=&quot;https://www.cnx-software.com/2021/11/27/visionfive-v1-risc-v-linux-sbc-resurrects-beaglev-single-board-computer/&quot;&gt;VisionFive V1 development
-board&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://www.canaan.io/product/kendryteai&quot;&gt;Kendryte K210&lt;/a&gt;
-(&lt;a href=&quot;https://cdn.hackaday.io/files/1654127076987008/kendryte_datasheet_20181011163248_en.pdf&quot;&gt;datasheet&lt;/a&gt;)
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;2 x RV64GC application cores
-(&lt;a href=&quot;https://lore.kernel.org/all/48e10b3d-12f3-a65c-8017-99c780c63040@gmail.com/&quot;&gt;reportedly&lt;/a&gt;
-implementations of the open-source
-&lt;a href=&quot;https://github.com/chipsalliance/rocket-chip&quot;&gt;Rocket&lt;/a&gt; core design).&lt;/li&gt;
-&lt;li&gt;If it&amp;#x27;s correct the K210 uses Rocket, it&amp;#x27;s a single-issue in-order
-pipeline with 5 stages.&lt;/li&gt;
-&lt;li&gt;Has a non-standard (older version of the privileged spec?) MMU
-(&lt;a href=&quot;https://github.com/riscv-software-src/opensbi/pull/206#issuecomment-821726609&quot;&gt;ref&lt;/a&gt;,
-so the &lt;a href=&quot;https://lore.kernel.org/all/20200212103432.660256-5-damien.lemoal@wdc.com/t/&quot;&gt;nommu Linux
-port&lt;/a&gt;
-is typically used.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;400MHz, fabbed on TSMC 28nm.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Available in &lt;a href=&quot;https://wiki.sipeed.com/hardware/maixface/en/core_modules/k210_core_modules.html&quot;&gt;development boards from
-SiPeed&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://www.microchip.com/en-us/products/fpgas-and-plds/system-on-chip-fpgas/polarfire-soc-fpgas&quot;&gt;MicroChip PolarFire SoC
-MPFSxxxT&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;4 x RV64GC &lt;a href=&quot;https://www.sifive.com/cores/u54&quot;&gt;SiFive U54&lt;/a&gt; application
-cores, 1 x RV64IMAC SiFive E51 (now renamed to
-&lt;a href=&quot;https://www.sifive.com/cores/s51&quot;&gt;S51&lt;/a&gt;) monitor core.&lt;/li&gt;
-&lt;li&gt;The U54 is a single-issue, in-order pipeline with 5 stages.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;667 MHz (&lt;a href=&quot;https://www.microsemi.com/document-portal/doc_download/1244584-polarfire-soc-product-overview&quot;&gt;ref&lt;/a&gt;),
-fabbed on a 28nm node
-(&lt;a href=&quot;https://riscv.org/wp-content/uploads/2019/04/RISC-V-Linux-Foundation.pdf&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;li&gt;Microchip report 3.125 CoreMark/MHz.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Available in the
-&lt;a href=&quot;https://www.microsemi.com/existing-parts/parts/152514&quot;&gt;&amp;#x27;Icicle&amp;#x27;&lt;/a&gt;
-development board.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://sifive.cdn.prismic.io/sifive/1a82e600-1f93-4f41-b2d8-86ed8b16acba_fu740-c000-manual-v1p6.pdf&quot;&gt;SiFive
-FU740&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;4 x RV64GC &lt;a href=&quot;https://www.sifive.com/cores/u74&quot;&gt;SFive U74&lt;/a&gt; application
-cores, 1 x RV64IMAC SiFive S71 monitor core.&lt;/li&gt;
-&lt;li&gt;It&amp;#x27;s hard to find details for the S71 core, the FU740 manual refers to
-it as an S7 while the HiFive Unmatched refers to it as the S71 - but
-neither have a page on SiFive&amp;#x27;s site. I&amp;#x27;m told that the S71 has the same
-pipeline as the &lt;a href=&quot;https://www.sifive.com/cores/s76&quot;&gt;S76&lt;/a&gt;, just no support
-for the F and D extensions.&lt;/li&gt;
-&lt;li&gt;The U74 is a dual-issue in-order pipeline with 8 stages.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1.2 GHz, fabbed on TSMC 28nm (&lt;a href=&quot;https://www.theregister.com/2020/10/29/sifive_riscv_pc/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;li&gt;The current U74 product page claims 5.75 CoreMark/MHz (&lt;a href=&quot;https://linuxgizmos.com/hifive-unmatched-sbc-showcases-new-fu740-risc-v-soc/&quot;&gt;previous
-reports&lt;/a&gt;
-suggested 4.9 CoreMark/MHz).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Was available on the now-discontinued &lt;a href=&quot;https://www.sifive.com/boards/hifive-unmatched&quot;&gt;HiFive Unmatched development
-board&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://static.dev.sifive.com/FU540-C000-v1.0.pdf&quot;&gt;SiFive FU540&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;4 x RV64GC &lt;a href=&quot;https://www.sifive.com/cores/u54&quot;&gt;SiFive U54&lt;/a&gt; application
-cores, 1 x RV64IMAC SiFive E51 (now renamed to
-&lt;a href=&quot;https://www.sifive.com/cores/s51&quot;&gt;S51&lt;/a&gt;) monitor core.&lt;/li&gt;
-&lt;li&gt;The U54 is a single-issue, in-order pipeline with 5 stages.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1.5GHz, fabbed on TSMC 28nm
-(&lt;a href=&quot;https://riscv.org/wp-content/uploads/2018/05/14.15-14.30-RISC-V-Barcelona-workshop.pdf&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;li&gt;The current U54 product page claims 3.16 CoreMark/MHz but it was &lt;a href=&quot;https://twitter.com/wikichip/status/917585069509959680&quot;&gt;2.75
-in 2017&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Was available on the now-discontinued &lt;a href=&quot;https://www.sifive.com/boards/hifive-unleashed&quot;&gt;HiFive Unleashed development
-board&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://github.com/bouffalolab/bl_docs/blob/main/BL808_DS/en/BL808_DS_1.2_en.pdf&quot;&gt;Bouffalo Lab
-BL808&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1 x RV64IMAFCV &lt;a href=&quot;https://www.t-head.cn/product/c906?lang=en&quot;&gt;T-Head C906&lt;/a&gt;
-application core, 1 x RV32IMAFCP &lt;a href=&quot;https://www.t-head.cn/product/e907?lang=en&quot;&gt;T-Head
-E907&lt;/a&gt;, 1 x RV32E?? &lt;a href=&quot;https://www.t-head.cn/product/e902?lang=en&quot;&gt;T-Head
-E902&lt;/a&gt;
-(&lt;a href=&quot;https://wiki.pine64.org/wiki/Ox64&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;li&gt;See notes elsewhere for more info on these T-Head core designs.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;The C906 runs at 480 MHz, the E907 at 320 MHz and the E902 at 150 MHz.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Available in the &lt;a href=&quot;https://wiki.pine64.org/wiki/Ox64&quot;&gt;Ox64&lt;/a&gt; from Pine64.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://www.renesas.com/in/en/products/microcontrollers-microprocessors/rz-mpus/rzfive-general-purpose-microprocessors-risc-v-cpu-core-andes-ax45mp-single-10-ghz-2ch-gigabit-ethernet&quot;&gt;Renesas
-RZ/Five&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1 x RV64GC &lt;a href=&quot;http://www.andestech.com/en/products-solutions/andescore-processors/riscv-ax45mp/&quot;&gt;Andes
-AX45MP&lt;/a&gt;
-application core with additional Andes extensions (draft of the &amp;#x27;P&amp;#x27;
-packed SIMD spec, Andes &amp;#x27;V5&amp;#x27; extensions).&lt;/li&gt;
-&lt;li&gt;Unfortunately has a hardware bug where &lt;a href=&quot;https://lore.kernel.org/all/OSZPR01MB70191A1A9FD7FAE4EF4F8FF0AA129@OSZPR01MB7019.jpnprd01.prod.outlook.com/&quot;&gt;virtual addresses in a certain
-range are always treated as physical
-addresses&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;Dual issue, in-order pipeline with 8 stages.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1.0 GHz, 5.63 CoreMark/MHz
-(&lt;a href=&quot;http://www.andestech.com/en/products-solutions/andescore-processors/riscv-ax45mp/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;https://www.renesas.com/us/en/products/microcontrollers-microprocessors/rz-mpus/rzfive-evaluation-board-kit-rzfive-evaluation-board-kit&quot;&gt;Evaluation
-kit&lt;/a&gt;
-available.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://www.canaan.io/product/kendryte-k510&quot;&gt;Kendryte K510&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;2 x RV64GC application cores and 1 x RV64GC core with DSP extensions.
-The &lt;a href=&quot;http://www.andestech.com/en/products-solutions/andescore-processors/riscv-ax25mp/&quot;&gt;Andes
-AX25MP&lt;/a&gt; appears to be used (&lt;a href=&quot;https://drive.google.com/file/d/1IlbkZZg1dUWZMKIfvYX6A7HVNmmQs5r2/view&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;800 MHz.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;https://www.canaan.io/product/kendryte-k510-crb-kit-developer-kit&quot;&gt;K510
-CRB-KIT&lt;/a&gt;
-developer kit is available.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;(Upcoming) &lt;a href=&quot;https://www.sifive.com/boards/hifive-pro-p550&quot;&gt;Intel-SiFive Horse Creek SoC&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;4 x &amp;quot;RV64GBC&amp;quot; SiFive P550 application cores (docs not yet available, but
-&lt;a href=&quot;https://www.cnx-software.com/2021/06/23/sifive-performance-p550-fastest-64-bit-risc-v-processor/&quot;&gt;an overview is
-here&lt;/a&gt;).
-As the &amp;#x27;B&amp;#x27; extension was broken up into smaller sub-extensions, this is
-perhaps RV64GC_Zba_Zbb like the SiFive U74.&lt;/li&gt;
-&lt;li&gt;13 stage, 3 issue, out-of-order pipeline.&lt;/li&gt;
-&lt;li&gt;As the bit manipulation extension was split into a range of
-sub-extensions it&amp;#x27;s unclear exactly which of the &amp;#x27;B&amp;#x27; family extensions
-will be supported.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;2.2 GHz, fabbed on Intel&amp;#x27;s &amp;#x27;4&amp;#x27; process node
-(&lt;a href=&quot;https://fuse.wikichip.org/news/7277/intel-sifive-demo-high-performance-risc-v-horse-creek-dev-platform-on-intel-4-process/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Will be available in the &lt;a href=&quot;https://www.sifive.com/boards/hifive-pro-p550&quot;&gt;HiFive Pro P550 development
-board&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;(Upcoming) T-Head TH1520
-(&lt;a href=&quot;https://riscv.org/blog/2022/10/deepcomputing-and-xcalibyte-announce-the-roma-laptop-will-be-powered-by-th1520-the-first-soc-from-wujian-600s-platform-by-alibaba-t-head-xcalibyte/&quot;&gt;announcement&lt;/a&gt;)
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;4 x RV64GC &lt;a href=&quot;https://www.t-head.cn/product/c910&quot;&gt;T-Head C910&lt;/a&gt; application
-cores, 1 x RV64GC &lt;a href=&quot;https://www.t-head.cn/product/c906?lang=en&quot;&gt;T-Head
-C906&lt;/a&gt;, 1 x RV32IMC &lt;a href=&quot;https://www.t-head.cn/product/e902&quot;&gt;T-Head
-E902&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;The C910 is a 3-issue out-of-order pipeline with 12 stages, the C906 is
-single-issue in-order with 5 stages, and the E902 is single-issue in-order
-with 2 stages.&lt;/li&gt;
-&lt;li&gt;Verilog for the cores is up on GitHub under the Apache license:
-&lt;a href=&quot;https://github.com/T-head-Semi/openc910&quot;&gt;C910&lt;/a&gt;,
-&lt;a href=&quot;https://github.com/T-head-Semi/openc906&quot;&gt;C906&lt;/a&gt;,
-&lt;a href=&quot;https://github.com/T-head-Semi/opene902&quot;&gt;E902&lt;/a&gt;.
-See &lt;a href=&quot;https://news.ycombinator.com/item?id=30691980&quot;&gt;discussion&lt;/a&gt;
-on what is included).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;2.4 GHz, fabbed on a 12nm process
-(&lt;a href=&quot;https://sipeed.com/licheepi4a/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Will be available on the &lt;a href=&quot;https://sipeed.com/licheepi4a/&quot;&gt;SiPeed Lichee Pi
-4A&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&quot;embedded--specialised-socs-mostly-32-bit&quot;&gt;&lt;a href=&quot;#embedded--specialised-socs-mostly-32-bit&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Embedded / specialised SoCs (mostly 32-bit)&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;https://static.dev.sifive.com/SiFive-E310-G000-manual-v1.0.1.pdf&quot;&gt;SiFive
-FE310&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1 x RV32IMAC &lt;a href=&quot;https://www.sifive.com/cores/e31&quot;&gt;SiFive E31&lt;/a&gt; core.&lt;/li&gt;
-&lt;li&gt;Single-issue, in-order pipeline with 5 stages.&lt;/li&gt;
-&lt;li&gt;Derived from the open source
-&lt;a href=&quot;https://github.com/chipsalliance/rocket-chip&quot;&gt;Rocket&lt;/a&gt; core design
-(&lt;a href=&quot;https://github.com/sifive/freedom&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;320 MHz
-(&lt;a href=&quot;https://sifive.cdn.prismic.io/sifive/4999db8a-432f-45e4-bab2-57007eed0a43_fe310-g002-datasheet-v1p2.pdf&quot;&gt;ref&lt;/a&gt;),
-fabbed on TSMC 180nm
-(&lt;a href=&quot;https://static.dev.sifive.com/SiFive-E310-G000-manual-v1.0.1.pdf&quot;&gt;ref&lt;/a&gt;),&lt;/li&gt;
-&lt;li&gt;2.73 CoreMark/MHz &lt;a href=&quot;https://sifive.cdn.prismic.io/sifive/4999db8a-432f-45e4-bab2-57007eed0a43_fe310-g002-datasheet-v1p2.pdf&quot;&gt;in the FE310-G002
-datasheet&lt;/a&gt;,
-3.17 CoreMark/MHz on the &lt;a href=&quot;https://www.sifive.com/cores/e31&quot;&gt;E31 product
-page&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Available in development boards such as the &lt;a href=&quot;https://www.sifive.com/boards/hifive1-rev-b&quot;&gt;HiFive 1 Rev
-B&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://www.gigadevice.com/products/microcontrollers/gd32/risc-v/mainstream-line/gd32vf103-series/&quot;&gt;GigaDevice GD32VF103
-series&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1 x RV32IMAC Nuclei &lt;a href=&quot;https://github.com/nucleisys/Bumblebee_Core_Doc&quot;&gt;Bumblebee
-N200&lt;/a&gt; (&amp;quot;jointly
-developed by Nuclei System Technology and Andes Technology.&amp;quot;)&lt;/li&gt;
-&lt;li&gt;No support for PMP (Physical Memory Protection), includes the &amp;#x27;ECLIC&amp;#x27;
-interrupt controller derived from the CLIC design.&lt;/li&gt;
-&lt;li&gt;Single-issue, in-order pipeline with 2 stages.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;108 MHz. 360 CoreMark
-(&lt;a href=&quot;https://www.eenewseurope.com/en/open-source-risc-v-mcu-with-bumblebee-core/&quot;&gt;ref&lt;/a&gt;),
-implying 3.33 CoreMark/MHz.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Available in development boards such as the &lt;a href=&quot;https://www.seeedstudio.com/Sipeed-Longan-Nano-V1-1-p-5118.html&quot;&gt;Sipeed Longan
-Nano&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://greenwaves-technologies.com/gap8_mcu_ai/&quot;&gt;GreenWaves GAP8&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Fabric Controller (FC) core and compute cluster of 8 cores based on
-&lt;a href=&quot;https://pulp-platform.org/&quot;&gt;PULP&lt;/a&gt;. Implements RV32IMC with alongside
-&lt;a href=&quot;https://greenwaves-technologies.com/manuals/BUILD/HOME/html/index.html&quot;&gt;additional custom
-extensions&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;175 MHz Fabric Controller, 250 MHz cluster. Fabbed on TSMC&amp;#x27;s 55nm
-process (&lt;a href=&quot;https://en.wikichip.org/wiki/greenwaves/gap8&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;li&gt;22.65 GOPS at 4.24mW/GOP
-(&lt;a href=&quot;https://greenwaves-technologies.com/low-power-processor/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;li&gt;Shipped 150,000 units, composed of roughly 80% open source and 20%
-proprietary IP
-(&lt;a href=&quot;https://www.eetimes.eu/greenwaves-channels-funding-into-new-risc-v-processors/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Available in the
-&lt;a href=&quot;https://greenwaves-technologies.com/product/gapuino/&quot;&gt;GAPuino&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://greenwaves-technologies.com/gap9_processor/&quot;&gt;GreenWaves GAP9&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Fabric Controller (FC) and compute cluster of 9 cores. Extends the
-RV32IMC (plus extensions) GAP8 core design with additional custom
-extensions
-(&lt;a href=&quot;https://riscv.org/wp-content/uploads/2019/12/12.10-17.10a-The-Next-Generation-of-GAP8-An-IoT-Application-Processor-for-Inference-at-the-Very-Edge.pdf&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;400 MHz Fabric Controller and computer cluster. Fabbed on Global
-Foundries 22nm FDX process
-(&lt;a href=&quot;https://greenwaves-technologies.com/gap9_iot_application_processor/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;li&gt;150.8 GOPS at 0.33mW/GOP
-(&lt;a href=&quot;https://greenwaves-technologies.com/low-power-processor/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;GAP9 evaluation kit listed on &lt;a href=&quot;https://greenwaves-technologies.com/store/&quot;&gt;Greenwaves
-store&lt;/a&gt; but you must email
-to receive access to order it.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://www.renesas.com/eu/en/products/microcontrollers-microprocessors/rh850-automotive-mcus/rh850u2b-zonedomain-and-vehicle-motion-microcontroller&quot;&gt;Renesas
-RH850/U2B&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Features an &lt;a href=&quot;https://www.nsitexe.com/en/ip-solutions/data-flow-processor/DR1000C/&quot;&gt;NSITEXE
-DR1000C&lt;/a&gt;
-RISC-V parallel coprocessor, comprised of RV32I scalar processor units,
-a control core unit, and a vector processing unit based on the RISC-V
-vector extension.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;400 MHz. Fabbed on a 28nm process.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;None I can find.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://www.renesas.com/eu/en/products/microcontrollers-microprocessors/risc-v/r9a02g020-assp-easy-mcu-motor-control-based-risc-v&quot;&gt;Renesas
-R9A02G020&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1 x RV32IMC &lt;a href=&quot;http://www.andestech.com/en/products-solutions/andescore-processors/riscv-n22/&quot;&gt;AndesCore
-N22&lt;/a&gt;
-(additionally supporting the Andes &amp;#x27;Performance&amp;#x27; and &amp;#x27;CoDense&amp;#x27;
-instruction set extensions).&lt;/li&gt;
-&lt;li&gt;Single-issue in-order with a 2-stage pipeline.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;32 MHz.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;The
-&lt;a href=&quot;https://www.renesas.com/eu/en/products/microcontrollers-microprocessors/risc-v/r9a02g020-evk-r9a02g020-assp-easy-motor-control-kit&quot;&gt;R9A02G020-EVK&lt;/a&gt;
-motor control kit is available.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://www.analog.com/en/products/max78000.html#product-overview&quot;&gt;Analog Devices
-MAX78000&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Features an RV32 RISC-V coprocessor of unknown (to me!) design and
-unknown ISA naming string.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;60 MHz (for the RISC-V co-processor), fabbed on a TSMC 40nm process
-(&lt;a href=&quot;https://forums.tinyml.org/t/two-tinyml-talks-on-october-27-2020-by-kristopher-ardis-and-robert-muchsel-from-maxim-integrated-and-manuele-rusci-from-greenwaves-technologies/385&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;https://www.analog.com/en/design-center/evaluation-hardware-and-software/evaluation-boards-kits/max78000evkit.html&quot;&gt;MAX78000EVKIT&lt;/a&gt;
-and
-&lt;a href=&quot;https://www.analog.com/en/design-center/evaluation-hardware-and-software/evaluation-boards-kits/max78000fthr.html&quot;&gt;MAX78000FTHR&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://www.espressif.com/en/products/socs/esp32-c3&quot;&gt;Espressif ESP32-C3&lt;/a&gt; / ESP8685
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1 x RV32IMC core of unknown design, single issue in-order 4-stage
-pipeline
-(&lt;a href=&quot;https://www.espressif.com/sites/default/files/documentation/esp32-c3_datasheet_en.pdf&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;160 MHz, fabbed on a TSMC 40nm process
-(&lt;a href=&quot;https://www.espressif.com.cn/sites/default/files/ESP32-C3%20%26%20ESP32-S3%20BQB%20Certification_0.pdf&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;li&gt;2.55 CoreMark/MHz.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Available in a number of formats including the
-&lt;a href=&quot;https://www.mouser.co.uk/ProductDetail/Espressif-Systems/ESP32-C3-DevKitM-1?qs=pUKx8fyJudB1sOWbbEnGFw%3D%3D&quot;&gt;ESP32-C3-DevKitM-1&lt;/a&gt;
-and the &lt;a href=&quot;https://www.mouser.co.uk/new/m5stack/m5stack-m5stamp-c3-set/&quot;&gt;M5Stack M5Stamp
-C3&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://www.espressif.com/en/products/socs/esp32-c2&quot;&gt;Espressif ESP32-C2&lt;/a&gt; / ESP8684
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1 x RV32IMC core of unknown design, single issue in-order 4-stage
-pipeline
-(&lt;a href=&quot;https://www.espressif.com/sites/default/files/documentation/esp8684_datasheet_en.pdf&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;160 MHz, fabbed on a TSMC 40nm process.&lt;/li&gt;
-&lt;li&gt;2.55 CoreMark/MHz.&lt;/li&gt;
-&lt;li&gt;Die photo available &lt;a href=&quot;https://blog.espressif.com/esp32-c2-and-why-it-matter-s-bcf4d7d0b2c6&quot;&gt;in this article&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Available in the
-&lt;a href=&quot;https://eu.mouser.com/ProductDetail/Espressif-Systems/ESP8684-DevKitM-1-H4?qs=tlsG%2FOw5FFjDvS55rvTa7Q%3D%3D&quot;&gt;ESP8684-DevKitM-1-H4&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://www.espressif.com/en/products/socs/esp32-c6&quot;&gt;Espressif ESP32-C6&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1 x RV32IMAC core of unknown design (four stage pipeline) and 1 x RV32IMAC
-core of unknown design (two stage pipeline) for low power operation (&lt;a href=&quot;https://www.espressif.com/sites/default/files/documentation/esp32-c6_datasheet_en.pdf&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;160 MHz high performance (HP) core with 2.76 CoreMark/MHz, 20 MHz low power (LP) core.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Available in the
-&lt;a href=&quot;https://www.mouser.co.uk/ProductDetail/Espressif-Systems/ESP32-C6-DevKitC-1-N8?qs=8Wlm6%252BaMh8TjnOR8RwmaBw%3D%3D&quot;&gt;ESP32-C6-DevKitC-1-N8&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://www.hisilicon.com/en/products/smart-iot/ShortRangeWirelessIOT/Hi3861V100&quot;&gt;HiSilicon
-Hi3861&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1 x RV32IM core of unknown design, supporting additional non-standard
-compressed instruction set extensions
-(&lt;a href=&quot;https://github.com/koendv/hi3861_notes&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;160 MHz.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;A low-cost board &lt;a href=&quot;https://www.aliexpress.com/item/1005003342192909.html&quot;&gt;is
-available&lt;/a&gt;
-advertising support for Harmony OS.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://en.bouffalolab.com/product/?type=detail&amp;amp;id=25&quot;&gt;Bouffalo Lab
-BL616/BL618&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1 x RV32GC core of unknown design, also with support for the unratified
-&amp;#x27;P&amp;#x27; packed SIMD extension
-(&lt;a href=&quot;https://wiki.sipeed.com/hardware/en/maixzero/m0s/m0s.html&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;320 MHz.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Available in the &lt;a href=&quot;https://wiki.sipeed.com/hardware/en/maixzero/m0s/m0s.html&quot;&gt;Sipeed M0S
-module&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://en.bouffalolab.com/product/?type=detail&amp;amp;id=1&quot;&gt;Bouffalo Lab BL602/BL604&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1 x RV32IMAFC &lt;a href=&quot;https://www.sifive.com/cores/e24&quot;&gt;SiFive E24&lt;/a&gt; core
-(&lt;a href=&quot;https://maero.dk/bl602-firmware-image-format/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;li&gt;3-stage pipeline.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;192 MHz, 3.1 CoreMark/MHz
-(&lt;a href=&quot;http://download.bl602.fun/BL602_%E5%AE%98%E6%96%B9%E8%8A%AF%E7%89%87%E8%B5%84%E6%96%99.pdf&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Available in the very low cost
-&lt;a href=&quot;https://pine64.com/product/pinecone-bl602-evaluation-board/&quot;&gt;Pinecone&lt;/a&gt;
-evaluation board.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Other&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;The &lt;a href=&quot;https://en.bouffalolab.com/product/?type=detail&amp;amp;id=4&quot;&gt;BL702&lt;/a&gt;
-appears to have the same core, so I haven&amp;#x27;t listed it separately.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://www.bluetrum.com/product/ab5301a.html&quot;&gt;Bluetrum AB5301A&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1 x RV32 core of uknown design and unknown ISA naming string (&lt;a href=&quot;https://www.cnx-software.com/2021/03/09/bluetrum-ab32vg1-board-features-ab5301a-bluetooth-risc-v-mcu-runs-rt-thread-rtos/&quot;&gt;CNX
-Software tried and failed to get
-clarification&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;125 MHz.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Available in the
-&lt;a href=&quot;https://www.aliexpress.com/item/1005002953148585.html&quot;&gt;AB32VG1&lt;/a&gt;
-development board.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://www.wch-ic.com/products/CH583.html&quot;&gt;WCH CH583&lt;/a&gt;/CH582/CH581
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1 x RV32IMAC &lt;a href=&quot;http://www.wch-ic.com/downloads/file/367.html&quot;&gt;QingKe V4a&lt;/a&gt;
-core, which also supports a &amp;quot;hardware prologue/epilogue&amp;quot; extension.&lt;/li&gt;
-&lt;li&gt;Single issue in-order pipeline with 2 stages.&lt;/li&gt;
-&lt;li&gt;Unlike the other QingKe V4 series core designs, the V4a doesn&amp;#x27;t support
-the custom &amp;#x27;extended instruction&amp;#x27; (XW) instruction set extension.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;20MHz.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;An evaluation board &lt;a href=&quot;https://www.aliexpress.com/i/1005003926698348.html&quot;&gt;is
-available&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://www.wch-ic.com/products/CH32V307.html&quot;&gt;WCH CH32V307&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1 x RV32IMAFC &lt;a href=&quot;http://www.wch-ic.com/downloads/file/367.html&quot;&gt;QingKe
-V4f&lt;/a&gt; core.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;144 MHz.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;An evaluation board &lt;a href=&quot;https://www.aliexpress.com/item/1005004511264952.html&quot;&gt;is
-available&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://www.wch-ic.com/products/CH32V208.html&quot;&gt;WVH CH32V208&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1 x RV32IMAC &lt;a href=&quot;http://www.wch-ic.com/downloads/file/367.html&quot;&gt;QingKe
-V4c&lt;/a&gt; core with custom
-instruction set extensions (&amp;#x27;XW&amp;#x27; for sign-extended byte and half word
-operations).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key info&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;144 MHz.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Available &lt;a href=&quot;https://www.aliexpress.com/item/1005004924242063.html&quot;&gt;here&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Other&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;The &lt;a href=&quot;http://www.wch-ic.com/products/CH32V203.html&quot;&gt;CH32V203&lt;/a&gt; is also
-available but I haven&amp;#x27;t listed it separately as it&amp;#x27;s not clear how the
-QingKe V4b core in that chip differs to the V4c in this one.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://www.wch-ic.com/products/CH569.html&quot;&gt;WCH CH569&lt;/a&gt; / &lt;a href=&quot;http://www.wch-ic.com/products/CH573.html&quot;&gt;WCH
-CH573&lt;/a&gt; / &lt;a href=&quot;http://www.wch-ic.com/products/CH32V103.html&quot;&gt;WCH
-CH32V103&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1 x RV32IMAC &lt;a href=&quot;http://www.wch-ic.com/downloads/file/368.html&quot;&gt;QinqKe V3a&lt;/a&gt;
-core.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;120 MHz (CH569), 20 MHz (CH573), 80 MHz (CH32V103).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Evaluation boards available, e.g. &lt;a href=&quot;https://www.aliexpress.com/item/1005004607642695.html&quot;&gt;this one for the
-CH32V103&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://www.wch-ic.com/products/CH32V003.html&quot;&gt;WCH CH32V003&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1 x RV32EC &lt;a href=&quot;http://www.wch-ic.com/downloads/file/369.html&quot;&gt;QingKe V2A&lt;/a&gt;
-with custom instruction set extensions (&amp;#x27;XW&amp;#x27; for sign-extended byte and
-half word operations).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;48 MHz.&lt;/li&gt;
-&lt;li&gt;Notably announced as &lt;a href=&quot;https://twitter.com/patrick_riscv/status/1580384430996484101&quot;&gt;costing less than 10
-cents&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Various boards
-&lt;a href=&quot;https://www.aliexpress.com/item/1005004988121617.html&quot;&gt;available&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://picocom.com/products/socs/pc802/&quot;&gt;PicoCom PC802&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Two clusters of 16 RV32IMAC &lt;a href=&quot;http://www.andestech.com/en/products-solutions/andescore-processors/riscv-n25f/&quot;&gt;Andes
-N25F&lt;/a&gt;
-cores
-(&lt;a href=&quot;https://www.electronicsweekly.com/news/business/picocom-adopts-andes-risc-v-cores-o-ran-soc-2020-08/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;li&gt;Single issue, in order pipeline with 5 stages.&lt;/li&gt;
-&lt;li&gt;Also see the &lt;a href=&quot;https://www.youtube.com/watch?v=EmG0fWFwIqI&quot;&gt;2021 RISC-V summit
-talk&lt;/a&gt; for more insight on
-the architecture.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Fabbed on TSMC 12nm process
-(&lt;a href=&quot;https://www.eenewseurope.com/en/picocom-tapes-out-multicore-risc-v-openran-chip-for-oranic-board/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Several boards &lt;a href=&quot;https://picocom.com/products/boards/&quot;&gt;are available&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://csm-ic.com/Html/ProductView.asp?ID=253&amp;amp;SortID=201&quot;&gt;CSM32RV20&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1 x RV32IMAC core of unknown design.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;2.6 CoreMark/MHz.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;The &lt;a href=&quot;http://csm-ic.com/Html/ProductView.asp?ID=253&amp;amp;SortID=201&quot;&gt;product
-page&lt;/a&gt; suggests
-two boards are available.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://www.hpmicro.com/product/summary.html?id=d7fdb78f-1fa5-43be-be08-b97b405b65f0&quot;&gt;HPMicro
-HPM6750&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;2 x RV32IMAFDC cores (&lt;a href=&quot;http://www.andestech.com/en/products-solutions/andescore-processors/riscv-d45/&quot;&gt;AndesCore
-D45&lt;/a&gt;)
-with an implementation of the draft &amp;#x27;P&amp;#x27; packed SIMD spec
-(&lt;a href=&quot;https://riscv.org/news/2021/12/hpmicro-semiconductor-announces-the-release-of-the-hpm6000-series-of-microcontrollers-with-andescore-dual-d45-cores-andes-technology/&quot;&gt;ref&lt;/a&gt;).&lt;/li&gt;
-&lt;li&gt;In-order dual-issue 8-stage pipeline.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;800 MHz&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;Available in the
-&lt;a href=&quot;http://doc.hpmicro.com/sdk_doc/en/latest/html/boards/hpm6750evk/README.html&quot;&gt;HPM6750EVK&lt;/a&gt;
-as well as other variants.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://www.renesas.com/eu/en/application/iot-applications/smart-appliances/voice-control-hmi-risc-v-assp&quot;&gt;Renesas
-R9A06G150&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Core design&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;1 x RV32IMAFC &lt;a href=&quot;http://www.andestech.com/en/products-solutions/andescore-processors/riscv-d25f/&quot;&gt;AndesCore
-D25F&lt;/a&gt;
-with additional vendor-specific instruction set extensions.&lt;/li&gt;
-&lt;li&gt;5 stage pipeline, single issue in-order.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key stats&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;100 MHz&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Development board&lt;/strong&gt;:
-&lt;ul&gt;
-&lt;li&gt;None available currently.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&quot;bonus-other-socs-that-donx27t-match-the-above-criteria-or-where-therex27s-insufficient-info&quot;&gt;&lt;a href=&quot;#bonus-other-socs-that-donx27t-match-the-above-criteria-or-where-therex27s-insufficient-info&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Bonus: Other SoCs that don&amp;#x27;t match the above criteria or where there&amp;#x27;s insufficient info&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;The &lt;a href=&quot;https://www.espressif.com/en/news/ESP32-P4&quot;&gt;Espressif ESP32-P4&lt;/a&gt; was
-announced, featuring a dual-core 400MHz RISC-V CPU with &amp;quot;an AI instructions
-extension&amp;quot;. I look forward to incorporating it into the list above when more
-information is available.&lt;/li&gt;
-&lt;li&gt;I won&amp;#x27;t try to enumerate every use of RISC-V in chips that aren&amp;#x27;t
-programmable by end users or where development boards aren&amp;#x27;t available, but
-it&amp;#x27;s worth noting the &lt;a href=&quot;https://www.androidauthority.com/titan-m2-google-3261547/&quot;&gt;use of RISC-V Google&amp;#x27;s Titan
-M2&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;In January 2022 Intel Mobileye
-&lt;a href=&quot;https://www.anandtech.com/show/17165/mobileye-announces-eyeq-ultra-l4-auto-soc&quot;&gt;announced&lt;/a&gt;
-the EyeQ Ultra featuring 12 RISC-V cores (of unknown design), but there
-hasn&amp;#x27;t been any news since.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
-&lt;ul&gt;
-&lt;li&gt;2023-03-31: Add Renesas R9A06G150 to the list.&lt;/li&gt;
-&lt;li&gt;2023-03-26: Add HPM6750 to the list.&lt;/li&gt;
-&lt;li&gt;2023-03-19: Add note on silicon bug in the Renesas RZ/Five.&lt;/li&gt;
-&lt;li&gt;2023-03-12: Clarified details of several SiFive cores and made the
-listing of SoCs using cores derived from open source RTL exhaustive.&lt;/li&gt;
-&lt;li&gt;2023-03-04:
-&lt;ul&gt;
-&lt;li&gt;Added in the CSM32RV20 and some extra Bouffalo Lab and WCH chips (&lt;a href=&quot;https://old.reddit.com/r/RISCV/comments/11h2e6u/commercially_available_riscv_silicon_list/jasbyfo/&quot;&gt;thanks
-to Reddit user
-1r0n_m6n&lt;/a&gt;).&lt;/li&gt;
-&lt;li&gt;Confirmed likely core design in the K510 (&lt;a href=&quot;https://old.reddit.com/r/RISCV/comments/11h2e6u/commercially_available_riscv_silicon_list/jaupwnb/&quot;&gt;thanks to Reddit user
-zephray_wenting&lt;/a&gt;).&lt;/li&gt;
-&lt;li&gt;Further Espressif information and new ESP32-C2 entry
-&lt;a href=&quot;https://github.com/muxup/muxup-site/pull/1&quot;&gt;contributed&lt;/a&gt; by Ivan
-Grokhotkov.&lt;/li&gt;
-&lt;li&gt;Clarified cores in the JH7110 and JH7100 (thanks to Conor Dooley for the
-tip).&lt;/li&gt;
-&lt;li&gt;Added T-Head C910-ICE (thanks to a tip via email).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;2023-03-03:
-&lt;ul&gt;
-&lt;li&gt;Added note about CoreMark scores.&lt;/li&gt;
-&lt;li&gt;Added the Renesas R9A02G020 (thanks to Giancarlo Parodi for the tip!).&lt;/li&gt;
-&lt;li&gt;Various typo fixes.&lt;/li&gt;
-&lt;li&gt;Add link to PicoCom RISC-V Summit talk and clarify the ISA extensions
-supported by the PC802 Andes N25F clusters.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;2023-03-03: Initial publication date.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/details&gt;
 </content>

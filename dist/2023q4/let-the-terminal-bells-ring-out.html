@@ -209,13 +209,13 @@ content: " «";
 <div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></a></div>
 </div>
 <h1 id="article-title"><span id="title-highlight">Let the (terminal) bells ring out</span></h1>
-<div id="article-meta"><span title="2023-12-24">2023Q4</span>. Last update <span title="2023-12-24">24 Dec 2023</span>. <a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
+<div id="article-meta"><span title="2023-12-24">2023Q4</span>. Last update <span title="2023-12-24">Dec 2023</span>. <a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
 <p>I just wanted to take a few minutes to argue that the venerable terminal bell
 is a helpful and perhaps overlooked tool for anyone who does a lot of their
 work out of a terminal window. First, an important clarification. Bells
 ringing, chiming, or (as is appropriate for the season) jingling all sounds
 very noisy - but although you can configure your terminal emulator to emit a
-sound for the terminal bell, I&#x27;m actually advocating for configuring a
+sound for the terminal bell, I'm actually advocating for configuring a
 non-intrusive but persistent visual notification.</p>
 <h2 id="bel"><a href="#bel" class="anchor" aria-hidden="true" tabindex="-1"></a>BEL</h2>
 <p>Our goal is to generate a visual indicator on demand (e.g. when a long-running
@@ -223,12 +223,12 @@ task has finished) and to do so with minimal fuss. This should work over ssh
 and without worrying about forwarding connections to some notification
 daemon. The ASCII <code>BEL</code> control character (alternatively written as <code>BELL</code> by
 those willing to spend characters extravagantly) meets these requirements.
-You&#x27;ll just need co-operation from your terminal emulator and window manager
+You'll just need co-operation from your terminal emulator and window manager
 to convert the bell to an appropriate notification.</p>
 <p><code>BEL</code> is <code>7</code> in ASCII, but can be printed using <code>\a</code> in <code>printf</code> (including
 the <code>/usr/bin/printf</code> you likely use from your shell, <a href="https://pubs.opengroup.org/onlinepubs/9699919799/utilities/printf.html">defined in
 POSIX</a>).
-There&#x27;s even a <a href="https://rosettacode.org/wiki/Terminal_control/Ringing_the_terminal_bell">Rosetta Code
+There's even a <a href="https://rosettacode.org/wiki/Terminal_control/Ringing_the_terminal_bell">Rosetta Code
 page</a>
 on ringing the terminal bell from various languages. Personally, I like to
 define a shell alias such as:</p>
@@ -245,23 +245,23 @@ operation like an LLVM compile and test use something like:</p>
 previous commands. All being well, this sets the urgent hint on the X11 window
 used by your terminal, and your window manager produces a subtle but
 persistent visual indicator that is dismissed after you next give focus to the
-source of the bell. Here&#x27;s how it looks for me in
+source of the bell. Here's how it looks for me in
 <a href="https://dwm.suckless.org/">DWM</a>:</p>
 <p><img src="/static/bell_example.png" alt="Screenshot of DWM showing a notification from abell" title="DWM screenshot" /></p>
 <p>The above example shows 9 workspaces (some of them named), where the <code>llvm</code>
-workspace has been highlighted because a bell was produced there. You&#x27;ll also
+workspace has been highlighted because a bell was produced there. You'll also
 spot that I have a <code>timers</code> workspace, which I tend to use for miscellaneous
-timers. e.g. a reminder before a meeting is due to start, or when I&#x27;m planning
+timers. e.g. a reminder before a meeting is due to start, or when I'm planning
 to switch a task. I have a small tool for this I might share in a future post.</p>
 <p>A limitation versus triggering <a href="https://specifications.freedesktop.org/notification-spec/latest/">freedesktop.org Desktop
 Notifications</a>
-is that there&#x27;s no payload / associated message. For me this isn&#x27;t a big deal,
-such messages are distracting, and it&#x27;s easy enough to see the full context
-when switching workspaces. It&#x27;s possible it&#x27;s a problem for your preferred
+is that there's no payload / associated message. For me this isn't a big deal,
+such messages are distracting, and it's easy enough to see the full context
+when switching workspaces. It's possible it's a problem for your preferred
 workflow of course.</p>
 <p>You <em>could</em> put <code>\a</code> in your terminal prompt (<code>$PS1</code>), meaning a bell is
 triggered after every command finishes. For me this would lead to too many
-notifications for commands I didn&#x27;t want to carefully monitor the output for,
+notifications for commands I didn't want to carefully monitor the output for,
 but your mileage may vary. After publishing this article, my
 <a href="https://igalia.com">Igalia</a> colleague Adrian Perez pointed me to a slight
 variant on this that he uses: in Zsh <code>$TTYIDLE</code> makes it easy to configure
@@ -278,7 +278,7 @@ the visual bell in preferences), and I switched solely due to this issue.</p>
 <p>From what I can tell, this is the status of visual bell support via setting
 the X11 urgent hint:</p>
 <ul>
-<li>xfce4-terminal: Supported. In Preferences -&gt; Advanced ensure &quot;Visual bell&quot;
+<li>xfce4-terminal: Supported. In Preferences -&gt; Advanced ensure "Visual bell"
 is ticked.</li>
 <li>xterm: Set <code>XTerm.vt100.bellIsUrgent: true</code> in your <code>.Xresources</code> file.</li>
 <li>rxvt-unicode (urxvt): Set <code>URxvt.urgentOnBell: true</code> in your <code>.Xresources</code>
@@ -287,8 +287,8 @@ file.</li>
 needed.</li>
 <li>gnome-terminal: <a href="https://gitlab.gnome.org/GNOME/gnome-terminal/-/issues/6698">Not
 supported</a>.</li>
-<li>konsole: As far as I can tell it isn&#x27;t supported. Creating a new profile and
-setting the &quot;Terminal bell mode&quot; to &quot;Visual Bell&quot; doesn&#x27;t seem to result in
+<li>konsole: As far as I can tell it isn't supported. Creating a new profile and
+setting the "Terminal bell mode" to "Visual Bell" doesn't seem to result in
 the urgent hint being set.</li>
 </ul>
 <hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor "aria-hidden="true" tabindex="-1"></a>Article changelog</summary>

@@ -169,27 +169,27 @@ font-size:.833rem
 </div>
 <h1 id="article-title"><span id="title-highlight">Reflections on ten years of LLVM Weekly</span></h1>
 <div id="article-meta"><span title="2024-01-01">2024Q1</span>.</div>
-<p>Today, with <a href="https://llvmweekly.org/issue/522">Issue #522</a> I&#x27;m marking ten
+<p>Today, with <a href="https://llvmweekly.org/issue/522">Issue #522</a> I'm marking ten
 years of authoring <a href="https://llvmweekly.org/">LLVM Weekly</a>, a newsletter
 summarising developments on projects under the LLVM umbrella (LLVM, Clang,
-MLIR, Flang, libcxx, compiler-rt, lld, LLDB, ...). Somehow I&#x27;ve managed to
+MLIR, Flang, libcxx, compiler-rt, lld, LLDB, ...). Somehow I've managed to
 keep up an unbroken streak, publishing every single Monday since the first
 issue back on <a href="https://llvmweekly.org/issue/1">Jan 6th 2014</a> (the first Monday
-of 2014 - you can also see the format hasn&#x27;t changed much!). With a milestone
+of 2014 - you can also see the format hasn't changed much!). With a milestone
 like that, now is the perfect moment to jot down some reflections on the
 newsletter and thoughts for the future.</p>
 <h2 id="motivation-and-purpose"><a href="#motivation-and-purpose" class="anchor" aria-hidden="true" tabindex="-1"></a>Motivation and purpose</h2>
-<p>Way back when I started <a href="https://llvmweekly.org/">LLVM Weekly</a>, I&#x27;d been
+<p>Way back when I started <a href="https://llvmweekly.org/">LLVM Weekly</a>, I'd been
 working with LLVM for a few years as part of developing and supporting a
 downstream compiler for a novel
 research architecture. This was a very educational yet somewhat lonely
 experience, and I sought to more closely follow upstream LLVM development
 to keep better abreast of changes that might impact or help my work, to
-learn more about parts of the compiler I wasn&#x27;t actively using, and also to
+learn more about parts of the compiler I wasn't actively using, and also to
 feel more of a connection to the wider LLVM community given my compiler work
 was a solo effort. The calculus for kicking off an LLVM development newsletter
 was dead simple: I found value in tracking development anyway, the
-incremental effort to write up and share with others wasn&#x27;t <em>too</em> great, and I
+incremental effort to write up and share with others wasn't <em>too</em> great, and I
 felt quite sure others would benefit as well.</p>
 <p>Looking back at my notes (I have a huge Markdown file with daily notes going back
 to 2011 - a file of this rough size and format is also a good
@@ -203,7 +203,7 @@ better to give it a try and stop it if it gets no traction rather than waste
 lots of time putting out feelers on level of interest and format. As a
 sidenote, I was delighted to see many of the newsletters I studied at the time
 are still going: <a href="https://this-week-in-rust.org/">This Week in Rust</a>
-<a href="https://perlweekly.com/">Perl Weekly</a> (I&#x27;ll admit this surprised me!),
+<a href="https://perlweekly.com/">Perl Weekly</a> (I'll admit this surprised me!),
 <a href="https://discourse.ubuntu.com/c/uwn/124">Ubuntu Weekly News</a>, <a href="https://alan.petitepomme.net/cwn/index.html">OCaml Weekly
 News</a>, and <a href="https://wiki.haskell.org/Haskell_Weekly_News">Haskell Weekly
 News</a>.</p>
@@ -212,44 +212,44 @@ News</a>.</p>
 articles and blog posts, pick out some forum/mailing discussions (sometimes
 trying to summarise complex debates - but this is very challenging and time
 intensive), and highlight some noteworthy commits from across the project.
-More recently I&#x27;ve taken to advertising the scheduled <a href="https://llvm.org/docs/GettingInvolved.html#online-sync-ups">online
+More recently I've taken to advertising the scheduled <a href="https://llvm.org/docs/GettingInvolved.html#online-sync-ups">online
 sync-ups</a> and
 <a href="https://llvm.org/docs/GettingInvolved.html#office-hours">office hours</a> for
 the week. Notably absent are any kind of ads or paid content. I respect that
-others have made successful businesses in this kind of space, but although I&#x27;ve
-always written LLVM Weekly on my own personal time I&#x27;ve never felt comfortable
-trying to monetise other people&#x27;s attention or my relationship with the
+others have made successful businesses in this kind of space, but although I've
+always written LLVM Weekly on my own personal time I've never felt comfortable
+trying to monetise other people's attention or my relationship with the
 community in this way.</p>
 <p>The target audience is really anyone with an interest in keeping track of LLVM
-development, though I don&#x27;t tend to expand every acronym or give a
+development, though I don't tend to expand every acronym or give a
 from-basics explanation for every term, so some familiarity with the project
 is assumed if you want to understand every line. The newsletter is posted to
-LLVM&#x27;s Discourse, to <a href="https://llvmweekly.org/">llvmweekly.org</a>, and delivered
-direct to people&#x27;s inboxes. I additionally post <a href="https://twitter.com/llvmweekly">on
+LLVM's Discourse, to <a href="https://llvmweekly.org/">llvmweekly.org</a>, and delivered
+direct to people's inboxes. I additionally post <a href="https://twitter.com/llvmweekly">on
 Twitter</a> and <a href="https://fosstodon.org/@llvmweekly">on
-Mastodon</a> linking to each issue. I don&#x27;t
+Mastodon</a> linking to each issue. I don't
 attempt to track open rates or have functioning analytics, so only have a
 rough idea of readership. There are ~3.5k active subscribers directly to the
 mailing list, ~7.5k Twitter followers, ~180 followers on Mastodon (introduced
 much more recently), and an unknown number of people reading via
-llvmweekly.org or RSS. I&#x27;m pretty confident that I&#x27;m not just shouting in the
+llvmweekly.org or RSS. I'm pretty confident that I'm not just shouting in the
 void at least.</p>
 <p>There are some gaps or blind spots of course. I make no attempt to try to link
 to patches that are under-review, even though many might have interesting
 review discussions because it would simply be too much work to sort through
 them and if the discussion is particularly contentious or requires input
-from a wider cross-section of the LLVM community you&#x27;d expect an RFC
+from a wider cross-section of the LLVM community you'd expect an RFC
 to be posted anyway. Although I do try to highlight MLIR threads or commits,
-as it&#x27;s not an area of LLVM I&#x27;m working right now I probably miss some things.
+as it's not an area of LLVM I'm working right now I probably miss some things.
 Thankfully Javed Absar has taken up writing an <a href="https://discourse.llvm.org/c/mlir/mlir-news-mlir-newsletter/37">MLIR
 newsletter</a>
-that helps plug those gaps. I&#x27;m also not currently trawling through repos
+that helps plug those gaps. I'm also not currently trawling through repos
 under the <a href="https://github.com/llvm/">LLVM GitHub organisation</a> other than the
 main llvm-project monorepo, though perhaps I should...</p>
-<p>I&#x27;ve shied away from reposting job posts as the overhead is just too high.  I
+<p>I've shied away from reposting job posts as the overhead is just too high.  I
 found dealing with requests to re-advertise (and considering if this is useful
 to the community) or determining if ads are sufficiently LLVM related just
-wasnt a good use of time when there&#x27;s a good alternative. People can <a href="https://discourse.llvm.org/c/community/job-postings/">check
+wasnt a good use of time when there's a good alternative. People can <a href="https://discourse.llvm.org/c/community/job-postings/">check
 the job post
 category on LLVM
 discourse</a> or search for
@@ -270,26 +270,26 @@ to others. This is bound to be somewhat flawed, but hopefully better than
 ramdom selection! I always really appreciate feedback if you think I missed
 something important, or tips on things you think I should include next week.
 <ul>
-<li>There&#x27;s a cheat that practically guarantees a mention in LLVM Weekly
-without even needing to drop me a note though - write documentation! It&#x27;s
+<li>There's a cheat that practically guarantees a mention in LLVM Weekly
+without even needing to drop me a note though - write documentation! It's
 very rare I see a commit that adds more docs and fail to highlight it.</li>
 </ul>
 </li>
 <li>Similarly, I scan through <a href="https://discourse.llvm.org/">LLVM Discourse</a>
 posts over the past week and pick out discussions I think readers may be
 interested in. Most RFCs will be picked up as part of this. In some cases if
-there&#x27;s a lengthy discussion I might attempt to summarise or point to key
-messages, but honestly this is rarer than I&#x27;d like as it can be incredibly
+there's a lengthy discussion I might attempt to summarise or point to key
+messages, but honestly this is rarer than I'd like as it can be incredibly
 time consuming. I try very hard to remain a neutral voice and no to insert
 personal views on technical discussions.</li>
 <li>Many ask how long it takes to write, and the answer is of course that it
-varies. It&#x27;s easy to spend a lot of time trying to figure out the importance
-of commits or discussions in parts of the compiler I don&#x27;t work with much,
+varies. It's easy to spend a lot of time trying to figure out the importance
+of commits or discussions in parts of the compiler I don't work with much,
 or to better summarise content. The amount of activity can also vary a lot
-week to week (especially on Discourse). It&#x27;s mostly in the 2.5-3.5h range
+week to week (especially on Discourse). It's mostly in the 2.5-3.5h range
 (very rarely any more than 4 hours) to write, copyedit, and send.</li>
 </ul>
-<p>There&#x27;s not much to be said on the tooling said, except that I could probably
+<p>There's not much to be said on the tooling said, except that I could probably
 benefit from refreshing my helper scripts. Mail sending is handled by
 <a href="https://www.mailgun.com/">Mailgun</a>, who have changed ownership three times
 since I started. I handle double opt-in via a simple Python script on the
@@ -298,54 +298,54 @@ static HTML with some scripts that could do with a bit more love. The only
 other running costs are the domain name fees and a VPS that hosts some other
 things as well, so quite insignificant compared to the time commitment.</p>
 <h2 id="how-you-can-help"><a href="#how-you-can-help" class="anchor" aria-hidden="true" tabindex="-1"></a>How you can help</h2>
-<p>I cannot emphasise enough that I&#x27;m not an expert on all parts of LLVM, and I&#x27;m
+<p>I cannot emphasise enough that I'm not an expert on all parts of LLVM, and I'm
 also only human and can easily miss things. If you did something you think
 people may be interested in and I failed to cover it, I almost certainly
-didn&#x27;t explicitly review it and deem it not worthy. Please do continue to help
+didn't explicitly review it and deem it not worthy. Please do continue to help
 me out by dropping links and suggestions. Writing commit messages that make it
-clear if a change has wider impact also helps increase the chance I&#x27;ll pick it
+clear if a change has wider impact also helps increase the chance I'll pick it
 up.</p>
 <p>I noted above that it is particularly time consuming to summarise back and
 forth in lengthy RFC threads. Sometimes people step up and do this and I
 always try to link to it when this happens. The person who initiated a thread
-or proposal is best placed write such a summary, and it&#x27;s also a useful tool
-to check that you interpreted people&#x27;s suggestions/feedback correctly, but it
+or proposal is best placed write such a summary, and it's also a useful tool
+to check that you interpreted people's suggestions/feedback correctly, but it
 can still be helpful if others provide a similar service.</p>
 <p>Many people have fed back they find LLVM Weekly useful to stay on top of LLVM
 developments. This is gratifying, but also a pretty huge responsibility. If
 you have thoughts on things I could be doing differently to serve the
-community even better without a big difference in time commitment, I&#x27;m always
+community even better without a big difference in time commitment, I'm always
 keen to hear ideas and suggestions.</p>
 <h2 id="miscellaneous-thoughts"><a href="#miscellaneous-thoughts" class="anchor" aria-hidden="true" tabindex="-1"></a>Miscellaneous thoughts</h2>
 <p>To state the obvious, ten years is kind of a long time. A lot has happened
-with me in that time - I&#x27;ve got married, we had a son, I co-founded and helped
+with me in that time - I've got married, we had a son, I co-founded and helped
 grow a company, and then moved on from that, kicked off the upstream RISC-V
 LLVM backend, and much more. One of the things I love working with compilers
-is that there&#x27;s always new things to learn, and writing LLVM Weekly helps me
-learn at least a little more each week in areas outside of where I&#x27;m currently
-working.  There&#x27;s been a lot of changes in LLVM as well. Off the top off my
-head: there&#x27;s been the move from SVN to Git, moving the Git repo to GitHub,
+is that there's always new things to learn, and writing LLVM Weekly helps me
+learn at least a little more each week in areas outside of where I'm currently
+working.  There's been a lot of changes in LLVM as well. Off the top off my
+head: there's been the move from SVN to Git, moving the Git repo to GitHub,
 moving from Phabricator to GitHub PRs, Bugzilla to GitHub issues, mailing
 lists to Discourse, relicensing to Apache 2.0 with LLVM exception, the wider
 adoption of office hours and area-specific sync-up calls, and more. I think
 even the LLVM Foundation was set up a little bit after LLVM Weekly started.
-It&#x27;s comforting to see the <a href="https://web.archive.org/web/20140102034931/http://llvm.org/">llvm.org website design remains unchanged
+It's comforting to see the <a href="https://web.archive.org/web/20140102034931/http://llvm.org/">llvm.org website design remains unchanged
 though!</a></p>
-<p>It&#x27;s also been a time period where I&#x27;ve become increasingly involved in LLVM.
+<p>It's also been a time period where I've become increasingly involved in LLVM.
 Upstream work - most notably initiating the RISC-V LLVM backend, organising an
 LLVM conference, many talks, serving on various program committees for LLVM
 conferences, etc etc. When I started I felt a lot like someone outside the
 community looking in and documenting what I saw. That was probably accurate
-too, given the majority of my work was downstream. While I don&#x27;t feel like an
-LLVM &quot;insider&quot; (if such a thing exists?!), I certainly feel a lot more part of
+too, given the majority of my work was downstream. While I don't feel like an
+LLVM "insider" (if such a thing exists?!), I certainly feel a lot more part of
 the community than I did way back then.</p>
 <p>An obvious question is whether there are other ways of pulling together the
 newsletter that are worth pursuing. My experience with large language models
-so far has been that they haven&#x27;t been very helpful in reducing the effort for
+so far has been that they haven't been very helpful in reducing the effort for
 the more time consuming aspects of producing LLVM Weekly, but perhaps that
-will change in the future. If I could be automated away then that&#x27;s great -
-perhaps I&#x27;m misjudging how much of my editorial input is signal rather than
-just noise, but I don&#x27;t think we&#x27;re there yet for AI. More collaborative
+will change in the future. If I could be automated away then that's great -
+perhaps I'm misjudging how much of my editorial input is signal rather than
+just noise, but I don't think we're there yet for AI. More collaborative
 approaches to producing content would be another avenue to explore. For the
 current format, the risk is that the communication overhead and stress of
 seeing if various contributions actually materialise before the intended
@@ -354,31 +354,31 @@ over, then a rotating editorship would probably be most interesting to me.
 Even if multiple people contribute, each week a single would act as a backstop
 to make sure something goes out.</p>
 <p>The unbroken streak of LLVM Weekly editions each Monday has become a bit
-totemic. It&#x27;s certainly not always convenient having this fixed commitment,
-but it can also be nice to have this rhythm to the week. Even if it&#x27;s a bad
-week, at least it&#x27;s something in the bag that people seem to appreciate.
+totemic. It's certainly not always convenient having this fixed commitment,
+but it can also be nice to have this rhythm to the week. Even if it's a bad
+week, at least it's something in the bag that people seem to appreciate.
 Falling into bad habits and frequently missing weeks would be good for nobody,
 but I suspect that a schedule that allowed the odd break now and then would be
 just fine. Either way, I feel a sense of relief having hit the 10 year
-unbroken streak. I don&#x27;t intend to start skipping weeks, but should life get
-in the way and the streak gets broken I&#x27;ll feel rather more relaxed about it
+unbroken streak. I don't intend to start skipping weeks, but should life get
+in the way and the streak gets broken I'll feel rather more relaxed about it
 having hit that arbitrary milestone.</p>
 <h2 id="looking-forwards-and-thanks"><a href="#looking-forwards-and-thanks" class="anchor" aria-hidden="true" tabindex="-1"></a>Looking forwards and thanks</h2>
-<p>So what&#x27;s next? LLVM Weekly continues, much as before. I don&#x27;t know of I&#x27;ll
-still be writing it in another 10 years time, but I&#x27;m not planning to stop
+<p>So what's next? LLVM Weekly continues, much as before. I don't know of I'll
+still be writing it in another 10 years time, but I'm not planning to stop
 soon. If it ceases to be a good use of my time, ceases to have values for
-others, or I find there&#x27;s a better way of generating similar impact then it
+others, or I find there's a better way of generating similar impact then it
 would only be logical to move on. But for now, onwards and upwards.</p>
 <p>Many thanks are due. Thank you to the people who make LLVM
-what it is - both technically and in terms of its community that I&#x27;ve learned
+what it is - both technically and in terms of its community that I've learned
 so much from. Thank you to <a href="https://www.igalia.com/">Igalia</a> where I work for
-creating an environment where I&#x27;m privileged enough to be paid to contribute
+creating an environment where I'm privileged enough to be paid to contribute
 upstream to LLVM (<a href="https://www.igalia.com/contact/">get in touch</a> if you have
 LLVM needs!). Thanks to my family for ongoing support and
 of course putting up with the times my LLVM Weekly commitment is inconvenient.
 Thank you to everyone who has been reading LLVM Weekly and especially those
 sending in feedback or tips or suggestions for future issues.</p>
-<p>On a final note, if you&#x27;ve got this far you should make sure you are
+<p>On a final note, if you've got this far you should make sure you are
 <a href="https://llvmweekly.org/">subscribed</a> to LLVM Weekly and <a href="https://fosstodon.org/@llvmweekly">follow on
 Mastodon</a> or <a href="https://twitter.com/llvmweekly">on
 Twitter</a>.</p>
