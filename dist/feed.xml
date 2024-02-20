@@ -162,10 +162,10 @@ community even better without a big difference in time commitment, I&amp;#x27;m 
 keen to hear ideas and suggestions.&lt;/p&gt;
 &lt;h2 id=&quot;miscellaneous-thoughts&quot;&gt;&lt;a href=&quot;#miscellaneous-thoughts&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Miscellaneous thoughts&lt;/h2&gt;
 &lt;p&gt;To state the obvious, ten years is kind of a long time. A lot has happened
-with me in that time - I&amp;#x27;ve got married, had a son, co-founded and helped grow a
-company, and then moved on from that, kicked off the upstream RISC-V LLVM
-backend, and much more. One of the things I love working with compilers is
-that there&amp;#x27;s always new things to learn, and writing LLVM Weekly helps me
+with me in that time - I&amp;#x27;ve got married, we had a son, I co-founded and helped
+grow a company, and then moved on from that, kicked off the upstream RISC-V
+LLVM backend, and much more. One of the things I love working with compilers
+is that there&amp;#x27;s always new things to learn, and writing LLVM Weekly helps me
 learn at least a little more each week in areas outside of where I&amp;#x27;m currently
 working.  There&amp;#x27;s been a lot of changes in LLVM as well. Off the top off my
 head: there&amp;#x27;s been the move from SVN to Git, moving the Git repo to GitHub,
