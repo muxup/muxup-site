@@ -48,7 +48,10 @@ and then 5 P-Code instructions are printed showing the semantics. These P-Code
 instructions directly use the register names for architectural registers (as a
 reminder, &lt;a href=&quot;https://developer.arm.com/documentation/dui0801/l/Overview-of-AArch64-state/Registers-in-AArch64-state?lang=en&quot;&gt;AArch64 has 64-bit GPRs X0-X30 with the bottom halves acessible
 through
-W-W30&lt;/a&gt;). Intermediate state is stored in &lt;code&gt;unique[addr:width]&lt;/code&gt; locations. So the above instruction sign-extends &lt;code&gt;w20&lt;/code&gt;, adds to &lt;code&gt;x9&lt;/code&gt;, and reads a 32-bit value from the resulting address, then zero-extends to 64-bits when storing into &lt;code&gt;x5&lt;/code&gt;.&lt;/p&gt;
+W-W30&lt;/a&gt;).
+Intermediate state is stored in &lt;code&gt;unique[addr:width]&lt;/code&gt; locations. So the above
+instruction sign-extends &lt;code&gt;w20&lt;/code&gt;, adds to &lt;code&gt;x9&lt;/code&gt;, and reads a 32-bit value from
+the resulting address, then zero-extends to 64-bits when storing into &lt;code&gt;x5&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;The output is somewhat more verbose for architectures with flag registers,
 e.g. &lt;code&gt;cmpb $0x2f,-0x1(%r11)&lt;/code&gt; produces:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;./instruction_to_pcode x86-64 --no-reverse-input &quot;41 80 7b ff 2f&quot;
