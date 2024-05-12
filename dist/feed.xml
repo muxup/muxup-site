@@ -17,12 +17,11 @@
 session on the &lt;a href=&quot;https://github.com/carbon-language/carbon-lang&quot;&gt;Carbon programming
 language&lt;/a&gt;. It was recorded and
 of course we all know automated transcription can be stunningly accurate these days, yet I still
-took fairly extensive notes throughout. It&#x27;s a topic I&#x27;m interested in and I
-suppose I often take notes (or near transcriptions) as I find it helps me
-process. I&#x27;m not sure whether I&#x27;m adding any value by writing this up, or just
-contributing entropy but here it goes. You should of course assume factual
-mistakes or odd comments are errors in my transcription or interpretation, and
-if you keep an eye on the &lt;a href=&quot;https://www.youtube.com/@LLVMPROJ/videos&quot;&gt;LLVM YouTube
+took fairly extensive notes throughout. I often take notes (or near
+transcriptions) as I find it helps me process. I&#x27;m not sure whether I&#x27;m adding
+any value by writing this up, or just contributing entropy but here it goes.
+You should of course assume factual mistakes or odd comments are errors in my
+transcription or interpretation, and if you keep an eye on the &lt;a href=&quot;https://www.youtube.com/@LLVMPROJ/videos&quot;&gt;LLVM YouTube
 channel&lt;/a&gt; you should find the session
 recording uploaded there in the coming months.&lt;/p&gt;
 &lt;p&gt;First, a bit of background on the session, Carbon, and my interest in it.
@@ -48,14 +47,14 @@ threads, the removal of typestate, or internal vs external iterators. The
 &lt;a href=&quot;https://forums.swift.org/c/evolution/18&quot;&gt;Swift Evolution&lt;/a&gt; and &lt;a href=&quot;https://internals.rust-lang.org/&quot;&gt;Rust
 Internals&lt;/a&gt; forums are still a great read,
 but obviously there&#x27;s little ability to revisit fundamental decisions at this
-point. Carbon&#x27;s development is particularly interesting to me due to a
-combination of its openness, the fact it&#x27;s early stage enough to be making big
-decisions (e.g. &lt;a href=&quot;https://github.com/carbon-language/carbon-lang/pull/3848&quot;&gt;lambdas in
+point. I try to follow Carbon&#x27;s development due to a combination of its
+openness, the fact it&#x27;s early stage enough to be making big decisions (e.g.
+&lt;a href=&quot;https://github.com/carbon-language/carbon-lang/pull/3848&quot;&gt;lambdas in
 Carbon&lt;/a&gt;), and also
 because they&#x27;re exploring different design trade-offs than those other
 languages (e.g. the &lt;a href=&quot;https://www.youtube.com/watch?v=FKC8WACSMP0&quot;&gt;Carbon approach to definition-checked
 generics&lt;/a&gt;). I follow because I&#x27;m
-a fan of interesting programming language design discussion, not necessarily
+a fan of programming language design discussion, not necessarily
 because of the language itself, which may or may not turn out to be something
 I&#x27;m excited to program in. As a programming language development lurker I like
 to imagine I&#x27;m learning something by osmosis if nothing else - but perhaps
@@ -99,19 +98,19 @@ toolchain that works and you can do interesting stuff with and evaluate in a
 more concrete context.&quot;&lt;/p&gt;
 &lt;p&gt;As for the size of the team and how many companies are contributing, the
 conclusion was that Google is definitely the main backer right now but there
-are others showing interest. There are probably about 5-10 people active on
-Carbon in any different week, but it varies so this can be a different set of
-people from week to week.&lt;/p&gt;
-&lt;p&gt;Given we&#x27;ve established that Google are still the main backer, one
-particularly interesting line of questioning was about what Google see in it
-and how management were convinced to back it. Richard commented &quot;I think we&#x27;re
-always interested in exploring new possibilities for how to deal with our
-existing C++ codebase, which is a hugely valuable asset for us. That includes
-both looking at how we can keep the C++ language itself happy and our tools
-for it being good and maintainable, but also places we might take it in the
-future. For a long time we&#x27;ve been talking about if we can build something
-that works better for our use case than existing tools, and had an opportunity
-to explore that and went with it.&quot;&lt;/p&gt;
+are others starting to take a look. There are probably about 5-10 people
+active on Carbon in any different week, but it varies so this can be a
+different set of people from week to week.&lt;/p&gt;
+&lt;p&gt;Given we&#x27;ve established that Google are still the main backer, one line of
+questioning was about what Google see in it and how management were convinced
+to back it. Richard commented &quot;I think we&#x27;re always interested in exploring
+new possibilities for how to deal with our existing C++ codebase, which is a
+hugely valuable asset for us. That includes both looking at how we can keep
+the C++ language itself happy and our tools for it being good and
+maintainable, but also places we might take it in the future. For a long time
+we&#x27;ve been talking about if we can build something that works better for our
+use case than existing tools, and had an opportunity to explore that and went
+with it.&quot;&lt;/p&gt;
 &lt;p&gt;A fun question that followed later aimed to establish the favourite thing
 about Carbon from each of the panel members (of course, it&#x27;s nice that much of
 this motivation overlaps with the reasons for my own interest!):&lt;/p&gt;
@@ -220,15 +219,15 @@ gets reflection before C++, with the hope that if it did happen it could help
 with the design process by giving another example for C++ to learn from (just
 as Carbon learns from Rust, Swift, Go, C++, and others).&lt;/p&gt;
 &lt;h2 id=&quot;compiler-implementation-questions&quot;&gt;&lt;a href=&quot;#compiler-implementation-questions&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Compiler implementation questions&lt;/h2&gt;
-&lt;p&gt;EuroLLVM is of course a compilers conference, so there was a lot of interest
-in the implementation of the Carbon toolchain itself. In discussing trade-offs
-in the design, Jon leapt into a discussion of this &quot;to go for SemIR vs a
-traditional AST. In Clang the language is represented by an AST, which is what
-you&#x27;re typically taught about how compilers work. We have a semantic IR model
-where we produce lex tokens, then a parse tree (slightly different to an AST)
-an then it becomes SemIR. This is very efficient and fast to process, lowers
-to LLVM IR very easily, but it&#x27;s a different model and a different way to
-think about writing a compiler. To the earlier point about newcomers, it&#x27;s
+&lt;p&gt;EuroLLVM is of course a compilers conference, so there was a lot of curiousity
+about the implementation of the Carbon toolchain itself. In discussing
+trade-offs in the design, Jon leapt into a discussion of this &quot;to go for SemIR
+vs a traditional AST. In Clang the language is represented by an AST, which is
+what you&#x27;re typically taught about how compilers work. We have a semantic IR
+model where we produce lex tokens, then a parse tree (slightly different to an
+AST) an then it becomes SemIR. This is very efficient and fast to process,
+lowers to LLVM IR very easily, but it&#x27;s a different model and a different way
+to think about writing a compiler. To the earlier point about newcomers, it&#x27;s
 something people have to learn and a bit of a barrier because of that. We try
 to address it, but it is a trade-off.&quot; Jon since provided more insight on
 Carbon&#x27;s implementation approach in a &lt;a href=&quot;https://old.reddit.com/r/ProgrammingLanguages/comments/1co8qpv/flat_ast_and_states_machine_over_recursion_is/l3fyrga/&quot;&gt;recent /r/ProgrammingLanguages
