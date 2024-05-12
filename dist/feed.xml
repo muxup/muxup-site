@@ -4,8 +4,253 @@
 <subtitle>Adventures in collaborative open source development</subtitle>
 <link href="https://muxup.com/feed.xml" rel="self" type="application/atom+xml"/>
 <link href="https://muxup.com"/>
-<updated>2024-02-20T12:00:00Z</updated>
+<updated>2024-05-12T12:00:00Z</updated>
 <id>https://muxup.com/feed.xml</id>
+<entry>
+<title>Notes from the Carbon panel session at EuroLLVM 2024</title>
+<published>2024-05-12T12:00:00Z</published>
+<updated>2024-05-12T12:00:00Z</updated>
+<link rel="alternate" href="https://muxup.com/2024q2/notes-from-the-carbon-panel-session-at-eurollvm"/>
+<id>https://muxup.com/2024q2/notes-from-the-carbon-panel-session-at-eurollvm</id>
+<content type="html">
+&lt;p&gt;Last month I had the pleasure of attending EuroLLVM which featured a panel
+session on the &lt;a href=&quot;https://github.com/carbon-language/carbon-lang&quot;&gt;Carbon programming
+language&lt;/a&gt;. It was recorded and
+of course we all know automated transcription can be stunningly accurate these days, yet I still
+took fairly extensive notes throughout. It&#x27;s a topic I&#x27;m interested in and I
+suppose I often take notes (or near transcriptions) as I find it helps me
+process. I&#x27;m not sure whether I&#x27;m adding any value by writing this up, or just
+contributing entropy but here it goes. You should of course assume factual
+mistakes or odd comments are errors in my transcription or interpretation, and
+if you keep an eye on the &lt;a href=&quot;https://www.youtube.com/@LLVMPROJ/videos&quot;&gt;LLVM YouTube
+channel&lt;/a&gt; you should find the session
+recording uploaded there in the coming months.&lt;/p&gt;
+&lt;p&gt;First, a bit of background on the session, Carbon, and my interest in it.
+Carbon is a programming language started by Google aiming to be used in many
+cases where you would currently use C++ (billed as &quot;an experimental successor
+to C++&quot;). The &lt;a href=&quot;https://github.com/carbon-language/carbon-lang/blob/trunk/README.md&quot;&gt;Carbon
+README&lt;/a&gt;
+gives a great description of its goals and purpose, but one point I&#x27;ll
+highlight is that ease of interoperability with C++ is a key design
+goal and constraint. The project recognises that this limits the options for
+the language to such a degree that it explicitly recommends that if you are
+able to make use of a modern language like Go, Swift, Kotlin, or Rust, then
+you should. Carbon is intended to be there for when you need that C++
+interoperability. Of course, (and as mentioned during the panel) there are
+parallel &lt;a href=&quot;https://security.googleblog.com/2024/02/improving-interoperability-between-rust-and-c.html&quot;&gt;efforts to improve Rust&#x27;s ability to interoperate with
+C++&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Whatever other benefits the Carbon project is able to deliver, I think there&#x27;s
+huge value in the artefacts being produced as part of the design and decision
+making process so far. This has definitely been true of languages like Swift
+and especially Rust, where going back through the development history there&#x27;s
+masses of discussion on difficult decisions e.g. (in the case of Rust) green
+threads, the removal of typestate, or internal vs external iterators. The
+&lt;a href=&quot;https://forums.swift.org/c/evolution/18&quot;&gt;Swift Evolution&lt;/a&gt; and &lt;a href=&quot;https://internals.rust-lang.org/&quot;&gt;Rust
+Internals&lt;/a&gt; forums are still a great read,
+but obviously there&#x27;s little ability to revisit fundamental decisions at this
+point. Carbon&#x27;s development is particularly interesting to me due to a
+combination of its openness, the fact it&#x27;s early stage enough to be making big
+decisions (e.g. &lt;a href=&quot;https://github.com/carbon-language/carbon-lang/pull/3848&quot;&gt;lambdas in
+Carbon&lt;/a&gt;), and also
+because they&#x27;re exploring different design trade-offs than those other
+languages (e.g. the &lt;a href=&quot;https://www.youtube.com/watch?v=FKC8WACSMP0&quot;&gt;Carbon approach to definition-checked
+generics&lt;/a&gt;). I follow because I&#x27;m
+a fan of interesting programming language design discussion, not necessarily
+because of the language itself, which may or may not turn out to be something
+I&#x27;m excited to program in. As a programming language development lurker I like
+to imagine I&#x27;m learning something by osmosis if nothing else - but perhaps
+it&#x27;s just a displacement activity...&lt;/p&gt;
+&lt;p&gt;If you want to keep up with Carbon, then &lt;a href=&quot;https://github.com/carbon-language/carbon-lang/discussions/categories/announcements&quot;&gt;check out their recently started
+newsletter&lt;/a&gt;,
+issues/PRs/discussions &lt;a href=&quot;https://github.com/carbon-language/carbon-lang&quot;&gt;on
+GitHub&lt;/a&gt; and there&#x27;s a lot
+going on on Discord too (I find group chat distracting so don&#x27;t really follow
+here). The current &lt;a href=&quot;https://github.com/carbon-language/carbon-lang/blob/trunk/docs/project/roadmap.md&quot;&gt;Carbon
+roadmap&lt;/a&gt;
+is of course worth a read too. In case I wasn&#x27;t clear enough already, I have
+no affiliation to the project. From where I&#x27;m standing, I&#x27;m impressed by the
+way it&#x27;s being designed and developed out in the open, more than (rightly or
+wrongly) you might assume given the Google origin.&lt;/p&gt;
+&lt;h2 id=&quot;notes-from-the-panel-session&quot;&gt;&lt;a href=&quot;#notes-from-the-panel-session&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Notes from the panel session&lt;/h2&gt;
+&lt;p&gt;The panel &quot;Carbon: An experiment in different tradeoffs&quot; took place on April
+11th at EuroLLVM 2024. It was moderated by Hana Dusíková and the panel members
+were Chandler Carruth, Jon Ross-Perkins, and Richard Smith. Rather than go
+through each question in the order they were asked I&#x27;ve tried to group
+together questions I saw as thematically linked. Anything in quotes should be
+a close approximation of what was said, but I can&#x27;t guarantee I didn&#x27;t
+introduce errors.&lt;/p&gt;
+&lt;h3 id=&quot;background-and-basics-of-carbon&quot;&gt;&lt;a href=&quot;#background-and-basics-of-carbon&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Background and basics of Carbon&lt;/h3&gt;
+&lt;p&gt;This wasn&#x27;t actually the first question, but I think a good starting point is
+&#x27;how would you sell Carbon to a C++ user?&#x27;. Per Chandler, &quot;we can provide a
+better language, tooling, and ecosystem without needing to leave everything
+you built up in C++ (both existing code and the training you had). The cost of
+leveraging carbon should have as simple a ramp as possible. Sometimes you need
+performance, we can give more advanced tools to help you get the most
+performance from your code. In other cases, it&#x27;s security and we&#x27;ll be able to
+offer more tools here than C++. It&#x27;s having the ability to unlock improvements
+in the language without having to walk away from your investments in C++, that
+of course isn&#x27;t going anywhere.&quot;&lt;/p&gt;
+&lt;p&gt;When is it going to be done? Chandler: &quot;When it&#x27;s ready! We&#x27;re trying to put
+our roadmap out there publicly where we can. It&#x27;s a long term project. Our
+goal for this year is to get the toolchain caught up with the language design,
+get into building practical C++ interop this year. There are many unknowns in
+terms of how far we&#x27;ll get this year, but next year I think you&#x27;ll see a
+toolchain that works and you can do interesting stuff with and evaluate in a
+more concrete context.&quot;&lt;/p&gt;
+&lt;p&gt;As for the size of the team and how many companies are contributing, the
+conclusion was that Google is definitely the main backer right now but there
+are others showing interest. There are probably about 5-10 people active on
+Carbon in any different week, but it varies so this can be a different set of
+people from week to week.&lt;/p&gt;
+&lt;p&gt;Given we&#x27;ve established that Google are still the main backer, one
+particularly interesting line of questioning was about what Google see in it
+and how management were convinced to back it. Richard commented &quot;I think we&#x27;re
+always interested in exploring new possibilities for how to deal with our
+existing C++ codebase, which is a hugely valuable asset for us. That includes
+both looking at how we can keep the C++ language itself happy and our tools
+for it being good and maintainable, but also places we might take it in the
+future. For a long time we&#x27;ve been talking about if we can build something
+that works better for our use case than existing tools, and had an opportunity
+to explore that and went with it.&quot;&lt;/p&gt;
+&lt;p&gt;A fun question that followed later aimed to establish the favourite thing
+about Carbon from each of the panel members (of course, it&#x27;s nice that much of
+this motivation overlaps with the reasons for my own interest!):&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Jon: For me it&#x27;s unlocking the ability to improve the developer experience.
+Improving the language syntax, making things more understandable. Also C++
+is very slow to compile and we&#x27;re hoping for 1/3rd of the compile time for a
+typical file vs Clang.&lt;/li&gt;
+&lt;li&gt;Richard: from a language design perspective, being able to go through and
+systematically evaluate every decision and look at them again using things
+that have been learned since then.&lt;/li&gt;
+&lt;li&gt;Chandler: It&#x27;s not so much the systematic review for me. We&#x27;re building this
+with an eye to C++, and to integrate with C++ need a fairly big complex
+language (generics, inheritance, overloading etc etc). But when we look at
+this stuff, we keep finding principled and small/focused designs that we can
+use to underpin the sort of language functionality that is in C++ but fits
+together in a coherent and principled way. And we write this down.  I think
+a lot of people don&#x27;t realise that Carbon is writing down all the design as
+we go rather than having some mostly complete starting point and then making
+changes to that using something like an RFC process.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Finally, (for this section) there was also some intriguing discussion about
+Carbon&#x27;s design tradeoffs. This is covered mostly elsewhere, but I think
+Chandler&#x27;s answer focusing on the philosophy of Carbon rather than technical
+implementation details fits well here: &quot;One of the philosophical goals of our
+language design is we don&#x27;t try to solve hard problems in the compiler. [In
+other languages] there&#x27;s often a big problem and the compiler has to solve it,
+freeing the programmer from worrying about it. Instead we provide the syntax
+and ask the programmer to tell us. e.g. for type inference, you could imagine
+having Hindley-Milner type inference. That&#x27;s a hard problem, even if it makes
+ergonomics better in some cases. So we use a simpler and more direct type
+system. You see this crop up all over the language design.&quot;&lt;/p&gt;
+&lt;h3 id=&quot;carbon-governance&quot;&gt;&lt;a href=&quot;#carbon-governance&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Carbon governance&lt;/h3&gt;
+&lt;p&gt;The first question related to organisation of the project and its governance
+was about what has been done to make it easier for contributors to get
+involved. My interpretation of the responses is that although they&#x27;ve had some
+success in attracting new contributors, the feeling is that there&#x27;s more that
+could be done here. e.g. from Jon &quot;Things like maintaining the project
+documentation, writing a start guide on how to build. We&#x27;re making some
+different infrastructure choices, e.g. bazel, but in general we&#x27;re trying to
+use things people are familiar with: GitHub, GH actions etc. There&#x27;s probably
+still room for improvement.  Listening to the LLVM newcomers session a couple
+of days ago gave me some ideas. Right now there&#x27;s probably a lot of challenge
+learning how the different model works in Carbon.&quot;&lt;/p&gt;
+&lt;p&gt;The governance model for Carbon in general was something Chandler had a lot to
+say about:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;On getting it in place early: &quot;I was keen we start off with it, seeing
+challenges with C++ or even LLVM where as a project gets big the governance
+model that worked well at the beginning might not work so well and changing
+it at that point can be really hard. So I wanted to set up something that
+could scale, and can be changed if needed.&lt;/li&gt;
+&lt;li&gt;Initial mistakes: &quot;The initial model was terrible. It was very elaborate, a
+large core team of people that pulled in people that weren&#x27;t even involved
+in the project. We&#x27;d have weekly/biweekly meetings, a complex consensus
+process. In some ways it worked, we were being intentional and it was clear
+there was a governance project. But its was so inefficient, so people tried
+to avoid it. So we revamped it and simplified it, distilling it to something
+a little closer to the benevolent dictator for life model with minimal
+patches. Three leads rather than one to add some redundancy, one top-level
+governance body, will eventually have a rotation there.&quot;&lt;/li&gt;
+&lt;li&gt;The model now: &quot;It&#x27;s not that we&#x27;ll try to agree on everything - if a change
+is uncontroversial then any one of the leads can approve, which gives us 3x
+bandwidth. Except for the cases if there is controversy, then the three of
+us step back and discuss. I had my personal pet favourite feature of carbon
+overturned by this governance model. The model allows us to make decisions
+quickly and easily, and most decisions are reversible if they turn out to be
+wrong. So we don&#x27;t try to optimise for getting to the best outcome, rather
+to minimise cost for getting to an outcome. We&#x27;re still early - we have a
+plan for scaling but that&#x27;s more in the future.&quot;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Further questioning led to additional points being made about the governance
+model, such as the fact there are now several community members unaffiliated
+to Google with commit privileges, that the &lt;a href=&quot;https://github.com/carbon-language/carbon-lang/blob/trunk/docs/project/goals.md&quot;&gt;project goals are
+documented&lt;/a&gt;
+which helps contributors understand if a proposal is likely to be aligned with
+Carbon or not, and that these goals are potentially changeable if people come
+in with good arguments as to why they should be updated.&lt;/p&gt;
+&lt;h2 id=&quot;carbon-vs-other-languages&quot;&gt;&lt;a href=&quot;#carbon-vs-other-languages&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Carbon vs other languages&lt;/h2&gt;
+&lt;p&gt;Naturally, there were multiple questions related to Carbon vs Rust. In terms
+of high-level comparisons, the panel members were keen to point out that Rust
+is a great language and is mature, while Carbon remains at an early stage.
+There are commonalities in terms of the aim to provide modern type system
+features to systems programmers, but the focus on C++ interoperability as a
+goal driving the language design is a key differentiator.&lt;/p&gt;
+&lt;p&gt;Thoughts about Rust naturally lead to questions about Carbon&#x27;s memory safety
+story, and whether Carbon plans to have something like Rust&#x27;s borrow checker.
+Richard commented &quot;I think it&#x27;s possible to get something like that. We&#x27;re not
+sure exactly what it will look like yet, we&#x27;re planning to look at this more
+between the 0.1 and 0.2 milestone. Borrow checking is an interesting option to
+pursue but there are some others to explore.&quot;&lt;/p&gt;
+&lt;p&gt;Concerns were also raised about whether given that C++ interop is such a core
+goal of Carbon, it may have problems as C++ continues to evolve (perhaps with
+features that clash with features add in Carbon). Chandler&#x27;s response was &quot;As
+long as clang gets new C++ features, we&#x27;ll get them. Similar to how swift&#x27;s
+interop works, linking the toolchain and using that to understand the
+functionality. If C++ starts moving in ways addressing the safety concerns etc
+that would be fantastic.  We could shut down carbon! I don&#x27;t think that&#x27;s very
+likely. In terms of functionality that would make interop not work well that&#x27;s
+a bit of a concern, but of course if C++ adds something they need it to
+interop with existing C++ code so we face similar constraints. While Richard
+commented &quot;C++ modules is a big one we need to keep an eye on. But at the
+moment as modules adoption hasn&#x27;t taken off in a big way yet, we&#x27;re still
+targeting header files.&quot; There was also a brief exchange about what if Carbon
+gets reflection before C++, with the hope that if it did happen it could help
+with the design process by giving another example for C++ to learn from (just
+as Carbon learns from Rust, Swift, Go, C++, and others).&lt;/p&gt;
+&lt;h2 id=&quot;compiler-implementation-questions&quot;&gt;&lt;a href=&quot;#compiler-implementation-questions&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Compiler implementation questions&lt;/h2&gt;
+&lt;p&gt;EuroLLVM is of course a compilers conference, so there was a lot of interest
+in the implementation of the Carbon toolchain itself. In discussing trade-offs
+in the design, Jon leapt into a discussion of this &quot;to go for SemIR vs a
+traditional AST. In Clang the language is represented by an AST, which is what
+you&#x27;re typically taught about how compilers work. We have a semantic IR model
+where we produce lex tokens, then a parse tree (slightly different to an AST)
+an then it becomes SemIR. This is very efficient and fast to process, lowers
+to LLVM IR very easily, but it&#x27;s a different model and a different way to
+think about writing a compiler. To the earlier point about newcomers, it&#x27;s
+something people have to learn and a bit of a barrier because of that. We try
+to address it, but it is a trade-off.&quot; Jon since provided more insight on
+Carbon&#x27;s implementation approach in a &lt;a href=&quot;https://old.reddit.com/r/ProgrammingLanguages/comments/1co8qpv/flat_ast_and_states_machine_over_recursion_is/l3fyrga/&quot;&gt;recent /r/ProgrammingLanguages
+thread&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Given what Carbon devs have learned about applying data oriented design to
+optimise the frontend (see talks like &lt;a href=&quot;https://www.youtube.com/watch?v=ZI198eFghJk&quot;&gt;Modernizing Compiler Design for Carbon
+Toolchain&lt;/a&gt;), could the same ideas
+be applied to the backend? Chandler commented on the tradeoff he sees &quot;By
+necessity with data-oriented design you have to specialise a lot. We think we
+can benefit from this a lot with the frontend at the cost of reusability. The
+trade-off might be different within LLVM.&quot;&lt;/p&gt;
+&lt;p&gt;When asked about whether the Carbon frontend may be reusable for other tools
+(reducing duplicated effort writing parsers for Carbon), Jon responded &quot;I&#x27;m
+pretty confident at least through the parse tree it will be reusable. I&#x27;m more
+hesitant to make that claim through to SemIR. It may not be the best choice
+for everyone, and in some cases you may want more of an AST. But providing
+these tools as part of the language project like a formatter, migration tool
+[for language of API changes], something like clang-tidy, we&#x27;re going to be
+taking on these costs ourselves which is going to incentivise us to find ways
+of amortising this and finding the right balance.&quot;&lt;/p&gt;
+</content>
+</entry>
 <entry>
 <title>Clarifying instruction semantics with P-Code</title>
 <published>2024-02-20T12:00:00Z</published>
@@ -2051,286 +2296,6 @@ downstream, but I landed a couple of related minor test cleanups.
 &lt;li&gt;2023-02-27: Added in a forgotten note about trivial buildbot doc
 improvements.&lt;/li&gt;
 &lt;li&gt;2023-02-27: Initial publication date.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/details&gt;
-</content>
-</entry>
-<entry>
-<title>What&#x27;s new for RISC-V in LLVM 16</title>
-<published>2023-03-18T12:00:00Z</published>
-<updated>2023-03-18T12:00:00Z</updated>
-<link rel="alternate" href="https://muxup.com/2023q1/whats-new-for-risc-v-in-llvm-16"/>
-<id>https://muxup.com/2023q1/whats-new-for-risc-v-in-llvm-16</id>
-<content type="html">
-&lt;p&gt;LLVM 16.0.0 was &lt;a href=&quot;https://discourse.llvm.org/t/llvm-16-0-0-release/69326&quot;&gt;just
-released today&lt;/a&gt;, and
-as &lt;a href=&quot;/2022q3/whats-new-for-risc-v-in-llvm-15&quot;&gt;I did for LLVM 15&lt;/a&gt;, I
-wanted to highlight some of the RISC-V specific changes and improvements. This
-is very much a tour of a chosen subset of additions rather than an attempt to
-be exhaustive. If you&#x27;re interested in RISC-V, you may also want to check out
-my recent attempt to enumerate the &lt;a href=&quot;/2023q1/commercially-available-risc-v-silicon&quot;&gt;commercially available RISC-V
-SoCs&lt;/a&gt; and if you want
-to find out what&#x27;s going on in LLVM as a whole on a week-by-week basis, then
-I&#x27;ve got &lt;a href=&quot;https://llvmweekly.org/&quot;&gt;the perfect newsletter for you&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;In case you&#x27;re not familiar with LLVM&#x27;s release schedule, it&#x27;s worth noting
-that there are two major LLVM releases a year (i.e. one roughly every 6
-months) and these are timed releases as opposed to being cut when a pre-agreed
-set of feature targets have been met. We&#x27;re very fortunate to benefit from an
-active and growing set of contributors working on RISC-V support in LLVM
-projects, who are responsible for the work I describe below - thank you!
-I coordinate biweekly sync-up calls for RISC-V LLVM contributors, so if you&#x27;re
-working in this area please &lt;a href=&quot;https://discourse.llvm.org/c/code-generation/riscv/57&quot;&gt;consider dropping
-in&lt;/a&gt;.&lt;/p&gt;
-&lt;h2 id=&quot;documentation&quot;&gt;&lt;a href=&quot;#documentation&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Documentation&lt;/h2&gt;
-&lt;p&gt;LLVM 16 is the first release featuring a user guide for the RISC-V target
-(&lt;a href=&quot;https://releases.llvm.org/16.0.0/docs/RISCVUsage.html&quot;&gt;16.0.0 version&lt;/a&gt;,
-&lt;a href=&quot;https://llvm.org/docs/RISCVUsage.html&quot;&gt;current HEAD&lt;/a&gt;. This fills a
-long-standing gap in our documentation, whereby it was difficult to tell at a
-glance the expected level of support for the various RISC-V instruction set
-extensions (standard, vendor-specific, and experimental extensions of either
-type) in a given LLVM release. We&#x27;ve tried to keep it concise but informative,
-and add a brief note to describe any known limitations that end users should
-know about. Thanks again to Philip Reames for kicking this off, and the
-reviewers and contributors for ensuring it&#x27;s kept up to date.&lt;/p&gt;
-&lt;h2 id=&quot;vectorization&quot;&gt;&lt;a href=&quot;#vectorization&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Vectorization&lt;/h2&gt;
-&lt;p&gt;LLVM 16 was a big release for vectorisation. As well as a long-running strand
-of work making incremental improvements (e.g. better cost modelling) and
-fixes, scalable vectorization was &lt;a href=&quot;https://reviews.llvm.org/rG15c645f7ee67&quot;&gt;enabled by
-default&lt;/a&gt;. This allows LLVM&#x27;s &lt;a href=&quot;https://llvm.org/docs/Vectorizers.html#loop-vectorizer&quot;&gt;loop
-vectorizer&lt;/a&gt; to use
-scalable vectors when profitable. Follow-on work
-&lt;a href=&quot;https://reviews.llvm.org/rGb45a262679ab&quot;&gt;enabled&lt;/a&gt; support for loop
-vectorization using fixed length vectors and &lt;a href=&quot;https://reviews.llvm.org/rG269bc684e7a0&quot;&gt;disabled vectorization of
-epilogue loops&lt;/a&gt;. See the talk
-&lt;a href=&quot;https://www.youtube.com/watch?v=daWLCyhwrZ8&quot;&gt;optimizing code for scalable vector
-architectures&lt;/a&gt;
-(&lt;a href=&quot;https://llvm.org/devmtg/2021-11/slides/2021-OptimizingCodeForScalableVectorArchitectures.pdf&quot;&gt;slides&lt;/a&gt;)
-by Sander de Smalen for more information about scalable vectorization in LLVM
-and &lt;a href=&quot;https://eupilot.eu/wp-content/uploads/2022/11/RISC-V-VectorExtension-1-1.pdf&quot;&gt;introduction to the RISC-V vector
-extension&lt;/a&gt;
-by Roger Ferrer Ibáñez for an overview of the vector extension and some of its
-codegen challenges.&lt;/p&gt;
-&lt;p&gt;The RISC-V vector intrinsics supported by Clang have changed (to match e.g.
-&lt;a href=&quot;https://github.com/riscv-non-isa/rvv-intrinsic-doc/pull/186&quot;&gt;this&lt;/a&gt; and
-&lt;a href=&quot;https://github.com/riscv-non-isa/rvv-intrinsic-doc/pull/185&quot;&gt;this&lt;/a&gt;) during
-the 16.x development process in a backwards incompatible way, as the &lt;a href=&quot;https://github.com/riscv-non-isa/rvv-intrinsic-doc&quot;&gt;RISC-V
-Vector Extension Intrinsics
-specification&lt;/a&gt; evolves
-towards a v1.0. In retrospect, it would have been better to keep the
-intrinsics behind an experimental flag when the vector codegen and MC layer
-(assembler/disassembler) support became stable, and this is something we&#x27;ll be
-more careful of for future extensions. The good news is that thanks to
-Yueh-Ting Chen, headers &lt;a href=&quot;https://github.com/riscv-non-isa/rvv-intrinsic-doc/tree/master/auto-generated/rvv-v0p10-compatible-headers&quot;&gt;are
-available&lt;/a&gt;
-that provide the old-style intrinsics mapped to the new version.&lt;/p&gt;
-&lt;h2 id=&quot;support-for-new-instruction-set-extensions&quot;&gt;&lt;a href=&quot;#support-for-new-instruction-set-extensions&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Support for new instruction set extensions&lt;/h2&gt;
-&lt;p&gt;I refer to &#x27;experimental&#x27; support many times below. See the &lt;a href=&quot;https://releases.llvm.org/16.0.0/docs/RISCVUsage.html#experimental-extensions&quot;&gt;documentation on
-experimental extensions within RISC-V
-LLVM&lt;/a&gt;
-for guidance on what that means. One point to highlight is that the extensions
-remain experimental until they are ratified, which is why some extensions on
-the list below are &#x27;experimental&#x27; despite the fact the LLVM support needed is
-trivial. On to the list of newly added instruction set extensions:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Experimental support for the
-&lt;a href=&quot;https://github.com/riscv/riscv-code-size-reduction/releases/tag/V0.70.1-TOOLCHAIN-DEV&quot;&gt;Zca, Zcf, and
-Zcd&lt;/a&gt;
-instruction set extensions. These are all 16-bit instructions and are being
-defined as part of the output of the RISC-V code size reduction working
-group.
-&lt;ul&gt;
-&lt;li&gt;Zca is just a subset of the standard &#x27;C&#x27; compressed instruction set
-extension but without floating point loads/stores.&lt;/li&gt;
-&lt;li&gt;Zcf is also a subset of the standard &#x27;C&#x27; compressed instruction set
-extension, including just the single precision floating point loads and
-stores (&lt;code&gt;c.flw&lt;/code&gt;, &lt;code&gt;c.flwsp&lt;/code&gt;, &lt;code&gt;c.fsw&lt;/code&gt;, &lt;code&gt;c.fswsp&lt;/code&gt;).&lt;/li&gt;
-&lt;li&gt;Zcd, as you might have guessed, just includes the double precision
-floating point loads and stores from the standard &#x27;C&#x27; compressed
-instruction set extension (&lt;code&gt;c.fld&lt;/code&gt;, &lt;code&gt;c.fldsp&lt;/code&gt;, &lt;code&gt;c.fsd&lt;/code&gt;, &lt;code&gt;c.fsdsp&lt;/code&gt;).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Experimental assembler/disassembler support for the
-&lt;a href=&quot;https://github.com/riscv/riscv-isa-manual/releases/tag/draft-20220831-bf5a151&quot;&gt;Zihintntl&lt;/a&gt;
-instruction set extension. This provides a small set of instructions that
-can be used to hint that the memory accesses of the following instruction
-exhibits poor temporal locality.&lt;/li&gt;
-&lt;li&gt;Experimental assembler/disassembler support for the
-&lt;a href=&quot;https://github.com/riscv/riscv-zawrs/releases/download/V1.0-rc3/Zawrs.pdf&quot;&gt;Zawrs&lt;/a&gt;
-instruction set extension, providing a pair of instructions meant for use in
-a polling loop allowing a core to enter a low-power state and wait on a
-store to a memory location.&lt;/li&gt;
-&lt;li&gt;Experimental support for the
-&lt;a href=&quot;https://github.com/riscv/riscv-isa-manual/releases/download/draft-20220723-10eea63/riscv-spec.pdf&quot;&gt;Ztso&lt;/a&gt;
-extension, which for now just means setting the appropriate ELF header flag.
-If a core implements Ztso, it implements the Total Store Ordering memory
-consistency model. Future releases will provide alternate lowerings of
-atomics operations that take advantage of this.&lt;/li&gt;
-&lt;li&gt;Code generation support for the &lt;a href=&quot;https://drive.google.com/file/d/1z3tQQLm5ALsAD77PM0l0CHnapxWCeVzP/view&quot;&gt;Zfhmin
-extension&lt;/a&gt;
-(load/store, conversion, and GPR/FPR move support for 16-bit floating point
-values).&lt;/li&gt;
-&lt;li&gt;Codegen and assembler/disassembler support for the
-&lt;a href=&quot;https://github.com/ventanamicro/ventana-custom-extensions/releases/download/v1.0.0/ventana-custom-extensions-v1.0.0.pdf&quot;&gt;XVentanaCondOps&lt;/a&gt;
-vendor extension, which provides conditional arithmetic and move/select
-operations.&lt;/li&gt;
-&lt;li&gt;Codegen and assembler/disassembler support for the
-&lt;a href=&quot;https://github.com/T-head-Semi/thead-extension-spec/blob/master/xtheadvdot.adoc&quot;&gt;XTHeadVdot&lt;/a&gt;
-vendor extension, which implements vector integer four 8-bit multiple and
-32-bit add.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&quot;lldb&quot;&gt;&lt;a href=&quot;#lldb&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;LLDB&lt;/h2&gt;
-&lt;p&gt;LLDB has started to become usable for RISC-V in this period due to
-work by contributor &#x27;Emmer&#x27;. As they &lt;a href=&quot;https://discourse.llvm.org/t/is-lldb-for-riscv-ready-to-use/68326/2&quot;&gt;summarise
-here&lt;/a&gt;,
-LLDB should be usable for debugging RV64 programs locally but support is
-lacking for remote debug (e.g. via the gdb server protocol). During the LLVM
-16 development window, LLDB gained &lt;a href=&quot;https://reviews.llvm.org/rG4fc7e9cba24b&quot;&gt;support for software single stepping on
-RISC-V&lt;/a&gt;, support in
-&lt;code&gt;EmulateInstructionRISCV&lt;/code&gt; for
-&lt;a href=&quot;https://reviews.llvm.org/rGff7b876aa75d&quot;&gt;RV{32,64}I&lt;/a&gt;, as well as extensions
-&lt;a href=&quot;https://reviews.llvm.org/rG49f9af1864d9&quot;&gt;A and M&lt;/a&gt;,
-&lt;a href=&quot;https://reviews.llvm.org/rG05ae747a5353&quot;&gt;C&lt;/a&gt;,
-&lt;a href=&quot;https://reviews.llvm.org/rG6d4ab6d92179&quot;&gt;RV32F&lt;/a&gt; and
-&lt;a href=&quot;https://reviews.llvm.org/rG2d7f43f9eaf3&quot;&gt;RV64F&lt;/a&gt;, and
-&lt;a href=&quot;https://reviews.llvm.org/rG6493fc4bccd2&quot;&gt;D&lt;/a&gt;.&lt;/p&gt;
-&lt;h2 id=&quot;short-forward-branch-optimisation&quot;&gt;&lt;a href=&quot;#short-forward-branch-optimisation&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Short forward branch optimisation&lt;/h2&gt;
-&lt;p&gt;Another improvement that&#x27;s fun to look more closely at is support for &quot;short
-forward branch optimisation&quot; for the &lt;a href=&quot;https://www.sifive.com/press/sifive-core-ip-7-series-creates-new-class-of-embedded&quot;&gt;SiFive 7
-series&lt;/a&gt;
-cores. What does this mean? Well, let&#x27;s start by looking at the problem it&#x27;s
-trying to solve. The base RISC-V ISA doesn&#x27;t include conditional moves or
-predicated instructions, which can be a downside if your code features
-unpredictable short forward branches (with the ensuing cost in terms of
-branch mispredictions and bloating branch predictor state). The &lt;a href=&quot;https://github.com/riscv/riscv-isa-manual/releases/download/Ratified-IMAFDQC/riscv-spec-20191213.pdf&quot;&gt;ISA
-spec&lt;/a&gt;
-includes commentary on this decision (page 23), noting some disadvantages of
-adding such instructions to the specification and noting microarchitectural
-techniques exist to convert short forward branches into predicated code
-internally. In the case of the SiFive 7 series, this is achieved using
-&lt;a href=&quot;https://en.wikichip.org/wiki/macro-operation_fusion&quot;&gt;macro-op fusion&lt;/a&gt; where a
-branch over a single ALU instruction is fused and executed as a single
-conditional instruction.&lt;/p&gt;
-&lt;p&gt;In the LLVM 16 cycle, compiler optimisations targeting this microarchitectural
-feature were enabled for &lt;a href=&quot;https://reviews.llvm.org/rG2b32e4f98b4f&quot;&gt;conditional move style
-sequences&lt;/a&gt; (i.e. branch over a
-register move) as well as for &lt;a href=&quot;https://reviews.llvm.org/rGda7415acdafb&quot;&gt;other ALU
-operations&lt;/a&gt;. The job of the
-compiler here is of course to emit a sequence compatible with the
-micro-architectural optimisation when possible and profitable. I&#x27;m not aware
-of other RISC-V designs implementing a similar optimisation - although there
-are developments in terms of instructions to support such operations directly
-in the ISA which would avoid the need for such microarchitectural tricks. See
-&lt;a href=&quot;https://github.com/ventanamicro/ventana-custom-extensions/releases/download/v1.0.0/ventana-custom-extensions-v1.0.0.pdf&quot;&gt;XVentanaCondOps&lt;/a&gt;,
-&lt;a href=&quot;https://github.com/T-head-Semi/thead-extension-spec/blob/master/xtheadcondmov.adoc&quot;&gt;XTheadCondMov&lt;/a&gt;,
-the previously proposed but now abandoned &lt;a href=&quot;https://github.com/riscv/riscv-bitmanip/releases/download/v0.93/bitmanip-0.93.pdf&quot;&gt;Zbt
-extension&lt;/a&gt;
-(part of the earlier bitmanip spec) and more recently the proposed
-&lt;a href=&quot;https://github.com/riscv/riscv-zicond&quot;&gt;Zicond&lt;/a&gt; (integer conditional
-operations) standard extension.&lt;/p&gt;
-&lt;h2 id=&quot;atomics&quot;&gt;&lt;a href=&quot;#atomics&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Atomics&lt;/h2&gt;
-&lt;p&gt;It&#x27;s perhaps not surprising that code generation for atomics can be tricky to
-understand, and the &lt;a href=&quot;https://llvm.org/docs/Atomics.html#atomics-and-codegen&quot;&gt;LLVM documentation on atomics codegen and
-libcalls&lt;/a&gt; is actually
-one of the best references on the topic I&#x27;ve found. A particularly important
-note in that document is that if a backend supports any inline lock-free
-atomic operations at a given size, all operations of that size must be
-supported in a lock-free manner. If targeting a RISC-V CPU without the atomics
-extension, all atomics operations would usually be lowered to &lt;code&gt;__atomic_*&lt;/code&gt;
-libcalls. But if we know a bit more about the target, it&#x27;s possible to do
-better - for instance, a single-core microcontroller could implement an atomic
-operation in a lock-free manner by disabling interrupts (and conventionally,
-lock-free implementations of atomics are provided through &lt;code&gt;__sync_*&lt;/code&gt;
-libcalls).  This kind of setup is exactly what the &lt;a href=&quot;https://reviews.llvm.org/rGf5ed0cb217a9988f97b55f2ccb053bca7b41cc0c&quot;&gt;&lt;code&gt;+forced-atomics&lt;/code&gt;
-feature&lt;/a&gt;
-enables, where atomic load/store can be lowered to a load/store with
-appropriate fences (as is supported in the base ISA) while other atomic
-operations generate a &lt;code&gt;__sync_*&lt;/code&gt; libcall.&lt;/p&gt;
-&lt;p&gt;There&#x27;s also been a very minor improvement for targets with native atomics
-support (the &#x27;A&#x27; instruction set extension) that I may as well mention while
-on the topic. As you might know, atomic operations such as compare and swap
-that are lowered to an instruction sequence involving &lt;code&gt;lr.{w,d}&lt;/code&gt; (load reserved) and
-&lt;code&gt;sc.{w,d}&lt;/code&gt; (store conditional). There are very specific rules about these
-instruction sequences that must be met to align with the &lt;a href=&quot;https://github.com/riscv/riscv-isa-manual/releases/download/Ratified-IMAFDQC/riscv-spec-20191213.pdf&quot;&gt;architectural
-forward progress
-guarantee&lt;/a&gt; (section 8.3, page 51),
-which is why we expand to a fixed instruction sequence at a very late stage in
-compilation (see &lt;a href=&quot;https://lists.llvm.org/pipermail/llvm-dev/2018-June/123993.html&quot;&gt;original
-RFC&lt;/a&gt;). This
-means the sequence of instructions implementing the atomic operation are
-opaque to LLVM&#x27;s optimisation passes and are treated as a single unit. The
-obvious disadvantage of avoiding LLVM&#x27;s optimisations is that sometimes there
-are optimisations that would be helpful and wouldn&#x27;t break that
-forward-progress guarantee. One that came up in real-world code was the lack
-of branch folding, which would have simplified a branch in the expanded
-&lt;code&gt;cmpxchg&lt;/code&gt; sequence that just targets another branch with the same condition
-(by just folding in the eventual target). With some &lt;a href=&quot;https://reviews.llvm.org/rGce381281940f&quot;&gt;relatively simple
-logic&lt;/a&gt;, this suboptimal codegen is
-resolved.&lt;/p&gt;
-&lt;div class=&quot;highlight&quot; style=&quot;background: #ffffff&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span style=&quot;color: #177500&quot;&gt;; Before                 =&amp;gt; After&lt;/span&gt;
-&lt;span style=&quot;color: #000000&quot;&gt;.loop:&lt;/span&gt;                   &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&quot;color: #836C28&quot;&gt;.loop&lt;/span&gt;
-  &lt;span style=&quot;color: #000000&quot;&gt;lr.w.aqrl&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a3&lt;/span&gt;, (&lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;)     &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;lr.w.aqrl&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a3&lt;/span&gt;, (&lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;)
-  &lt;span style=&quot;color: #000000&quot;&gt;bne&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a3&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;.afterloop&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;bne&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a3&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;.loop&lt;/span&gt;
-  &lt;span style=&quot;color: #000000&quot;&gt;sc.w.aqrl&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a4&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;a2&lt;/span&gt;, (&lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;) &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;sc.w.aqrl&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a4&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;a2&lt;/span&gt;, (&lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;)
-  &lt;span style=&quot;color: #000000&quot;&gt;bnez&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a4&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;.loop&lt;/span&gt;         &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;bnez&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a4&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;.loop&lt;/span&gt;
-&lt;span style=&quot;color: #000000&quot;&gt;.aferloop:&lt;/span&gt;               &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;
-  &lt;span style=&quot;color: #000000&quot;&gt;bne&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a3&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;a1&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;.loop&lt;/span&gt;      &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;
-  &lt;span style=&quot;color: #000000&quot;&gt;ret&lt;/span&gt;                    &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;ret&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;assorted-optimisations&quot;&gt;&lt;a href=&quot;#assorted-optimisations&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Assorted optimisations&lt;/h2&gt;
-&lt;p&gt;As you can imagine, there&#x27;s been a lot of incremental minor improvements over
-the past ~6 months. I unfortunately only have space (and patience) to highight
-a few of them.&lt;/p&gt;
-&lt;p&gt;A new pre-regalloc pseudo instruction expansion pass was
-&lt;a href=&quot;https://reviews.llvm.org/rG260a64106854986a981e49ed87ee740460a23eb5&quot;&gt;added&lt;/a&gt;
-in order to allow &lt;a href=&quot;https://reviews.llvm.org/rG0bc177b6f54b&quot;&gt;optimising&lt;/a&gt; the
-global address access instruction sequences such as those found in the &lt;a href=&quot;https://github.com/riscv-non-isa/riscv-toolchain-conventions/blob/master/README.mkd#specifying-the-target-code-model-with--mcmodel&quot;&gt;medany
-code
-model&lt;/a&gt;
-(and was later &lt;a href=&quot;https://reviews.llvm.org/rGda5b1bf5bb0f&quot;&gt;broadened further&lt;/a&gt;).
-This results in improvements such as the following (note: this transformation
-was already supported for the medlow code model):&lt;/p&gt;
-&lt;div class=&quot;highlight&quot; style=&quot;background: #ffffff&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span style=&quot;color: #177500&quot;&gt;; Before                            =&amp;gt; After&lt;/span&gt;
-&lt;span style=&quot;color: #000000&quot;&gt;.Lpcrel_hi1:&lt;/span&gt;                        &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&quot;color: #836C28&quot;&gt;.Lpcrel_hi1&lt;/span&gt;
-&lt;span style=&quot;color: #000000&quot;&gt;auipc&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;%pcrel_hi1&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;ga&lt;/span&gt;)            &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;auipc&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;%pcrel_hi1&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;ga+&lt;/span&gt;&lt;span style=&quot;color: #1C01CE&quot;&gt;4&lt;/span&gt;)
-&lt;span style=&quot;color: #000000&quot;&gt;addi&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;%pcrel_lo&lt;/span&gt;(.&lt;span style=&quot;color: #000000&quot;&gt;Lpcrel_hi1&lt;/span&gt;) &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt;
-&lt;span style=&quot;color: #000000&quot;&gt;lw&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;, &lt;span style=&quot;color: #1C01CE&quot;&gt;4&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;)                        &lt;span style=&quot;color: #000000&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;lw&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;%pcrel_lo&lt;/span&gt;(.&lt;span style=&quot;color: #000000&quot;&gt;Lpcrel_hi1&lt;/span&gt;)(&lt;span style=&quot;color: #000000&quot;&gt;a0&lt;/span&gt;)
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;A missing target hook (&lt;code&gt;isUsedByReturnOnly&lt;/code&gt;) had been preventing tail calling
-libcalls in some cases. This was
-&lt;a href=&quot;https://reviews.llvm.org/rG47b1f8362aa4&quot;&gt;fixed&lt;/a&gt;, and later support was added
-for &lt;a href=&quot;https://reviews.llvm.org/rGe94dc58dff1d&quot;&gt;generating an inlined sequence of
-instructions&lt;/a&gt; for some of the
-floating point libcalls.&lt;/p&gt;
-&lt;p&gt;The RISC-V compressed instruction set extension defines a number of 16-bit
-encodings that map to a 32-bit longer form (with restrictions on addressable
-registers in the compressed form of course). The conversion 32-bit
-instructions 16-bit forms when possible happens at a very late stage, after
-instruction selection. But of course over time, we&#x27;ve introduced more tuning
-to influence codegen decisions in cases where a choice can be made to produce
-an instruction that can be compressed, rather than one that can&#x27;t. A recent
-addition to this was the &lt;a href=&quot;https://reviews.llvm.org/rGd64d3c5a8f81&quot;&gt;RISCVStripWSuffix
-pass&lt;/a&gt;, which for RV64 targets will
-convert &lt;code&gt;addw&lt;/code&gt; and &lt;code&gt;slliw&lt;/code&gt; to &lt;code&gt;add&lt;/code&gt; or &lt;code&gt;slli&lt;/code&gt; respectively when it can be
-determined that all the users of its result only use the lower 32 bits. This
-is a minor code size saving, as &lt;code&gt;slliw&lt;/code&gt; has no matching compressed instruction
-and &lt;code&gt;c.addw&lt;/code&gt; can address a more restricted set of registers than &lt;code&gt;c.add&lt;/code&gt;.&lt;/p&gt;
-&lt;h2 id=&quot;other&quot;&gt;&lt;a href=&quot;#other&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Other&lt;/h2&gt;
-&lt;p&gt;At the risk of repeating myself, this has been a selective tour of some
-additions I thought it would be fun to write about. Apologies if I&#x27;ve missed
-your favourite new feature or improvement - the &lt;a href=&quot;https://releases.llvm.org/16.0.0/docs/ReleaseNotes.html#changes-to-the-risc-v-backend&quot;&gt;LLVM release
-notes&lt;/a&gt;
-will include some things I haven&#x27;t had space for here. Thanks again for
-everyone who has been contributing to make the RISC-V in LLVM even better.&lt;/p&gt;
-&lt;p&gt;If you have a RISC-V project you think me and my colleagues and at Igalia may
-be able to help with, then do &lt;a href=&quot;https://www.igalia.com/contact/&quot;&gt;get in touch&lt;/a&gt;
-regarding our services.&lt;/p&gt;
-&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
-&lt;ul&gt;
-&lt;li&gt;2023-03-19: Clarified that Zawrs and Zihintntl support just involves
-the MC layer (assembler/disassembler).&lt;/li&gt;
-&lt;li&gt;2023-03-18: Initial publication date.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/details&gt;
 </content>

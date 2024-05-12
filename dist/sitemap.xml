@@ -2,7 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
 <loc>https://muxup.com</loc>
-<lastmod>2024-02-20</lastmod>
+<lastmod>2024-05-12</lastmod>
+</url>
+<url>
+<loc>https://muxup.com/2024q2/notes-from-the-carbon-panel-session-at-eurollvm</loc>
+<lastmod>2024-05-12</lastmod>
 </url>
 <url>
 <loc>https://muxup.com/2024q1/clarifying-instruction-semantics-with-p-code</loc>
