@@ -64,7 +64,7 @@ newsletter&lt;/a&gt;,
 issues/PRs/discussions &lt;a href=&quot;https://github.com/carbon-language/carbon-lang&quot;&gt;on
 GitHub&lt;/a&gt; and there&#x27;s a lot
 going on on Discord too (I find group chat distracting so don&#x27;t really follow
-here). The current &lt;a href=&quot;https://github.com/carbon-language/carbon-lang/blob/trunk/docs/project/roadmap.md&quot;&gt;Carbon
+there). The current &lt;a href=&quot;https://github.com/carbon-language/carbon-lang/blob/trunk/docs/project/roadmap.md&quot;&gt;Carbon
 roadmap&lt;/a&gt;
 is of course worth a read too. In case I wasn&#x27;t clear enough already, I have
 no affiliation to the project. From where I&#x27;m standing, I&#x27;m impressed by the
@@ -189,7 +189,7 @@ documented&lt;/a&gt;
 which helps contributors understand if a proposal is likely to be aligned with
 Carbon or not, and that these goals are potentially changeable if people come
 in with good arguments as to why they should be updated.&lt;/p&gt;
-&lt;h2 id=&quot;carbon-vs-other-languages&quot;&gt;&lt;a href=&quot;#carbon-vs-other-languages&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Carbon vs other languages&lt;/h2&gt;
+&lt;h3 id=&quot;carbon-vs-other-languages&quot;&gt;&lt;a href=&quot;#carbon-vs-other-languages&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Carbon vs other languages&lt;/h3&gt;
 &lt;p&gt;Naturally, there were multiple questions related to Carbon vs Rust. In terms
 of high-level comparisons, the panel members were keen to point out that Rust
 is a great language and is mature, while Carbon remains at an early stage.
@@ -218,7 +218,7 @@ targeting header files.&quot; There was also a brief exchange about what if Carb
 gets reflection before C++, with the hope that if it did happen it could help
 with the design process by giving another example for C++ to learn from (just
 as Carbon learns from Rust, Swift, Go, C++, and others).&lt;/p&gt;
-&lt;h2 id=&quot;compiler-implementation-questions&quot;&gt;&lt;a href=&quot;#compiler-implementation-questions&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Compiler implementation questions&lt;/h2&gt;
+&lt;h3 id=&quot;compiler-implementation-questions&quot;&gt;&lt;a href=&quot;#compiler-implementation-questions&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Compiler implementation questions&lt;/h3&gt;
 &lt;p&gt;EuroLLVM is of course a compilers conference, so there was a lot of curiousity
 about the implementation of the Carbon toolchain itself. In discussing
 trade-offs in the design, Jon leapt into a discussion of this &quot;to go for SemIR
@@ -248,6 +248,13 @@ these tools as part of the language project like a formatter, migration tool
 [for language of API changes], something like clang-tidy, we&#x27;re going to be
 taking on these costs ourselves which is going to incentivise us to find ways
 of amortising this and finding the right balance.&quot;&lt;/p&gt;
+&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
+&lt;ul&gt;
+&lt;li&gt;2024-05-13: Various phrasing tweaks and fixed improper heading
+nesting.&lt;/li&gt;
+&lt;li&gt;2024-05-12: Initial publication date.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/details&gt;
 </content>
 </entry>
 <entry>
