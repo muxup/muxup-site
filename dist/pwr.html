@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:title" content="pwr"/>
+<meta property="og:site_name" content="Muxup">
+<meta property="og:description" content="Paced web reader (pwr) - an esoteric feed reader and workflow for keeping up to date online."/>
+<meta property="og:type" content="article"/>
+<meta property="og:url" content="https://muxup.com/pwr"/>
+<meta property="og:image" content="https://v1.screenshot.11ty.dev/https%3A%2F%2Fmuxup.com%2Fpwr/opengraph/ar/bigger"/>
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:site" content="@muxup">
+<meta property="twitter:creator" content="@asbradbury">
+<title>pwr - Muxup</title>
+<link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg xmlns='http:%2F%2Fwww.w3.org%2F2000%2Fsvg' viewBox='0 0 100 100'%3E%3Ctext y='80' font-size='110'%3E▨%3C%2Ftext%3E%3C%2Fsvg%3E">
+<meta name="description" content="Paced web reader (pwr) - an esoteric feed reader and workflow for keeping up to date online.">
+<style>
+@font-face {
+font-family:'Nunito Var';
+src:url('/static/Nunito.var.v2.woff2') format('woff2-variations');
+font-display:swap;
+font-weight: 200 1000;
+}
+*, *::before, *::after {
+box-sizing:border-box;
+}
+* {
+margin:0;
+}
+input, button, textarea, select {
+font:inherit;
+}
+img, picture, video, canvas, svg {
+display:block;
+max-width:100%;
+}
+html {
+font-family:'Nunito Var', sans-serif;
+height:100%;
+font-size:16px;
+-webkit-tap-highlight-color:transparent;
+}
+@media screen and (min-width:640px) {
+html {
+font-size:18px;
+}
+}
+body {
+line-height:1.5;
+color:#222;
+display:grid;
+height:100%;
+grid-template-rows:1fr auto;
+background:#fff no-repeat 0% 0% / 100% .7rem linear-gradient(120deg, #ffffe3 20%, #ddfffc 20%, #ddfffc 40%, #e2eeff 40%, #e2eeff 60%, #f2e2ff 60%, #f2e2ff 80%, #ffdef2 80%, #ffdef2 100%);
+tab-size:4;
+}
+h1, h2, h3, h4, h5, h6 {
+line-height:1.25;
+font-weight:600;
+overflow-wrap:break-word;
+letter-spacing:-.025em;
+margin:1.75rem 0 .75rem;
+}
+h1 {
+font-size:2.986rem
+}
+h2 {
+font-size:2.488rem
+}
+p {
+margin:.75rem 0;
+font-weight:400;
+overflow-wrap:break-word;
+}
+a {
+color:inherit;
+text-decoration:underline;
+text-decoration-color:#aaa;
+text-underline-offset:.15em;
+}
+a:hover {
+text-decoration-thickness:2px;
+}
+ol, ul {
+margin:0 0 0 1.5rem;
+padding-left:0;
+}
+li {
+margin:0 0 .25rem
+}
+::selection {
+background:#ffdac0;
+}
+footer {
+font-size:.833rem;
+color:#777;
+padding:0 1rem;
+width:100%;
+max-width:min(calc(750px + 2rem), calc(100vw - 1rem));
+margin:0 auto;
+}
+footer p {
+text-align:center;
+margin:0 0 .75rem;
+}
+#footer-image {
+margin:0 auto;
+cursor:pointer;
+}
+#article-logo {
+line-height:1.25;
+margin:.5rem 0 0;
+font-size:1.44rem;
+font-weight:700;
+position:relative;
+}
+#article-logo a {
+text-decoration:none;
+}
+#article-title {
+margin:1.5rem 0 0;
+position:relative;
+}
+#article-meta {
+font-size:.833rem;
+color:#777;
+}
+#article-container {
+margin:0 auto;
+padding:1rem;
+max-width:min(calc(750px + 2rem), calc(100vw - 1rem));
+width:100%;
+}
+.anchor {
+position: absolute;
+text-decoration: none;
+width:1.75ex;
+margin-left:-1.4ex;
+visibility:hidden;
+font-size:.8em;
+padding-top:.2em;
+color:#aaa;
+}
+h2:hover .anchor,
+h3:hover .anchor,
+h4:hover .anchor,
+h5:hover .anchor,
+h6:hover .anchor,
+summary:hover .anchor {
+visibility:visible;
+}
+.anchor::before {
+content:"#";
+}
+hr {
+border:none;
+border-top:4px solid #f1f3f5;
+}
+code {
+background:#f5f5f5;
+padding:.125rem .25rem;
+font-size:.833rem
+}
+pre > code {
+padding:0;
+background:#fff;
+}
+pre {
+word-wrap:break-word;
+overflow-x:auto;
+padding:.5rem 1rem;
+margin:1rem -1rem;
+border-radius:.4rem;
+border:1px solid #d2d2d2;
+}
+details {
+font-size:.833rem;
+}
+details summary {
+margin:.75rem 0 .5rem 0;
+font-weight:600;
+cursor:pointer;
+font-size:1.2rem;
+line-height:1.25;
+letter-spacing:-.025em;
+list-style:none;
+}
+details summary > * {
+display:inline;
+}
+summary::-webkit-details-marker {
+display:none;
+}
+summary::after {
+content: " »";
+}
+details[open] summary::after {
+content: " «";
+}
+
+</style>
+<link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed.xml"/>
+<link rel="canonical" href="https://muxup.com/pwr"/>
+</head>
+<body>
+<div id="article-container">
+<div>
+<div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></a></div>
+</div>
+<h1 id="article-title"><span id="title-highlight">pwr</span></h1>
+<div id="article-meta"><a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
+<h2 id="summary"><a href="#summary" class="anchor" aria-hidden="true" tabindex="-1"></a>Summary</h2>
+<p><a href="https://github.com/muxup/pwr">pwr</a> (paced web reader) is a script and
+terminal-centric workflow I use for keeping up to date with various sources
+online, shared on the off chance it's useful to you too.</p>
+<h2 id="motivation"><a href="#motivation" class="anchor" aria-hidden="true" tabindex="-1"></a>Motivation</h2>
+<p>The internet is (mostly) a wonderful thing, but it's kind of a lot. It can be
+distracting and I thnk we all know the unhealthy loops of scrolling and
+refreshing the same sites. <code>pwr</code> provides a structured workflow for keeping up
+to date with a preferred set of sites in an incremental fashion (willpower
+required). It takes some inspiration from <a href="https://web.archive.org/web/20150708111216/http://article.gmane.org/gmane.os.openbsd.misc/134979">a widely reported
+workflow</a>
+that involved sending a URL to a server and having it returned via email to be
+read in a batch later. <code>pwr</code> adopts the delayed gratification aspect of this
+but doesn't involve downloading for offline reading.</p>
+<h2 id="the-pwr-flow"><a href="#the-pwr-flow" class="anchor" aria-hidden="true" tabindex="-1"></a>The pwr flow</h2>
+<p>One-time setup:</p>
+<ul>
+<li>Configure the <code>pwr</code> script so it supports your desired feed sources (RSS or
+using hand-written extractors for those that don't have a good feed).</li>
+</ul>
+<p>Regular workflow (just run <code>pwr</code> with no arguments to initiate this sequence
+in one invocation):</p>
+<ul>
+<li>Run <code>pwr read</code> to open any URLs that were previously queued for reading.</li>
+<li>Run <code>pwr fetch</code> to get any new URLs from the configured sources.</li>
+<li>Run <code>pwr filter</code> to open an editor window where you can quickly mark which
+retrieved articles to queue for reading.</li>
+</ul>
+<p>In my preferred usage, the above is run once a day as a replacement for
+unstructured web browsing. This flow means you're always reading items that
+were identified the previous day. Although comments on sites such as Hacker
+News or Reddit are much maligned, I do find they can be a source of additional
+insight, and this flow means that by the time you're reading a post ~24 hours
+after initially found, discussion has died down so there's little reason to
+keep refreshing.</p>
+<p><code>pwr filter</code> is the main part requiring active input, and involves the editor
+in a way that is somewhat inspired by <code>git rebase -i</code>. For instance, at the
+time of writing it produces the following output (and you would simply replace
+the <code>d </code> prefix with <code>r </code> for any you want to queue to read:</p>
+<pre><code>------------------------------------------------------------
+Filter file generated at 2024-07-01 08:51:54 UTC
+DO NOT DELETE OR MOVE ANY LINES
+To mark an item for reading, replace the 'd' prefix with 'r'
+Exit editor with non-zero return code (:cq in vim) to abort
+------------------------------------------------------------
+
+# Rust Internals
+d [Discussion] Hybrid borrow (0 replies)
+
+# Swift Evolution
+d [Pitch #2] Safe Access to Contiguous Storage (27 replies)
+d [Re-Proposal] Type only Unions (69 replies)
+
+# HN
+d Programmers Should Never Trust Anyone, Not Even Themselves
+d Unification in Elixir
+d Quaternions in Signal and Image Processing
+
+# lobste.rs
+d Code Reviews Do Find Bugs
+d Integrated assembler improvements in LLVM 19
+d Cubernetes
+d Grafana security update: Grafana Loki and unintended data write attempts to Amazon S3 buckets
+d regreSSHion: RCE in OpenSSH's server, on glibc-based Linux systems (CVE-2024-6387)
+d Elaboration of the PostgreSQL sort cost model
+
+# /r/programminglanguages
+d Rate my syntax (Array Access)
+</code></pre>
+<h2 id="making-it-your-own"><a href="#making-it-your-own" class="anchor" aria-hidden="true" tabindex="-1"></a>Making it your own</h2>
+<p>Ultimately <code>pwr</code> is a tool that happens to scratch an itch for me. It's out
+there in case any aspect of it is useful to you. It's very explicitly written
+a script, where the expected usage is that you take a copy and make what
+modifications you need for yourself (changing sources, new fetchers, or other
+improvements).</p>
+
+<hr/>
+<details id="article-changelog"><summary>Article changelog</summary>
+<ul>
+<li>2024-07-01: Initial publication date.</li>
+</ul>
+</div>
+<footer class="footer">
+<img id="footer-image" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E" width="50" height="50"/>
+<p>Curated by Alex Bradbury | &copy; <a href="/">Muxup</a> contributors | <a href="/about">About</a> | <a href="https://github.com/muxup">GitHub</a> | <a href="https://twitter.com/muxup">Twitter</a></p>
+</footer>
+<script>
+const t="http://www.w3.org/2000/svg";function o(t){return Math.random()*(2*t)-t}function n(t){const n=t.t.getBoundingClientRect();const e=t.o.getClientRects();let c="";for(const t of e){const e=t.x-n.x,f=t.y-n.y,s=t.width,r=t.height;const i=f+r/2;let u=s<75?3:s<300?6:8;const l=.2+.2*Math.random();c=`${c}\n      M${e+o(u)} ${i+o(u)}\n      C${e+s*l+o(u)} ${i+o(u)},\n       ${e+2*s*l+o(u)} ${i+o(u)}\n       ${e+s+o(u)} ${i+o(u)}`}t.i=c;t.strokeWidth=.85*e[0].height}const e=new Map;let c=new ResizeObserver((t=>{for(const o of t){const t=e.get(o.target);if(!t.i)n(t)}for(const o of t){s(e.get(o.target))}}));function f(o){const n=document.createElementNS(t,"svg");n.style.position="absolute";n.style.zIndex=-1;n.style.top="0";n.style.left="0";n.style.overflow="visible";const e=document.createElementNS(t,"path");e.setAttribute("fill","none");e.setAttribute("stroke",o.u);n.appendChild(e);o.o.insertAdjacentElement("beforebegin",n);o.t=n}function s(t){if(!t.i){n(t)}const o=t.t.children[0];o.setAttribute("stroke-width",t.strokeWidth);o.setAttribute("d",t.i);t.i=null}function r(){for(const t of e.values()){f(t)}for(const t of e.values()){n(t)}for(const t of e.keys()){c.observe(t)}document.fonts.ready.then((()=>i()))}function i(){for(const t of e.values()){n(t)}for(const t of e.values()){s(t)}}function u(t,o){let n;t.addEventListener("mouseover",(()=>{s(o);n=setInterval((()=>s(o)),240)}),false);t.addEventListener("mouseout",(()=>{clearInterval(n)}));t.addEventListener("click",(()=>{clearInterval(n)}))}function l(t,o,n){let c={o:t,l:o,u:n};e.set(o,c);return c}let a=new Set([window.location.pathname]);const h=document.querySelector("#footer-image");let d=null;function m(){let t=Math.floor(Math.random()*282);d="/static/footer/"+String(t).padStart(4,"0")+".svg"}function g(t){h.src=d;m();if(!t)v()}function v(){if(a.has(d))return;a.add(d);fetch(d)}m();g(true);const w=[{transform:"rotate(0)"},{transform:"rotate(360deg)"}];const $={duration:600,h:1};h.addEventListener("click",(()=>{h.animate(w,$);g()}));function M(){h.animate(w,$);v()}h.addEventListener("mouseover",M);h.addEventListener("touchstart",M,{passive:true});function k(t){const o=t.currentTarget.getAttribute("href").split("#")[0];if(a.has(o))return;a.add(o);fetch(o)}const p=document.getElementsByTagName("a");for(const t of p){const o=(t.getAttribute("href")??"").split("#")[0];if(o.includes("?")||!o.startsWith("/")||o.slice(o.lastIndexOf("/")+1).includes(".")){continue}t.addEventListener("mouseover",k);t.addEventListener("touchstart",k,{passive:true})}const b=["#ffdef2","#f2e2ff","#e2eeff","#ddfffc","#ffffe3"];const I=document.querySelector("#title-highlight");l(I,I.parentNode,b[Math.floor(Math.random()*b.length)]);const C=document.querySelector("#logo-highlight");const E=l(C,C.parentNode,"#ffdac0");r();u(C,E);
+
+</script>
+</body>
+</html>
