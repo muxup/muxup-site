@@ -59,7 +59,7 @@ newsletter](https://github.com/carbon-language/carbon-lang/discussions/categorie
 issues/PRs/discussions [on
 GitHub](https://github.com/carbon-language/carbon-lang) and there's a lot
 going on on Discord too (I find group chat distracting so don't really follow
-here). The current [Carbon
+there). The current [Carbon
 roadmap](https://github.com/carbon-language/carbon-lang/blob/trunk/docs/project/roadmap.md)
 is of course worth a read too. In case I wasn't clear enough already, I have
 no affiliation to the project. From where I'm standing, I'm impressed by the
@@ -194,7 +194,7 @@ which helps contributors understand if a proposal is likely to be aligned with
 Carbon or not, and that these goals are potentially changeable if people come
 in with good arguments as to why they should be updated.
 
-## Carbon vs other languages
+### Carbon vs other languages
 
 Naturally, there were multiple questions related to Carbon vs Rust. In terms
 of high-level comparisons, the panel members were keen to point out that Rust
@@ -227,7 +227,7 @@ gets reflection before C++, with the hope that if it did happen it could help
 with the design process by giving another example for C++ to learn from (just
 as Carbon learns from Rust, Swift, Go, C++, and others).
 
-## Compiler implementation questions
+### Compiler implementation questions
 
 EuroLLVM is of course a compilers conference, so there was a lot of curiousity
 about the implementation of the Carbon toolchain itself. In discussing
@@ -260,3 +260,7 @@ these tools as part of the language project like a formatter, migration tool
 [for language of API changes], something like clang-tidy, we're going to be
 taking on these costs ourselves which is going to incentivise us to find ways
 of amortising this and finding the right balance."
+
+## Article changelog
+* 2024-05-13: (minor) Various phrasing tweaks and fixed improper heading
+  nesting.
