@@ -4,8 +4,244 @@
 <subtitle>Adventures in collaborative open source development</subtitle>
 <link href="https://muxup.com/feed.xml" rel="self" type="application/atom+xml"/>
 <link href="https://muxup.com"/>
-<updated>2024-07-01T12:00:00Z</updated>
+<updated>2024-10-01T12:00:00Z</updated>
 <id>https://muxup.com/feed.xml</id>
+<entry>
+<title>Arch Linux on remote server setup runbook</title>
+<published>2024-10-01T12:00:00Z</published>
+<updated>2024-10-01T12:00:00Z</updated>
+<link rel="alternate" href="https://muxup.com/arch-linux-on-remote-server-setup-runbook"/>
+<id>https://muxup.com/arch-linux-on-remote-server-setup-runbook</id>
+<content type="html">
+&lt;p&gt;As I develop, I tend to offload a lot of the computationally heavy build or
+test tasks to a remote build machine. It&#x27;s convenient for this to match the
+distribution I use on my local machine, and I so far haven&#x27;t felt it would be
+advantageous to add another more server-oriented distro to the mix to act as a
+host to an Arch Linux container. This post acts as a quick reference / runbook
+for me on the occasions I want to spin up a new machine with this setup. To be
+very explicit, this is shared as something that might happen to be helpful if
+you have similar requirements, or to give some ideas if you have different
+ones. I definitely don&#x27;t advocate that you blindly copy it.&lt;/p&gt;
+&lt;p&gt;Although this is something that could be fully automated, I find structuring
+this kind of thing as a series of commands to copy and paste and check/adjust
+manually hits the sweetspot for my usage. As always, the Arch Linux wiki and
+its &lt;a href=&quot;https://wiki.archlinux.org/title/Installation_guide&quot;&gt;install guide&lt;/a&gt; is a
+fantastic reference that you should go and check if you&#x27;re unsure about
+anything listed here.&lt;/p&gt;
+&lt;h2 id=&quot;details-about-my-setup&quot;&gt;&lt;a href=&quot;#details-about-my-setup&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Details about my setup&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;I&#x27;m typically targeting Hetzner servers with two SSDs. I&#x27;m not worried about
+data loss or minor downtime waiting for a disk to be replaced before
+re-imaging, so RAID0 is just fine. The commands below assume this setup.&lt;/li&gt;
+&lt;li&gt;I do want encrypted root just in case anything sensitive is ever copied to
+the machine. As it is a remote machine, remote unlock over SSH must be
+supported (i.e. initrd contains an sshd that will accept the passphrase for
+unlocking the root partition before continuing the boot process).
+&lt;ul&gt;
+&lt;li&gt;The described setup means that if the disk is thrown away or given to
+another customer, you shouldn&#x27;t have anything plain text in the root
+partition lying around it. As the boot partition is unencrypted, there are
+a whole bunch of threat models where someone is able to modify that boot
+partition which wouldn&#x27;t be addressed by this approach.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;The setup also assumes you start from some kind of rescue environment (in my
+case Hetzner&#x27;s) that means you can freely repartition and overwrite the disk
+drives.&lt;/li&gt;
+&lt;li&gt;If you&#x27;re not on Hetzner, you&#x27;ll have to use different mirrors as they&#x27;re
+not available externally.&lt;/li&gt;
+&lt;li&gt;Hosts typically provide their own base images and installer scripts. The
+approach detailed here is good if you&#x27;d rather control the process yourself,
+and although there are a few hoster-specific bits in here it&#x27;s easy enough
+to replace them.&lt;/li&gt;
+&lt;li&gt;For simplicity I use UEFI boot and EFI stub. If you have problems with
+efibootmgr, you might want to use systemd-boot instead.&lt;/li&gt;
+&lt;li&gt;Disclaimer: As is hopefully obvious, the below instructions will overwrite
+anything on the hard drive of the system you&#x27;re running them on.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;setting-up-and-chrooting-into-arch-bootstrap-environment-from-rescue-system&quot;&gt;&lt;a href=&quot;#setting-up-and-chrooting-into-arch-bootstrap-environment-from-rescue-system&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Setting up and chrooting into Arch bootstrap environment from rescue system&lt;/h2&gt;
+&lt;p&gt;See the &lt;a href=&quot;https://docs.hetzner.com/robot/dedicated-server/troubleshooting/hetzner-rescue-system/&quot;&gt;docs on the Hetzner rescue
+system&lt;/a&gt;
+for details on how to enter it. If you&#x27;ve previously used this server, you
+likely want to remove old &lt;code&gt;known_hosts&lt;/code&gt; entries with &lt;code&gt;ssh-keygen -R your.server&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Now ssh in and do the following:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot; style=&quot;background: #ffffff&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;wget http://mirror.hetzner.de/archlinux/iso/latest/archlinux-bootstrap-x86_64.tar.zst
+tar -xvf archlinux-bootstrap-x86_64.tar.zst --numeric-owner
+sed -i &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;#39;1s;^;Server=https://mirror.hetzner.de/archlinux/$repo/os/$arch\n\n;&amp;#39;&lt;/span&gt; root.x86_64/etc/pacman.d/mirrorlist
+mount --bind root.x86_64/ root.x86_64/ &lt;span style=&quot;color: #177500&quot;&gt;# See &amp;lt;https://bugs.archlinux.org/task/46169&amp;gt;&lt;/span&gt;
+&lt;span style=&quot;color: #A90D91&quot;&gt;printf&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;About to enter bootstrap chroot\n===============================\n&amp;quot;&lt;/span&gt;
+./root.x86_64/bin/arch-chroot root.x86_64/
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;You are now chrooted into the Arch boostrap environment. We will do as much
+work from there as possible so as to minimise dependency on tools in the
+Hetzner rescue system.&lt;/p&gt;
+&lt;h2 id=&quot;set-up-drives-and-create-and-chroot-into-actual-rootfs&quot;&gt;&lt;a href=&quot;#set-up-drives-and-create-and-chroot-into-actual-rootfs&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Set up drives and create and chroot into actual rootfs&lt;/h2&gt;
+&lt;p&gt;The goal is now to set up the drives, perform an Arch Linux bootstrap, and
+chroot into it. The UEFI partition is placed at 1MiB pretty much guaranteed to
+be properly aligned for any reasonable physical sector size (remembering space
+must be left at the beginning of the disk for the partition table itself).&lt;/p&gt;
+&lt;p&gt;We&#x27;ll start by collecting info that will be used throughout the process:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot; style=&quot;background: #ffffff&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span style=&quot;color: #A90D91&quot;&gt;printf&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;Enter the desired new hostname:\n&amp;quot;&lt;/span&gt;
+&lt;span style=&quot;color: #A90D91&quot;&gt;read&lt;/span&gt; NEW_HOST_NAME; &lt;span style=&quot;color: #A90D91&quot;&gt;export&lt;/span&gt; NEW_HOST_NAME
+&lt;span style=&quot;color: #A90D91&quot;&gt;printf&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;Enter the desired passphrase for unlocking the root partition:\n&amp;quot;&lt;/span&gt;
+&lt;span style=&quot;color: #A90D91&quot;&gt;read&lt;/span&gt; ROOT_PART_PASSPHRASE
+&lt;span style=&quot;color: #A90D91&quot;&gt;printf&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;Enter the public ssh key (e.g. cat ~/.ssh/id_ed22519.pub) that will be used for access:\n&amp;quot;&lt;/span&gt;
+&lt;span style=&quot;color: #A90D91&quot;&gt;read&lt;/span&gt; PUBLIC_SSH_KEY; &lt;span style=&quot;color: #A90D91&quot;&gt;export&lt;/span&gt; PUBLIC_SSH_KEY
+&lt;span style=&quot;color: #A90D91&quot;&gt;printf&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;Enter the name of the main user account to be created:\n&amp;quot;&lt;/span&gt;
+&lt;span style=&quot;color: #A90D91&quot;&gt;read&lt;/span&gt; NEW_USER; &lt;span style=&quot;color: #A90D91&quot;&gt;export&lt;/span&gt; NEW_USER
+&lt;span style=&quot;color: #A90D91&quot;&gt;printf&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;You&amp;#39;ve entered the following information:\n&amp;quot;&lt;/span&gt;
+&lt;span style=&quot;color: #A90D91&quot;&gt;printf&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;NEW_HOST_NAME: %s\n&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;$NEW_HOST_NAME&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&lt;/span&gt;
+&lt;span style=&quot;color: #A90D91&quot;&gt;printf&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;ROOT_PART_PASSPHRASE: %s\n&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;$ROOT_PART_PASSPHRASE&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&lt;/span&gt;
+&lt;span style=&quot;color: #A90D91&quot;&gt;printf&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;PUBLIC_SSH_KEY: %s\n&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;$PUBLIC_SSH_KEY&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&lt;/span&gt;
+&lt;span style=&quot;color: #A90D91&quot;&gt;printf&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;NEW_USER: %s\n&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;$NEW_USER&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;And now proceed to set up the disks, create filesystems, perform an initial
+bootstrap and chroot into the new rootfs:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot; style=&quot;background: #ffffff&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;pacman-key --init
+pacman-key --populate archlinux
+pacman -Sy --noconfirm xfsprogs dosfstools mdadm cryptsetup
+
+&lt;span style=&quot;color: #A90D91&quot;&gt;for&lt;/span&gt; M &lt;span style=&quot;color: #A90D91&quot;&gt;in&lt;/span&gt; /dev/md?; &lt;span style=&quot;color: #A90D91&quot;&gt;do&lt;/span&gt; mdadm --stop &lt;span style=&quot;color: #000000&quot;&gt;$M&lt;/span&gt;; &lt;span style=&quot;color: #A90D91&quot;&gt;done&lt;/span&gt;
+&lt;span style=&quot;color: #A90D91&quot;&gt;for&lt;/span&gt; DRIVE &lt;span style=&quot;color: #A90D91&quot;&gt;in&lt;/span&gt; /dev/nvme0n1 /dev/nvme1n1; &lt;span style=&quot;color: #A90D91&quot;&gt;do&lt;/span&gt;
+  sfdisk &lt;span style=&quot;color: #000000&quot;&gt;$DRIVE&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;lt;&amp;lt;EOF&lt;/span&gt;
+&lt;span style=&quot;color: #C41A16&quot;&gt;label: gpt&lt;/span&gt;
+
+&lt;span style=&quot;color: #C41A16&quot;&gt;start=1MiB, size=255MiB, type=uefi&lt;/span&gt;
+&lt;span style=&quot;color: #C41A16&quot;&gt;start=256MiB, type=raid&lt;/span&gt;
+&lt;span style=&quot;color: #C41A16&quot;&gt;EOF&lt;/span&gt;
+&lt;span style=&quot;color: #A90D91&quot;&gt;done&lt;/span&gt;
+
+&lt;span style=&quot;color: #177500&quot;&gt;# Warning from mdadm about falling back to creating md0 via node seems fine to ignore&lt;/span&gt;
+yes | mdadm --create --verbose --level&lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt;&lt;span style=&quot;color: #1C01CE&quot;&gt;0&lt;/span&gt; --raid-devices&lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt;&lt;span style=&quot;color: #1C01CE&quot;&gt;2&lt;/span&gt; --homehost&lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt;any /dev/md/0 /dev/nvme0n1p2 /dev/nvme1n1p2
+
+mkfs.fat -F32 /dev/nvme0n1p1
+&lt;span style=&quot;color: #A90D91&quot;&gt;printf&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;%s\n&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;$ROOT_PART_PASSPHRASE&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&lt;/span&gt; | cryptsetup -y -v luksFormat --batch-mode /dev/md0
+&lt;span style=&quot;color: #A90D91&quot;&gt;printf&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;%s\n&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;$ROOT_PART_PASSPHRASE&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&lt;/span&gt; | cryptsetup open /dev/md0 root
+&lt;span style=&quot;color: #A90D91&quot;&gt;unset&lt;/span&gt; ROOT_PART_PASSPHRASE
+
+mkfs.xfs /dev/mapper/root &lt;span style=&quot;color: #177500&quot;&gt;# rely on this calaculating appropriate sunit and swidth&lt;/span&gt;
+
+mount /dev/mapper/root /mnt
+mkdir /mnt/boot
+mount /dev/nvme0n1p1 /mnt/boot
+pacstrap /mnt base linux linux-firmware efibootmgr &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  xfsprogs dosfstools mdadm cryptsetup &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  mkinitcpio-netconf mkinitcpio-tinyssh mkinitcpio-utils python3 &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  openssh sudo net-tools git man-db man-pages vim
+genfstab -U /mnt &amp;gt;&amp;gt; /mnt/etc/fstab
+&lt;span style=&quot;color: #177500&quot;&gt;# Note that sunit and swidth in fstab confusingly use different units vs those shown by xfs &amp;lt;https://superuser.com/questions/701124/xfs-mount-overrides-sunit-and-swidth-options&amp;gt;&lt;/span&gt;
+
+mdadm --detail --scan &amp;gt;&amp;gt; /mnt/etc/mdadm.conf
+&lt;span style=&quot;color: #A90D91&quot;&gt;printf&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;About to enter newrootfs chroot\n===============================\n&amp;quot;&lt;/span&gt;
+arch-chroot /mnt
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;do-final-configuration-from-within-the-new-rootfs-chroot&quot;&gt;&lt;a href=&quot;#do-final-configuration-from-within-the-new-rootfs-chroot&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Do final configuration from within the new rootfs chroot&lt;/h2&gt;
+&lt;p&gt;Unfortunately I wasn&#x27;t able to find a way to get ipv6 configured via DHCP on
+Hetzner&#x27;s network, so we rely on hardcoding it (which seems to be &lt;a href=&quot;https://docs.hetzner.com/robot/dedicated-server/network/network-configuration-using-systemd-networkd/&quot;&gt;their
+recommendation&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;We set up sudo and also configure ssh to disable password-based login. A small
+swapfile is configured in order to allow the kernel to move allocated but not
+actively used pages there if deemed worthwhile.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot; style=&quot;background: #ffffff&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sed /etc/locale.gen -i -e &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;s/^\#en_GB.UTF-8 UTF-8.*/en_GB.UTF-8 UTF-8/&amp;quot;&lt;/span&gt;
+locale-gen
+&lt;span style=&quot;color: #177500&quot;&gt;# Ignore &amp;quot;System has not been booted with systemd&amp;quot; and &amp;quot;Failed to connect to bus&amp;quot; error for next command.&lt;/span&gt;
+systemd-firstboot --locale&lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt;en_GB.UTF-8 --timezone&lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt;UTC --hostname&lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;$NEW_HOST_NAME&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&lt;/span&gt;
+ln -s /dev/null /etc/udev/rules.d/80-net-setup-link.rules &lt;span style=&quot;color: #177500&quot;&gt;# disable persistent network names&lt;/span&gt;
+
+ssh-keygen -A &lt;span style=&quot;color: #177500&quot;&gt;# generate openssh host keys for the tinyssh hook to pick up&lt;/span&gt;
+&lt;span style=&quot;color: #A90D91&quot;&gt;printf&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;%s\n&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;$PUBLIC_SSH_KEY&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&lt;/span&gt; &amp;gt; /etc/tinyssh/root_key
+sed /etc/mkinitcpio.conf -i -e &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;#39;s/^HOOKS=.*/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block mdadm_udev netconf tinyssh encryptssh filesystems fsck)/&amp;#39;&lt;/span&gt;
+&lt;span style=&quot;color: #177500&quot;&gt;# The call to tinyssh-convert in mkinitcpio-linux is incorrect, so do it&lt;/span&gt;
+&lt;span style=&quot;color: #177500&quot;&gt;# manually &amp;lt;https://github.com/grazzolini/mkinitcpio-tinyssh/issues/10&amp;gt;&lt;/span&gt;
+tinyssh-convert /etc/tinyssh/sshkeydir &amp;lt; /etc/ssh/ssh_host_ed25519_key
+mkinitcpio -p linux
+
+&lt;span style=&quot;color: #A90D91&quot;&gt;printf&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;efibootmgr before changes:\n==========================\n&amp;quot;&lt;/span&gt;
+efibootmgr -u
+&lt;span style=&quot;color: #177500&quot;&gt;# Clean up any other efibootmgr entries from previous installs&lt;/span&gt;
+&lt;span style=&quot;color: #A90D91&quot;&gt;for&lt;/span&gt; BOOTNUM &lt;span style=&quot;color: #A90D91&quot;&gt;in&lt;/span&gt; &lt;span style=&quot;color: #A90D91&quot;&gt;$(&lt;/span&gt;efibootmgr | grep &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;#39;^Boot0&amp;#39;&lt;/span&gt; | grep -v PXE | sed &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;#39;s/^Boot\([0-9]*\).*/\1/&amp;#39;&lt;/span&gt;&lt;span style=&quot;color: #A90D91&quot;&gt;)&lt;/span&gt;; &lt;span style=&quot;color: #A90D91&quot;&gt;do&lt;/span&gt;
+  efibootmgr -b &lt;span style=&quot;color: #000000&quot;&gt;$BOOTNUM&lt;/span&gt; -B
+&lt;span style=&quot;color: #A90D91&quot;&gt;done&lt;/span&gt;
+&lt;span style=&quot;color: #177500&quot;&gt;# Set up efistub&lt;/span&gt;
+efibootmgr &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  --disk /dev/nvme0n1 &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  --part &lt;span style=&quot;color: #1C01CE&quot;&gt;1&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  --create &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  --label &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;#39;Arch Linux&amp;#39;&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  --loader /vmlinuz-linux &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  --unicode &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;root=/dev/mapper/root rw cryptdevice=UUID=&lt;/span&gt;&lt;span style=&quot;color: #A90D91&quot;&gt;$(&lt;/span&gt;blkid -s UUID -o value /dev/md0&lt;span style=&quot;color: #A90D91&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;:root:allow-discards initrd=\initramfs-linux.img ip=:::::eth0:dhcp&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  --verbose
+efibootmgr -o &lt;span style=&quot;color: #1C01CE&quot;&gt;0001&lt;/span&gt;,0000 &lt;span style=&quot;color: #177500&quot;&gt;# prefer PXE boot. May need to check IDs&lt;/span&gt;
+&lt;span style=&quot;color: #A90D91&quot;&gt;printf&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;efibootmgr after changes:\n=========================\n&amp;quot;&lt;/span&gt;
+efibootmgr -u
+
+mkswap --size&lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt;8G --file /swapfile
+cat - &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;lt;&amp;lt;EOF &amp;gt; /etc/systemd/system/swapfile.swap&lt;/span&gt;
+&lt;span style=&quot;color: #C41A16&quot;&gt;[Unit]&lt;/span&gt;
+&lt;span style=&quot;color: #C41A16&quot;&gt;Description=Swap file&lt;/span&gt;
+
+&lt;span style=&quot;color: #C41A16&quot;&gt;[Swap]&lt;/span&gt;
+&lt;span style=&quot;color: #C41A16&quot;&gt;What=/swapfile&lt;/span&gt;
+
+&lt;span style=&quot;color: #C41A16&quot;&gt;[Install]&lt;/span&gt;
+&lt;span style=&quot;color: #C41A16&quot;&gt;WantedBy=multi-user.target&lt;/span&gt;
+&lt;span style=&quot;color: #C41A16&quot;&gt;EOF&lt;/span&gt;
+systemctl &lt;span style=&quot;color: #A90D91&quot;&gt;enable&lt;/span&gt; swapfile.swap
+
+cat - &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;lt;&amp;lt;EOF &amp;gt; /etc/systemd/network/10-eth0.network&lt;/span&gt;
+&lt;span style=&quot;color: #C41A16&quot;&gt;[Match]&lt;/span&gt;
+&lt;span style=&quot;color: #C41A16&quot;&gt;Name=eth0&lt;/span&gt;
+
+&lt;span style=&quot;color: #C41A16&quot;&gt;[Network]&lt;/span&gt;
+&lt;span style=&quot;color: #C41A16&quot;&gt;DHCP=yes&lt;/span&gt;
+&lt;span style=&quot;color: #C41A16&quot;&gt;Address=$(ip -6 addr show dev eth0 scope global | grep &amp;quot;scope global&amp;quot; | cut -d&amp;#39; &amp;#39; -f6)&lt;/span&gt;
+&lt;span style=&quot;color: #C41A16&quot;&gt;Gateway=$(ip route show | head -n 1 | cut -d&amp;#39; &amp;#39; -f 3)&lt;/span&gt;
+&lt;span style=&quot;color: #C41A16&quot;&gt;Gateway=fe80::1&lt;/span&gt;
+&lt;span style=&quot;color: #C41A16&quot;&gt;EOF&lt;/span&gt;
+systemctl &lt;span style=&quot;color: #A90D91&quot;&gt;enable&lt;/span&gt; systemd-networkd.service systemd-resolved.service systemd-timesyncd.service
+&lt;span style=&quot;color: #A90D91&quot;&gt;printf&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;PasswordAuthentication no\n&amp;quot;&lt;/span&gt; &amp;gt; /etc/ssh/sshd_config.d/20-no-password-auth.conf
+systemctl &lt;span style=&quot;color: #A90D91&quot;&gt;enable&lt;/span&gt; sshd.service
+useradd -m -g users -G wheel -s /bin/bash &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;$NEW_USER&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&lt;/span&gt;
+usermod --pass&lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;#39;!&amp;#39;&lt;/span&gt; root &lt;span style=&quot;color: #177500&quot;&gt;# disable root login&lt;/span&gt;
+chmod +w /etc/sudoers
+&lt;span style=&quot;color: #A90D91&quot;&gt;printf&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;%%wheel ALL=(ALL) ALL\n&amp;quot;&lt;/span&gt; &amp;gt;&amp;gt; /etc/sudoers
+chmod -w /etc/sudoers
+mkdir &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;/home/&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;$NEW_USER&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;/.ssh&amp;quot;&lt;/span&gt;
+&lt;span style=&quot;color: #A90D91&quot;&gt;printf&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;%s\n&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;$PUBLIC_SSH_KEY&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&lt;/span&gt; &amp;gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;/home/&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;$NEW_USER&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;/.ssh/authorized_keys&amp;quot;&lt;/span&gt;
+chmod &lt;span style=&quot;color: #1C01CE&quot;&gt;700&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;/home/&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;$NEW_USER&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;/.ssh&amp;quot;&lt;/span&gt;
+chmod &lt;span style=&quot;color: #1C01CE&quot;&gt;600&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;/home/&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;$NEW_USER&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;/.ssh/authorized_keys&amp;quot;&lt;/span&gt;
+chown -R &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;$NEW_USER&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;:users&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;/home/&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;$NEW_USER&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;/.ssh&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;set-user-password-and-reboot&quot;&gt;&lt;a href=&quot;#set-user-password-and-reboot&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Set user password and reboot&lt;/h2&gt;
+&lt;div class=&quot;highlight&quot; style=&quot;background: #ffffff&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span style=&quot;color: #177500&quot;&gt;# The next command will ask for the user password (needed for sudo).&lt;/span&gt;
+passwd &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;$NEW_USER&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Then &lt;kbd&gt;ctrl&lt;/kbd&gt;+&lt;kbd&gt;d&lt;/kbd&gt; twice and &lt;code&gt;reboot&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id=&quot;unlocking-rootfs-and-logging-in&quot;&gt;&lt;a href=&quot;#unlocking-rootfs-and-logging-in&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Unlocking rootfs and logging in&lt;/h2&gt;
+&lt;p&gt;Firstly, you likely want to remove any saved host public keys as there will be
+a new one for the newly provisioned machine &lt;code&gt;ssh-keygen -R your.server&lt;/code&gt;. The server will have a different host key for the root
+key unlock so I&#x27;d recommend using a different &lt;code&gt;known_hosts&lt;/code&gt; file for unlock.
+e.g. &lt;code&gt;ssh -o UserKnownHostsFile=~/.ssh/known_hosts_unlock root@your.server&lt;/code&gt;. If you put something like the following in your
+&lt;code&gt;~/.ssh/config&lt;/code&gt; you could just &lt;code&gt;ssh unlock-foo-host&lt;/code&gt;:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Host unlock-foo-host
+HostName your.server
+User root
+UserKnownHostsFile ~/.ssh/known_hosts_unlock
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Once you&#x27;ve successfully entered the key to unlock the rootfs, you can just
+ssh as normal to the server.&lt;/p&gt;
+
+&lt;hr/&gt;
+&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;Article changelog&lt;/summary&gt;
+&lt;ul&gt;
+&lt;li&gt;2024-10-01: Initial publication date.&lt;/li&gt;
+&lt;/ul&gt;</content>
+</entry>
 <entry>
 <title>pwr</title>
 <published>2024-07-01T12:00:00Z</published>
@@ -1619,391 +1855,6 @@ suggested some alternate wording.&lt;/li&gt;
 &lt;li&gt;2023-04-10: Initial publication date.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/details&gt;
-</content>
-</entry>
-<entry>
-<title>Updating Wren&#x27;s benchmarks</title>
-<published>2023-04-10T12:00:00Z</published>
-<updated>2023-04-10T12:00:00Z</updated>
-<link rel="alternate" href="https://muxup.com/2023q2/updating-wrens-benchmarks"/>
-<id>https://muxup.com/2023q2/updating-wrens-benchmarks</id>
-<content type="html">
-&lt;p&gt;&lt;a href=&quot;https://wren.io/&quot;&gt;Wren&lt;/a&gt; is a &quot;small, fast, class-based, concurrent scripting
-language&quot;, originally designed by Bob Nystrom (who you might recognise as the
-author of &lt;a href=&quot;https://gameprogrammingpatterns.com/&quot;&gt;Game Programming Patterns&lt;/a&gt;
-and &lt;a href=&quot;https://craftinginterpreters.com/&quot;&gt;Crafting Interpreters&lt;/a&gt;. It&#x27;s a really
-fun language to study - the implementation is compact and easily readable, and
-although class-based languages aren&#x27;t considered very hip these days there&#x27;s a
-real elegance to its design. I saw Wren&#x27;s &lt;a href=&quot;https://wren.io/performance.html&quot;&gt;performance
-page&lt;/a&gt; hadn&#x27;t been updated for a very long
-time, and especially given the recent upstream interpreter performance work on
-Python, was interested in seeing how performance on these microbencharks has
-changed. Hence this quick post to share some new numbers.&lt;/p&gt;
-&lt;h2 id=&quot;new-results&quot;&gt;&lt;a href=&quot;#new-results&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;New results&lt;/h2&gt;
-&lt;p&gt;To cut to the chase, here are the results I get running the same set of
-&lt;a href=&quot;https://github.com/wren-lang/wren/tree/main/test/benchmark&quot;&gt;benchmarks&lt;/a&gt;
-across a collection of Python, Ruby, and Lua versions (those available in
-current Arch Linux).&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Method Call&lt;/strong&gt;:&lt;/p&gt;
-&lt;table class=&quot;chart&quot;&gt;
-  &lt;tr&gt;
-    &lt;th&gt;wren0.4&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 25%;&quot;&gt;0.079s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;luajit2.1 -joff&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 29%;&quot;&gt;0.090s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;ruby2.7&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 33%;&quot;&gt;0.102s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;ruby3.0&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 33%;&quot;&gt;0.104s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;lua5.4&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 39%;&quot;&gt;0.123s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;lua5.3&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 50%;&quot;&gt;0.156s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;python3.11&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 54%;&quot;&gt;0.170s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;lua5.2&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 59%;&quot;&gt;0.184s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;mruby&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 62%;&quot;&gt;0.193s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;python3.10&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 100%;&quot;&gt;0.313s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/table&gt;
-&lt;p&gt;&lt;strong&gt;Delta Blue&lt;/strong&gt;:&lt;/p&gt;
-&lt;table class=&quot;chart&quot;&gt;
-  &lt;tr&gt;
-    &lt;th&gt;wren0.4&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 43%;&quot;&gt;0.086s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;python3.11&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 53%;&quot;&gt;0.106s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;python3.10&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 100%;&quot;&gt;0.202s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/table&gt;
-&lt;p&gt;&lt;strong&gt;Binary Trees&lt;/strong&gt;:&lt;/p&gt;
-&lt;table class=&quot;chart&quot;&gt;
-  &lt;tr&gt;
-    &lt;th&gt;luajit2.1 -joff&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 37%;&quot;&gt;0.073s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;ruby2.7&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 58%;&quot;&gt;0.113s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;ruby3.0&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 59%;&quot;&gt;0.115s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;python3.11&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 70%;&quot;&gt;0.137s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;lua5.4&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 71%;&quot;&gt;0.138s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;wren0.4&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 73%;&quot;&gt;0.144s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;mruby&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 84%;&quot;&gt;0.163s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;python3.10&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 95%;&quot;&gt;0.186s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;lua5.3&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 99%;&quot;&gt;0.195s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;lua5.2&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 100%;&quot;&gt;0.196s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/table&gt;
-&lt;p&gt;&lt;strong&gt;Recursive Fibonacci&lt;/strong&gt;:&lt;/p&gt;
-&lt;table class=&quot;chart&quot;&gt;
-  &lt;tr&gt;
-    &lt;th&gt;luajit2.1 -joff&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 22%;&quot;&gt;0.055s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;lua5.4&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 36%;&quot;&gt;0.090s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;ruby2.7&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 43%;&quot;&gt;0.109s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;ruby3.0&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 47%;&quot;&gt;0.117s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;lua5.3&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 50%;&quot;&gt;0.126s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;lua5.2&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 55%;&quot;&gt;0.138s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;wren0.4&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 59%;&quot;&gt;0.148s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;python3.11&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 62%;&quot;&gt;0.157s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;mruby&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 73%;&quot;&gt;0.185s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;python3.10&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 100%;&quot;&gt;0.252s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/table&gt;
-&lt;p&gt;I&#x27;ve used essentially the same presentation and methodology as in the original
-benchmark, partly to save time pondering the optimal approach, partly so I can
-redirect any critiques to the original author (sorry Bob!). Benchmarks do not
-measure interpreter startup time, and each benchmark is run ten times with the
-median used (thermal throttling could potentially mean this isn&#x27;t the best
-methodology, but changing the number of test repetitions to e.g. 1000 seems to
-have little effect).&lt;/p&gt;
-&lt;p&gt;The tests were run on a machine with an AMD Ryzen 9 5950X processor. wren 0.4
-as of commit
-&lt;a href=&quot;https://github.com/wren-lang/wren/commit/c2a75f1eaf9b1ba1245d7533a723360863fb012d&quot;&gt;c2a75f1&lt;/a&gt;
-was used as well as the following Arch Linux packages:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;lua52-5.2.4-5&lt;/li&gt;
-&lt;li&gt;lua53-5.3.6-1&lt;/li&gt;
-&lt;li&gt;lua-5.4.4-3,&lt;/li&gt;
-&lt;li&gt;luajit-2.1.0.beta3.r471.g505e2c03-1&lt;/li&gt;
-&lt;li&gt;mruby-3.1.0-1&lt;/li&gt;
-&lt;li&gt;python-3.10.10-1&lt;/li&gt;
-&lt;li&gt;python-3.11.3-1 (taken from Arch Linux&#x27;s staging repo)&lt;/li&gt;
-&lt;li&gt;ruby2.7-2.7.7-1&lt;/li&gt;
-&lt;li&gt;ruby-3.0.5-1&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;The Python 3.10 and 3.11 packages were compiled with the same GCC version
-(12.2.1 according to &lt;code&gt;python -VV&lt;/code&gt;), though this won&#x27;t necessarily be true for
-all other packages (e.g. the lua52 and lua53 packages are several years old so
-will have been built an older GCC).&lt;/p&gt;
-&lt;p&gt;I&#x27;ve submitted a &lt;a href=&quot;https://github.com/wren-lang/wren/pull/1164&quot;&gt;pull request to update the Wren performance
-page&lt;/a&gt;.&lt;/p&gt;
-&lt;h2 id=&quot;old-results&quot;&gt;&lt;a href=&quot;#old-results&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Old results&lt;/h2&gt;
-&lt;p&gt;The following results are copied from the &lt;a href=&quot;https://wren.io/performance.html&quot;&gt;Wren performance
-page&lt;/a&gt; (&lt;a href=&quot;https://web.archive.org/web/20230326002211/https://wren.io/performance.html&quot;&gt;archive.org
-link&lt;/a&gt;
-ease of comparison. They were run on a MacBook Pro 2.3GHz Intel Core i7 with
-Lua 5.2.3, LuaJIT 2.0.2, Python 2.7.5, Python 3.3.4, ruby 2.0.0p247.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Method Call&lt;/strong&gt;:&lt;/p&gt;
-&lt;table class=&quot;chart&quot;&gt;
-  &lt;tr&gt;
-    &lt;th&gt;wren2015&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 14%;&quot;&gt;0.12s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;luajit2.0 -joff&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 18%;&quot;&gt;0.16s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;ruby2.0&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 23%;&quot;&gt;0.20s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;lua5.2&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 41%;&quot;&gt;0.35s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;python3.3&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 91%;&quot;&gt;0.78s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;python2.7&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 100%;&quot;&gt;0.85s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/table&gt;
-&lt;p&gt;&lt;strong&gt;DeltaBlue&lt;/strong&gt;:&lt;/p&gt;
-&lt;table class=&quot;chart&quot;&gt;
-  &lt;tr&gt;
-    &lt;th&gt;wren2015&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 22%;&quot;&gt;0.13s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;python3.3&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 83%;&quot;&gt;0.48s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;python2.7&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 100%;&quot;&gt;0.57s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/table&gt;
-&lt;p&gt;&lt;strong&gt;Binary Trees&lt;/strong&gt;:&lt;/p&gt;
-&lt;table class=&quot;chart&quot;&gt;
-  &lt;tr&gt;
-    &lt;th&gt;luajit2.0 -joff&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 20%;&quot;&gt;0.11s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;wren2015&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 41%;&quot;&gt;0.22s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;ruby2.0&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 46%;&quot;&gt;0.24s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;python2.7&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 71%;&quot;&gt;0.37s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;python3.3&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 73%;&quot;&gt;0.38s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;lua5.2&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 100%;&quot;&gt;0.52s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/table&gt;
-&lt;p&gt;&lt;strong&gt;Recursive Fibonacci&lt;/strong&gt;:&lt;/p&gt;
-&lt;table class=&quot;chart&quot;&gt;
-  &lt;tr&gt;
-    &lt;th&gt;luajit2.0 -joff&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 17%;&quot;&gt;0.10s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;wren2015&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 35%;&quot;&gt;0.20s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;ruby2.0&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 39%;&quot;&gt;0.22s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;lua5.2&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 49%;&quot;&gt;0.28s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;python2.7&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 90%;&quot;&gt;0.51s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;th&gt;python3.3&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 100%;&quot;&gt;0.57s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/table&gt;
-&lt;h2 id=&quot;observations&quot;&gt;&lt;a href=&quot;#observations&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Observations&lt;/h2&gt;
-&lt;p&gt;A few takeaways:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;LuaJIT&#x27;s bytecode interpreter remains incredibly fast (though see &lt;a href=&quot;https://sillycross.github.io/2022/11/22/2022-11-22/&quot;&gt;this blog
-post&lt;/a&gt; for a methodology
-to produce an even faster interpreter).&lt;/li&gt;
-&lt;li&gt;The performance improvements in Python 3.11 were &lt;a href=&quot;https://docs.python.org/3/whatsnew/3.11.html#whatsnew311-faster-cpython&quot;&gt;well
-documented&lt;/a&gt;
-and are very visible on this set of microbenchparks.&lt;/li&gt;
-&lt;li&gt;I was more surprised by the performance jump with Lua 5.4, especially as the
-&lt;a href=&quot;https://www.lua.org/manual/5.4/readme.html#changes&quot;&gt;release notes&lt;/a&gt; give few
-hints of performance improvements that would be reflected in these
-microbenchmarks. The &lt;a href=&quot;https://lwn.net/Articles/826134/&quot;&gt;LWN article about the Lua 5.4
-release&lt;/a&gt; however did note improved
-performance on a range of benchmarks.&lt;/li&gt;
-&lt;li&gt;Wren remains speedy (for these workloads at least), but engineering work on
-other interpreters has narrowed that gap for some of these benchmarks.&lt;/li&gt;
-&lt;li&gt;I haven&#x27;t taken the time to compare the January 2015 version of Wren used
-for the benchmarks vs present-day Wren 0.4. It would be interesting to
-explore that though.&lt;/li&gt;
-&lt;li&gt;A tiny number of microbenchmarks have been used in this performance test. It
-wouldn&#x27;t be wise to draw general conclusions - this is just a bit of fun.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&quot;appendix-benchmark-script&quot;&gt;&lt;a href=&quot;#appendix-benchmark-script&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Appendix: Benchmark script&lt;/h2&gt;
-&lt;p&gt;Health warning: this is incredibly quick and dirty (especially the repeated
-switching between the python packages to allow testing both 3.10 and 3.11):&lt;/p&gt;
-&lt;div class=&quot;highlight&quot; style=&quot;background: #ffffff&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span style=&quot;color: #177500&quot;&gt;#!/usr/bin/env python3&lt;/span&gt;
-
-&lt;span style=&quot;color: #177500&quot;&gt;# Copyright Muxup contributors.&lt;/span&gt;
-&lt;span style=&quot;color: #177500&quot;&gt;# Distributed under the terms of the MIT license, see LICENSE for details.&lt;/span&gt;
-&lt;span style=&quot;color: #177500&quot;&gt;# SPDX-License-Identifier: MIT&lt;/span&gt;
-
-&lt;span style=&quot;color: #A90D91&quot;&gt;import&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;statistics&lt;/span&gt;
-&lt;span style=&quot;color: #A90D91&quot;&gt;import&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;subprocess&lt;/span&gt;
-
-&lt;span style=&quot;color: #000000&quot;&gt;out&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #A90D91&quot;&gt;open&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;out.md&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;w&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;encoding=&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;utf-8&amp;quot;&lt;/span&gt;)
-
-
-&lt;span style=&quot;color: #A90D91&quot;&gt;def&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;run_single_bench&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;bench_name&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;runner_name&lt;/span&gt;):
-    &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;./test/benchmark/&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt;
-    &lt;span style=&quot;color: #A90D91&quot;&gt;if&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runner_name&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;==&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;lua5.2&amp;quot;&lt;/span&gt;:
-        &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;.lua&amp;quot;&lt;/span&gt;
-        &lt;span style=&quot;color: #000000&quot;&gt;cmdline&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; [&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;lua5.2&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt;]
-    &lt;span style=&quot;color: #A90D91&quot;&gt;elif&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runner_name&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;==&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;lua5.3&amp;quot;&lt;/span&gt;:
-        &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;.lua&amp;quot;&lt;/span&gt;
-        &lt;span style=&quot;color: #000000&quot;&gt;cmdline&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; [&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;lua5.3&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt;]
-    &lt;span style=&quot;color: #A90D91&quot;&gt;elif&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runner_name&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;==&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;lua5.4&amp;quot;&lt;/span&gt;:
-        &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;.lua&amp;quot;&lt;/span&gt;
-        &lt;span style=&quot;color: #000000&quot;&gt;cmdline&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; [&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;lua5.4&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt;]
-    &lt;span style=&quot;color: #A90D91&quot;&gt;elif&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runner_name&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;==&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;luajit2.1 -joff&amp;quot;&lt;/span&gt;:
-        &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;.lua&amp;quot;&lt;/span&gt;
-        &lt;span style=&quot;color: #000000&quot;&gt;cmdline&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; [&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;luajit&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;-joff&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt;]
-    &lt;span style=&quot;color: #A90D91&quot;&gt;elif&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runner_name&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;==&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;mruby&amp;quot;&lt;/span&gt;:
-        &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;.rb&amp;quot;&lt;/span&gt;
-        &lt;span style=&quot;color: #000000&quot;&gt;cmdline&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; [&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;mruby&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt;]
-    &lt;span style=&quot;color: #A90D91&quot;&gt;elif&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runner_name&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;==&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;python3.10&amp;quot;&lt;/span&gt;:
-        &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;.py&amp;quot;&lt;/span&gt;
-        &lt;span style=&quot;color: #000000&quot;&gt;subprocess.run&lt;/span&gt;(
-            [
-                &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;sudo&amp;quot;&lt;/span&gt;,
-                &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;pacman&amp;quot;&lt;/span&gt;,
-                &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;-U&amp;quot;&lt;/span&gt;,
-                &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;--noconfirm&amp;quot;&lt;/span&gt;,
-                &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;/var/cache/pacman/pkg/python-3.10.10-1-x86_64.pkg.tar.zst&amp;quot;&lt;/span&gt;,
-            ],
-            &lt;span style=&quot;color: #000000&quot;&gt;check=&lt;/span&gt;&lt;span style=&quot;color: #A90D91&quot;&gt;True&lt;/span&gt;,
-        )
-        &lt;span style=&quot;color: #000000&quot;&gt;cmdline&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; [&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;python&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt;]
-    &lt;span style=&quot;color: #A90D91&quot;&gt;elif&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runner_name&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;==&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;python3.11&amp;quot;&lt;/span&gt;:
-        &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;.py&amp;quot;&lt;/span&gt;
-        &lt;span style=&quot;color: #000000&quot;&gt;subprocess.run&lt;/span&gt;(
-            [
-                &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;sudo&amp;quot;&lt;/span&gt;,
-                &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;pacman&amp;quot;&lt;/span&gt;,
-                &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;-U&amp;quot;&lt;/span&gt;,
-                &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;--noconfirm&amp;quot;&lt;/span&gt;,
-                &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;/var/cache/pacman/pkg/python-3.11.3-1-x86_64.pkg.tar.zst&amp;quot;&lt;/span&gt;,
-            ],
-            &lt;span style=&quot;color: #000000&quot;&gt;check=&lt;/span&gt;&lt;span style=&quot;color: #A90D91&quot;&gt;True&lt;/span&gt;,
-        )
-        &lt;span style=&quot;color: #000000&quot;&gt;cmdline&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; [&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;python&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt;]
-    &lt;span style=&quot;color: #A90D91&quot;&gt;elif&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runner_name&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;==&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;ruby2.7&amp;quot;&lt;/span&gt;:
-        &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;.rb&amp;quot;&lt;/span&gt;
-        &lt;span style=&quot;color: #000000&quot;&gt;cmdline&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; [&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;ruby-2.7&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt;]
-    &lt;span style=&quot;color: #A90D91&quot;&gt;elif&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runner_name&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;==&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;ruby3.0&amp;quot;&lt;/span&gt;:
-        &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;.rb&amp;quot;&lt;/span&gt;
-        &lt;span style=&quot;color: #000000&quot;&gt;cmdline&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; [&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;ruby&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt;]
-    &lt;span style=&quot;color: #A90D91&quot;&gt;elif&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runner_name&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;==&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;wren0.4&amp;quot;&lt;/span&gt;:
-        &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;+=&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;.wren&amp;quot;&lt;/span&gt;
-        &lt;span style=&quot;color: #000000&quot;&gt;cmdline&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; [&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;./bin/wren_test&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;bench_file&lt;/span&gt;]
-    &lt;span style=&quot;color: #A90D91&quot;&gt;else&lt;/span&gt;:
-        &lt;span style=&quot;color: #A90D91&quot;&gt;raise&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;SystemExit&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;Unrecognised runner&amp;quot;&lt;/span&gt;)
-
-    &lt;span style=&quot;color: #000000&quot;&gt;times&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; []
-    &lt;span style=&quot;color: #A90D91&quot;&gt;for&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;_&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;in&lt;/span&gt; &lt;span style=&quot;color: #A90D91&quot;&gt;range&lt;/span&gt;(&lt;span style=&quot;color: #1C01CE&quot;&gt;10&lt;/span&gt;):
-        &lt;span style=&quot;color: #000000&quot;&gt;bench_out&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;subprocess.run&lt;/span&gt;(
-            &lt;span style=&quot;color: #000000&quot;&gt;cmdline&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;capture_output=&lt;/span&gt;&lt;span style=&quot;color: #A90D91&quot;&gt;True&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;check=&lt;/span&gt;&lt;span style=&quot;color: #A90D91&quot;&gt;True&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;encoding=&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;utf-8&amp;quot;&lt;/span&gt;
-        )&lt;span style=&quot;color: #000000&quot;&gt;.stdout&lt;/span&gt;
-        &lt;span style=&quot;color: #000000&quot;&gt;times.append&lt;/span&gt;(&lt;span style=&quot;color: #A90D91&quot;&gt;float&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;bench_out.split&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;: &amp;quot;&lt;/span&gt;)[&lt;span style=&quot;color: #000000&quot;&gt;-&lt;/span&gt;&lt;span style=&quot;color: #1C01CE&quot;&gt;1&lt;/span&gt;]&lt;span style=&quot;color: #000000&quot;&gt;.strip&lt;/span&gt;()))
-    &lt;span style=&quot;color: #A90D91&quot;&gt;return&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;statistics.median&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;times&lt;/span&gt;)
-
-
-&lt;span style=&quot;color: #A90D91&quot;&gt;def&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;do_bench&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;name&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;file_base&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;runners&lt;/span&gt;):
-    &lt;span style=&quot;color: #000000&quot;&gt;results&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; {}
-    &lt;span style=&quot;color: #A90D91&quot;&gt;for&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runner&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;in&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runners&lt;/span&gt;:
-        &lt;span style=&quot;color: #000000&quot;&gt;results&lt;/span&gt;[&lt;span style=&quot;color: #000000&quot;&gt;runner&lt;/span&gt;] &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;run_single_bench&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;name&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;file_base&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;runner&lt;/span&gt;)
-    &lt;span style=&quot;color: #000000&quot;&gt;results&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #A90D91&quot;&gt;dict&lt;/span&gt;(&lt;span style=&quot;color: #A90D91&quot;&gt;sorted&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;results.items&lt;/span&gt;(), &lt;span style=&quot;color: #000000&quot;&gt;key=&lt;/span&gt;&lt;span style=&quot;color: #A90D91&quot;&gt;lambda&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;kv&lt;/span&gt;: &lt;span style=&quot;color: #000000&quot;&gt;kv&lt;/span&gt;[&lt;span style=&quot;color: #1C01CE&quot;&gt;1&lt;/span&gt;]))
-    &lt;span style=&quot;color: #000000&quot;&gt;longest_result&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #A90D91&quot;&gt;max&lt;/span&gt;(&lt;span style=&quot;color: #000000&quot;&gt;results.values&lt;/span&gt;())
-    &lt;span style=&quot;color: #000000&quot;&gt;out.write&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;f&amp;quot;**{&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;name&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;}**:\n&amp;quot;&lt;/span&gt;)
-    &lt;span style=&quot;color: #000000&quot;&gt;out.write&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;#39;&amp;lt;table class=&amp;quot;chart&amp;quot;&amp;gt;\n&amp;#39;&lt;/span&gt;)
-    &lt;span style=&quot;color: #A90D91&quot;&gt;for&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;runner&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;result&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;in&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;results.items&lt;/span&gt;():
-        &lt;span style=&quot;color: #000000&quot;&gt;percent&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #A90D91&quot;&gt;round&lt;/span&gt;((&lt;span style=&quot;color: #000000&quot;&gt;result&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;/&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;longest_result&lt;/span&gt;) &lt;span style=&quot;color: #000000&quot;&gt;*&lt;/span&gt; &lt;span style=&quot;color: #1C01CE&quot;&gt;100&lt;/span&gt;)
-        &lt;span style=&quot;color: #000000&quot;&gt;out.write&lt;/span&gt;(
-            &lt;span style=&quot;color: #C41A16&quot;&gt;f&amp;quot;&amp;quot;&amp;quot;\&lt;/span&gt;
-&lt;span style=&quot;color: #C41A16&quot;&gt;  &amp;lt;tr&amp;gt;&lt;/span&gt;
-&lt;span style=&quot;color: #C41A16&quot;&gt;    &amp;lt;th&amp;gt;{&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;runner&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;}&amp;lt;/th&amp;gt;&amp;lt;td&amp;gt;&amp;lt;div class=&amp;quot;chart-bar&amp;quot; style=&amp;quot;width: {&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;percent&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;}%;&amp;quot;&amp;gt;{&lt;/span&gt;&lt;span style=&quot;color: #000000&quot;&gt;result&lt;/span&gt;&lt;span style=&quot;color: #C41A16&quot;&gt;:.3f}s&amp;amp;nbsp;&amp;lt;/div&amp;gt;&amp;lt;/td&amp;gt;&lt;/span&gt;
-&lt;span style=&quot;color: #C41A16&quot;&gt;  &amp;lt;/tr&amp;gt;\n&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
-        )
-    &lt;span style=&quot;color: #000000&quot;&gt;out.write&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;&amp;lt;/table&amp;gt;\n\n&amp;quot;&lt;/span&gt;)
-
-
-&lt;span style=&quot;color: #000000&quot;&gt;all_runners&lt;/span&gt; &lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt; [
-    &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;lua5.2&amp;quot;&lt;/span&gt;,
-    &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;lua5.3&amp;quot;&lt;/span&gt;,
-    &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;lua5.4&amp;quot;&lt;/span&gt;,
-    &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;luajit2.1 -joff&amp;quot;&lt;/span&gt;,
-    &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;mruby&amp;quot;&lt;/span&gt;,
-    &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;python3.10&amp;quot;&lt;/span&gt;,
-    &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;python3.11&amp;quot;&lt;/span&gt;,
-    &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;ruby2.7&amp;quot;&lt;/span&gt;,
-    &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;ruby3.0&amp;quot;&lt;/span&gt;,
-    &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;wren0.4&amp;quot;&lt;/span&gt;,
-]
-&lt;span style=&quot;color: #000000&quot;&gt;do_bench&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;Method Call&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;method_call&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;all_runners&lt;/span&gt;)
-&lt;span style=&quot;color: #000000&quot;&gt;do_bench&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;Delta Blue&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;delta_blue&amp;quot;&lt;/span&gt;, [&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;python3.10&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;python3.11&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;wren0.4&amp;quot;&lt;/span&gt;])
-&lt;span style=&quot;color: #000000&quot;&gt;do_bench&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;Binary Trees&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;binary_trees&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;all_runners&lt;/span&gt;)
-&lt;span style=&quot;color: #000000&quot;&gt;do_bench&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;Recursive Fibonacci&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;fib&amp;quot;&lt;/span&gt;, &lt;span style=&quot;color: #000000&quot;&gt;all_runners&lt;/span&gt;)
-&lt;span style=&quot;color: #A90D91&quot;&gt;print&lt;/span&gt;(&lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;Output written to out.md&amp;quot;&lt;/span&gt;)
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 </content>
 </entry>
 </feed>

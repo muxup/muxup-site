@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:title" content="Arch Linux on remote server setup runbook"/>
+<meta property="og:site_name" content="Muxup">
+<meta property="og:description" content="Notes on how I set up Arch on an remote server with encrypted root and remote unlock"/>
+<meta property="og:type" content="article"/>
+<meta property="og:url" content="https://muxup.com/arch-linux-on-remote-server-setup-runbook"/>
+<meta property="og:image" content="https://v1.screenshot.11ty.dev/https%3A%2F%2Fmuxup.com%2Farch-linux-on-remote-server-setup-runbook/opengraph/ar/bigger"/>
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:site" content="@muxup">
+<meta property="twitter:creator" content="@asbradbury">
+<title>Arch Linux on remote server setup runbook - Muxup</title>
+<link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg xmlns='http:%2F%2Fwww.w3.org%2F2000%2Fsvg' viewBox='0 0 100 100'%3E%3Ctext y='80' font-size='110'%3E▨%3C%2Ftext%3E%3C%2Fsvg%3E">
+<meta name="description" content="Notes on how I set up Arch on an remote server with encrypted root and remote unlock">
+<style>
+@font-face {
+font-family:'Nunito Var';
+src:url('/static/Nunito.var.v2.woff2') format('woff2-variations');
+font-display:swap;
+font-weight: 200 1000;
+}
+*, *::before, *::after {
+box-sizing:border-box;
+}
+* {
+margin:0;
+}
+input, button, textarea, select {
+font:inherit;
+}
+img, picture, video, canvas, svg {
+display:block;
+max-width:100%;
+}
+html {
+font-family:'Nunito Var', sans-serif;
+height:100%;
+font-size:16px;
+-webkit-tap-highlight-color:transparent;
+}
+@media screen and (min-width:640px) {
+html {
+font-size:18px;
+}
+}
+body {
+line-height:1.5;
+color:#222;
+display:grid;
+height:100%;
+grid-template-rows:1fr auto;
+background:#fff no-repeat 0% 0% / 100% .7rem linear-gradient(120deg, #ffffe3 20%, #ddfffc 20%, #ddfffc 40%, #e2eeff 40%, #e2eeff 60%, #f2e2ff 60%, #f2e2ff 80%, #ffdef2 80%, #ffdef2 100%);
+tab-size:4;
+}
+h1, h2, h3, h4, h5, h6 {
+line-height:1.25;
+font-weight:600;
+overflow-wrap:break-word;
+letter-spacing:-.025em;
+margin:1.75rem 0 .75rem;
+}
+h1 {
+font-size:2.986rem
+}
+h2 {
+font-size:2.488rem
+}
+p {
+margin:.75rem 0;
+font-weight:400;
+overflow-wrap:break-word;
+}
+a {
+color:inherit;
+text-decoration:underline;
+text-decoration-color:#aaa;
+text-underline-offset:.15em;
+}
+a:hover {
+text-decoration-thickness:2px;
+}
+ol, ul {
+margin:0 0 0 1.5rem;
+padding-left:0;
+}
+li {
+margin:0 0 .25rem
+}
+::selection {
+background:#ffdac0;
+}
+footer {
+font-size:.833rem;
+color:#777;
+padding:0 1rem;
+width:100%;
+max-width:min(calc(750px + 2rem), calc(100vw - 1rem));
+margin:0 auto;
+}
+footer p {
+text-align:center;
+margin:0 0 .75rem;
+}
+#footer-image {
+margin:0 auto;
+cursor:pointer;
+}
+#article-logo {
+line-height:1.25;
+margin:.5rem 0 0;
+font-size:1.44rem;
+font-weight:700;
+position:relative;
+}
+#article-logo a {
+text-decoration:none;
+}
+#article-title {
+margin:1.5rem 0 0;
+position:relative;
+}
+#article-meta {
+font-size:.833rem;
+color:#777;
+}
+#article-container {
+margin:0 auto;
+padding:1rem;
+max-width:min(calc(750px + 2rem), calc(100vw - 1rem));
+width:100%;
+}
+.anchor {
+position: absolute;
+text-decoration: none;
+width:1.75ex;
+margin-left:-1.4ex;
+visibility:hidden;
+font-size:.8em;
+padding-top:.2em;
+color:#aaa;
+}
+h2:hover .anchor,
+h3:hover .anchor,
+h4:hover .anchor,
+h5:hover .anchor,
+h6:hover .anchor,
+summary:hover .anchor {
+visibility:visible;
+}
+.anchor::before {
+content:"#";
+}
+hr {
+border:none;
+border-top:4px solid #f1f3f5;
+}
+code {
+background:#f5f5f5;
+padding:.125rem .25rem;
+font-size:.833rem
+}
+pre > code {
+padding:0;
+background:#fff;
+}
+pre {
+word-wrap:break-word;
+overflow-x:auto;
+padding:.5rem 1rem;
+margin:1rem -1rem;
+border-radius:.4rem;
+border:1px solid #d2d2d2;
+}
+kbd {
+background:#212529;
+border-radius:.2rem;
+color:#fff;
+font-size:.85em;
+font-weight:700;
+line-height:1;
+padding:2px 4px;
+white-space:nowrap;
+}
+details {
+font-size:.833rem;
+}
+details summary {
+margin:.75rem 0 .5rem 0;
+font-weight:600;
+cursor:pointer;
+font-size:1.2rem;
+line-height:1.25;
+letter-spacing:-.025em;
+list-style:none;
+}
+details summary > * {
+display:inline;
+}
+summary::-webkit-details-marker {
+display:none;
+}
+summary::after {
+content: " »";
+}
+details[open] summary::after {
+content: " «";
+}
+
+</style>
+<link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed.xml"/>
+<link rel="canonical" href="https://muxup.com/arch-linux-on-remote-server-setup-runbook"/>
+</head>
+<body>
+<div id="article-container">
+<div>
+<div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></a></div>
+</div>
+<h1 id="article-title"><span id="title-highlight">Arch Linux on remote server setup runbook</span></h1>
+<div id="article-meta"><a href="#article-changelog" onclick="document.querySelector('#article-changelog').setAttribute('open', true)">History↓</a></div>
+<p>As I develop, I tend to offload a lot of the computationally heavy build or
+test tasks to a remote build machine. It's convenient for this to match the
+distribution I use on my local machine, and I so far haven't felt it would be
+advantageous to add another more server-oriented distro to the mix to act as a
+host to an Arch Linux container. This post acts as a quick reference / runbook
+for me on the occasions I want to spin up a new machine with this setup. To be
+very explicit, this is shared as something that might happen to be helpful if
+you have similar requirements, or to give some ideas if you have different
+ones. I definitely don't advocate that you blindly copy it.</p>
+<p>Although this is something that could be fully automated, I find structuring
+this kind of thing as a series of commands to copy and paste and check/adjust
+manually hits the sweetspot for my usage. As always, the Arch Linux wiki and
+its <a href="https://wiki.archlinux.org/title/Installation_guide">install guide</a> is a
+fantastic reference that you should go and check if you're unsure about
+anything listed here.</p>
+<h2 id="details-about-my-setup"><a href="#details-about-my-setup" class="anchor" aria-hidden="true" tabindex="-1"></a>Details about my setup</h2>
+<ul>
+<li>I'm typically targeting Hetzner servers with two SSDs. I'm not worried about
+data loss or minor downtime waiting for a disk to be replaced before
+re-imaging, so RAID0 is just fine. The commands below assume this setup.</li>
+<li>I do want encrypted root just in case anything sensitive is ever copied to
+the machine. As it is a remote machine, remote unlock over SSH must be
+supported (i.e. initrd contains an sshd that will accept the passphrase for
+unlocking the root partition before continuing the boot process).
+<ul>
+<li>The described setup means that if the disk is thrown away or given to
+another customer, you shouldn't have anything plain text in the root
+partition lying around it. As the boot partition is unencrypted, there are
+a whole bunch of threat models where someone is able to modify that boot
+partition which wouldn't be addressed by this approach.</li>
+</ul>
+</li>
+<li>The setup also assumes you start from some kind of rescue environment (in my
+case Hetzner's) that means you can freely repartition and overwrite the disk
+drives.</li>
+<li>If you're not on Hetzner, you'll have to use different mirrors as they're
+not available externally.</li>
+<li>Hosts typically provide their own base images and installer scripts. The
+approach detailed here is good if you'd rather control the process yourself,
+and although there are a few hoster-specific bits in here it's easy enough
+to replace them.</li>
+<li>For simplicity I use UEFI boot and EFI stub. If you have problems with
+efibootmgr, you might want to use systemd-boot instead.</li>
+<li>Disclaimer: As is hopefully obvious, the below instructions will overwrite
+anything on the hard drive of the system you're running them on.</li>
+</ul>
+<h2 id="setting-up-and-chrooting-into-arch-bootstrap-environment-from-rescue-system"><a href="#setting-up-and-chrooting-into-arch-bootstrap-environment-from-rescue-system" class="anchor" aria-hidden="true" tabindex="-1"></a>Setting up and chrooting into Arch bootstrap environment from rescue system</h2>
+<p>See the <a href="https://docs.hetzner.com/robot/dedicated-server/troubleshooting/hetzner-rescue-system/">docs on the Hetzner rescue
+system</a>
+for details on how to enter it. If you've previously used this server, you
+likely want to remove old <code>known_hosts</code> entries with <code>ssh-keygen -R your.server</code>.</p>
+<p>Now ssh in and do the following:</p>
+<div class="highlight" style="background: #ffffff"><pre style="line-height: 125%;"><span></span><code>wget http://mirror.hetzner.de/archlinux/iso/latest/archlinux-bootstrap-x86_64.tar.zst
+tar -xvf archlinux-bootstrap-x86_64.tar.zst --numeric-owner
+sed -i <span style="color: #C41A16">&#39;1s;^;Server=https://mirror.hetzner.de/archlinux/$repo/os/$arch\n\n;&#39;</span> root.x86_64/etc/pacman.d/mirrorlist
+mount --bind root.x86_64/ root.x86_64/ <span style="color: #177500"># See &lt;https://bugs.archlinux.org/task/46169&gt;</span>
+<span style="color: #A90D91">printf</span> <span style="color: #C41A16">&quot;About to enter bootstrap chroot\n===============================\n&quot;</span>
+./root.x86_64/bin/arch-chroot root.x86_64/
+</code></pre></div>
+
+<p>You are now chrooted into the Arch boostrap environment. We will do as much
+work from there as possible so as to minimise dependency on tools in the
+Hetzner rescue system.</p>
+<h2 id="set-up-drives-and-create-and-chroot-into-actual-rootfs"><a href="#set-up-drives-and-create-and-chroot-into-actual-rootfs" class="anchor" aria-hidden="true" tabindex="-1"></a>Set up drives and create and chroot into actual rootfs</h2>
+<p>The goal is now to set up the drives, perform an Arch Linux bootstrap, and
+chroot into it. The UEFI partition is placed at 1MiB pretty much guaranteed to
+be properly aligned for any reasonable physical sector size (remembering space
+must be left at the beginning of the disk for the partition table itself).</p>
+<p>We'll start by collecting info that will be used throughout the process:</p>
+<div class="highlight" style="background: #ffffff"><pre style="line-height: 125%;"><span></span><code><span style="color: #A90D91">printf</span> <span style="color: #C41A16">&quot;Enter the desired new hostname:\n&quot;</span>
+<span style="color: #A90D91">read</span> NEW_HOST_NAME; <span style="color: #A90D91">export</span> NEW_HOST_NAME
+<span style="color: #A90D91">printf</span> <span style="color: #C41A16">&quot;Enter the desired passphrase for unlocking the root partition:\n&quot;</span>
+<span style="color: #A90D91">read</span> ROOT_PART_PASSPHRASE
+<span style="color: #A90D91">printf</span> <span style="color: #C41A16">&quot;Enter the public ssh key (e.g. cat ~/.ssh/id_ed22519.pub) that will be used for access:\n&quot;</span>
+<span style="color: #A90D91">read</span> PUBLIC_SSH_KEY; <span style="color: #A90D91">export</span> PUBLIC_SSH_KEY
+<span style="color: #A90D91">printf</span> <span style="color: #C41A16">&quot;Enter the name of the main user account to be created:\n&quot;</span>
+<span style="color: #A90D91">read</span> NEW_USER; <span style="color: #A90D91">export</span> NEW_USER
+<span style="color: #A90D91">printf</span> <span style="color: #C41A16">&quot;You&#39;ve entered the following information:\n&quot;</span>
+<span style="color: #A90D91">printf</span> <span style="color: #C41A16">&quot;NEW_HOST_NAME: %s\n&quot;</span> <span style="color: #C41A16">&quot;</span><span style="color: #000000">$NEW_HOST_NAME</span><span style="color: #C41A16">&quot;</span>
+<span style="color: #A90D91">printf</span> <span style="color: #C41A16">&quot;ROOT_PART_PASSPHRASE: %s\n&quot;</span> <span style="color: #C41A16">&quot;</span><span style="color: #000000">$ROOT_PART_PASSPHRASE</span><span style="color: #C41A16">&quot;</span>
+<span style="color: #A90D91">printf</span> <span style="color: #C41A16">&quot;PUBLIC_SSH_KEY: %s\n&quot;</span> <span style="color: #C41A16">&quot;</span><span style="color: #000000">$PUBLIC_SSH_KEY</span><span style="color: #C41A16">&quot;</span>
+<span style="color: #A90D91">printf</span> <span style="color: #C41A16">&quot;NEW_USER: %s\n&quot;</span> <span style="color: #C41A16">&quot;</span><span style="color: #000000">$NEW_USER</span><span style="color: #C41A16">&quot;</span>
+</code></pre></div>
+
+<p>And now proceed to set up the disks, create filesystems, perform an initial
+bootstrap and chroot into the new rootfs:</p>
+<div class="highlight" style="background: #ffffff"><pre style="line-height: 125%;"><span></span><code>pacman-key --init
+pacman-key --populate archlinux
+pacman -Sy --noconfirm xfsprogs dosfstools mdadm cryptsetup
+
+<span style="color: #A90D91">for</span> M <span style="color: #A90D91">in</span> /dev/md?; <span style="color: #A90D91">do</span> mdadm --stop <span style="color: #000000">$M</span>; <span style="color: #A90D91">done</span>
+<span style="color: #A90D91">for</span> DRIVE <span style="color: #A90D91">in</span> /dev/nvme0n1 /dev/nvme1n1; <span style="color: #A90D91">do</span>
+  sfdisk <span style="color: #000000">$DRIVE</span> <span style="color: #C41A16">&lt;&lt;EOF</span>
+<span style="color: #C41A16">label: gpt</span>
+
+<span style="color: #C41A16">start=1MiB, size=255MiB, type=uefi</span>
+<span style="color: #C41A16">start=256MiB, type=raid</span>
+<span style="color: #C41A16">EOF</span>
+<span style="color: #A90D91">done</span>
+
+<span style="color: #177500"># Warning from mdadm about falling back to creating md0 via node seems fine to ignore</span>
+yes | mdadm --create --verbose --level<span style="color: #000000">=</span><span style="color: #1C01CE">0</span> --raid-devices<span style="color: #000000">=</span><span style="color: #1C01CE">2</span> --homehost<span style="color: #000000">=</span>any /dev/md/0 /dev/nvme0n1p2 /dev/nvme1n1p2
+
+mkfs.fat -F32 /dev/nvme0n1p1
+<span style="color: #A90D91">printf</span> <span style="color: #C41A16">&quot;%s\n&quot;</span> <span style="color: #C41A16">&quot;</span><span style="color: #000000">$ROOT_PART_PASSPHRASE</span><span style="color: #C41A16">&quot;</span> | cryptsetup -y -v luksFormat --batch-mode /dev/md0
+<span style="color: #A90D91">printf</span> <span style="color: #C41A16">&quot;%s\n&quot;</span> <span style="color: #C41A16">&quot;</span><span style="color: #000000">$ROOT_PART_PASSPHRASE</span><span style="color: #C41A16">&quot;</span> | cryptsetup open /dev/md0 root
+<span style="color: #A90D91">unset</span> ROOT_PART_PASSPHRASE
+
+mkfs.xfs /dev/mapper/root <span style="color: #177500"># rely on this calaculating appropriate sunit and swidth</span>
+
+mount /dev/mapper/root /mnt
+mkdir /mnt/boot
+mount /dev/nvme0n1p1 /mnt/boot
+pacstrap /mnt base linux linux-firmware efibootmgr <span style="color: #C41A16">\</span>
+  xfsprogs dosfstools mdadm cryptsetup <span style="color: #C41A16">\</span>
+  mkinitcpio-netconf mkinitcpio-tinyssh mkinitcpio-utils python3 <span style="color: #C41A16">\</span>
+  openssh sudo net-tools git man-db man-pages vim
+genfstab -U /mnt &gt;&gt; /mnt/etc/fstab
+<span style="color: #177500"># Note that sunit and swidth in fstab confusingly use different units vs those shown by xfs &lt;https://superuser.com/questions/701124/xfs-mount-overrides-sunit-and-swidth-options&gt;</span>
+
+mdadm --detail --scan &gt;&gt; /mnt/etc/mdadm.conf
+<span style="color: #A90D91">printf</span> <span style="color: #C41A16">&quot;About to enter newrootfs chroot\n===============================\n&quot;</span>
+arch-chroot /mnt
+</code></pre></div>
+
+<h2 id="do-final-configuration-from-within-the-new-rootfs-chroot"><a href="#do-final-configuration-from-within-the-new-rootfs-chroot" class="anchor" aria-hidden="true" tabindex="-1"></a>Do final configuration from within the new rootfs chroot</h2>
+<p>Unfortunately I wasn't able to find a way to get ipv6 configured via DHCP on
+Hetzner's network, so we rely on hardcoding it (which seems to be <a href="https://docs.hetzner.com/robot/dedicated-server/network/network-configuration-using-systemd-networkd/">their
+recommendation</a>.</p>
+<p>We set up sudo and also configure ssh to disable password-based login. A small
+swapfile is configured in order to allow the kernel to move allocated but not
+actively used pages there if deemed worthwhile.</p>
+<div class="highlight" style="background: #ffffff"><pre style="line-height: 125%;"><span></span><code>sed /etc/locale.gen -i -e <span style="color: #C41A16">&quot;s/^\#en_GB.UTF-8 UTF-8.*/en_GB.UTF-8 UTF-8/&quot;</span>
+locale-gen
+<span style="color: #177500"># Ignore &quot;System has not been booted with systemd&quot; and &quot;Failed to connect to bus&quot; error for next command.</span>
+systemd-firstboot --locale<span style="color: #000000">=</span>en_GB.UTF-8 --timezone<span style="color: #000000">=</span>UTC --hostname<span style="color: #000000">=</span><span style="color: #C41A16">&quot;</span><span style="color: #000000">$NEW_HOST_NAME</span><span style="color: #C41A16">&quot;</span>
+ln -s /dev/null /etc/udev/rules.d/80-net-setup-link.rules <span style="color: #177500"># disable persistent network names</span>
+
+ssh-keygen -A <span style="color: #177500"># generate openssh host keys for the tinyssh hook to pick up</span>
+<span style="color: #A90D91">printf</span> <span style="color: #C41A16">&quot;%s\n&quot;</span> <span style="color: #C41A16">&quot;</span><span style="color: #000000">$PUBLIC_SSH_KEY</span><span style="color: #C41A16">&quot;</span> &gt; /etc/tinyssh/root_key
+sed /etc/mkinitcpio.conf -i -e <span style="color: #C41A16">&#39;s/^HOOKS=.*/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block mdadm_udev netconf tinyssh encryptssh filesystems fsck)/&#39;</span>
+<span style="color: #177500"># The call to tinyssh-convert in mkinitcpio-linux is incorrect, so do it</span>
+<span style="color: #177500"># manually &lt;https://github.com/grazzolini/mkinitcpio-tinyssh/issues/10&gt;</span>
+tinyssh-convert /etc/tinyssh/sshkeydir &lt; /etc/ssh/ssh_host_ed25519_key
+mkinitcpio -p linux
+
+<span style="color: #A90D91">printf</span> <span style="color: #C41A16">&quot;efibootmgr before changes:\n==========================\n&quot;</span>
+efibootmgr -u
+<span style="color: #177500"># Clean up any other efibootmgr entries from previous installs</span>
+<span style="color: #A90D91">for</span> BOOTNUM <span style="color: #A90D91">in</span> <span style="color: #A90D91">$(</span>efibootmgr | grep <span style="color: #C41A16">&#39;^Boot0&#39;</span> | grep -v PXE | sed <span style="color: #C41A16">&#39;s/^Boot\([0-9]*\).*/\1/&#39;</span><span style="color: #A90D91">)</span>; <span style="color: #A90D91">do</span>
+  efibootmgr -b <span style="color: #000000">$BOOTNUM</span> -B
+<span style="color: #A90D91">done</span>
+<span style="color: #177500"># Set up efistub</span>
+efibootmgr <span style="color: #C41A16">\</span>
+  --disk /dev/nvme0n1 <span style="color: #C41A16">\</span>
+  --part <span style="color: #1C01CE">1</span> <span style="color: #C41A16">\</span>
+  --create <span style="color: #C41A16">\</span>
+  --label <span style="color: #C41A16">&#39;Arch Linux&#39;</span> <span style="color: #C41A16">\</span>
+  --loader /vmlinuz-linux <span style="color: #C41A16">\</span>
+  --unicode <span style="color: #C41A16">&quot;root=/dev/mapper/root rw cryptdevice=UUID=</span><span style="color: #A90D91">$(</span>blkid -s UUID -o value /dev/md0<span style="color: #A90D91">)</span><span style="color: #C41A16">:root:allow-discards initrd=\initramfs-linux.img ip=:::::eth0:dhcp&quot;</span> <span style="color: #C41A16">\</span>
+  --verbose
+efibootmgr -o <span style="color: #1C01CE">0001</span>,0000 <span style="color: #177500"># prefer PXE boot. May need to check IDs</span>
+<span style="color: #A90D91">printf</span> <span style="color: #C41A16">&quot;efibootmgr after changes:\n=========================\n&quot;</span>
+efibootmgr -u
+
+mkswap --size<span style="color: #000000">=</span>8G --file /swapfile
+cat - <span style="color: #C41A16">&lt;&lt;EOF &gt; /etc/systemd/system/swapfile.swap</span>
+<span style="color: #C41A16">[Unit]</span>
+<span style="color: #C41A16">Description=Swap file</span>
+
+<span style="color: #C41A16">[Swap]</span>
+<span style="color: #C41A16">What=/swapfile</span>
+
+<span style="color: #C41A16">[Install]</span>
+<span style="color: #C41A16">WantedBy=multi-user.target</span>
+<span style="color: #C41A16">EOF</span>
+systemctl <span style="color: #A90D91">enable</span> swapfile.swap
+
+cat - <span style="color: #C41A16">&lt;&lt;EOF &gt; /etc/systemd/network/10-eth0.network</span>
+<span style="color: #C41A16">[Match]</span>
+<span style="color: #C41A16">Name=eth0</span>
+
+<span style="color: #C41A16">[Network]</span>
+<span style="color: #C41A16">DHCP=yes</span>
+<span style="color: #C41A16">Address=$(ip -6 addr show dev eth0 scope global | grep &quot;scope global&quot; | cut -d&#39; &#39; -f6)</span>
+<span style="color: #C41A16">Gateway=$(ip route show | head -n 1 | cut -d&#39; &#39; -f 3)</span>
+<span style="color: #C41A16">Gateway=fe80::1</span>
+<span style="color: #C41A16">EOF</span>
+systemctl <span style="color: #A90D91">enable</span> systemd-networkd.service systemd-resolved.service systemd-timesyncd.service
+<span style="color: #A90D91">printf</span> <span style="color: #C41A16">&quot;PasswordAuthentication no\n&quot;</span> &gt; /etc/ssh/sshd_config.d/20-no-password-auth.conf
+systemctl <span style="color: #A90D91">enable</span> sshd.service
+useradd -m -g users -G wheel -s /bin/bash <span style="color: #C41A16">&quot;</span><span style="color: #000000">$NEW_USER</span><span style="color: #C41A16">&quot;</span>
+usermod --pass<span style="color: #000000">=</span><span style="color: #C41A16">&#39;!&#39;</span> root <span style="color: #177500"># disable root login</span>
+chmod +w /etc/sudoers
+<span style="color: #A90D91">printf</span> <span style="color: #C41A16">&quot;%%wheel ALL=(ALL) ALL\n&quot;</span> &gt;&gt; /etc/sudoers
+chmod -w /etc/sudoers
+mkdir <span style="color: #C41A16">&quot;/home/</span><span style="color: #000000">$NEW_USER</span><span style="color: #C41A16">/.ssh&quot;</span>
+<span style="color: #A90D91">printf</span> <span style="color: #C41A16">&quot;%s\n&quot;</span> <span style="color: #C41A16">&quot;</span><span style="color: #000000">$PUBLIC_SSH_KEY</span><span style="color: #C41A16">&quot;</span> &gt; <span style="color: #C41A16">&quot;/home/</span><span style="color: #000000">$NEW_USER</span><span style="color: #C41A16">/.ssh/authorized_keys&quot;</span>
+chmod <span style="color: #1C01CE">700</span> <span style="color: #C41A16">&quot;/home/</span><span style="color: #000000">$NEW_USER</span><span style="color: #C41A16">/.ssh&quot;</span>
+chmod <span style="color: #1C01CE">600</span> <span style="color: #C41A16">&quot;/home/</span><span style="color: #000000">$NEW_USER</span><span style="color: #C41A16">/.ssh/authorized_keys&quot;</span>
+chown -R <span style="color: #C41A16">&quot;</span><span style="color: #000000">$NEW_USER</span><span style="color: #C41A16">:users&quot;</span> <span style="color: #C41A16">&quot;/home/</span><span style="color: #000000">$NEW_USER</span><span style="color: #C41A16">/.ssh&quot;</span>
+</code></pre></div>
+
+<h2 id="set-user-password-and-reboot"><a href="#set-user-password-and-reboot" class="anchor" aria-hidden="true" tabindex="-1"></a>Set user password and reboot</h2>
+<div class="highlight" style="background: #ffffff"><pre style="line-height: 125%;"><span></span><code><span style="color: #177500"># The next command will ask for the user password (needed for sudo).</span>
+passwd <span style="color: #C41A16">&quot;</span><span style="color: #000000">$NEW_USER</span><span style="color: #C41A16">&quot;</span>
+</code></pre></div>
+
+<p>Then <kbd>ctrl</kbd>+<kbd>d</kbd> twice and <code>reboot</code>.</p>
+<h2 id="unlocking-rootfs-and-logging-in"><a href="#unlocking-rootfs-and-logging-in" class="anchor" aria-hidden="true" tabindex="-1"></a>Unlocking rootfs and logging in</h2>
+<p>Firstly, you likely want to remove any saved host public keys as there will be
+a new one for the newly provisioned machine <code>ssh-keygen -R your.server</code>. The server will have a different host key for the root
+key unlock so I'd recommend using a different <code>known_hosts</code> file for unlock.
+e.g. <code>ssh -o UserKnownHostsFile=~/.ssh/known_hosts_unlock root@your.server</code>. If you put something like the following in your
+<code>~/.ssh/config</code> you could just <code>ssh unlock-foo-host</code>:</p>
+<pre><code>Host unlock-foo-host
+HostName your.server
+User root
+UserKnownHostsFile ~/.ssh/known_hosts_unlock
+</code></pre>
+<p>Once you've successfully entered the key to unlock the rootfs, you can just
+ssh as normal to the server.</p>
+
+<hr/>
+<details id="article-changelog"><summary>Article changelog</summary>
+<ul>
+<li>2024-10-01: Initial publication date.</li>
+</ul>
+</div>
+<footer class="footer">
+<img id="footer-image" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E" width="50" height="50"/>
+<p>Curated by Alex Bradbury | &copy; <a href="/">Muxup</a> contributors | <a href="/about">About</a> | <a href="https://github.com/muxup">GitHub</a> | <a href="https://twitter.com/muxup">Twitter</a></p>
+</footer>
+<script>
+const t="http://www.w3.org/2000/svg";function o(t){return Math.random()*(2*t)-t}function n(t){const n=t.t.getBoundingClientRect();const e=t.o.getClientRects();let c="";for(const t of e){const e=t.x-n.x,f=t.y-n.y,s=t.width,r=t.height;const i=f+r/2;let u=s<75?3:s<300?6:8;const l=.2+.2*Math.random();c=`${c}\n      M${e+o(u)} ${i+o(u)}\n      C${e+s*l+o(u)} ${i+o(u)},\n       ${e+2*s*l+o(u)} ${i+o(u)}\n       ${e+s+o(u)} ${i+o(u)}`}t.i=c;t.strokeWidth=.85*e[0].height}const e=new Map;let c=new ResizeObserver((t=>{for(const o of t){const t=e.get(o.target);if(!t.i)n(t)}for(const o of t){s(e.get(o.target))}}));function f(o){const n=document.createElementNS(t,"svg");n.style.position="absolute";n.style.zIndex=-1;n.style.top="0";n.style.left="0";n.style.overflow="visible";const e=document.createElementNS(t,"path");e.setAttribute("fill","none");e.setAttribute("stroke",o.u);n.appendChild(e);o.o.insertAdjacentElement("beforebegin",n);o.t=n}function s(t){if(!t.i){n(t)}const o=t.t.children[0];o.setAttribute("stroke-width",t.strokeWidth);o.setAttribute("d",t.i);t.i=null}function r(){for(const t of e.values()){f(t)}for(const t of e.values()){n(t)}for(const t of e.keys()){c.observe(t)}document.fonts.ready.then((()=>i()))}function i(){for(const t of e.values()){n(t)}for(const t of e.values()){s(t)}}function u(t,o){let n;t.addEventListener("mouseover",(()=>{s(o);n=setInterval((()=>s(o)),240)}),false);t.addEventListener("mouseout",(()=>{clearInterval(n)}));t.addEventListener("click",(()=>{clearInterval(n)}))}function l(t,o,n){let c={o:t,l:o,u:n};e.set(o,c);return c}let a=new Set([window.location.pathname]);const h=document.querySelector("#footer-image");let d=null;function m(){let t=Math.floor(Math.random()*282);d="/static/footer/"+String(t).padStart(4,"0")+".svg"}function g(t){h.src=d;m();if(!t)v()}function v(){if(a.has(d))return;a.add(d);fetch(d)}m();g(true);const w=[{transform:"rotate(0)"},{transform:"rotate(360deg)"}];const $={duration:600,h:1};h.addEventListener("click",(()=>{h.animate(w,$);g()}));function M(){h.animate(w,$);v()}h.addEventListener("mouseover",M);h.addEventListener("touchstart",M,{passive:true});function k(t){const o=t.currentTarget.getAttribute("href").split("#")[0];if(a.has(o))return;a.add(o);fetch(o)}const p=document.getElementsByTagName("a");for(const t of p){const o=(t.getAttribute("href")??"").split("#")[0];if(o.includes("?")||!o.startsWith("/")||o.slice(o.lastIndexOf("/")+1).includes(".")){continue}t.addEventListener("mouseover",k);t.addEventListener("touchstart",k,{passive:true})}const b=["#ffdef2","#f2e2ff","#e2eeff","#ddfffc","#ffffe3"];const I=document.querySelector("#title-highlight");l(I,I.parentNode,b[Math.floor(Math.random()*b.length)]);const C=document.querySelector("#logo-highlight");const E=l(C,C.parentNode,"#ffdac0");r();u(C,E);
+
+</script>
+</body>
+</html>
