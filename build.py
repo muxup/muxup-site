@@ -152,6 +152,7 @@ favicon_svg = (
     .replace("/", "%2F")
     .replace(">", "%3E")
     .replace("#", "%23")
+    .replace(" ", "%20")
 )
 
 standard_footer = """\
