@@ -236,7 +236,7 @@ UserKnownHostsFile ~/.ssh/known_hosts_unlock
 &lt;p&gt;Once you&#x27;ve successfully entered the key to unlock the rootfs, you can just
 ssh as normal to the server.&lt;/p&gt;
 
-&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
+&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
 &lt;ul&gt;
 &lt;li&gt;2024-10-01: Initial publication date.&lt;/li&gt;
 &lt;/ul&gt;
@@ -325,7 +325,7 @@ a script, where the expected usage is that you take a copy and make what
 modifications you need for yourself (changing sources, new fetchers, or other
 improvements).&lt;/p&gt;
 
-&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
+&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
 &lt;ul&gt;
 &lt;li&gt;2024-07-01: Initial publication date.&lt;/li&gt;
 &lt;/ul&gt;
@@ -573,7 +573,7 @@ these tools as part of the language project like a formatter, migration tool
 [for language of API changes], something like clang-tidy, we&#x27;re going to be
 taking on these costs ourselves which is going to incentivise us to find ways
 of amortising this and finding the right balance.&quot;&lt;/p&gt;
-&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
+&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
 &lt;ul&gt;
 &lt;li&gt;2024-05-13: Various phrasing tweaks and fixed improper heading
 nesting.&lt;/li&gt;
@@ -988,7 +988,7 @@ supported&lt;/a&gt;.&lt;/li&gt;
 setting the &quot;Terminal bell mode&quot; to &quot;Visual Bell&quot; doesn&#x27;t seem to result in
 the urgent hint being set.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
+&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
 &lt;ul&gt;
 &lt;li&gt;2023-12-24: Add note about configuring a bell for commands taking
 longer than a certain threshold duration in Zsh.&lt;/li&gt;
@@ -1432,7 +1432,7 @@ lobste.rs&lt;/a&gt;, &lt;a href=&quot;https://news.ycombinator.com/item?id=38424
 HN&lt;/a&gt;, &lt;a href=&quot;https://old.reddit.com/r/cpp/duplicates/184n4bd/storing_data_in_pointers/&quot;&gt;on various
 subreddits&lt;/a&gt;,
 or &lt;a href=&quot;https://fosstodon.org/@asb/111478289261238134&quot;&gt;on Mastodon&lt;/a&gt;.&lt;/p&gt;
-&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
+&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
 &lt;ul&gt;
 &lt;li&gt;2023-12-02:
 &lt;ul&gt;
@@ -1845,7 +1845,7 @@ PR&lt;/a&gt; where I
 suggested some alternate wording.&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/483&quot;&gt;LLVM Weekly #483&lt;/a&gt;.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
+&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
 &lt;ul&gt;
 &lt;li&gt;2023-06-05: Added notes for the week of 22nd May 2023 and week fo 29th May
 2023.&lt;/li&gt;
