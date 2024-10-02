@@ -588,7 +588,7 @@ for file in sorted(pages_path.rglob("*.md")):
 <body>
 <div id="article-container">
 <div>
-<div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></a></div>
+<div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></span></div>
 </div>
 <h1 id="article-title"><span id="title-highlight">{html.escape(pd.title)}</span></h1>
 <div id="article-meta">{generate_article_meta(pd)}</div>
