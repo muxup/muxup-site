@@ -828,7 +828,7 @@ class MuxupHTTPRequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(text.encode())
         else:
             with path.open("rb") as f:
-                shutil.copyfileobj(f, self.wfile)
+                shutil.copyfileobj(f, self.wfile)  # type: ignore
 
 
 def rebuild_loop() -> None:
