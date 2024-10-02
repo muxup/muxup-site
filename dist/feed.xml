@@ -236,11 +236,11 @@ UserKnownHostsFile ~/.ssh/known_hosts_unlock
 &lt;p&gt;Once you&#x27;ve successfully entered the key to unlock the rootfs, you can just
 ssh as normal to the server.&lt;/p&gt;
 
-&lt;hr/&gt;
-&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;Article changelog&lt;/summary&gt;
+&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
 &lt;ul&gt;
 &lt;li&gt;2024-10-01: Initial publication date.&lt;/li&gt;
-&lt;/ul&gt;</content>
+&lt;/ul&gt;
+&lt;/details&gt;</content>
 </entry>
 <entry>
 <title>pwr</title>
@@ -325,11 +325,11 @@ a script, where the expected usage is that you take a copy and make what
 modifications you need for yourself (changing sources, new fetchers, or other
 improvements).&lt;/p&gt;
 
-&lt;hr/&gt;
-&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;Article changelog&lt;/summary&gt;
+&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor &quot;aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
 &lt;ul&gt;
 &lt;li&gt;2024-07-01: Initial publication date.&lt;/li&gt;
-&lt;/ul&gt;</content>
+&lt;/ul&gt;
+&lt;/details&gt;</content>
 </entry>
 <entry>
 <title>Notes from the Carbon panel session at EuroLLVM 2024</title>
