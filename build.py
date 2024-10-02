@@ -407,7 +407,7 @@ def render_markdown(
             .children[0]
         )
         doc.children[changelog_idx] = mistletoe.block_token.HTMLBlock(
-            '<hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor "aria-hidden="true" tabindex="-1"></a>Article changelog</summary>'
+            '<hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor" aria-hidden="true" tabindex="-1"></a>Article changelog</summary>'
         )
         doc.children.insert(
             changelog_idx + 2, mistletoe.block_token.HTMLBlock("</details>")
@@ -424,7 +424,7 @@ def render_markdown(
         if not (yyyyqq_dir or last_major_update or last_minor_update):
             markdown_content_as_html = f"""\
 {markdown_content_as_html}
-<hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor "aria-hidden="true" tabindex="-1"></a>Article changelog</summary>
+<hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor" aria-hidden="true" tabindex="-1"></a>Article changelog</summary>
 <ul>
 <li>{published_date}: Initial publication date.</li>
 </ul>
