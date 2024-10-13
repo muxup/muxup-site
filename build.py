@@ -15,6 +15,7 @@ import re
 import shutil
 import subprocess
 import threading
+import tomllib
 import typing
 import urllib.parse
 from contextlib import contextmanager
@@ -28,7 +29,6 @@ import mistletoe.utils
 import pygments.style
 import pygments.token
 import pygments.util
-import tomli
 from pygments import highlight
 from pygments.formatters.html import HtmlFormatter
 from pygments.lexers import get_lexer_by_name as get_lexer
@@ -202,8 +202,8 @@ def parse_frontmatter(file: pathlib.Path) -> Tuple[dict[str, Any], str]:
     if content is None:
         raise SystemExit(f"{file} doesn't start with valid frontmatter")
     try:
-        toml_dict = tomli.loads(toml_str)
-    except tomli.TOMLDecodeError as err:
+        toml_dict = tomllib.loads(toml_str)
+    except tomllib.TOMLDecodeError as err:
         err.args = err.args + (f"{file} doesn't start with valid frontmatter",)
         raise
     return toml_dict, content
