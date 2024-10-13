@@ -19,7 +19,6 @@ Arch packages:
       python-isort \
       python-mistletoe \
       python-pygments \
-      python-tomli
 
 AUR packages:
 * [terser](https://aur.archlinux.org/packages/terser)
