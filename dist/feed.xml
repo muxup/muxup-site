@@ -95,6 +95,8 @@ measuring.&lt;/li&gt;
 ensure runtimes aren&#x27;t affected by the order of tests (e.g. long-running
 tests being scheduled last).&lt;/li&gt;
 &lt;li&gt;Total size of the files being exposed is ~8GiB or so.&lt;/li&gt;
+&lt;li&gt;Although not strictly necessary, I&#x27;ve tried to map to the uid:gid pair used
+in the guest where possible.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&quot;details-9pfs-qemu--virtfs&quot;&gt;&lt;a href=&quot;#details-9pfs-qemu--virtfs&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Details: 9pfs (QEMU -virtfs)&lt;/h2&gt;
 &lt;ul&gt;
