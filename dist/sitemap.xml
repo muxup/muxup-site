@@ -2,7 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
 <loc>https://muxup.com</loc>
-<lastmod>2024-10-01</lastmod>
+<lastmod>2024-10-15</lastmod>
+</url>
+<url>
+<loc>https://muxup.com/2024q4/accessing-a-cross-compiled-build-tree-from-qemu-system</loc>
+<lastmod>2024-10-15</lastmod>
 </url>
 <url>
 <loc>https://muxup.com/arch-linux-on-remote-server-setup-runbook</loc>

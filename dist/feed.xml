@@ -4,8 +4,205 @@
 <subtitle>Adventures in collaborative open source development</subtitle>
 <link href="https://muxup.com/feed.xml" rel="self" type="application/atom+xml"/>
 <link href="https://muxup.com"/>
-<updated>2024-10-01T12:00:00Z</updated>
+<updated>2024-10-15T12:00:00Z</updated>
 <id>https://muxup.com/feed.xml</id>
+<entry>
+<title>Accessing a cross-compiled build tree from qemu-system</title>
+<published>2024-10-15T12:00:00Z</published>
+<updated>2024-10-15T12:00:00Z</updated>
+<link rel="alternate" href="https://muxup.com/2024q4/accessing-a-cross-compiled-build-tree-from-qemu-system"/>
+<id>https://muxup.com/2024q4/accessing-a-cross-compiled-build-tree-from-qemu-system</id>
+<content type="html">
+&lt;p&gt;I&#x27;m cross-compiling a large codebase (LLVM and sub-projects such as Clang) and
+want to access the full tree - the source and the build artifacts from under
+qemu. This post documents the results of my experiments in various ways to do
+this. Note that I&#x27;m explicitly choosing to run timings using something that
+approximates the work I want to do rather than any microbenchmark targeting
+just file access time.&lt;/p&gt;
+&lt;p&gt;Requirements:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The whole source tree and the build directories are accessible from the
+qemu-system VM.&lt;/li&gt;
+&lt;li&gt;Writes must be possible, but don&#x27;t need to be reflected in the original
+directory (so importantly, although files are written as part of the test
+being run, I don&#x27;t need to get them back out of the virtual machine).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;results&quot;&gt;&lt;a href=&quot;#results&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Results&lt;/h2&gt;
+&lt;p&gt;The test simply involves taking a cross-compiled LLVM tree (with RISC-V as the
+only enabled target) and running the equivalent of &lt;code&gt;ninja check-llvm&lt;/code&gt; on it
+after exposing / transferring it to the VM using the listed method. Results in
+chart form for overall time taken in the &quot;empty cache&quot; case:&lt;/p&gt;
+&lt;table class=&quot;chart&quot;&gt;
+  &lt;tr&gt;
+    &lt;th&gt;9pfs&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 94%;&quot;&gt;13m05s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;virtiofsd&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 100%;&quot;&gt;13m56s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;squashfs&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 83%;&quot;&gt;11m33s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;ext4&lt;/th&gt;&lt;td&gt;&lt;div class=&quot;chart-bar&quot; style=&quot;width: 84%;&quot;&gt;11m42s&amp;nbsp;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;ul&gt;
+&lt;li&gt;9pfs: 13m05s with empty cache, 12m45s with warm cache&lt;/li&gt;
+&lt;li&gt;virtiofsd: 13m56s with empty cache, 13m49s with warm cache&lt;/li&gt;
+&lt;li&gt;squashfs: 11m33s (~17s image build, 11m16s check-llvm) with empty cache,
+11m16s (~3s image build, 11m13s check-llvm) with warm cache&lt;/li&gt;
+&lt;li&gt;new ext4 filesystem: 11m42s, (~38s image build, 11m4s check-llvm) with empty
+cache, 11m34s (~30s image build, 11m4s check-llvm) with warm cache.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;By way of comparison, it takes ~10m40s to naively transfer the data by piping
+it over ssh (tarring on one end, untarring on the other).&lt;/p&gt;
+&lt;p&gt;For this use case, building and mounting a filesystem seems the most
+compelling option with the ext4 being overall simplest (no need to use
+overlayfs) assuming you have an e2fsprogs new enough to support tar input to
+&lt;code&gt;mkfs.ext4&lt;/code&gt;. I&#x27;m not sure why I&#x27;m not seeing the purported performance
+improvements when using virtiofsd.&lt;/p&gt;
+&lt;h2 id=&quot;notes-on-test-setup&quot;&gt;&lt;a href=&quot;#notes-on-test-setup&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Notes on test setup&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;The effects of caching are accounted for by taking measurements in two
+scenarios below. Although neither is a precise match for the situation in a
+typical build system, it at least gives some insight into the impact of the
+page cache in a controlled manner.
+&lt;ul&gt;
+&lt;li&gt;&quot;Empty cache&quot;. Caches are dropped (&lt;code&gt;sync &amp;amp;&amp;amp; echo 3 | sudo tee /proc/sys/vm/drop_caches&lt;/code&gt;)
+before building the filesystem (if necessary) and launching QEMU.&lt;/li&gt;
+&lt;li&gt;&quot;Warm cache&quot;. Caches are dropped as above but immediately after that (i.e.
+before building any needed filesystem) we load all files that will
+be accessed so they will be cached. For simplicity, just do this by doing
+using a variant of the &lt;code&gt;tar&lt;/code&gt; command described below.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Running on AMD Ryzen 9 7950X3D with 128GiB RAM.&lt;/li&gt;
+&lt;li&gt;QEMU 9.1.0, running qemu-system-riscv64, with 32 virtual cores matching the
+number 16 cores / 32 hyper-threads in the host.&lt;/li&gt;
+&lt;li&gt;LLVM HEAD as of 2024-10-13 (48deb3568eb2452ff).&lt;/li&gt;
+&lt;li&gt;Release+Asserts build of LLVM with all non-experimental targets enabled.
+Built in a two-stage cross targeting rv64gc_zba_zbb_zbs.&lt;/li&gt;
+&lt;li&gt;Running riscv64 Debian unstable within QEMU.&lt;/li&gt;
+&lt;li&gt;Results gathered via &lt;code&gt;time ../bin/llvm-lit -sv .&lt;/code&gt; running from
+&lt;code&gt;test/&lt;/code&gt; within the build directory, and combining this with the timing for
+whatever command(s) are needed to transfer and extract the source+build
+tree.&lt;/li&gt;
+&lt;li&gt;Only the time taken to build the filesystem (if relevant) and to run the
+tests is measured. There may be very minor difference in the time taken to
+mount the different filesystems, but we assume this is too small to be worth
+measuring.&lt;/li&gt;
+&lt;li&gt;If I were to rerun this, I would invoke &lt;code&gt;lit&lt;/code&gt; with &lt;code&gt;--order=lexical&lt;/code&gt; to
+ensure runtimes aren&#x27;t affected by the order of tests (e.g. long-running
+tests being scheduled last).&lt;/li&gt;
+&lt;li&gt;Total size of the files being exposed is ~8GiB or so.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;details-9pfs-qemu--virtfs&quot;&gt;&lt;a href=&quot;#details-9pfs-qemu--virtfs&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Details: 9pfs (QEMU -virtfs)&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Add &lt;code&gt;-virtfs local,path=$HOME/llvm-project/,mount_tag=llvm,security_model=none,id=llvm&lt;/code&gt;
+to the QEMU command line.&lt;/li&gt;
+&lt;li&gt;Within the guest &lt;code&gt;sudo mount -t 9p -o trans=virtio,version=9p2000.L,msize=512000 llvm /mnt&lt;/code&gt;.
+I haven&#x27;t swept different parameters for
+&lt;a href=&quot;https://wiki.qemu.org/Documentation/9psetup#Performance_Considerations_(msize)&quot;&gt;msize&lt;/a&gt;
+and mount reports 512000 is the maximum for the virtio transport.&lt;/li&gt;
+&lt;li&gt;Sadly 9pfs doesn&#x27;t support &lt;a href=&quot;https://lpc.events/event/11/contributions/1086/attachments/926/1826/christian_brauner_idmapped_mounts.pdf&quot;&gt;ID-mapped
+mounts&lt;/a&gt;
+at the moment, which would allow us to easily remap the uid and gid used
+within the file tree on the host to one of an arbitrary user account in the
+guest without &lt;code&gt;chown&lt;/code&gt;ing everything (which would also require
+&lt;code&gt;security_model=mapped-xattr&lt;/code&gt; or &lt;code&gt;security_model=mapped-file&lt;/code&gt; to be passed
+to qemu. In the future you should be able to do &lt;code&gt;sudo mount --bind --map-users 1000:1001:1 --map-groups 984:1001:1 /mnt mapped&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;We now need to set up an overlayfs that we can freely write to.
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;mkdir -p upper work llvm-project&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sudo mount -t overlay overlay -o lowerdir=/mnt,upperdir=$HOME/upper,workdir=$HOME/work $HOME/llvm-project&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;You could create a user account with appropriate uid/gid to match those in
+the exposed directory, but for simplicity I&#x27;ve just run the tests as root
+within the VM.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;details-virtiofsd&quot;&gt;&lt;a href=&quot;#details-virtiofsd&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Details: virtiofsd&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Installed the virtiofsd package on Arch Linux (version 1.11.1). Refer to the
+&lt;a href=&quot;https://gitlab.com/virtio-fs/virtiofsd#examples&quot;&gt;documentation&lt;/a&gt; for
+examples of how to run.&lt;/li&gt;
+&lt;li&gt;Run &lt;code&gt;/usr/lib/virtiofsd --socket-path=/tmp/vhostqemu --shared-dir=$HOME/llvm-project --cache=always&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Add the following commands to your qemu launch command (where the memory size
+parameter to &lt;code&gt;-object&lt;/code&gt; seems to need to match the &lt;code&gt;-m&lt;/code&gt; argument you used):&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&quot;highlight&quot; style=&quot;background: #ffffff&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;  -chardev socket,id&lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt;char0,path&lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt;/tmp/vhostqemu &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  -device vhost-user-fs-pci,queue-size&lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt;&lt;span style=&quot;color: #1C01CE&quot;&gt;1024&lt;/span&gt;,chardev&lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt;char0,tag&lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt;llvm &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  -object memory-backend-memfd,id&lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt;mem,size&lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt;64G,share&lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt;on -numa node,memdev&lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt;mem
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;sudo mount -t virtiofs llvm /mnt&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Unfortunately id-mapped mounts also aren&#x27;t quite supported for virtiofs at
+the time of writing.  The changes were recently merged into the upstream
+kernel and a merge request to virtiofsd &lt;a href=&quot;https://gitlab.com/virtio-fs/virtiofsd/-/merge_requests/245&quot;&gt;is
+pending&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;mkdir -p upper work llvm-project&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sudo mount -t overlay overlay -o lowerdir=/mnt,upperdir=$HOME/upper,workdir=$HOME/work $HOME/llvm-project&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;As with the 9p tests, just ran the tests using sudo.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;details-squashfs&quot;&gt;&lt;a href=&quot;#details-squashfs&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Details: squashfs&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;I couldn&#x27;t get a regex that squashfs would accept to exclude all build/*
+directories except build/stage2cross, so use &lt;code&gt;find&lt;/code&gt; to generate the
+individual directory exclusions.&lt;/li&gt;
+&lt;li&gt;As you can see in the commandline below, I disabled compression altogether.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;mksquashfs ~/llvm-project llvm-project.squashfs -no-compression -force-uid 1001 -force-gid 1001 -e \ .git $(find $HOME/llvm-project/build -maxdepth 1 -mindepth 1 -type d -not -name &#x27;stage2cross&#x27; -printf &#x27;-e build/%P &#x27;)&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Add this to the qemu command line: &lt;code&gt;-drive file=$HOME/llvm-project.squashfs,if=none,id=llvm,format=raw -device virtio-net-device,netdev=net&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sudo mount -t squashfs /dev/vdb /mnt&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Use the same instructions for setting up overlayfs as for 9pfs above.
+There&#x27;s no need to run the tests using sudo as we&#x27;ve set the appropriate
+uid.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;details-new-ext4-filesystem&quot;&gt;&lt;a href=&quot;#details-new-ext4-filesystem&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Details: new ext4 filesystem&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Make use of the &lt;code&gt;-d&lt;/code&gt; parameter of &lt;code&gt;mkfs.ext4&lt;/code&gt; which allows you to create a
+filesystem, using the given directory or tarball to initialise it. As
+&lt;code&gt;mkfs.ext4&lt;/code&gt; lacks features for filtering the input or forcing the uid/gid of
+files, we rely on tarball input (only just added in e2fsprogs 1.47.1).&lt;/li&gt;
+&lt;li&gt;Create a filesystem image that&#x27;s big enough with &lt;code&gt;fallocate -l 15GiB llvm-project.img&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Execute:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&quot;highlight&quot; style=&quot;background: #ffffff&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;tar --create &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  --file&lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt;- &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  --owner&lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt;&lt;span style=&quot;color: #1C01CE&quot;&gt;1001&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  --group&lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt;&lt;span style=&quot;color: #1C01CE&quot;&gt;1001&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  --exclude&lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt;.git &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  &lt;span style=&quot;color: #A90D91&quot;&gt;$(&lt;/span&gt;find &lt;span style=&quot;color: #000000&quot;&gt;$HOME&lt;/span&gt;/llvm-project/build -maxdepth &lt;span style=&quot;color: #1C01CE&quot;&gt;1&lt;/span&gt; -mindepth &lt;span style=&quot;color: #1C01CE&quot;&gt;1&lt;/span&gt; -type d -not -name &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;#39;stage2cross&amp;#39;&lt;/span&gt; -printf &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;#39;--exclude=build/%P &amp;#39;&lt;/span&gt;&lt;span style=&quot;color: #A90D91&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  -C &lt;span style=&quot;color: #000000&quot;&gt;$HOME&lt;/span&gt;/llvm-project . &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  | mkfs.ext4 -d - llvm-project.img
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Attach the drive by adding this to the qemu command line &lt;code&gt;-device virtio-blk-device,drive=hdb -drive file=$HOME/llvm-project.img,format=raw,if=none,id=hdb&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Mount in qemu with &lt;code&gt;sudo mount -t ext4 /dev/vdb $HOME/llvm-project&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;details-tar-piped-over-ssh&quot;&gt;&lt;a href=&quot;#details-tar-piped-over-ssh&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Details: tar piped over ssh&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Essentially, use the tar command above and pipe it to tar running under
+qemu-system over ssh to extract it to root filesystem (XFS in my VM setup).&lt;/li&gt;
+&lt;li&gt;This could be optimised. e.g. by selecting a less expensive ssh encryption
+algorithm (or just &lt;code&gt;netcat&lt;/code&gt;), a better networking backend to QEMU, and so
+on. But the intent is to show the cost of the naive &quot;obvious&quot; solution.&lt;/li&gt;
+&lt;li&gt;Execute:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&quot;highlight&quot; style=&quot;background: #ffffff&quot;&gt;&lt;pre style=&quot;line-height: 125%;&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;tar --create &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  --file&lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt;- &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  --owner&lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt;&lt;span style=&quot;color: #1C01CE&quot;&gt;1001&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  --group&lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt;&lt;span style=&quot;color: #1C01CE&quot;&gt;1001&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  --exclude&lt;span style=&quot;color: #000000&quot;&gt;=&lt;/span&gt;.git &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  &lt;span style=&quot;color: #A90D91&quot;&gt;$(&lt;/span&gt;find &lt;span style=&quot;color: #000000&quot;&gt;$HOME&lt;/span&gt;/llvm-project/build -maxdepth &lt;span style=&quot;color: #1C01CE&quot;&gt;1&lt;/span&gt; -mindepth &lt;span style=&quot;color: #1C01CE&quot;&gt;1&lt;/span&gt; -type d -not -name &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;#39;stage2cross&amp;#39;&lt;/span&gt; -printf &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;#39;--exclude=build/%P &amp;#39;&lt;/span&gt;&lt;span style=&quot;color: #A90D91&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  -C &lt;span style=&quot;color: #000000&quot;&gt;$HOME&lt;/span&gt;/llvm-project . &lt;span style=&quot;color: #C41A16&quot;&gt;\&lt;/span&gt;
+  | ssh -p10222 asb@localhost &lt;span style=&quot;color: #C41A16&quot;&gt;&amp;quot;mkdir -p llvm-project &amp;amp;&amp;amp; tar xf - -C \&lt;/span&gt;
+&lt;span style=&quot;color: #C41A16&quot;&gt;  llvm-project&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+</content>
+</entry>
 <entry>
 <title>Arch Linux on remote server setup runbook</title>
 <published>2024-10-01T12:00:00Z</published>
@@ -1687,174 +1884,6 @@ everyone who has been contributing to make the RISC-V in LLVM even better.&lt;/p
 &lt;p&gt;If you have a RISC-V project you think me and my colleagues and at Igalia may
 be able to help with, then do &lt;a href=&quot;https://www.igalia.com/contact/&quot;&gt;get in touch&lt;/a&gt;
 regarding our services.&lt;/p&gt;
-</content>
-</entry>
-<entry>
-<title>2023Q2 week log</title>
-<published>2023-04-10T12:00:00Z</published>
-<updated>2023-06-05T12:00:00Z</updated>
-<link rel="alternate" href="https://muxup.com/2023q2/week-log"/>
-<id>https://muxup.com/2023q2/week-log</id>
-<content type="html">
-&lt;p&gt;I tend to keep quite a lot of notes on the development related (sometimes at
-work, sometimes not) I do on a week-by-week basis, and thought it might be fun
-to write up the parts that were public. This may or may not be of wider
-interest, but it aims to be a useful aide-mémoire for my purposes at least.
-Weeks with few entries might be due to focusing on downstream work (or perhaps
-just a less productive week - I am only human!).&lt;/p&gt;
-&lt;h2 id=&quot;week-of-29th-may-2023&quot;&gt;&lt;a href=&quot;#week-of-29th-may-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 29th May 2023&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;Posted &lt;a href=&quot;https://reviews.llvm.org/D151663&quot;&gt;D151663&lt;/a&gt;, implementing support for
-bf16 truncate/extend of hard FP targets.&lt;/li&gt;
-&lt;li&gt;Responded to user query about &lt;a href=&quot;https://discourse.llvm.org/t/csrs-defined-in-sstc-extension/70824/2&quot;&gt;gating of
-CSRs&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;Filed &lt;a href=&quot;https://gitlab.xfce.org/apps/xfce4-terminal/-/issues/244&quot;&gt;issue&lt;/a&gt;
-about shift and right-click and xfce4-terminal (after migrating to it due to
-frustration with gnome-terminal &lt;a href=&quot;https://gitlab.gnome.org/GNOME/gnome-terminal/-/issues/6698&quot;&gt;not supporting setting the urgent hint upon
-receiving a terminal
-bell&lt;/a&gt;).&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://fosstodon.org/@asb/110475298100440985&quot;&gt;Spread the word&lt;/a&gt; about my
-keynote about LLVM next week at the RISC-V Summit Europe.&lt;/li&gt;
-&lt;li&gt;A few reviews on RISC-V psABI or ASM manual PRs (e.g. &lt;a href=&quot;https://github.com/riscv-non-isa/riscv-elf-psabi-doc/pull/378&quot;&gt;atomics
-ABI&lt;/a&gt;,
-&lt;a href=&quot;https://github.com/riscv-non-isa/riscv-asm-manual/pull/86&quot;&gt;floating point in the asm
-manual&lt;/a&gt;).&lt;/li&gt;
-&lt;li&gt;Less activity this week due to being on holiday.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/491&quot;&gt;LLVM Weekly #491&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&quot;week-of-22nd-may-2023&quot;&gt;&lt;a href=&quot;#week-of-22nd-may-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 22nd May 2023&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;Posted a &lt;a href=&quot;https://reviews.llvm.org/D151434&quot;&gt;patch&lt;/a&gt; to generalise  the
-shouldExtendTypeInLibcall hook so it applies to half and bfloat16.&lt;/li&gt;
-&lt;li&gt;Updated &lt;a href=&quot;https://github.com/riscv-non-isa/riscv-elf-psabi-doc/pull/367&quot;&gt;bfloat16 psABI
-PR&lt;/a&gt;, which
-has now been merged.&lt;/li&gt;
-&lt;li&gt;Posted &lt;a href=&quot;https://reviews.llvm.org/D151563&quot;&gt;D151363&lt;/a&gt; a patch to implement soft
-FP legalisation for bf16 FP_EXTEND and BF16_TO_FP after abandoning &lt;a href=&quot;https://reviews.llvm.org/D151436&quot;&gt;patch to
-add an extenbfsf2 libcall&lt;/a&gt; (which would
-match libgcc, but add no real value).&lt;/li&gt;
-&lt;li&gt;Identified a bug in the ABI used for half FP libcalls and &lt;a href=&quot;https://reviews.llvm.org/D151284&quot;&gt;posted a
-patch&lt;/a&gt; to fix it.&lt;/li&gt;
-&lt;li&gt;Some misc small cleanups like &lt;a href=&quot;https://reviews.llvm.org/D151096&quot;&gt;making zfbfmin imply the F
-extension&lt;/a&gt;, cleaning up bfloat16 tests
-(&lt;a href=&quot;https://reviews.llvm.org/rGf3202b9da663&quot;&gt;1&lt;/a&gt;,
-&lt;a href=&quot;https://reviews.llvm.org/rGa6e2b1ee49f5&quot;&gt;2&lt;/a&gt;).&lt;/li&gt;
-&lt;li&gt;Prepared agenda for an ran biweekly &lt;a href=&quot;https://discourse.llvm.org/t/risc-v-llvm-sync-up-call-may-25th-2023/70873&quot;&gt;RISC-V LLVM sync-up
-call&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/490&quot;&gt;LLVM Weekly #490&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&quot;week-of-15th-may-2023&quot;&gt;&lt;a href=&quot;#week-of-15th-may-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 15th May 2023&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;Corrected Clang codegen support for half FP types when the zhinx extension
-is available (&lt;a href=&quot;https://reviews.llvm.org/D150777&quot;&gt;D150777&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;Rebased and committed patches to implement MC layer support for the bfloat16
-extensions (unblocked now a new PDF was posted in the riscv-bfloat16 repo).
-&lt;a href=&quot;https://reviews.llvm.org/D147610&quot;&gt;Zfbfmin&lt;/a&gt;,
-&lt;a href=&quot;https://reviews.llvm.org/D147611&quot;&gt;zvfbfmin&lt;/a&gt;,
-&lt;a href=&quot;https://reviews.llvm.org/D147612&quot;&gt;zvfbfwma&lt;/a&gt;. Also made a &lt;a href=&quot;https://github.com/riscv/riscv-bfloat16/pull/48&quot;&gt;trivial typo fix
-to the spec&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;Looked at cleaning up the usage of &lt;code&gt;report_fatal_error&lt;/code&gt; in the RISC-V
-backend and also &lt;a href=&quot;https://reviews.llvm.org/D150669&quot;&gt;fixed a bug encountered while looking at
-this&lt;/a&gt;.
-&lt;a href=&quot;https://reviews.llvm.org/D150674&quot;&gt;D150674&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;Participated in the ongoing discussion about &lt;a href=&quot;https://github.com/riscv-non-isa/riscv-elf-psabi-doc/pull/378#issuecomment-1549250676&quot;&gt;adding atomics lowering to the
-RISC-V
-psABI&lt;/a&gt;,
-including a slightly altered lowering of some primitives in order to allow
-for forwards compatibility with &quot;table A.7&quot;.&lt;/li&gt;
-&lt;li&gt;Usual mix of upstream LLVM reviews, and a number of RISC-V psABI or ASM
-manual reviews.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/489&quot;&gt;LLVM Weekly #489&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;Missed some weeks - busy with EuroLLVM etc.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&quot;week-of-17th-april-2023&quot;&gt;&lt;a href=&quot;#week-of-17th-april-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 17th April 2023&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;Still &lt;a href=&quot;https://github.com/riscv/riscv-bfloat16/issues/33&quot;&gt;pinging&lt;/a&gt; for an
-updated riscv-bfloat1y spec version that incorporates the &lt;code&gt;fcvt.bf16.s&lt;/code&gt;
-encoding fix.&lt;/li&gt;
-&lt;li&gt;Bumped the version of the experimental Zfa RISC-V extension supported by
-LLVM to 0.2 (&lt;a href=&quot;https://reviews.llvm.org/D148634&quot;&gt;D146834&lt;/a&gt;). This was very
-straightforward as after inspecting the spec history, it was clear there
-were no changes that would impact the compiler.&lt;/li&gt;
-&lt;li&gt;Filed a couple of pull requests against the &lt;a href=&quot;https://github.com/riscv/riscv-zacas&quot;&gt;riscv-zacas
-repo&lt;/a&gt; (RISC-V Atomic Compare and Swap
-extension).
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;https://github.com/riscv/riscv-zacas/pull/8&quot;&gt;#8&lt;/a&gt; made the
-dependency on the A extension explicit.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://github.com/riscv/riscv-zacas/pull/7&quot;&gt;#7&lt;/a&gt; attempted to explicitly
-reference the extension for misaligned atomics, though it seems won&#x27;t be
-merged. I do feel uncomfortable with RISC-V extensions that can have their
-semantics changed by other standard extensions without this possibility
-being called out very explicitly. As I note in the PR, failure to
-appreciate this might mean that conformance tests written for &lt;code&gt;zacas&lt;/code&gt;
-might fail on a system with &lt;code&gt;zacas_zam&lt;/code&gt;. I see a slight parallel to a
-recent &lt;a href=&quot;https://lists.riscv.org/g/tech-profiles/message/94&quot;&gt;discussion about RISC-V
-profiles&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Fixed the canonical ordering used for ISA naming strings in RISCVISAInfo
-(this will mainly affect the string stored in build attributes). This was
-fixed in &lt;a href=&quot;https://reviews.llvm.org/D148615&quot;&gt;D148615&lt;/a&gt; which built on the
-&lt;a href=&quot;https://reviews.llvm.org/rGa35e67fc5be6&quot;&gt;pre-committed test case&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;A whole bunch of upstream LLVM reviews. As noted in
-&lt;a href=&quot;https://reviews.llvm.org/D148315#4279486&quot;&gt;D148315&lt;/a&gt; I&#x27;m thinking we should
-probably relaxing the ordering rules for ISA strings in &lt;code&gt;-march&lt;/code&gt; in order to
-avoid issues due to spec changes and incompatibilities between GCC and
-Clang.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/485&quot;&gt;LLVM Weekly #485&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&quot;week-of-10th-april-2023&quot;&gt;&lt;a href=&quot;#week-of-10th-april-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 10th April 2023&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;Some days off due to the Easter holidays, so less to report this week.&lt;/li&gt;
-&lt;li&gt;Updated RISC-V bfloat16 patches
-(&lt;a href=&quot;https://reviews.llvm.org/D147610&quot;&gt;Zfbfmin&lt;/a&gt;,
-&lt;a href=&quot;https://reviews.llvm.org/D147611&quot;&gt;Zvfbfmin&lt;/a&gt;,
-&lt;a href=&quot;https://reviews.llvm.org/D147612&quot;&gt;Zvfbfwma&lt;/a&gt;), incorporating new
-&lt;code&gt;fcvt.bf16.s&lt;/code&gt; encoding. Also filed an
-&lt;a href=&quot;https://github.com/riscv/riscv-bfloat16/issues/40&quot;&gt;issue&lt;/a&gt; about the way in
-which the dependencies of the vector bfloat16 extensions is specified.&lt;/li&gt;
-&lt;li&gt;Blogged about &lt;a href=&quot;/2023q2/updating-wrens-benchmarks&quot;&gt;updating the Wren language
-benchmarks&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;Variety of upstream LLVM reviews.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/484&quot;&gt;LLVM Weekly #484&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&quot;week-of-3rd-april-2023&quot;&gt;&lt;a href=&quot;#week-of-3rd-april-2023&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Week of 3rd April 2023&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;Some days off due to the Easter holidays, so less to report this week.&lt;/li&gt;
-&lt;li&gt;Posted MC layer (assembler/disassembler) patches for the bfloat16
-extensions:
-&lt;a href=&quot;https://reviews.llvm.org/D147610&quot;&gt;Zfbfmin&lt;/a&gt;,
-&lt;a href=&quot;https://reviews.llvm.org/D147611&quot;&gt;Zvfbfmin&lt;/a&gt;,
-&lt;a href=&quot;https://reviews.llvm.org/D147612&quot;&gt;Zvfbfwma&lt;/a&gt;.
-&lt;ul&gt;
-&lt;li&gt;Also posted a PR to the riscv-bfloat16 spec to &lt;a href=&quot;https://github.com/riscv/riscv-bfloat16/pull/34&quot;&gt;clarify the vector
-extension dependencies&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;Pinged on my &lt;a href=&quot;https://github.com/riscv/riscv-bfloat16/issues/33&quot;&gt;bug report about the fcvt.bf16.s encoding
-clash&lt;/a&gt;. Once this is
-resolved, the LLVM MC layer patches can land.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Updated authorship information for
-&lt;a href=&quot;https://github.com/riscv-non-isa/riscv-toolchain-conventions/pull/34&quot;&gt;riscv-toolchain-conventions&lt;/a&gt;
-which now has a range of contributors beyond myself.&lt;/li&gt;
-&lt;li&gt;Usual mix of upstream LLVM reviews. This included some discussion on
-&lt;a href=&quot;https://reviews.llvm.org/D146463&quot;&gt;changing the shadow call stack register to
-x3&lt;/a&gt; which spilled into the &lt;a href=&quot;https://github.com/riscv-non-isa/riscv-elf-psabi-doc/pull/371&quot;&gt;psABI
-PR&lt;/a&gt; where I
-suggested some alternate wording.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://llvmweekly.org/issue/483&quot;&gt;LLVM Weekly #483&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;hr style=&quot;margin-top:1.75rem&quot;/&gt;&lt;details id=&quot;article-changelog&quot;&gt;&lt;summary&gt;&lt;a href=&quot;#article-changelog&quot; class=&quot;anchor&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;Article changelog&lt;/summary&gt;
-&lt;ul&gt;
-&lt;li&gt;2023-06-05: Added notes for the week of 22nd May 2023 and week fo 29th May
-2023.&lt;/li&gt;
-&lt;li&gt;2023-05-22: Added notes for the week of 15th May 2023.&lt;/li&gt;
-&lt;li&gt;2023-04-24: Added notes for the week of 17th April 2023.&lt;/li&gt;
-&lt;li&gt;2023-04-17: Added notes for the week of 10th April 2023.&lt;/li&gt;
-&lt;li&gt;2023-04-10: Initial publication date.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/details&gt;
 </content>
 </entry>
 </feed>

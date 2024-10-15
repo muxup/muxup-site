@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:title" content="Accessing a cross-compiled build tree from qemu-system"/>
+<meta property="og:site_name" content="Muxup">
+<meta property="og:description" content="A quick benchmark of several approaches for accessing a large build tree"/>
+<meta property="og:type" content="article"/>
+<meta property="og:url" content="https://muxup.com/2024q4/accessing-a-cross-compiled-build-tree-from-qemu-system"/>
+<meta property="og:image" content="https://v1.screenshot.11ty.dev/https%3A%2F%2Fmuxup.com%2F2024q4%2Faccessing-a-cross-compiled-build-tree-from-qemu-system/opengraph/ar/bigger"/>
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:site" content="@muxup">
+<meta property="twitter:creator" content="@asbradbury">
+<title>Accessing a cross-compiled build tree from qemu-system - Muxup</title>
+<link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg%20xmlns='http:%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='80'%20font-size='110'%3E▨%3C%2Ftext%3E%3C%2Fsvg%3E">
+<meta name="description" content="A quick benchmark of several approaches for accessing a large build tree">
+<style>
+@font-face {
+font-family:'Nunito Var';
+src:url('/static/Nunito.var.v2.woff2') format('woff2-variations');
+font-display:swap;
+font-weight: 200 1000;
+}
+*, *::before, *::after {
+box-sizing:border-box;
+}
+* {
+margin:0;
+}
+input, button, textarea, select {
+font:inherit;
+}
+img, picture, video, canvas, svg {
+display:block;
+max-width:100%;
+}
+html {
+font-family:'Nunito Var', sans-serif;
+height:100%;
+font-size:16px;
+-webkit-tap-highlight-color:transparent;
+}
+@media screen and (min-width:640px) {
+html {
+font-size:18px;
+}
+}
+body {
+line-height:1.5;
+color:#222;
+display:grid;
+height:100%;
+grid-template-rows:1fr auto;
+background:#fff no-repeat 0% 0% / 100% .7rem linear-gradient(120deg, #ffffe3 20%, #ddfffc 20%, #ddfffc 40%, #e2eeff 40%, #e2eeff 60%, #f2e2ff 60%, #f2e2ff 80%, #ffdef2 80%, #ffdef2 100%);
+tab-size:4;
+}
+h1, h2, h3, h4, h5, h6 {
+line-height:1.25;
+font-weight:600;
+overflow-wrap:break-word;
+letter-spacing:-.025em;
+margin:1.75rem 0 .75rem;
+}
+h1 {
+font-size:2.986rem
+}
+h2 {
+font-size:2.488rem
+}
+p {
+margin:.75rem 0;
+font-weight:400;
+overflow-wrap:break-word;
+}
+a {
+color:inherit;
+text-decoration:underline;
+text-decoration-color:#aaa;
+text-underline-offset:.15em;
+}
+a:hover {
+text-decoration-thickness:2px;
+}
+ol, ul {
+margin:0 0 0 1.5rem;
+padding-left:0;
+}
+li {
+margin:0 0 .25rem
+}
+::selection {
+background:#ffdac0;
+}
+footer {
+font-size:.833rem;
+color:#777;
+padding:0 1rem;
+width:100%;
+max-width:min(calc(750px + 2rem), calc(100vw - 1rem));
+margin:0 auto;
+}
+footer p {
+text-align:center;
+margin:0 0 .75rem;
+}
+#footer-image {
+margin:0 auto;
+cursor:pointer;
+}
+#article-logo {
+line-height:1.25;
+margin:.5rem 0 0;
+font-size:1.44rem;
+font-weight:700;
+position:relative;
+}
+#article-logo a {
+text-decoration:none;
+}
+#article-title {
+margin:1.5rem 0 0;
+position:relative;
+}
+#article-meta {
+font-size:.833rem;
+color:#777;
+}
+#article-container {
+margin:0 auto;
+padding:1rem;
+max-width:min(calc(750px + 2rem), calc(100vw - 1rem));
+width:100%;
+}
+.anchor {
+position: absolute;
+text-decoration: none;
+width:1.75ex;
+margin-left:-1.4ex;
+visibility:hidden;
+font-size:.8em;
+padding-top:.2em;
+color:#aaa;
+}
+h2:hover .anchor,
+h3:hover .anchor,
+h4:hover .anchor,
+h5:hover .anchor,
+h6:hover .anchor,
+summary:hover .anchor {
+visibility:visible;
+}
+.anchor::before {
+content:"#";
+}
+code {
+background:#f5f5f5;
+padding:.125rem .25rem;
+font-size:.833rem
+}
+pre > code {
+padding:0;
+background:#fff;
+}
+pre {
+word-wrap:break-word;
+overflow-x:auto;
+padding:.5rem 1rem;
+margin:1rem -1rem;
+border-radius:.4rem;
+border:1px solid #d2d2d2;
+}
+table {
+border-spacing:.75rem 0;
+text-align:left;
+width:100%;
+margin:0 0 1.5rem 0;
+}
+td, th {
+border-bottom:.05rem solid #dadee4;
+padding:.6rem 0;
+}
+table.chart {
+font-size:.833rem;
+}
+table.chart td, th {
+padding:.1em;
+border-bottom:0;
+}
+table.chart th {
+width:15%;
+}
+table.chart .chart-bar {
+background:#8bdd7c;
+text-align:right;
+}
+</style>
+<link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed.xml"/>
+<link rel="canonical" href="https://muxup.com/2024q4/accessing-a-cross-compiled-build-tree-from-qemu-system"/>
+</head>
+<body>
+<div id="article-container">
+<div>
+<div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></span></div>
+</div>
+<h1 id="article-title"><span id="title-highlight">Accessing a cross-compiled build tree from qemu-system</span></h1>
+<div id="article-meta"><span title="2024-10-15">2024Q4</span>.</div>
+<p>I'm cross-compiling a large codebase (LLVM and sub-projects such as Clang) and
+want to access the full tree - the source and the build artifacts from under
+qemu. This post documents the results of my experiments in various ways to do
+this. Note that I'm explicitly choosing to run timings using something that
+approximates the work I want to do rather than any microbenchmark targeting
+just file access time.</p>
+<p>Requirements:</p>
+<ul>
+<li>The whole source tree and the build directories are accessible from the
+qemu-system VM.</li>
+<li>Writes must be possible, but don't need to be reflected in the original
+directory (so importantly, although files are written as part of the test
+being run, I don't need to get them back out of the virtual machine).</li>
+</ul>
+<h2 id="results"><a href="#results" class="anchor" aria-hidden="true" tabindex="-1"></a>Results</h2>
+<p>The test simply involves taking a cross-compiled LLVM tree (with RISC-V as the
+only enabled target) and running the equivalent of <code>ninja check-llvm</code> on it
+after exposing / transferring it to the VM using the listed method. Results in
+chart form for overall time taken in the "empty cache" case:</p>
+<table class="chart">
+  <tr>
+    <th>9pfs</th><td><div class="chart-bar" style="width: 94%;">13m05s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>virtiofsd</th><td><div class="chart-bar" style="width: 100%;">13m56s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>squashfs</th><td><div class="chart-bar" style="width: 83%;">11m33s&nbsp;</div></td>
+  </tr>
+  <tr>
+    <th>ext4</th><td><div class="chart-bar" style="width: 84%;">11m42s&nbsp;</div></td>
+  </tr>
+</table>
+<ul>
+<li>9pfs: 13m05s with empty cache, 12m45s with warm cache</li>
+<li>virtiofsd: 13m56s with empty cache, 13m49s with warm cache</li>
+<li>squashfs: 11m33s (~17s image build, 11m16s check-llvm) with empty cache,
+11m16s (~3s image build, 11m13s check-llvm) with warm cache</li>
+<li>new ext4 filesystem: 11m42s, (~38s image build, 11m4s check-llvm) with empty
+cache, 11m34s (~30s image build, 11m4s check-llvm) with warm cache.</li>
+</ul>
+<p>By way of comparison, it takes ~10m40s to naively transfer the data by piping
+it over ssh (tarring on one end, untarring on the other).</p>
+<p>For this use case, building and mounting a filesystem seems the most
+compelling option with the ext4 being overall simplest (no need to use
+overlayfs) assuming you have an e2fsprogs new enough to support tar input to
+<code>mkfs.ext4</code>. I'm not sure why I'm not seeing the purported performance
+improvements when using virtiofsd.</p>
+<h2 id="notes-on-test-setup"><a href="#notes-on-test-setup" class="anchor" aria-hidden="true" tabindex="-1"></a>Notes on test setup</h2>
+<ul>
+<li>The effects of caching are accounted for by taking measurements in two
+scenarios below. Although neither is a precise match for the situation in a
+typical build system, it at least gives some insight into the impact of the
+page cache in a controlled manner.
+<ul>
+<li>"Empty cache". Caches are dropped (<code>sync &amp;&amp; echo 3 | sudo tee /proc/sys/vm/drop_caches</code>)
+before building the filesystem (if necessary) and launching QEMU.</li>
+<li>"Warm cache". Caches are dropped as above but immediately after that (i.e.
+before building any needed filesystem) we load all files that will
+be accessed so they will be cached. For simplicity, just do this by doing
+using a variant of the <code>tar</code> command described below.</li>
+</ul>
+</li>
+<li>Running on AMD Ryzen 9 7950X3D with 128GiB RAM.</li>
+<li>QEMU 9.1.0, running qemu-system-riscv64, with 32 virtual cores matching the
+number 16 cores / 32 hyper-threads in the host.</li>
+<li>LLVM HEAD as of 2024-10-13 (48deb3568eb2452ff).</li>
+<li>Release+Asserts build of LLVM with all non-experimental targets enabled.
+Built in a two-stage cross targeting rv64gc_zba_zbb_zbs.</li>
+<li>Running riscv64 Debian unstable within QEMU.</li>
+<li>Results gathered via <code>time ../bin/llvm-lit -sv .</code> running from
+<code>test/</code> within the build directory, and combining this with the timing for
+whatever command(s) are needed to transfer and extract the source+build
+tree.</li>
+<li>Only the time taken to build the filesystem (if relevant) and to run the
+tests is measured. There may be very minor difference in the time taken to
+mount the different filesystems, but we assume this is too small to be worth
+measuring.</li>
+<li>If I were to rerun this, I would invoke <code>lit</code> with <code>--order=lexical</code> to
+ensure runtimes aren't affected by the order of tests (e.g. long-running
+tests being scheduled last).</li>
+<li>Total size of the files being exposed is ~8GiB or so.</li>
+</ul>
+<h2 id="details-9pfs-qemu--virtfs"><a href="#details-9pfs-qemu--virtfs" class="anchor" aria-hidden="true" tabindex="-1"></a>Details: 9pfs (QEMU -virtfs)</h2>
+<ul>
+<li>Add <code>-virtfs local,path=$HOME/llvm-project/,mount_tag=llvm,security_model=none,id=llvm</code>
+to the QEMU command line.</li>
+<li>Within the guest <code>sudo mount -t 9p -o trans=virtio,version=9p2000.L,msize=512000 llvm /mnt</code>.
+I haven't swept different parameters for
+<a href="https://wiki.qemu.org/Documentation/9psetup#Performance_Considerations_(msize)">msize</a>
+and mount reports 512000 is the maximum for the virtio transport.</li>
+<li>Sadly 9pfs doesn't support <a href="https://lpc.events/event/11/contributions/1086/attachments/926/1826/christian_brauner_idmapped_mounts.pdf">ID-mapped
+mounts</a>
+at the moment, which would allow us to easily remap the uid and gid used
+within the file tree on the host to one of an arbitrary user account in the
+guest without <code>chown</code>ing everything (which would also require
+<code>security_model=mapped-xattr</code> or <code>security_model=mapped-file</code> to be passed
+to qemu. In the future you should be able to do <code>sudo mount --bind --map-users 1000:1001:1 --map-groups 984:1001:1 /mnt mapped</code></li>
+<li>We now need to set up an overlayfs that we can freely write to.
+<ul>
+<li><code>mkdir -p upper work llvm-project</code></li>
+<li><code>sudo mount -t overlay overlay -o lowerdir=/mnt,upperdir=$HOME/upper,workdir=$HOME/work $HOME/llvm-project</code></li>
+</ul>
+</li>
+<li>You could create a user account with appropriate uid/gid to match those in
+the exposed directory, but for simplicity I've just run the tests as root
+within the VM.</li>
+</ul>
+<h2 id="details-virtiofsd"><a href="#details-virtiofsd" class="anchor" aria-hidden="true" tabindex="-1"></a>Details: virtiofsd</h2>
+<ul>
+<li>Installed the virtiofsd package on Arch Linux (version 1.11.1). Refer to the
+<a href="https://gitlab.com/virtio-fs/virtiofsd#examples">documentation</a> for
+examples of how to run.</li>
+<li>Run <code>/usr/lib/virtiofsd --socket-path=/tmp/vhostqemu --shared-dir=$HOME/llvm-project --cache=always</code></li>
+<li>Add the following commands to your qemu launch command (where the memory size
+parameter to <code>-object</code> seems to need to match the <code>-m</code> argument you used):</li>
+</ul>
+<div class="highlight" style="background: #ffffff"><pre style="line-height: 125%;"><span></span><code>  -chardev socket,id<span style="color: #000000">=</span>char0,path<span style="color: #000000">=</span>/tmp/vhostqemu <span style="color: #C41A16">\</span>
+  -device vhost-user-fs-pci,queue-size<span style="color: #000000">=</span><span style="color: #1C01CE">1024</span>,chardev<span style="color: #000000">=</span>char0,tag<span style="color: #000000">=</span>llvm <span style="color: #C41A16">\</span>
+  -object memory-backend-memfd,id<span style="color: #000000">=</span>mem,size<span style="color: #000000">=</span>64G,share<span style="color: #000000">=</span>on -numa node,memdev<span style="color: #000000">=</span>mem
+</code></pre></div>
+
+<ul>
+<li><code>sudo mount -t virtiofs llvm /mnt</code></li>
+<li>Unfortunately id-mapped mounts also aren't quite supported for virtiofs at
+the time of writing.  The changes were recently merged into the upstream
+kernel and a merge request to virtiofsd <a href="https://gitlab.com/virtio-fs/virtiofsd/-/merge_requests/245">is
+pending</a>.</li>
+<li><code>mkdir -p upper work llvm-project</code></li>
+<li><code>sudo mount -t overlay overlay -o lowerdir=/mnt,upperdir=$HOME/upper,workdir=$HOME/work $HOME/llvm-project</code></li>
+<li>As with the 9p tests, just ran the tests using sudo.</li>
+</ul>
+<h2 id="details-squashfs"><a href="#details-squashfs" class="anchor" aria-hidden="true" tabindex="-1"></a>Details: squashfs</h2>
+<ul>
+<li>I couldn't get a regex that squashfs would accept to exclude all build/*
+directories except build/stage2cross, so use <code>find</code> to generate the
+individual directory exclusions.</li>
+<li>As you can see in the commandline below, I disabled compression altogether.</li>
+<li><code>mksquashfs ~/llvm-project llvm-project.squashfs -no-compression -force-uid 1001 -force-gid 1001 -e \ .git $(find $HOME/llvm-project/build -maxdepth 1 -mindepth 1 -type d -not -name 'stage2cross' -printf '-e build/%P ')</code></li>
+<li>Add this to the qemu command line: <code>-drive file=$HOME/llvm-project.squashfs,if=none,id=llvm,format=raw -device virtio-net-device,netdev=net</code></li>
+<li><code>sudo mount -t squashfs /dev/vdb /mnt</code></li>
+<li>Use the same instructions for setting up overlayfs as for 9pfs above.
+There's no need to run the tests using sudo as we've set the appropriate
+uid.</li>
+</ul>
+<h2 id="details-new-ext4-filesystem"><a href="#details-new-ext4-filesystem" class="anchor" aria-hidden="true" tabindex="-1"></a>Details: new ext4 filesystem</h2>
+<ul>
+<li>Make use of the <code>-d</code> parameter of <code>mkfs.ext4</code> which allows you to create a
+filesystem, using the given directory or tarball to initialise it. As
+<code>mkfs.ext4</code> lacks features for filtering the input or forcing the uid/gid of
+files, we rely on tarball input (only just added in e2fsprogs 1.47.1).</li>
+<li>Create a filesystem image that's big enough with <code>fallocate -l 15GiB llvm-project.img</code></li>
+<li>Execute:</li>
+</ul>
+<div class="highlight" style="background: #ffffff"><pre style="line-height: 125%;"><span></span><code>tar --create <span style="color: #C41A16">\</span>
+  --file<span style="color: #000000">=</span>- <span style="color: #C41A16">\</span>
+  --owner<span style="color: #000000">=</span><span style="color: #1C01CE">1001</span> <span style="color: #C41A16">\</span>
+  --group<span style="color: #000000">=</span><span style="color: #1C01CE">1001</span> <span style="color: #C41A16">\</span>
+  --exclude<span style="color: #000000">=</span>.git <span style="color: #C41A16">\</span>
+  <span style="color: #A90D91">$(</span>find <span style="color: #000000">$HOME</span>/llvm-project/build -maxdepth <span style="color: #1C01CE">1</span> -mindepth <span style="color: #1C01CE">1</span> -type d -not -name <span style="color: #C41A16">&#39;stage2cross&#39;</span> -printf <span style="color: #C41A16">&#39;--exclude=build/%P &#39;</span><span style="color: #A90D91">)</span> <span style="color: #C41A16">\</span>
+  -C <span style="color: #000000">$HOME</span>/llvm-project . <span style="color: #C41A16">\</span>
+  | mkfs.ext4 -d - llvm-project.img
+</code></pre></div>
+
+<ul>
+<li>Attach the drive by adding this to the qemu command line <code>-device virtio-blk-device,drive=hdb -drive file=$HOME/llvm-project.img,format=raw,if=none,id=hdb</code></li>
+<li>Mount in qemu with <code>sudo mount -t ext4 /dev/vdb $HOME/llvm-project</code></li>
+</ul>
+<h2 id="details-tar-piped-over-ssh"><a href="#details-tar-piped-over-ssh" class="anchor" aria-hidden="true" tabindex="-1"></a>Details: tar piped over ssh</h2>
+<ul>
+<li>Essentially, use the tar command above and pipe it to tar running under
+qemu-system over ssh to extract it to root filesystem (XFS in my VM setup).</li>
+<li>This could be optimised. e.g. by selecting a less expensive ssh encryption
+algorithm (or just <code>netcat</code>), a better networking backend to QEMU, and so
+on. But the intent is to show the cost of the naive "obvious" solution.</li>
+<li>Execute:</li>
+</ul>
+<div class="highlight" style="background: #ffffff"><pre style="line-height: 125%;"><span></span><code>tar --create <span style="color: #C41A16">\</span>
+  --file<span style="color: #000000">=</span>- <span style="color: #C41A16">\</span>
+  --owner<span style="color: #000000">=</span><span style="color: #1C01CE">1001</span> <span style="color: #C41A16">\</span>
+  --group<span style="color: #000000">=</span><span style="color: #1C01CE">1001</span> <span style="color: #C41A16">\</span>
+  --exclude<span style="color: #000000">=</span>.git <span style="color: #C41A16">\</span>
+  <span style="color: #A90D91">$(</span>find <span style="color: #000000">$HOME</span>/llvm-project/build -maxdepth <span style="color: #1C01CE">1</span> -mindepth <span style="color: #1C01CE">1</span> -type d -not -name <span style="color: #C41A16">&#39;stage2cross&#39;</span> -printf <span style="color: #C41A16">&#39;--exclude=build/%P &#39;</span><span style="color: #A90D91">)</span> <span style="color: #C41A16">\</span>
+  -C <span style="color: #000000">$HOME</span>/llvm-project . <span style="color: #C41A16">\</span>
+  | ssh -p10222 asb@localhost <span style="color: #C41A16">&quot;mkdir -p llvm-project &amp;&amp; tar xf - -C \</span>
+<span style="color: #C41A16">  llvm-project&quot;</span>
+</code></pre></div>
+
+
+</div>
+<footer class="footer">
+<img id="footer-image" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E" width="50" height="50"/>
+<p>Curated by Alex Bradbury | &copy; <a href="/">Muxup</a> contributors | <a href="/about">About</a> | <a href="https://github.com/muxup">GitHub</a> | <a href="https://twitter.com/muxup">Twitter</a></p>
+</footer>
+<script>
+const t="http://www.w3.org/2000/svg";function o(t){return Math.random()*(2*t)-t}function n(t){const n=t.t.getBoundingClientRect();const e=t.o.getClientRects();let c="";for(const t of e){const e=t.x-n.x,f=t.y-n.y,s=t.width,r=t.height;const i=f+r/2;let u=s<75?3:s<300?6:8;const l=.2+.2*Math.random();c=`${c}\n      M${e+o(u)} ${i+o(u)}\n      C${e+s*l+o(u)} ${i+o(u)},\n       ${e+2*s*l+o(u)} ${i+o(u)}\n       ${e+s+o(u)} ${i+o(u)}`}t.i=c;t.strokeWidth=.85*e[0].height}const e=new Map;let c=new ResizeObserver((t=>{for(const o of t){const t=e.get(o.target);if(!t.i)n(t)}for(const o of t){s(e.get(o.target))}}));function f(o){const n=document.createElementNS(t,"svg");n.style.position="absolute";n.style.zIndex=-1;n.style.top="0";n.style.left="0";n.style.overflow="visible";const e=document.createElementNS(t,"path");e.setAttribute("fill","none");e.setAttribute("stroke",o.u);n.appendChild(e);o.o.insertAdjacentElement("beforebegin",n);o.t=n}function s(t){if(!t.i){n(t)}const o=t.t.children[0];o.setAttribute("stroke-width",t.strokeWidth);o.setAttribute("d",t.i);t.i=null}function r(){for(const t of e.values()){f(t)}for(const t of e.values()){n(t)}for(const t of e.keys()){c.observe(t)}document.fonts.ready.then((()=>i()))}function i(){for(const t of e.values()){n(t)}for(const t of e.values()){s(t)}}function u(t,o){let n;t.addEventListener("mouseover",(()=>{s(o);n=setInterval((()=>s(o)),240)}),false);t.addEventListener("mouseout",(()=>{clearInterval(n)}));t.addEventListener("click",(()=>{clearInterval(n)}))}function l(t,o,n){let c={o:t,l:o,u:n};e.set(o,c);return c}let a=new Set([window.location.pathname]);const h=document.querySelector("#footer-image");let d=null;function m(){let t=Math.floor(Math.random()*282);d="/static/footer/"+String(t).padStart(4,"0")+".svg"}function g(t){h.src=d;m();if(!t)v()}function v(){if(a.has(d))return;a.add(d);fetch(d)}m();g(true);const w=[{transform:"rotate(0)"},{transform:"rotate(360deg)"}];const $={duration:600,h:1};h.addEventListener("click",(()=>{h.animate(w,$);g()}));function M(){h.animate(w,$);v()}h.addEventListener("mouseover",M);h.addEventListener("touchstart",M,{passive:true});function k(t){const o=t.currentTarget.getAttribute("href").split("#")[0];if(a.has(o))return;a.add(o);fetch(o)}const p=document.getElementsByTagName("a");for(const t of p){const o=(t.getAttribute("href")??"").split("#")[0];if(o.includes("?")||!o.startsWith("/")||o.slice(o.lastIndexOf("/")+1).includes(".")){continue}t.addEventListener("mouseover",k);t.addEventListener("touchstart",k,{passive:true})}const b=["#ffdef2","#f2e2ff","#e2eeff","#ddfffc","#ffffe3"];const I=document.querySelector("#title-highlight");l(I,I.parentNode,b[Math.floor(Math.random()*b.length)]);const C=document.querySelector("#logo-highlight");const E=l(C,C.parentNode,"#ffdac0");r();u(C,E);document.querySelectorAll("pre:has(code)").forEach((t=>{let o=0,n=0,e=null;t.addEventListener("click",(c=>{const f=Date.now();if(c.target!==e||f-n>=500){o=1}else{o++}if(o===4){window.getSelection().selectAllChildren(t);o=0}e=c.target;n=f}))}));
+
+</script>
+</body>
+</html>
