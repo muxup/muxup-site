@@ -104,6 +104,8 @@ improvements when using virtiofsd.
   ensure runtimes aren't affected by the order of tests (e.g. long-running
   tests being scheduled last).
 * Total size of the files being exposed is ~8GiB or so.
+* Although not strictly necessary, I've tried to map to the uid:gid pair used
+  in the guest where possible.
 
 ## Details: 9pfs (QEMU -virtfs)
 
