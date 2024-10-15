@@ -158,7 +158,7 @@ favicon_svg = (
 standard_footer = """\
 <footer class="footer">
 <img id="footer-image" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E" width="50" height="50"/>
-<p>Curated by Alex Bradbury | &copy; <a href="/">Muxup</a> contributors | <a href="/about">About</a> | <a href="https://github.com/muxup">GitHub</a> | <a href="https://twitter.com/muxup">Twitter</a></p>
+<p>Curated by Alex Bradbury | &copy; <a href="/">Muxup</a> contributors | <a href="/about">About</a> | <a href="https://github.com/muxup">GitHub</a></p>
 </footer>\
 """
 
@@ -647,7 +647,7 @@ home_html.append(
 <div class="subtitle">Adventures in collaborative open source development</div>
 <p>
 A space maintained by Alex Bradbury - projects, blog posts, and notes on things I've been working on.
-See also: <a href="https://twitter.com/muxup">Twitter</a> and <a href="https://github.com/muxup">GitHub</a>
+See also: <a href="https://github.com/muxup">GitHub</a>
 </div>
 <div class="card-grid">
 """
