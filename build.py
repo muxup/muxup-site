@@ -145,9 +145,7 @@ favicon_svg = (
 <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>\
 <text y='80' font-size='110'>▨</text>\
 </svg>\
-""".replace(
-        '"', "%22"
-    )
+""".replace('"', "%22")
     .replace("<", "%3C")
     .replace("/", "%2F")
     .replace(">", "%3E")
