@@ -5,7 +5,22 @@ die () {
   exit 1
 }
 
-mypy --ignore-missing-imports --strict build.py || die "mypy failed"
-ruff check --target-version py312 --select I --diff build.py || die "Import sorting needed"
-ruff format --target-version py312 --diff build.py || die "Reformatting needed"
-flake8 --max-line-length 88 --extend-ignore=E203,E302,E501,W291 build.py || die "flake8 found issues"
+HAD_WARN=0
+
+warn() {
+  HAD_WARN=1
+  printf "!!!!!!!!! %s !!!!!!!!!\n" "$*"
+}
+
+printf "Checking types:\n"
+mypy --ignore-missing-imports --strict build.py || warn "Mypy failed"
+printf "Checking import sorts:\n"
+ruff check --target-version py312 --select I --diff build.py || warn "Import sort check filed"
+printf "Checking formatting:\n"
+ruff format --target-version py312 --diff build.py || warn "Reformatting needed"
+printf "Checking flake8 lints:\n"
+flake8 --max-line-length 88 --extend-ignore=E203,E302,E501,W291 build.py || warn "Flake8 found issues"
+if [ $HAD_WARN -ne 0 ]; then
+  warn "Exiting with failures"
+  exit 1
+fi
