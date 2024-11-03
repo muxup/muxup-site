@@ -452,14 +452,7 @@ def generate_gated_css(html_content: str, rules: dict[str, str]) -> str:
 
 
 def quarter_for_date(d: datetime.date) -> int:
-    if d.month <= 3:
-        return 1
-    elif d.month <= 6:
-        return 2
-    elif d.month <= 9:
-        return 3
-    else:
-        return 4
+    return ((d.month - 1) // 3) + 1
 
 
 def generate_article_meta(pd: PageData) -> str:
