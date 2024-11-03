@@ -216,6 +216,17 @@ def parse_page(file: pathlib.Path) -> PageData:
     metadata, markdown_content = parse_frontmatter(file)
     T = TypeVar("T")
 
+    known_keys = {
+        "description",
+        "published",
+        "permalink",
+        "hidden_from_home_and_rss",
+        "extra_css",
+    }
+    for key in metadata.keys():
+        if key not in known_keys:
+            print(f"{file}: Warning! Frontmatter field '{key}' not recognised")
+
     def fm_get(key: str, ty: type[T]) -> T:
         if key not in metadata:
             raise SystemExit(f"Post {file} missing required frontmatter field '{key}'.")
