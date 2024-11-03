@@ -1,7 +1,7 @@
 +++
 published = 2022-09-10
 description = "Information about Muxup's author, copyright, site structure, implementation, and more"
-hidden = true
+hidden_from_home_and_rss = true
 +++
 # About
 

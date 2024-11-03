@@ -175,7 +175,7 @@ class PageData:
     permalink: str
     markdown_content: str
     markdown_content_as_html: str
-    hidden: bool
+    hidden_from_home_and_rss: bool
     extra_css: str
     yyyyqq_dir: str | None
     last_major_update: str | None
@@ -234,7 +234,7 @@ def parse_page(file: pathlib.Path) -> PageData:
     description = fm_get("description", str)
     published_date = fm_get("published", datetime.date).strftime("%Y-%m-%d")
     permalink = page_path_to_permalink(file)
-    hidden = fm_get_opt("hidden", bool) or False
+    hidden_from_home_and_rss = fm_get_opt("hidden_from_home_and_rss", bool) or False
     extra_css = fm_get_opt("extra_css", str) or ""
     path_part = file.parts[1]
     yyyyqq_dir = None
@@ -260,7 +260,7 @@ def parse_page(file: pathlib.Path) -> PageData:
         permalink=permalink,
         markdown_content=markdown_content,
         markdown_content_as_html=markdown_content_as_html,
-        hidden=hidden,
+        hidden_from_home_and_rss=hidden_from_home_and_rss,
         extra_css=extra_css,
         last_major_update=last_major_update,
         last_minor_update=last_minor_update,
@@ -651,7 +651,7 @@ See also: <a href="https://github.com/muxup">GitHub</a>
 """
 )
 pages_data.sort(key=lambda pd: (pd.last_update(False), pd.permalink), reverse=True)
-for pd in filter(lambda pd: not pd.hidden, pages_data):
+for pd in filter(lambda pd: not pd.hidden_from_home_and_rss, pages_data):
     home_html.append(
         f"""\
 <a class="card" href="{pd.permalink}">
@@ -733,7 +733,9 @@ with atomic_write(out_path) as o:
 out_path = dest_path / "feed.xml"
 with atomic_write(out_path) as o:
     pages_data.sort(key=lambda pd: (pd.last_update(False), pd.permalink), reverse=True)
-    filtered_pages_data = list(filter(lambda pd: not pd.hidden, pages_data))
+    filtered_pages_data = list(
+        filter(lambda pd: not pd.hidden_from_home_and_rss, pages_data)
+    )
     o.write(
         f"""\
 <?xml version="1.0" encoding="UTF-8"?>
