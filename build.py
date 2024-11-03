@@ -176,6 +176,7 @@ class PageData:
     markdown_content: str
     markdown_content_as_html: str
     hidden_from_home_and_rss: bool
+    is_draft: bool
     extra_css: str
     yyyyqq_dir: str | None
     last_major_update: str | None
@@ -237,15 +238,30 @@ def parse_page(file: pathlib.Path) -> PageData:
             )
         return val
 
+    def fm_determine_published_date_and_is_draft() -> Tuple[str, bool]:
+        if "published" not in metadata:
+            raise SystemExit(
+                f"Post {file} missing required frontmatter field 'published'."
+            )
+        published = metadata["published"]
+        if isinstance(published, datetime.date):
+            return published.strftime("%Y-%m-%d"), False
+        elif published == "draft":
+            return datetime.datetime.now().strftime("%Y-%m-%d"), True
+        else:
+            raise SystemExit(
+                f"{file}: Error! 'published' must be set to date or 'draft'"
+            )
+
     def fm_get_opt(key: str, ty: type[T]) -> T | None:
         if key not in metadata:
             return None
         return fm_get(key, ty)
 
     description = fm_get("description", str)
-    published_date = fm_get("published", datetime.date).strftime("%Y-%m-%d")
+    published_date, is_draft = fm_determine_published_date_and_is_draft()
     permalink = page_path_to_permalink(file)
-    hidden_from_home_and_rss = fm_get_opt("hidden_from_home_and_rss", bool) or False
+    hidden_from_home_and_rss = fm_get_opt("hidden_from_home_and_rss", bool) or is_draft
     extra_css = fm_get_opt("extra_css", str) or ""
     path_part = file.parts[1]
     yyyyqq_dir = None
@@ -272,6 +288,7 @@ def parse_page(file: pathlib.Path) -> PageData:
         markdown_content=markdown_content,
         markdown_content_as_html=markdown_content_as_html,
         hidden_from_home_and_rss=hidden_from_home_and_rss,
+        is_draft=is_draft,
         extra_css=extra_css,
         last_major_update=last_major_update,
         last_minor_update=last_minor_update,
@@ -618,6 +635,7 @@ minified_home_js = subprocess.run(
 ).stdout
 out_path = dest_path / "index.html"
 home_html = []
+num_card_grid_entries = sum(1 for pd in pages_data if not pd.hidden_from_home_and_rss)
 home_html.append(
     f"""\
 <!DOCTYPE html>
@@ -630,7 +648,7 @@ home_html.append(
 <meta property="og:description" content="Adventures in collaborative open source development"/>
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="{base_url}"/>
-<meta property="og:image" content="https://v1.screenshot.11ty.dev/{urllib.parse.quote_plus(base_url)}/opengraph/ar/bigger/_{len(pages_data)}"/>
+<meta property="og:image" content="https://v1.screenshot.11ty.dev/{urllib.parse.quote_plus(base_url)}/opengraph/ar/bigger/_{num_card_grid_entries}"/>
 <meta property="twitter:card" content="summary_large_image">
 <meta property="twitter:site" content="@muxup">
 <meta property="twitter:creator" content="@asbradbury">
@@ -712,7 +730,8 @@ with atomic_write(out_path) as o:
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 """
     )
-    front_page_lastmod = max(pd.last_update(False) for pd in pages_data)
+    filtered_pages_data = list(filter(lambda pd: not pd.is_draft, pages_data))
+    front_page_lastmod = max(pd.last_update(False) for pd in filtered_pages_data)
     o.write(
         f"""\
 <url>
@@ -721,8 +740,10 @@ with atomic_write(out_path) as o:
 </url>
 """
     )
-    pages_data.sort(key=lambda pd: (pd.last_update(), pd.permalink), reverse=True)
-    for pd in pages_data:
+    filtered_pages_data.sort(
+        key=lambda pd: (pd.last_update(), pd.permalink), reverse=True
+    )
+    for pd in filtered_pages_data:
         o.write(
             f"""\
 <url>
