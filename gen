@@ -872,18 +872,23 @@ def rebuild_loop() -> None:
 # Command line handling
 
 os.chdir(pathlib.Path(__file__).parent)
-parser = argparse.ArgumentParser(description="muxup.com static site generator")
+parser = argparse.ArgumentParser(
+    description="muxup.com static site generator", add_help=False
+)
 subparsers = parser.add_subparsers(
     dest="command", help="Available commands", required=True
 )
 build_parser = subparsers.add_parser("build", help="Rebuild the site and exit")
+help_parser = subparsers.add_parser("help", help="Show this help message")
 serve_parser = subparsers.add_parser(
-    "serve", help="serve with simple-reload JS injected, rebuilding upon edit"
+    "serve", help="Serve with simple-reload JS injected, rebuilding upon edit"
 )
 args = parser.parse_args()
 
 if args.command == "build":
     rebuild()
+elif args.command == "help":
+    parser.print_help()
 elif args.command == "serve":
     print("Launching watcher")
     threading.Thread(target=rebuild_loop, daemon=True).start()
