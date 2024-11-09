@@ -160,6 +160,9 @@ standard_footer = """\
 </footer>\
 """
 
+pages_path = pathlib.Path("pages")
+dest_path = pathlib.Path("dist")
+
 
 # Helpers
 def page_path_to_permalink(path: pathlib.Path) -> str:
@@ -519,69 +522,59 @@ def atomic_write(path: pathlib.Path, binary: bool = False) -> Iterator[typing.IO
 
 # Core logic
 
-os.chdir(pathlib.Path(__file__).parent)
-parser = argparse.ArgumentParser(description="muxup.com static site generator")
-parser.add_argument(
-    "--serve",
-    action="store_true",
-    default=False,
-    help="serve with simple-reload JS injected, rebuilding upon edit",
-)
-args = parser.parse_args()
 
-print("Starting rebuild")
+def rebuild() -> None:
+    print("Starting rebuild")
+    if not dest_path.exists():
+        dest_path.mkdir()
 
-dest_path = pathlib.Path("dist")
-if not dest_path.exists():
-    dest_path.mkdir()
+    preexisting_dest_files = set()
+    for dirpath, dirnames, filenames in os.walk(dest_path):
+        for fn in filenames:
+            preexisting_dest_files.add(pathlib.Path(dirpath) / fn)
+        for dn in dirnames:
+            child_path = pathlib.Path(dirpath) / dn
+            if child_path.is_symlink():
+                preexisting_dest_files.add(pathlib.Path(dirpath) / dn)
 
-preexisting_dest_files = set()
-for dirpath, dirnames, filenames in os.walk(dest_path):
-    for fn in filenames:
-        preexisting_dest_files.add(pathlib.Path(dirpath) / fn)
-    for dn in dirnames:
-        child_path = pathlib.Path(dirpath) / dn
-        if child_path.is_symlink():
-            preexisting_dest_files.add(pathlib.Path(dirpath) / dn)
+    footer_data_path = pathlib.Path("footer_drawings.json")
+    footer_data = json.loads(footer_data_path.read_text(encoding="utf-8"))
+    num_footer_images = len(footer_data)
 
+    common_css_frag = remove_leading_whitespace(
+        pathlib.Path("fragments/common.css").read_text(encoding="utf-8")
+    )
+    article_css_frag = remove_leading_whitespace(
+        pathlib.Path("fragments/article.css").read_text(encoding="utf-8")
+    )
+    common_js_frag = (
+        pathlib.Path("fragments/common.js")
+        .read_text(encoding="utf-8")
+        .replace("NUM_FOOTER_IMAGES", str(num_footer_images))
+    )
+    article_js_frag = pathlib.Path("fragments/article.js").read_text(encoding="utf-8")
+    minified_article_js = subprocess.run(
+        ["terser", "--mangle-props", "--toplevel"],
+        input=common_js_frag + article_js_frag,
+        capture_output=True,
+        check=True,
+        encoding="utf-8",
+    ).stdout
 
-footer_data_path = pathlib.Path("footer_drawings.json")
-footer_data = json.loads(footer_data_path.read_text(encoding="utf-8"))
-num_footer_images = len(footer_data)
-
-common_css_frag = remove_leading_whitespace(
-    pathlib.Path("fragments/common.css").read_text(encoding="utf-8")
-)
-article_css_frag = remove_leading_whitespace(
-    pathlib.Path("fragments/article.css").read_text(encoding="utf-8")
-)
-common_js_frag = (
-    pathlib.Path("fragments/common.js")
-    .read_text(encoding="utf-8")
-    .replace("NUM_FOOTER_IMAGES", str(num_footer_images))
-)
-article_js_frag = pathlib.Path("fragments/article.js").read_text(encoding="utf-8")
-minified_article_js = subprocess.run(
-    ["terser", "--mangle-props", "--toplevel"],
-    input=common_js_frag + article_js_frag,
-    capture_output=True,
-    check=True,
-    encoding="utf-8",
-).stdout
-
-# Read all pages leaf pages, parse frontmatter, and generate HTML.
-pages_data: list[PageData] = []
-pages_path = pathlib.Path("pages")
-for file in sorted(pages_path.rglob("*.md")):
-    pd = parse_page(file)
-    pages_data.append(pd)
-    gated_css_frag = generate_gated_css(pd.markdown_content_as_html, gated_css_rules)
-    out_path = dest_path / file.relative_to(pages_path).with_suffix(".html")
-    if not out_path.parent.exists():
-        out_path.parent.mkdir(parents=True)
-    with atomic_write(out_path) as o:
-        o.write(
-            f"""\
+    # Read all pages leaf pages, parse frontmatter, and generate HTML.
+    pages_data: list[PageData] = []
+    for file in sorted(pages_path.rglob("*.md")):
+        pd = parse_page(file)
+        pages_data.append(pd)
+        gated_css_frag = generate_gated_css(
+            pd.markdown_content_as_html, gated_css_rules
+        )
+        out_path = dest_path / file.relative_to(pages_path).with_suffix(".html")
+        if not out_path.parent.exists():
+            out_path.parent.mkdir(parents=True)
+        with atomic_write(out_path) as o:
+            o.write(
+                f"""\
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -621,23 +614,25 @@ for file in sorted(pages_path.rglob("*.md")):
 </body>
 </html>
 """
-        )
+            )
 
-# Generate front page.
-home_css_frag = pathlib.Path("fragments/home.css").read_text(encoding="utf-8")
-home_js_frag = pathlib.Path("fragments/home.js").read_text(encoding="utf-8")
-minified_home_js = subprocess.run(
-    ["terser", "--mangle-props", "--toplevel"],
-    input=common_js_frag + home_js_frag,
-    capture_output=True,
-    check=True,
-    encoding="utf-8",
-).stdout
-out_path = dest_path / "index.html"
-home_html = []
-num_card_grid_entries = sum(1 for pd in pages_data if not pd.hidden_from_home_and_rss)
-home_html.append(
-    f"""\
+    # Generate front page.
+    home_css_frag = pathlib.Path("fragments/home.css").read_text(encoding="utf-8")
+    home_js_frag = pathlib.Path("fragments/home.js").read_text(encoding="utf-8")
+    minified_home_js = subprocess.run(
+        ["terser", "--mangle-props", "--toplevel"],
+        input=common_js_frag + home_js_frag,
+        capture_output=True,
+        check=True,
+        encoding="utf-8",
+    ).stdout
+    out_path = dest_path / "index.html"
+    home_html = []
+    num_card_grid_entries = sum(
+        1 for pd in pages_data if not pd.hidden_from_home_and_rss
+    )
+    home_html.append(
+        f"""\
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -671,25 +666,25 @@ See also: <a href="https://github.com/muxup">GitHub</a>
 </div>
 <div class="card-grid">
 """
-)
-pages_data.sort(key=lambda pd: (pd.last_update(False), pd.permalink), reverse=True)
-for pd in filter(lambda pd: not pd.hidden_from_home_and_rss, pages_data):
-    home_html.append(
-        f"""\
+    )
+    pages_data.sort(key=lambda pd: (pd.last_update(False), pd.permalink), reverse=True)
+    for pd in filter(lambda pd: not pd.hidden_from_home_and_rss, pages_data):
+        home_html.append(
+            f"""\
 <a class="card" href="{pd.permalink}">
 <h2 class="card-title"><span class="highlight-title">{html.escape(pd.title)}</span></h2>
 """
-    )
-    if pd.yyyyqq_dir:
-        home_html.append(f'<p class="card-date">{pd.yyyyqq_dir.upper()}</p>')
-    home_html.append(
-        f"""\
+        )
+        if pd.yyyyqq_dir:
+            home_html.append(f'<p class="card-date">{pd.yyyyqq_dir.upper()}</p>')
+        home_html.append(
+            f"""\
 <p class="card-description">{html.escape(pd.description)}</p>
 </a>
 """
-    )
-home_html.append(
-    f"""\
+        )
+    home_html.append(
+        f"""\
 </div>
 </div>
 {standard_footer}
@@ -699,70 +694,72 @@ home_html.append(
 </body>
 </html>
 """
-)
-home_html_str = "".join(home_html)
-home_html_str = home_html_str.replace(
-    "/* GATED_CSS */", generate_gated_css(home_html_str, gated_css_rules)
-)
-with atomic_write(out_path) as o:
-    o.write(home_html_str)
+    )
+    home_html_str = "".join(home_html)
+    home_html_str = home_html_str.replace(
+        "/* GATED_CSS */", generate_gated_css(home_html_str, gated_css_rules)
+    )
+    with atomic_write(out_path) as o:
+        o.write(home_html_str)
 
-# Generate robots.txt
-out_path = dest_path / "robots.txt"
-with atomic_write(out_path) as o:
-    o.write(
-        f"""\
+    # Generate robots.txt
+    out_path = dest_path / "robots.txt"
+    with atomic_write(out_path) as o:
+        o.write(
+            f"""\
 User-agent: *
 Disallow:
 Allow: /
 Sitemap: {base_url}/sitemap.xml
 """
-    )
+        )
 
-# Generate sitemap.xml
-# Simple iteration over frontmatter in order of last_updated again (but
-# unlike front page, by last minor update)
-out_path = dest_path / "sitemap.xml"
-with atomic_write(out_path) as o:
-    o.write(
-        """\
+    # Generate sitemap.xml
+    # Simple iteration over frontmatter in order of last_updated again (but
+    # unlike front page, by last minor update)
+    out_path = dest_path / "sitemap.xml"
+    with atomic_write(out_path) as o:
+        o.write(
+            """\
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 """
-    )
-    filtered_pages_data = list(filter(lambda pd: not pd.is_draft, pages_data))
-    front_page_lastmod = max(pd.last_update(False) for pd in filtered_pages_data)
-    o.write(
-        f"""\
+        )
+        filtered_pages_data = list(filter(lambda pd: not pd.is_draft, pages_data))
+        front_page_lastmod = max(pd.last_update(False) for pd in filtered_pages_data)
+        o.write(
+            f"""\
 <url>
 <loc>{base_url}</loc>
 <lastmod>{front_page_lastmod}</lastmod>
 </url>
 """
-    )
-    filtered_pages_data.sort(
-        key=lambda pd: (pd.last_update(), pd.permalink), reverse=True
-    )
-    for pd in filtered_pages_data:
-        o.write(
-            f"""\
+        )
+        filtered_pages_data.sort(
+            key=lambda pd: (pd.last_update(), pd.permalink), reverse=True
+        )
+        for pd in filtered_pages_data:
+            o.write(
+                f"""\
 <url>
 <loc>{base_url}{pd.permalink}</loc>
 <lastmod>{pd.last_update()}</lastmod>
 </url>
 """
-        )
-    o.write("</urlset>\n")
+            )
+        o.write("</urlset>\n")
 
-# Generate feed.xml
-out_path = dest_path / "feed.xml"
-with atomic_write(out_path) as o:
-    pages_data.sort(key=lambda pd: (pd.last_update(False), pd.permalink), reverse=True)
-    filtered_pages_data = list(
-        filter(lambda pd: not pd.hidden_from_home_and_rss, pages_data)
-    )
-    o.write(
-        f"""\
+    # Generate feed.xml
+    out_path = dest_path / "feed.xml"
+    with atomic_write(out_path) as o:
+        pages_data.sort(
+            key=lambda pd: (pd.last_update(False), pd.permalink), reverse=True
+        )
+        filtered_pages_data = list(
+            filter(lambda pd: not pd.hidden_from_home_and_rss, pages_data)
+        )
+        o.write(
+            f"""\
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
 <title>Muxup</title>
@@ -772,10 +769,10 @@ with atomic_write(out_path) as o:
 <updated>{filtered_pages_data[0].last_update(False)}T12:00:00Z</updated>
 <id>{base_url}/feed.xml</id>
 """
-    )
-    for pd in filtered_pages_data[:10]:
-        o.write(
-            f"""\
+        )
+        for pd in filtered_pages_data[:10]:
+            o.write(
+                f"""\
 <entry>
 <title>{html.escape(pd.title)}</title>
 <published>{pd.published_date}T12:00:00Z</published>
@@ -784,44 +781,44 @@ with atomic_write(out_path) as o:
 <id>{base_url}{pd.permalink}</id>
 <content type="html">
 """
-        )
-        o.write(
-            html.escape(
-                pd.markdown_content_as_html.replace(
-                    "href=/", f"href={base_url}/"
-                ).replace("src=/", "src={base_url}/")
             )
-        )
-        o.write(
-            """\
+            o.write(
+                html.escape(
+                    pd.markdown_content_as_html.replace(
+                        "href=/", f"href={base_url}/"
+                    ).replace("src=/", "src={base_url}/")
+                )
+            )
+            o.write(
+                """\
 </content>
 </entry>
 """
-        )
-    o.write("</feed>\n")
+            )
+        o.write("</feed>\n")
+
+    tmp_static_path = dest_path / "static~"
+    tmp_static_path.symlink_to("../static")
+    static_path = dest_path / "static"
+    tmp_static_path.rename(static_path)
+    written_dest_files.add(static_path)
+
+    files_to_delete = preexisting_dest_files - written_dest_files
+    for path in files_to_delete:
+        print(f"Removing {path} as it wasn't regenerated")
+        path.unlink()
+    for dirpath, dirnames, filenames in os.walk(dest_path, topdown=False):
+        for dn in dirnames:
+            path = pathlib.Path(dirpath) / dn
+            if any(os.scandir(path)):
+                continue
+            print(f"Removing empty path {path}")
+            os.rmdir(pathlib.Path(dirpath) / dn)
+
+    print("Rebuild finished")
+
 
 refresh_js = pathlib.Path("fragments/simple-reload.js").read_text(encoding="utf-8")
-
-tmp_static_path = dest_path / "static~"
-tmp_static_path.symlink_to("../static")
-static_path = dest_path / "static"
-tmp_static_path.rename(static_path)
-written_dest_files.add(static_path)
-
-
-files_to_delete = preexisting_dest_files - written_dest_files
-for path in files_to_delete:
-    print(f"Removing {path} as it wasn't regenerated")
-    path.unlink()
-for dirpath, dirnames, filenames in os.walk(dest_path, topdown=False):
-    for dn in dirnames:
-        path = pathlib.Path(dirpath) / dn
-        if any(os.scandir(path)):
-            continue
-        print(f"Removing empty path {path}")
-        os.rmdir(pathlib.Path(dirpath) / dn)
-
-print("Rebuild finished")
 
 
 class MuxupHTTPRequestHandler(BaseHTTPRequestHandler):
@@ -866,13 +863,28 @@ def rebuild_loop() -> None:
         )
         filenames = [str(p) for p in paths if p.is_file()]
         subprocess.run(
-            ["entr", "-d", "-p", "./build.py"],
+            ["entr", "-d", "-p", "./gen", "build"],
             input="\n".join(filenames),
             encoding="utf-8",
         )
 
 
-if args.serve:
+# Command line handling
+
+os.chdir(pathlib.Path(__file__).parent)
+parser = argparse.ArgumentParser(description="muxup.com static site generator")
+subparsers = parser.add_subparsers(
+    dest="command", help="Available commands", required=True
+)
+build_parser = subparsers.add_parser("build", help="Rebuild the site and exit")
+serve_parser = subparsers.add_parser(
+    "serve", help="serve with simple-reload JS injected, rebuilding upon edit"
+)
+args = parser.parse_args()
+
+if args.command == "build":
+    rebuild()
+elif args.command == "serve":
     print("Launching watcher")
     threading.Thread(target=rebuild_loop, daemon=True).start()
     print("Starting server. See http://localhost:5500")
