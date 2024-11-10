@@ -770,6 +770,14 @@ def build_feed_xml(pages_data: list[PageData]) -> None:
         o.write("</feed>\n")
 
 
+def build_static_subdir() -> None:
+    tmp_static_path = dest_path / "static~"
+    tmp_static_path.symlink_to("../static")
+    static_path = dest_path / "static"
+    tmp_static_path.rename(static_path)
+    written_dest_files.add(static_path)
+
+
 def rebuild() -> None:
     print("Starting rebuild")
     if not dest_path.exists():
@@ -814,12 +822,7 @@ def rebuild() -> None:
     build_robots_txt()
     build_sitemap_xml(pages_data)
     build_feed_xml(pages_data)
-
-    tmp_static_path = dest_path / "static~"
-    tmp_static_path.symlink_to("../static")
-    static_path = dest_path / "static"
-    tmp_static_path.rename(static_path)
-    written_dest_files.add(static_path)
+    build_static_subdir()
 
     files_to_delete = preexisting_dest_files - written_dest_files
     for path in files_to_delete:
