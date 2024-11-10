@@ -21,7 +21,14 @@ Arch packages:
       python-pygments \
 
 AUR packages:
+
 * [terser](https://aur.archlinux.org/packages/terser)
+
+Other:
+
+* util-linux 2.40 or newer is needed for the `exch` utility (I don't list
+  util-linux separately in the Arch dependency list as it's installed as a
+  base package).
 
 ## License
 

@@ -771,11 +771,21 @@ def build_feed_xml(pages_data: list[PageData]) -> None:
 
 
 def build_static_subdir() -> None:
-    tmp_static_path = dest_path / "static~"
-    tmp_static_path.symlink_to("../static")
-    static_path = dest_path / "static"
-    tmp_static_path.rename(static_path)
-    written_dest_files.add(static_path)
+    tmp_dest_static_path = dest_path / "static~"
+    dest_static_path = dest_path / "static"
+    dest_static_path.mkdir(exist_ok=True)
+    src_static_path = pathlib.Path("static")
+    if tmp_dest_static_path.exists():
+        shutil.rmtree(tmp_dest_static_path)
+
+    def copy_and_track(src: str, dst: str) -> None:
+        written_dest_files.add(dest_path / src)
+        shutil.copy2(src, dst)
+
+    shutil.copytree(src_static_path, tmp_dest_static_path, copy_function=copy_and_track)
+
+    subprocess.run(["exch", tmp_dest_static_path, dest_static_path], check=True)
+    shutil.rmtree(tmp_dest_static_path)
 
 
 def rebuild() -> None:
