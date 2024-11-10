@@ -685,6 +685,42 @@ Sitemap: {base_url}/sitemap.xml
         )
 
 
+def build_sitemap_xml(pages_data: list[PageData]) -> None:
+    # Simple iteration over frontmatter in order of last_updated again (but
+    # unlike front page, by last minor update)
+    out_path = dest_path / "sitemap.xml"
+    with atomic_write(out_path) as o:
+        o.write(
+            """\
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+"""
+        )
+        filtered_pages_data = list(filter(lambda pd: not pd.is_draft, pages_data))
+        front_page_lastmod = max(pd.last_update(False) for pd in filtered_pages_data)
+        o.write(
+            f"""\
+<url>
+<loc>{base_url}</loc>
+<lastmod>{front_page_lastmod}</lastmod>
+</url>
+"""
+        )
+        filtered_pages_data.sort(
+            key=lambda pd: (pd.last_update(), pd.permalink), reverse=True
+        )
+        for pd in filtered_pages_data:
+            o.write(
+                f"""\
+<url>
+<loc>{base_url}{pd.permalink}</loc>
+<lastmod>{pd.last_update()}</lastmod>
+</url>
+"""
+            )
+        o.write("</urlset>\n")
+
+
 def rebuild() -> None:
     print("Starting rebuild")
     if not dest_path.exists():
@@ -727,41 +763,7 @@ def rebuild() -> None:
 
     build_front_page(pages_data, common_css_frag, common_js_frag)
     build_robots_txt()
-
-    # Generate sitemap.xml
-    # Simple iteration over frontmatter in order of last_updated again (but
-    # unlike front page, by last minor update)
-    out_path = dest_path / "sitemap.xml"
-    with atomic_write(out_path) as o:
-        o.write(
-            """\
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-"""
-        )
-        filtered_pages_data = list(filter(lambda pd: not pd.is_draft, pages_data))
-        front_page_lastmod = max(pd.last_update(False) for pd in filtered_pages_data)
-        o.write(
-            f"""\
-<url>
-<loc>{base_url}</loc>
-<lastmod>{front_page_lastmod}</lastmod>
-</url>
-"""
-        )
-        filtered_pages_data.sort(
-            key=lambda pd: (pd.last_update(), pd.permalink), reverse=True
-        )
-        for pd in filtered_pages_data:
-            o.write(
-                f"""\
-<url>
-<loc>{base_url}{pd.permalink}</loc>
-<lastmod>{pd.last_update()}</lastmod>
-</url>
-"""
-            )
-        o.write("</urlset>\n")
+    build_sitemap_xml(pages_data)
 
     # Generate feed.xml
     out_path = dest_path / "feed.xml"
