@@ -672,6 +672,19 @@ See also: <a href="https://github.com/muxup">GitHub</a>
         o.write(home_html_str)
 
 
+def build_robots_txt() -> None:
+    out_path = dest_path / "robots.txt"
+    with atomic_write(out_path) as o:
+        o.write(
+            f"""\
+User-agent: *
+Disallow:
+Allow: /
+Sitemap: {base_url}/sitemap.xml
+"""
+        )
+
+
 def rebuild() -> None:
     print("Starting rebuild")
     if not dest_path.exists():
@@ -713,18 +726,7 @@ def rebuild() -> None:
     pages_data = build_pages(common_css_frag, article_css_frag, minified_article_js)
 
     build_front_page(pages_data, common_css_frag, common_js_frag)
-
-    # Generate robots.txt
-    out_path = dest_path / "robots.txt"
-    with atomic_write(out_path) as o:
-        o.write(
-            f"""\
-User-agent: *
-Disallow:
-Allow: /
-Sitemap: {base_url}/sitemap.xml
-"""
-        )
+    build_robots_txt()
 
     # Generate sitemap.xml
     # Simple iteration over frontmatter in order of last_updated again (but
