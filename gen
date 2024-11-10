@@ -523,45 +523,10 @@ def atomic_write(path: pathlib.Path, binary: bool = False) -> Iterator[typing.IO
 # Core logic
 
 
-def rebuild() -> None:
-    print("Starting rebuild")
-    if not dest_path.exists():
-        dest_path.mkdir()
-
-    preexisting_dest_files = set()
-    for dirpath, dirnames, filenames in os.walk(dest_path):
-        for fn in filenames:
-            preexisting_dest_files.add(pathlib.Path(dirpath) / fn)
-        for dn in dirnames:
-            child_path = pathlib.Path(dirpath) / dn
-            if child_path.is_symlink():
-                preexisting_dest_files.add(pathlib.Path(dirpath) / dn)
-
-    footer_data_path = pathlib.Path("footer_drawings.json")
-    footer_data = json.loads(footer_data_path.read_text(encoding="utf-8"))
-    num_footer_images = len(footer_data)
-
-    common_css_frag = remove_leading_whitespace(
-        pathlib.Path("fragments/common.css").read_text(encoding="utf-8")
-    )
-    article_css_frag = remove_leading_whitespace(
-        pathlib.Path("fragments/article.css").read_text(encoding="utf-8")
-    )
-    common_js_frag = (
-        pathlib.Path("fragments/common.js")
-        .read_text(encoding="utf-8")
-        .replace("NUM_FOOTER_IMAGES", str(num_footer_images))
-    )
-    article_js_frag = pathlib.Path("fragments/article.js").read_text(encoding="utf-8")
-    minified_article_js = subprocess.run(
-        ["terser", "--mangle-props", "--toplevel"],
-        input=common_js_frag + article_js_frag,
-        capture_output=True,
-        check=True,
-        encoding="utf-8",
-    ).stdout
-
-    # Read all pages leaf pages, parse frontmatter, and generate HTML.
+# Read all pages markdown files, parse frontmatter, and generate HTML.
+def build_pages(
+    common_css_frag: str, article_css_frag: str, minified_article_js: str
+) -> list[PageData]:
     pages_data: list[PageData] = []
     for file in sorted(pages_path.rglob("*.md")):
         pd = parse_page(file)
@@ -615,6 +580,48 @@ def rebuild() -> None:
 </html>
 """
             )
+    return pages_data
+
+
+def rebuild() -> None:
+    print("Starting rebuild")
+    if not dest_path.exists():
+        dest_path.mkdir()
+
+    preexisting_dest_files = set()
+    for dirpath, dirnames, filenames in os.walk(dest_path):
+        for fn in filenames:
+            preexisting_dest_files.add(pathlib.Path(dirpath) / fn)
+        for dn in dirnames:
+            child_path = pathlib.Path(dirpath) / dn
+            if child_path.is_symlink():
+                preexisting_dest_files.add(pathlib.Path(dirpath) / dn)
+
+    footer_data_path = pathlib.Path("footer_drawings.json")
+    footer_data = json.loads(footer_data_path.read_text(encoding="utf-8"))
+    num_footer_images = len(footer_data)
+
+    common_css_frag = remove_leading_whitespace(
+        pathlib.Path("fragments/common.css").read_text(encoding="utf-8")
+    )
+    article_css_frag = remove_leading_whitespace(
+        pathlib.Path("fragments/article.css").read_text(encoding="utf-8")
+    )
+    common_js_frag = (
+        pathlib.Path("fragments/common.js")
+        .read_text(encoding="utf-8")
+        .replace("NUM_FOOTER_IMAGES", str(num_footer_images))
+    )
+    article_js_frag = pathlib.Path("fragments/article.js").read_text(encoding="utf-8")
+    minified_article_js = subprocess.run(
+        ["terser", "--mangle-props", "--toplevel"],
+        input=common_js_frag + article_js_frag,
+        capture_output=True,
+        check=True,
+        encoding="utf-8",
+    ).stdout
+
+    pages_data = build_pages(common_css_frag, article_css_frag, minified_article_js)
 
     # Generate front page.
     home_css_frag = pathlib.Path("fragments/home.css").read_text(encoding="utf-8")
