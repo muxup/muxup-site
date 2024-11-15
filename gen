@@ -593,6 +593,10 @@ def atomic_write(path: pathlib.Path, binary: bool = False) -> Iterator[typing.IO
 
 
 # Read all pages markdown files, parse frontmatter, and generate HTML.
+
+page_template = compile_template(pathlib.Path("templates/page.html.tpl").read_text())
+
+
 def build_pages(
     common_css_frag: str, article_css_frag: str, minified_article_js: str
 ) -> list[PageData]:
@@ -606,49 +610,19 @@ def build_pages(
         out_path = dest_path / file.relative_to(pages_path).with_suffix(".html")
         if not out_path.parent.exists():
             out_path.parent.mkdir(parents=True)
+        page_content = page_template(
+            h=html.escape,
+            base_url=base_url,
+            favicon_svg=favicon_svg,
+            standard_footer=standard_footer,
+            pd=pd,
+            minified_article_js=minified_article_js,
+            opengraph_image=f"https://v1.screenshot.11ty.dev/{urllib.parse.quote_plus(base_url+pd.permalink)}/opengraph/ar/bigger",
+            css=f"{common_css_frag}{article_css_frag}{gated_css_frag}\n{remove_leading_whitespace(pd.extra_css)}",
+            article_meta=generate_article_meta(pd),
+        )
         with atomic_write(out_path) as o:
-            o.write(
-                f"""\
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta property="og:title" content="{html.escape(pd.title)}"/>
-<meta property="og:site_name" content="Muxup">
-<meta property="og:description" content="{html.escape(pd.description)}"/>
-<meta property="og:type" content="article"/>
-<meta property="og:url" content="{base_url}{pd.permalink}"/>
-<meta property="og:image" content="https://v1.screenshot.11ty.dev/{urllib.parse.quote_plus(base_url+pd.permalink)}/opengraph/ar/bigger"/>
-<meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:site" content="@muxup">
-<meta property="twitter:creator" content="@asbradbury">
-<title>{html.escape(pd.title)} - Muxup</title>
-<link rel="icon" sizes="any" href="data:image/svg+xml,{favicon_svg}">
-<meta name="description" content="{html.escape(pd.description)}">
-<style>
-{common_css_frag}{article_css_frag}{gated_css_frag}
-{remove_leading_whitespace(pd.extra_css)}</style>
-<link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed.xml"/>
-<link rel="canonical" href="{base_url}{pd.permalink}"/>
-</head>
-<body>
-<div id="article-container">
-<div>
-<div id="article-logo"><span id="logo-highlight"><a href="/">Muxup</a></span></div>
-</div>
-<h1 id="article-title"><span id="title-highlight">{html.escape(pd.title)}</span></h1>
-<div id="article-meta">{generate_article_meta(pd)}</div>
-{pd.markdown_content_as_html}
-</div>
-{standard_footer}
-<script>
-{minified_article_js}
-</script>
-</body>
-</html>
-"""
-            )
+            o.write(page_content)
     return pages_data
 
 
