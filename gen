@@ -22,7 +22,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Any, Iterator, Tuple, TypeVar
+from typing import Any, Callable, Iterator, Tuple, TypeVar
 
 import mistletoe
 import mistletoe.utils
@@ -165,6 +165,75 @@ dest_path = pathlib.Path("dist")
 
 
 # Helpers
+def compile_template(template_str: str) -> Callable[..., str]:
+    out = []
+    indent = 0
+    stack = []
+
+    def emit_line(line: str) -> None:
+        out.append(f"{'    ' * indent}{line}")
+
+    emit_line("def _render():")
+    indent += 1
+    emit_line("out = []")
+
+    for line_no, line in enumerate(template_str.splitlines(), start=1):
+        if line.startswith("$"):
+            pycmd = line[1:].strip()
+            keyword = pycmd.partition(" ")[0]
+            if keyword == "if":
+                stack.append(keyword)
+                emit_line(f"{pycmd}:")
+                indent += 1
+            elif keyword == "for":
+                stack.append(keyword)
+                emit_line(f"{pycmd}:")
+                indent += 1
+            elif keyword in ("elif", "else"):
+                if stack[-1] != "if":
+                    raise ValueError(f"Line {line_no}: Incorrectly nested '{keyword}'")
+                indent -= 1
+                emit_line(f"{pycmd}:")
+                indent += 1
+            elif keyword in ("endif", "endfor"):
+                expected = stack.pop()
+                if expected != keyword[3:]:
+                    raise ValueError(
+                        f"Line {line_no}: Expected end{expected}, got {pycmd}"
+                    )
+                if pycmd != keyword:
+                    raise ValueError(f"Line {line_no}: Unexpected text after {keyword}")
+                indent -= 1
+            else:
+                emit_line(f"{pycmd}")
+            continue
+
+        pos = 0
+        while pos <= len(line):
+            expr_start = line.find("{{", pos)
+            if expr_start == -1:
+                emit_line(f"out.append({repr(line[pos:])} '\\n')")
+                break
+            if expr_start != pos:
+                emit_line(f"out.append({repr(line[pos:expr_start])})")
+            expr_end = line.find("}}", expr_start)
+            if expr_end == -1:
+                raise ValueError(f"Line {line_no}: Couldn't find matching }}")
+            emit_line(f"out.append(str({line[expr_start+2:expr_end]}))")
+            pos = expr_end + 2
+    if len(stack) != 0:
+        raise ValueError(f"Unclosed '{stack[-1]}'")
+    emit_line('return "".join(out)')
+    py_code = "\n".join(out)
+    compiled_code = compile(py_code, "<string>", "exec")
+
+    def wrapper(**kwargs_as_globals: Any) -> str:
+        exec(compiled_code, kwargs_as_globals)
+        return kwargs_as_globals["_render"]()  # type: ignore
+
+    return wrapper
+
+
 def page_path_to_permalink(path: pathlib.Path) -> str:
     return "/" + str(path.relative_to(pages_path).with_suffix(""))
 
