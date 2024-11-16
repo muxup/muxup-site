@@ -639,80 +639,32 @@ def build_front_page(
         encoding="utf-8",
     ).stdout
     out_path = dest_path / "index.html"
-    home_html = []
     num_card_grid_entries = sum(
         1 for pd in pages_data if not pd.hidden_from_home_and_rss
     )
-    home_html.append(
-        f"""\
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta property="og:title" content="Muxup"/>
-<meta property="og:site_name" content="Muxup">
-<meta property="og:description" content="Adventures in collaborative open source development"/>
-<meta property="og:type" content="website"/>
-<meta property="og:url" content="{base_url}"/>
-<meta property="og:image" content="https://v1.screenshot.11ty.dev/{urllib.parse.quote_plus(base_url)}/opengraph/ar/bigger/_{num_card_grid_entries}"/>
-<meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:site" content="@muxup">
-<meta property="twitter:creator" content="@asbradbury">
-<title>Muxup - Adventures in collaborative open source development</title>
-<link rel="icon" sizes="any" href="data:image/svg+xml,{favicon_svg}">
-<style>
-{common_css_frag}{home_css_frag}/* GATED_CSS */
-</style>
-<link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/feed.xml"/>
-<link rel="canonical" href="{base_url}/"/>
-</head>
-<body>
-<div id="home-container">
-<div id="hero">
-<h1><span id="home-logo"><a href="/">Muxup</a></span></h1>
-<div class="subtitle">Adventures in collaborative open source development</div>
-<p>
-A space maintained by Alex Bradbury - projects, blog posts, and notes on things I've been working on.
-See also: <a href="https://github.com/muxup">GitHub</a>
-</div>
-<div class="card-grid">
-"""
-    )
     pages_data.sort(key=lambda pd: (pd.last_update(False), pd.permalink), reverse=True)
-    for pd in filter(lambda pd: not pd.hidden_from_home_and_rss, pages_data):
-        home_html.append(
-            f"""\
-<a class="card" href="{pd.permalink}">
-<h2 class="card-title"><span class="highlight-title">{html.escape(pd.title)}</span></h2>
-"""
-        )
-        if pd.yyyyqq_dir:
-            home_html.append(f'<p class="card-date">{pd.yyyyqq_dir.upper()}</p>')
-        home_html.append(
-            f"""\
-<p class="card-description">{html.escape(pd.description)}</p>
-</a>
-"""
-        )
-    home_html.append(
-        f"""\
-</div>
-</div>
-{standard_footer}
-<script>
-{minified_home_js}
-</script>
-</body>
-</html>
-"""
+    sorted_filtered_pages_for_cards = filter(
+        lambda pd: not pd.hidden_from_home_and_rss, pages_data
     )
-    home_html_str = "".join(home_html)
-    home_html_str = home_html_str.replace(
-        "/* GATED_CSS */", generate_gated_css(home_html_str, gated_css_rules)
+    home_template = compile_template(
+        pathlib.Path("templates/home.html.tpl").read_text()
+    )
+    home_content = home_template(
+        h=html.escape,
+        base_url=base_url,
+        opengraph_image=f"https://v1.screenshot.11ty.dev/{urllib.parse.quote_plus(base_url)}/opengraph/ar/bigger/_{num_card_grid_entries}",
+        favicon_svg=favicon_svg,
+        css=f"{common_css_frag}{home_css_frag}/* GATED_CSS */",
+        sorted_filtered_pages_for_cards=sorted_filtered_pages_for_cards,
+        standard_footer=standard_footer,
+        minified_home_js=minified_home_js,
+    )
+
+    home_content = home_content.replace(
+        "/* GATED_CSS */", generate_gated_css(home_content, gated_css_rules)
     )
     with atomic_write(out_path) as o:
-        o.write(home_html_str)
+        o.write(home_content)
 
 
 def build_robots_txt() -> None:
