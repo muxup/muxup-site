@@ -669,15 +669,10 @@ def build_front_page(
 
 def build_robots_txt() -> None:
     out_path = dest_path / "robots.txt"
+    template = compile_template(pathlib.Path("templates/robots.txt.tpl").read_text())
+    content = template(base_url=base_url)
     with atomic_write(out_path) as o:
-        o.write(
-            f"""\
-User-agent: *
-Disallow:
-Allow: /
-Sitemap: {base_url}/sitemap.xml
-"""
-        )
+        o.write(content)
 
 
 def build_sitemap_xml(pages_data: list[PageData]) -> None:
