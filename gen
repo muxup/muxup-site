@@ -695,51 +695,25 @@ def build_sitemap_xml(pages_data: list[PageData]) -> None:
 
 def build_feed_xml(pages_data: list[PageData]) -> None:
     out_path = dest_path / "feed.xml"
+    template = compile_template(pathlib.Path("templates/feed.xml.tpl").read_text())
+    pages_data.sort(key=lambda pd: (pd.last_update(False), pd.permalink), reverse=True)
+    filtered_pages_data = list(
+        filter(lambda pd: not pd.hidden_from_home_and_rss, pages_data)
+    )
+
+    def replace_rel_with_abs_links(string: str) -> str:
+        return string.replace("href=/", f"href={base_url}/").replace(
+            "src=/", "src={base_url}/"
+        )
+
+    content = template(
+        base_url=base_url,
+        h=html.escape,
+        filtered_pages_data=filtered_pages_data,
+        replace_rel_with_abs_links=replace_rel_with_abs_links,
+    )
     with atomic_write(out_path) as o:
-        pages_data.sort(
-            key=lambda pd: (pd.last_update(False), pd.permalink), reverse=True
-        )
-        filtered_pages_data = list(
-            filter(lambda pd: not pd.hidden_from_home_and_rss, pages_data)
-        )
-        o.write(
-            f"""\
-<?xml version="1.0" encoding="UTF-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
-<title>Muxup</title>
-<subtitle>Adventures in collaborative open source development</subtitle>
-<link href="{base_url}/feed.xml" rel="self" type="application/atom+xml"/>
-<link href="{base_url}"/>
-<updated>{filtered_pages_data[0].last_update(False)}T12:00:00Z</updated>
-<id>{base_url}/feed.xml</id>
-"""
-        )
-        for pd in filtered_pages_data[:10]:
-            o.write(
-                f"""\
-<entry>
-<title>{html.escape(pd.title)}</title>
-<published>{pd.published_date}T12:00:00Z</published>
-<updated>{pd.last_update(False)}T12:00:00Z</updated>
-<link rel="alternate" href="{base_url}{pd.permalink}"/>
-<id>{base_url}{pd.permalink}</id>
-<content type="html">
-"""
-            )
-            o.write(
-                html.escape(
-                    pd.markdown_content_as_html.replace(
-                        "href=/", f"href={base_url}/"
-                    ).replace("src=/", "src={base_url}/")
-                )
-            )
-            o.write(
-                """\
-</content>
-</entry>
-"""
-            )
-        o.write("</feed>\n")
+        o.write(content)
 
 
 def build_static_subdir() -> None:
