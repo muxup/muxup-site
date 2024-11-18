@@ -199,3 +199,117 @@ visibility:visible;
 content:"#";
 }
 $ endif
+$ if "<h3" in target_html
+h3 {
+font-size:2.074rem
+}
+$ endif
+$ if "<h4" in target_html
+h4 {
+font-size:1.728rem
+}
+$ endif
+$ if "<h5" in target_html
+h5 {
+font-size:1.44rem
+}
+$ endif
+$ if "<h6" in target_html
+h6 {
+font-size:1.2rem
+}
+$ endif
+$ if "<small" in target_html
+small {
+font-size:.833rem
+}
+$ endif
+$ if "<mark" in target_html
+mark {
+background:#fff474
+}
+$ endif
+$ if "<blockquote" in target_html
+blockquote {
+margin:1rem 0;
+padding:0 0.8rem;
+border-inline-start:4px solid #dadee4;
+}
+$ endif
+$ if "<hr" in target_html
+hr {
+border:none;
+border-top:4px solid #f1f3f5;
+}
+$ endif
+$ if "<code" in target_html
+code {
+background:#f5f5f5;
+padding:.125rem .25rem;
+font-size:.833rem
+}
+$ endif
+$ if "<pre" in target_html
+pre > code {
+padding:0;
+background:#fff;
+}
+pre {
+word-wrap:break-word;
+overflow-x:auto;
+padding:.5rem 1rem;
+margin:1rem -1rem;
+border-radius:.4rem;
+border:1px solid #d2d2d2;
+}
+$ endif
+$ if "<table" in target_html
+table {
+border-spacing:.75rem 0;
+text-align:left;
+width:100%;
+margin:0 0 1.5rem 0;
+}
+td, th {
+border-bottom:.05rem solid #dadee4;
+padding:.6rem 0;
+}
+$ endif
+$ if "<kbd" in target_html
+kbd {
+background:#212529;
+border-radius:.2rem;
+color:#fff;
+font-size:.85em;
+font-weight:700;
+line-height:1;
+padding:2px 4px;
+white-space:nowrap;
+}
+$ endif
+$ if "<details" in target_html
+details {
+font-size:.833rem;
+}
+details summary {
+margin:.75rem 0 .5rem 0;
+font-weight:600;
+cursor:pointer;
+font-size:1.2rem;
+line-height:1.25;
+letter-spacing:-.025em;
+list-style:none;
+}
+details summary > * {
+display:inline;
+}
+summary::-webkit-details-marker {
+display:none;
+}
+summary::after {
+content: " »";
+}
+details[open] summary::after {
+content: " «";
+}
+$ endif
