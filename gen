@@ -594,12 +594,17 @@ def atomic_write(path: pathlib.Path, binary: bool = False) -> Iterator[typing.IO
 
 # Read all pages markdown files, parse frontmatter, and generate HTML.
 
+css_template = compile_template(pathlib.Path("templates/style.css.tpl").read_text())
+
+
+def generate_css_string(page_type: str) -> str:
+    return css_template(page_type=page_type)
+
+
 page_template = compile_template(pathlib.Path("templates/page.html.tpl").read_text())
 
 
-def build_pages(
-    common_css_frag: str, article_css_frag: str, minified_article_js: str
-) -> list[PageData]:
+def build_pages(minified_article_js: str) -> list[PageData]:
     pages_data: list[PageData] = []
     for file in sorted(pages_path.rglob("*.md")):
         pd = parse_page(file)
@@ -618,7 +623,7 @@ def build_pages(
             pd=pd,
             minified_article_js=minified_article_js,
             opengraph_image=f"https://v1.screenshot.11ty.dev/{urllib.parse.quote_plus(base_url+pd.permalink)}/opengraph/ar/bigger",
-            css=f"{common_css_frag}{article_css_frag}{gated_css_frag}\n{remove_leading_whitespace(pd.extra_css)}",
+            css=f"{generate_css_string('article')}{gated_css_frag}\n{remove_leading_whitespace(pd.extra_css)}",
             article_meta=generate_article_meta(pd),
         )
         with atomic_write(out_path) as o:
@@ -626,10 +631,7 @@ def build_pages(
     return pages_data
 
 
-def build_front_page(
-    pages_data: list[PageData], common_css_frag: str, common_js_frag: str
-) -> None:
-    home_css_frag = pathlib.Path("fragments/home.css").read_text(encoding="utf-8")
+def build_front_page(pages_data: list[PageData], common_js_frag: str) -> None:
     home_js_frag = pathlib.Path("fragments/home.js").read_text(encoding="utf-8")
     minified_home_js = subprocess.run(
         ["terser", "--mangle-props", "--toplevel"],
@@ -654,7 +656,7 @@ def build_front_page(
         base_url=base_url,
         opengraph_image=f"https://v1.screenshot.11ty.dev/{urllib.parse.quote_plus(base_url)}/opengraph/ar/bigger/_{num_card_grid_entries}",
         favicon_svg=favicon_svg,
-        css=f"{common_css_frag}{home_css_frag}/* GATED_CSS */",
+        css=f"{generate_css_string('home')}/* GATED_CSS */",
         sorted_filtered_pages_for_cards=sorted_filtered_pages_for_cards,
         standard_footer=standard_footer,
         minified_home_js=minified_home_js,
@@ -752,12 +754,6 @@ def rebuild() -> None:
     footer_data = json.loads(footer_data_path.read_text(encoding="utf-8"))
     num_footer_images = len(footer_data)
 
-    common_css_frag = remove_leading_whitespace(
-        pathlib.Path("fragments/common.css").read_text(encoding="utf-8")
-    )
-    article_css_frag = remove_leading_whitespace(
-        pathlib.Path("fragments/article.css").read_text(encoding="utf-8")
-    )
     common_js_frag = (
         pathlib.Path("fragments/common.js")
         .read_text(encoding="utf-8")
@@ -772,9 +768,9 @@ def rebuild() -> None:
         encoding="utf-8",
     ).stdout
 
-    pages_data = build_pages(common_css_frag, article_css_frag, minified_article_js)
+    pages_data = build_pages(minified_article_js)
 
-    build_front_page(pages_data, common_css_frag, common_js_frag)
+    build_front_page(pages_data, common_js_frag)
     build_robots_txt()
     build_sitemap_xml(pages_data)
     build_feed_xml(pages_data)
