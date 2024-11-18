@@ -16,13 +16,11 @@ import shutil
 import subprocess
 import threading
 import tomllib
-import typing
 import urllib.parse
-from contextlib import contextmanager
 from dataclasses import dataclass
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Any, Callable, Iterator, Tuple, TypeVar
+from typing import Any, Callable, Tuple, TypeVar
 
 import mistletoe
 import mistletoe.utils
@@ -450,14 +448,10 @@ History↓</a>"""
 written_dest_files = set()
 
 
-@contextmanager
-def atomic_write(path: pathlib.Path, binary: bool = False) -> Iterator[typing.IO[Any]]:
+def atomic_write_text(path: pathlib.Path, data: str, encoding: str = "utf-8") -> None:
     written_dest_files.add(path)
     tmp_path = path.with_name(path.name + "~")
-    with open(
-        tmp_path, "wb" if binary else "w", encoding=None if binary else "utf-8"
-    ) as f:
-        yield f
+    tmp_path.write_text(data, encoding=encoding)
     os.rename(tmp_path, path)
 
 
@@ -500,8 +494,7 @@ def build_pages(minified_article_js: str) -> list[PageData]:
             ),
             article_meta=generate_article_meta(pd),
         )
-        with atomic_write(out_path) as o:
-            o.write(page_content)
+        atomic_write_text(out_path, page_content)
     return pages_data
 
 
@@ -535,16 +528,14 @@ def build_front_page(pages_data: list[PageData], common_js_frag: str) -> None:
         minified_home_js=minified_home_js,
     )
 
-    with atomic_write(out_path) as o:
-        o.write(home_content)
+    atomic_write_text(out_path, home_content)
 
 
 def build_robots_txt() -> None:
     out_path = dest_path / "robots.txt"
     template = compile_template(pathlib.Path("templates/robots.txt.tpl").read_text())
     content = template(base_url=base_url)
-    with atomic_write(out_path) as o:
-        o.write(content)
+    atomic_write_text(out_path, content)
 
 
 def build_sitemap_xml(pages_data: list[PageData]) -> None:
@@ -561,8 +552,7 @@ def build_sitemap_xml(pages_data: list[PageData]) -> None:
         front_page_lastmod=max(pd.last_update(False) for pd in filtered_pages_data),
         filtered_pages_data=filtered_pages_data,
     )
-    with atomic_write(out_path) as o:
-        o.write(content)
+    atomic_write_text(out_path, content)
 
 
 def build_feed_xml(pages_data: list[PageData]) -> None:
@@ -584,8 +574,7 @@ def build_feed_xml(pages_data: list[PageData]) -> None:
         filtered_pages_data=filtered_pages_data,
         replace_rel_with_abs_links=replace_rel_with_abs_links,
     )
-    with atomic_write(out_path) as o:
-        o.write(content)
+    atomic_write_text(out_path, content)
 
 
 def build_static_subdir() -> None:
