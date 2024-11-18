@@ -226,12 +226,7 @@ def parse_page(file: pathlib.Path) -> PageData:
     extra_css = fm_get_opt("extra_css", str) or ""
     path_part = file.parts[1]
     yyyyqq_dir = None
-    if (
-        len(path_part) == 6
-        and path_part[:4].isdigit()
-        and path_part[4] == "q"
-        and path_part[5].isdigit()
-    ):
+    if re.fullmatch(r"\d{4}q[1-4]", path_part):
         yyyyqq_dir = path_part
     (
         markdown_content_as_html,
