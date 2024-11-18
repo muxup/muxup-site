@@ -313,3 +313,6 @@ details[open] summary::after {
 content: " «";
 }
 $ endif
+$ if extra_css
+{{extra_css.rstrip()}}
+$ endif

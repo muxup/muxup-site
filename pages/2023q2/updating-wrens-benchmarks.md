@@ -3,18 +3,18 @@ published = 2023-04-10
 description = "Rerunning the Wren programming language's benchmarks against current Lua/Python/Ruby."
 extra_css = """
 table.chart {
-  font-size:.833rem;
+font-size:.833rem;
 }
 table.chart td, th {
-  padding:.1em;
-  border-bottom:0;
+padding:.1em;
+border-bottom:0;
 }
 table.chart th {
-  width:15%;
+width:15%;
 }
 table.chart .chart-bar {
-  background:#8bdd7c;
-  text-align:right;
+background:#8bdd7c;
+text-align:right;
 }
 """
 +++

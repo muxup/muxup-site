@@ -459,10 +459,6 @@ History↓</a>"""
     return (" ").join(ret)
 
 
-def remove_leading_whitespace(string: str) -> str:
-    return re.sub(r"(?m)^\s+", "", string)
-
-
 written_dest_files = set()
 
 
@@ -485,8 +481,12 @@ def atomic_write(path: pathlib.Path, binary: bool = False) -> Iterator[typing.IO
 css_template = compile_template(pathlib.Path("templates/style.css.tpl").read_text())
 
 
-def generate_css_string(page_type: str, html_for_gated_css_check: str = "") -> str:
-    return css_template(page_type=page_type, target_html=html_for_gated_css_check)
+def generate_css_string(
+    page_type: str, extra_css: str = "", html_for_gated_css_check: str = ""
+) -> str:
+    return css_template(
+        page_type=page_type, extra_css=extra_css, target_html=html_for_gated_css_check
+    )
 
 
 page_template = compile_template(pathlib.Path("templates/page.html.tpl").read_text())
@@ -508,7 +508,9 @@ def build_pages(minified_article_js: str) -> list[PageData]:
             pd=pd,
             minified_article_js=minified_article_js,
             opengraph_image=f"https://v1.screenshot.11ty.dev/{urllib.parse.quote_plus(base_url+pd.permalink)}/opengraph/ar/bigger",
-            css=f"{generate_css_string('article', pd.markdown_content_as_html)}{remove_leading_whitespace(pd.extra_css)}",
+            css=generate_css_string(
+                "article", pd.extra_css, pd.markdown_content_as_html
+            ),
             article_meta=generate_article_meta(pd),
         )
         with atomic_write(out_path) as o:
