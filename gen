@@ -656,15 +656,12 @@ def build_front_page(pages_data: list[PageData], common_js_frag: str) -> None:
         base_url=base_url,
         opengraph_image=f"https://v1.screenshot.11ty.dev/{urllib.parse.quote_plus(base_url)}/opengraph/ar/bigger/_{num_card_grid_entries}",
         favicon_svg=favicon_svg,
-        css=f"{generate_css_string('home')}/* GATED_CSS */",
+        css=generate_css_string("home"),
         sorted_filtered_pages_for_cards=sorted_filtered_pages_for_cards,
         standard_footer=standard_footer,
         minified_home_js=minified_home_js,
     )
 
-    home_content = home_content.replace(
-        "/* GATED_CSS */", generate_gated_css(home_content, gated_css_rules)
-    )
     with atomic_write(out_path) as o:
         o.write(home_content)
 
