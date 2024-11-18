@@ -29,7 +29,10 @@
 <div id="article-meta">{{article_meta}}</div>
 {{pd.markdown_content_as_html}}
 </div>
-{{standard_footer}}
+<footer class="footer">
+<img id="footer-image" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E" width="50" height="50"/>
+<p>Curated by Alex Bradbury | &copy; <a href="/">Muxup</a> contributors | <a href="/about">About</a> | <a href="https://github.com/muxup">GitHub</a></p>
+</footer>
 <script>
 {{minified_article_js}}
 </script>

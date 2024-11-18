@@ -49,13 +49,6 @@ favicon_svg = (
     .replace(" ", "%20")
 )
 
-standard_footer = """\
-<footer class="footer">
-<img id="footer-image" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E" width="50" height="50"/>
-<p>Curated by Alex Bradbury | &copy; <a href="/">Muxup</a> contributors | <a href="/about">About</a> | <a href="https://github.com/muxup">GitHub</a></p>
-</footer>\
-"""
-
 pages_path = pathlib.Path("pages")
 dest_path = pathlib.Path("dist")
 
@@ -504,7 +497,6 @@ def build_pages(minified_article_js: str) -> list[PageData]:
             h=html.escape,
             base_url=base_url,
             favicon_svg=favicon_svg,
-            standard_footer=standard_footer,
             pd=pd,
             minified_article_js=minified_article_js,
             opengraph_image=f"https://v1.screenshot.11ty.dev/{urllib.parse.quote_plus(base_url+pd.permalink)}/opengraph/ar/bigger",
@@ -545,7 +537,6 @@ def build_front_page(pages_data: list[PageData], common_js_frag: str) -> None:
         favicon_svg=favicon_svg,
         css=generate_css_string("home"),
         sorted_filtered_pages_for_cards=sorted_filtered_pages_for_cards,
-        standard_footer=standard_footer,
         minified_home_js=minified_home_js,
     )
 
