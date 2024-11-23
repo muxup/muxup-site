@@ -513,15 +513,7 @@ def build_pages(minified_article_js: str) -> list[PageData]:
     return pages_data
 
 
-def build_front_page(pages_data: list[PageData], common_js_frag: str) -> None:
-    home_js_frag = pathlib.Path("fragments/home.js").read_text(encoding="utf-8")
-    minified_home_js = subprocess.run(
-        ["terser", "--mangle-props", "--toplevel"],
-        input=common_js_frag + home_js_frag,
-        capture_output=True,
-        check=True,
-        encoding="utf-8",
-    ).stdout
+def build_front_page(pages_data: list[PageData], minified_home_js: str) -> None:
     out_path = dest_path / "index.html"
     num_card_grid_entries = sum(
         1 for pd in pages_data if not pd.hidden_from_home_and_rss
@@ -610,6 +602,24 @@ def build_static_subdir() -> None:
     shutil.rmtree(tmp_dest_static_path)
 
 
+def generate_minified_js(
+    common_js_frag: str, home_js_frag: str, article_js_frag: str
+) -> Tuple[str, str]:
+    def minify(in_js: str) -> str:
+        return subprocess.run(
+            ["terser", "--mangle-props", "--toplevel"],
+            input=in_js,
+            capture_output=True,
+            check=True,
+            encoding="utf-8",
+        ).stdout
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+        home_future = executor.submit(minify, common_js_frag + home_js_frag)
+        article_future = executor.submit(minify, common_js_frag + article_js_frag)
+        return (home_future.result(), article_future.result())
+
+
 def rebuild() -> None:
     print("Starting rebuild")
     if not dest_path.exists():
@@ -633,18 +643,14 @@ def rebuild() -> None:
         .read_text(encoding="utf-8")
         .replace("NUM_FOOTER_IMAGES", str(num_footer_images))
     )
+    home_js_frag = pathlib.Path("fragments/home.js").read_text(encoding="utf-8")
     article_js_frag = pathlib.Path("fragments/article.js").read_text(encoding="utf-8")
-    minified_article_js = subprocess.run(
-        ["terser", "--mangle-props", "--toplevel"],
-        input=common_js_frag + article_js_frag,
-        capture_output=True,
-        check=True,
-        encoding="utf-8",
-    ).stdout
+    minified_home_js, minified_article_js = generate_minified_js(
+        common_js_frag, home_js_frag, article_js_frag
+    )
 
     pages_data = build_pages(minified_article_js)
-
-    build_front_page(pages_data, common_js_frag)
+    build_front_page(pages_data, minified_home_js)
     build_robots_txt()
     build_sitemap_xml(pages_data)
     build_feed_xml(pages_data)
