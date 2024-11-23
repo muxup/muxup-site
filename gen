@@ -5,6 +5,7 @@
 # SPDX-License-Identifier: MIT
 
 import argparse
+import concurrent.futures
 import datetime
 import html
 import json
@@ -474,27 +475,41 @@ def generate_css_string(
 page_template = compile_template(pathlib.Path("templates/page.html.tpl").read_text())
 
 
+def build_single_page(
+    file: pathlib.Path, minified_article_js: str
+) -> Tuple[PageData, pathlib.Path]:
+    pd = parse_page(file)
+    out_path = dest_path / file.relative_to(pages_path).with_suffix(".html")
+    if not out_path.parent.exists():
+        out_path.parent.mkdir(parents=True)
+    page_content = page_template(
+        h=html.escape,
+        base_url=base_url,
+        favicon_svg=favicon_svg,
+        pd=pd,
+        minified_article_js=minified_article_js,
+        opengraph_image=f"https://v1.screenshot.11ty.dev/{urllib.parse.quote_plus(base_url+pd.permalink)}/opengraph/ar/bigger",
+        css=generate_css_string("article", pd.extra_css, pd.markdown_content_as_html),
+        article_meta=generate_article_meta(pd),
+    )
+    atomic_write_text(out_path, page_content)
+    return pd, out_path
+
+
 def build_pages(minified_article_js: str) -> list[PageData]:
     pages_data: list[PageData] = []
-    for file in sorted(pages_path.rglob("*.md")):
-        pd = parse_page(file)
-        pages_data.append(pd)
-        out_path = dest_path / file.relative_to(pages_path).with_suffix(".html")
-        if not out_path.parent.exists():
-            out_path.parent.mkdir(parents=True)
-        page_content = page_template(
-            h=html.escape,
-            base_url=base_url,
-            favicon_svg=favicon_svg,
-            pd=pd,
-            minified_article_js=minified_article_js,
-            opengraph_image=f"https://v1.screenshot.11ty.dev/{urllib.parse.quote_plus(base_url+pd.permalink)}/opengraph/ar/bigger",
-            css=generate_css_string(
-                "article", pd.extra_css, pd.markdown_content_as_html
-            ),
-            article_meta=generate_article_meta(pd),
-        )
-        atomic_write_text(out_path, page_content)
+
+    with concurrent.futures.ProcessPoolExecutor(max_workers=os.cpu_count()) as executor:
+        futures = [
+            executor.submit(build_single_page, file, minified_article_js)
+            for file in sorted(pages_path.rglob("*.md"))
+        ]
+        for future in concurrent.futures.as_completed(futures):
+            pd, out_path = future.result()
+            pages_data.append(pd)
+            # Need to manually add to written_dest_files as changes from
+            # within the process won't be reflected here.
+            written_dest_files.add(out_path)
     return pages_data
 
 
