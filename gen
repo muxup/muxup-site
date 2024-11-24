@@ -15,6 +15,7 @@ import pathlib
 import re
 import shutil
 import subprocess
+import sys
 import threading
 import tomllib
 import urllib.parse
@@ -50,6 +51,7 @@ favicon_svg = (
 
 pages_path = pathlib.Path("pages")
 dest_path = pathlib.Path("staged")
+deployed_path = pathlib.Path("deployed")
 
 
 # Helpers
@@ -675,7 +677,6 @@ def deploy() -> None:
     if not dest_path.is_dir():
         raise SystemExit(f"{dest_path} folder not present")
 
-    deployed_path = pathlib.Path("deployed")
     if deployed_path.exists():
         shutil.rmtree(deployed_path)
     shutil.copytree(dest_path, deployed_path)
@@ -705,6 +706,15 @@ def deploy() -> None:
     subprocess.run(
         ["rsync", "-avcz", "--no-t", "--delete", f"{deployed_path}/", deploy_target],
         check=True,
+    )
+
+
+def diff() -> None:
+    print(f"Diff between '{dest_path}/' and '{deployed_path}/':")
+    sys.exit(
+        subprocess.run(
+            ["diff", "--color", "--exclude=*.br", "-r", deployed_path, dest_path]
+        ).returncode
     )
 
 
@@ -770,6 +780,9 @@ subparsers = parser.add_subparsers(
 )
 build_parser = subparsers.add_parser("build", help="Rebuild the site and exit")
 build_parser = subparsers.add_parser("deploy", help="Deploy the already-built files")
+build_parser = subparsers.add_parser(
+    "diff", help="Diff between current staged and deployed directories"
+)
 help_parser = subparsers.add_parser("help", help="Show this help message")
 serve_parser = subparsers.add_parser(
     "serve", help="Serve with simple-reload JS injected, rebuilding upon edit"
@@ -780,6 +793,8 @@ if args.command == "build":
     rebuild()
 elif args.command == "deploy":
     deploy()
+elif args.command == "diff":
+    diff()
 elif args.command == "help":
     parser.print_help()
 elif args.command == "serve":
