@@ -49,7 +49,7 @@ favicon_svg = (
 )
 
 pages_path = pathlib.Path("pages")
-dest_path = pathlib.Path("dist")
+dest_path = pathlib.Path("staged")
 
 
 # Helpers
@@ -675,14 +675,14 @@ def deploy() -> None:
     if not dest_path.is_dir():
         raise SystemExit(f"{dest_path} folder not present")
 
-    tmp_path = pathlib.Path("tmp")
-    if tmp_path.exists():
-        shutil.rmtree(tmp_path)
-    shutil.copytree(dest_path, tmp_path)
+    deployed_path = pathlib.Path("deployed")
+    if deployed_path.exists():
+        shutil.rmtree(deployed_path)
+    shutil.copytree(dest_path, deployed_path)
 
     print("Compressing files with brotli")
     subprocess.run(
-        "find tmp \\( -name '*.html' -o -name '*.svg' \\) -print0 | "
+        f"find {deployed_path} \\( -name '*.html' -o -name '*.svg' \\) -print0 | "
         "xargs -0 -P$(nproc) brotli -q 11 -k -f",
         shell=True,
         check=True,
@@ -703,11 +703,9 @@ def deploy() -> None:
 
     print("Rsyncing")
     subprocess.run(
-        ["rsync", "-avcz", "--no-t", "--delete", f"{tmp_path}/", deploy_target],
+        ["rsync", "-avcz", "--no-t", "--delete", f"{deployed_path}/", deploy_target],
         check=True,
     )
-
-    shutil.rmtree(tmp_path)
 
 
 refresh_js = pathlib.Path("fragments/simple-reload.js").read_text(encoding="utf-8")
