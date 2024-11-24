@@ -15,10 +15,9 @@ Arch packages:
       entr \
       flake8 \
       mypy \
-      python-black \
-      python-isort \
       python-mistletoe \
       python-pygments \
+      ruff
 
 AUR packages:
 
