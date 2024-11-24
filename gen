@@ -671,6 +671,45 @@ def rebuild() -> None:
     print("Rebuild finished")
 
 
+def deploy() -> None:
+    if not dest_path.is_dir():
+        raise SystemExit(f"{dest_path} folder not present")
+
+    tmp_path = pathlib.Path("tmp")
+    if tmp_path.exists():
+        shutil.rmtree(tmp_path)
+    shutil.copytree(dest_path, tmp_path)
+
+    print("Compressing files with brotli")
+    subprocess.run(
+        "find tmp \\( -name '*.html' -o -name '*.svg' \\) -print0 | "
+        "xargs -0 -P$(nproc) brotli -q 11 -k -f",
+        shell=True,
+        check=True,
+    )
+
+    try:
+        deploy_target = subprocess.run(
+            ["git", "config", "get", "muxup.deploytarget"],
+            text=True,
+            check=True,
+            capture_output=True,
+        ).stdout.strip()
+    except subprocess.CalledProcessError:
+        raise SystemExit(
+            "Failed to get deploy target from git config.\n"
+            "Set it with: git config set muxup.deploytarget 'user@host:/path/to/target'"
+        )
+
+    print("Rsyncing")
+    subprocess.run(
+        ["rsync", "-avcz", "--no-t", "--delete", f"{tmp_path}/", deploy_target],
+        check=True,
+    )
+
+    shutil.rmtree(tmp_path)
+
+
 refresh_js = pathlib.Path("fragments/simple-reload.js").read_text(encoding="utf-8")
 
 
@@ -732,6 +771,7 @@ subparsers = parser.add_subparsers(
     dest="command", help="Available commands", required=True
 )
 build_parser = subparsers.add_parser("build", help="Rebuild the site and exit")
+build_parser = subparsers.add_parser("deploy", help="Deploy the already-built files")
 help_parser = subparsers.add_parser("help", help="Show this help message")
 serve_parser = subparsers.add_parser(
     "serve", help="Serve with simple-reload JS injected, rebuilding upon edit"
@@ -740,6 +780,8 @@ args = parser.parse_args()
 
 if args.command == "build":
     rebuild()
+elif args.command == "deploy":
+    deploy()
 elif args.command == "help":
     parser.print_help()
 elif args.command == "serve":
