@@ -33,6 +33,9 @@ from pygments import highlight
 from pygments.formatters.html import HtmlFormatter
 from pygments.lexers import get_lexer_by_name as get_lexer
 
+# All paths etc are relative to the location of this script.
+os.chdir(pathlib.Path(__file__).parent)
+
 # Data definitions
 base_url = "https://muxup.com"
 
@@ -771,7 +774,6 @@ def rebuild_loop() -> None:
 
 # Command line handling
 
-os.chdir(pathlib.Path(__file__).parent)
 parser = argparse.ArgumentParser(
     description="muxup.com static site generator", add_help=False
 )
