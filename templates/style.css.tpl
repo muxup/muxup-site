@@ -198,6 +198,30 @@ visibility:visible;
 .anchor::before {
 content:"#";
 }
+details {
+font-size:.833rem;
+}
+details summary {
+margin:.75rem 0 .5rem 0;
+font-weight:600;
+cursor:pointer;
+font-size:1.2rem;
+line-height:1.25;
+letter-spacing:-.025em;
+list-style:none;
+}
+details summary > * {
+display:inline;
+}
+summary::-webkit-details-marker {
+display:none;
+}
+summary::after {
+content: " »";
+}
+details[open] summary::after {
+content: " «";
+}
 $ endif
 $ if "<h3" in target_html
 h3 {
@@ -285,32 +309,6 @@ font-weight:700;
 line-height:1;
 padding:2px 4px;
 white-space:nowrap;
-}
-$ endif
-$ if "<details" in target_html
-details {
-font-size:.833rem;
-}
-details summary {
-margin:.75rem 0 .5rem 0;
-font-weight:600;
-cursor:pointer;
-font-size:1.2rem;
-line-height:1.25;
-letter-spacing:-.025em;
-list-style:none;
-}
-details summary > * {
-display:inline;
-}
-summary::-webkit-details-marker {
-display:none;
-}
-summary::after {
-content: " »";
-}
-details[open] summary::after {
-content: " «";
 }
 $ endif
 $ if extra_css

@@ -415,7 +415,7 @@ def render_markdown(
         check_and_rewrite_links(doc)
         last_major_update, last_minor_update = process_changelog(doc, renderer)
         markdown_content_as_html = renderer.render(doc)
-        if not (yyyyqq_dir or last_major_update or last_minor_update):
+        if not (last_major_update or last_minor_update):
             markdown_content_as_html = f"""\
 {markdown_content_as_html}
 <hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor" aria-hidden="true" tabindex="-1"></a>Article changelog</summary>
