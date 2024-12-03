@@ -703,7 +703,7 @@ def deploy() -> None:
     try:
         deploy_target = subprocess.run(
             ["git", "config", "get", "muxup.deploytarget"],
-            text=True,
+            encoding="utf-8",
             check=True,
             capture_output=True,
         ).stdout.strip()
@@ -784,7 +784,7 @@ def status() -> None:
     res = subprocess.run(
         ["diff", "--color", "--exclude=*.br", "-q", "-r", deployed_path, dest_path],
         capture_output=True,
-        text=True,
+        encoding="utf-8",
     )
     if res.returncode > 1:
         raise SystemExit("Unexpected failure executing diff")
