@@ -14,7 +14,7 @@ available for direct purchase or in development boards that feature RISC-V
 cores programmable by the end user. I'm certain to be missing some
 SoCs or have some mistakes or missing information - any corrections very
 gratefully received at asb@muxup.com or
-[@asbradbury](https://twitter.com/asbradbury). I'm focusing almost
+[asbradbury.org on bsky](https://bsky.app/profile/asbradbury.org). I'm focusing almost
 exclusively on the RISC-V aspects of each SoC - i.e. don't expect a detailed
 listing of other on-chip peripherals or accelerators.
 
@@ -591,6 +591,7 @@ listing of other on-chip peripherals or accelerators.
   hasn't been any news since.
 
 ## Article changelog
+* 2024-12-03: (minor) Replace twitter link with bsky.
 * 2023-03-31: (minor) Add Renesas R9A06G150 to the list.
 * 2023-03-26: (minor) Add HPM6750 to the list.
 * 2023-03-19: (minor) Add note on silicon bug in the Renesas RZ/Five.

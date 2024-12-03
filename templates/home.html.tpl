@@ -27,7 +27,7 @@
 <div class="subtitle">Adventures in collaborative open source development</div>
 <p>
 A space maintained by Alex Bradbury - projects, blog posts, and notes on things I've been working on.
-See also: <a href="https://github.com/muxup">GitHub</a>
+See also: <a href="https://github.com/muxup">GitHub</a>, <a href="https://bsky.app/profile/asbradbury.org">Bluesky</a>, <a href="https://fosstodon.org/@asb">Mastodon</a>.
 </div>
 <div class="card-grid">
 $ for pd in sorted_filtered_pages_for_cards
