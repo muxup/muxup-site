@@ -308,7 +308,7 @@ class MuxupRenderer(mistletoe.HTMLRenderer):  # type:ignore
 
 # Renders markdown to html, applying any necessary checks and transformations
 # at the AST level. Also extracts the title (first heading). Returns a tuple
-# of (rendered_markdown, title).
+# of (rendered_markdown, title, last_major_update, last_minor_update).
 def render_markdown(
     content: str,
     src_file: pathlib.Path,
