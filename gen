@@ -320,6 +320,7 @@ def render_markdown(
         initial_changelog_entry = "(Draft: not yet 'published')"
     else:
         initial_changelog_entry = f"{published_date}: Initial publication date."
+    changelog_opening_html = '<hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor" aria-hidden="true" tabindex="-1"></a>Article changelog</summary>'
 
     def err(desc: str) -> None:
         raise SystemExit(f"ERROR: {src_file} {desc}")
@@ -401,7 +402,7 @@ def render_markdown(
             mistletoe.Document(f"* {initial_changelog_entry}").children[0].children[0]
         )
         doc.children[changelog_idx] = mistletoe.block_token.HTMLBlock(
-            '<hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor" aria-hidden="true" tabindex="-1"></a>Article changelog</summary>'
+            changelog_opening_html
         )
         doc.children.insert(
             changelog_idx + 2, mistletoe.block_token.HTMLBlock("</details>")
@@ -418,7 +419,7 @@ def render_markdown(
         if not (last_major_update or last_minor_update):
             markdown_content_as_html = f"""\
 {markdown_content_as_html}
-<hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor" aria-hidden="true" tabindex="-1"></a>Article changelog</summary>
+{changelog_opening_html}
 <ul>
 <li>{initial_changelog_entry}</li>
 </ul>
