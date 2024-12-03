@@ -31,6 +31,11 @@ point I can file a useful bug report). I'm sharing this post because the
 approach may still be useful to people, especially if you rely on `fakeroot`
 for only the minimum needed to get a bootable image in qemu-system.
 
+Not explored in this article: using newuidmap/newgidmap with appropriate
+/etc/subuid (see
+[here](https://rootlesscontaine.rs/getting-started/common/subuid/)), though
+note one-off setup is needed to allow your user to set sufficient UIDs.
+
 ## My preferred solution
 
 Assuming you have `debootstrap` and `fakeroot` installed (`sudo pacman -S
@@ -135,13 +140,14 @@ author.
 
 ## Limitations
 
-As the file permissions info stored in `fakeroot.env` is keyed by the inode,
+* See the **warning** near the top of this article about correctness issues I've
+encountered in some cases.
+* As the file permissions info stored in `fakeroot.env` is keyed by the inode,
 you may lose important permissions information if you copy the rootfs. You
 should instead `tar` it under `fakeroot`, and if extracting in an unprivileged
 environment again then untar it under `fakeroot`, creating a new
 `fakeroot.env`.
-
-The use of `unshare` requires that unpriveleged user namespace support is
+* The use of `unshare` requires that unprivileged user namespace support is
 enabled. I believe this is the case in all common distributions by now, but
 please check your distro's guidance if not.
 
