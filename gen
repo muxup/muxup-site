@@ -237,7 +237,7 @@ def parse_page(file: pathlib.Path) -> PageData:
         title,
         last_major_update,
         last_minor_update,
-    ) = render_markdown(markdown_content, file, published_date, yyyyqq_dir)
+    ) = render_markdown(markdown_content, file, published_date, is_draft, yyyyqq_dir)
     return PageData(
         src_path=file,
         yyyyqq_dir=yyyyqq_dir,
@@ -310,8 +310,17 @@ class MuxupRenderer(mistletoe.HTMLRenderer):  # type:ignore
 # at the AST level. Also extracts the title (first heading). Returns a tuple
 # of (rendered_markdown, title).
 def render_markdown(
-    content: str, src_file: pathlib.Path, published_date: str, yyyyqq_dir: str | None
+    content: str,
+    src_file: pathlib.Path,
+    published_date: str,
+    is_draft: bool,
+    yyyyqq_dir: str | None,
 ) -> tuple[str, str, str | None, str | None]:
+    if is_draft:
+        initial_changelog_entry = "(Draft: not yet 'published')"
+    else:
+        initial_changelog_entry = f"{published_date}: Initial publication date."
+
     def err(desc: str) -> None:
         raise SystemExit(f"ERROR: {src_file} {desc}")
 
@@ -389,9 +398,7 @@ def render_markdown(
             else:
                 last_major_update = max(last_major_update or "", li_date)
         changelog_list.children.append(
-            mistletoe.Document(f"* {published_date}: Initial publication date.")
-            .children[0]
-            .children[0]
+            mistletoe.Document(f"* {initial_changelog_entry}").children[0].children[0]
         )
         doc.children[changelog_idx] = mistletoe.block_token.HTMLBlock(
             '<hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor" aria-hidden="true" tabindex="-1"></a>Article changelog</summary>'
@@ -413,7 +420,7 @@ def render_markdown(
 {markdown_content_as_html}
 <hr style="margin-top:1.75rem"/><details id="article-changelog"><summary><a href="#article-changelog" class="anchor" aria-hidden="true" tabindex="-1"></a>Article changelog</summary>
 <ul>
-<li>{published_date}: Initial publication date.</li>
+<li>{initial_changelog_entry}</li>
 </ul>
 </details>"""
 
