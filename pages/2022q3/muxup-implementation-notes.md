@@ -17,7 +17,7 @@ Markdown files. [Zola](https://www.getzola.org/) seems like an excellent
 option, but as I had a very specific idea on how I wanted pages to be
 represented in source form and the format and structure of the output, writing
 my own was the easier option (see
-[build.py](https://github.com/muxup/muxup-site/blob/main/build.py)). Plus,
+[gen](https://github.com/muxup/muxup-site/blob/main/gen)). Plus,
 yak-shaving is fun.
 
 I opted to use [mistletoe](https://github.com/miyuchina/mistletoe) for
@@ -302,8 +302,7 @@ A few notes on the above:
   `redir` and `error`.
 * Caddy doesn't support dynamically brotli compressing responses, so the
   `precompressed br` option of `file_server` is used to serve pre-compressed
-  files (as prepared by the [deploy
-  script](https://github.com/muxup/muxup-site/blob/main/deploy.sh)).
+  files (as prepared during deployment)
 * I've [asked for
   advice](https://caddy.community/t/suggestions-for-simplifying-my-caddyfile/17135)
   on improving the above Caddyfile on the Caddy Discourse.
@@ -331,7 +330,8 @@ tradition than with a hastily drawn doodle by a random person on the internet
 that spins when your mouse hovers over it?
 
 ## Article changelog
-
+* 2024-12-03: (minor) Fix links that were broken after site generator
+  refactoring.
 * 2022-09-11: (minor) Add HSTS, tweak no-www redirect, and reject HTTP methods
   other than GET or POST in Caddyfile. Also link to thread requesting
   suggestions for this Caddyfile on Caddy's Discourse.
