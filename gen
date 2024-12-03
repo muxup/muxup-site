@@ -780,6 +780,42 @@ def rebuild_loop() -> None:
         )
 
 
+def status() -> None:
+    res = subprocess.run(
+        ["diff", "--color", "--exclude=*.br", "-q", "-r", deployed_path, dest_path],
+        capture_output=True,
+        text=True,
+    )
+    if res.returncode > 1:
+        raise SystemExit("Unexpected failure executing diff")
+    num_differing_files = res.stdout.count("\n")
+    if num_differing_files == 0:
+        print("No differences between 'deployed' and 'staged'\n")
+    else:
+        print(f"{num_differing_files} differing files between 'deployed' and 'staged':")
+        print(res.stdout)
+
+    draft_articles = []
+    non_draft_articles = []
+    for file in pages_path.rglob("*.md"):
+        metadata, _ = parse_frontmatter(file)
+        if metadata["published"] == "draft":
+            draft_articles.append(file)
+        else:
+            non_draft_articles.append(file)
+
+    num_draft_articles = len(draft_articles)
+    if num_draft_articles == 0:
+        print("0 draft articles found\n")
+    else:
+        print(f"{num_draft_articles} draft articles found:")
+        for file in sorted(draft_articles):
+            print(file)
+        print()
+
+    print(f"{len(non_draft_articles)} published articles found.")
+
+
 # Command line handling
 
 parser = argparse.ArgumentParser(
@@ -796,6 +832,10 @@ build_parser = subparsers.add_parser(
 help_parser = subparsers.add_parser("help", help="Show this help message")
 serve_parser = subparsers.add_parser(
     "serve", help="Serve with simple-reload JS injected, rebuilding upon edit"
+)
+status_parser = subparsers.add_parser(
+    "status",
+    help="Print status of site (e.g. number of draft posts, if there's a staged vs deployed diff)",
 )
 args = parser.parse_args()
 
@@ -816,3 +856,5 @@ elif args.command == "serve":
     except KeyboardInterrupt:
         print("Ctrl-C received, shutting down server")
         raise SystemExit
+elif args.command == "status":
+    status()
