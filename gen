@@ -825,8 +825,8 @@ subparsers = parser.add_subparsers(
     dest="command", help="Available commands", required=True
 )
 build_parser = subparsers.add_parser("build", help="Rebuild the site and exit")
-build_parser = subparsers.add_parser("deploy", help="Deploy the already-built files")
-build_parser = subparsers.add_parser(
+deploy_parser = subparsers.add_parser("deploy", help="Deploy the already-built files")
+diff_parser = subparsers.add_parser(
     "diff", help="Diff between current staged and deployed directories"
 )
 help_parser = subparsers.add_parser("help", help="Show this help message")
