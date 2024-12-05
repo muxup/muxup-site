@@ -162,8 +162,7 @@ improvements when using virtiofsd.
 * `mksquashfs ~/llvm-project llvm-project.squashfs -no-compression -force-uid 1001 -force-gid 1001 -e \
   .git $(find $HOME/llvm-project/build -maxdepth 1 -mindepth 1 -type d -not -name 'stage2cross' -printf '-e build/%P ')`
 * Add this to the qemu command line: `-drive
-  file=$HOME/llvm-project.squashfs,if=none,id=llvm,format=raw -device
-  virtio-net-device,netdev=net`
+  file=$HOME/llvm-project.squashfs,if=none,id=llvm,format=raw`
 * `sudo mount -t squashfs /dev/vdb /mnt`
 * Use the same instructions for setting up overlayfs as for 9pfs above.
   There's no need to run the tests using sudo as we've set the appropriate
@@ -212,3 +211,7 @@ tar --create \
   | ssh -p10222 asb@localhost "mkdir -p llvm-project && tar xf - -C \
   llvm-project"
 ```
+
+## Article changelog
+* 2024-12-04: (minor) Correct where I'd accidentally copied too much for the
+  ext4 qemu command line.
