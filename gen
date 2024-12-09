@@ -5,6 +5,7 @@
 # SPDX-License-Identifier: MIT
 
 import argparse
+import atexit
 import concurrent.futures
 import datetime
 import html
@@ -22,7 +23,7 @@ import urllib.parse
 from dataclasses import dataclass
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Any, Callable, Tuple, TypeVar
+from typing import Any, Callable, List, Tuple, TypeVar
 
 import mistletoe
 import mistletoe.utils
@@ -780,6 +781,18 @@ def rebuild_loop() -> None:
         )
 
 
+def get_draft_articles() -> Tuple[List[pathlib.Path], List[pathlib.Path]]:
+    draft_articles = []
+    non_draft_articles = []
+    for file in pages_path.rglob("*.md"):
+        metadata, _ = parse_frontmatter(file)
+        if metadata["published"] == "draft":
+            draft_articles.append(file)
+        else:
+            non_draft_articles.append(file)
+    return draft_articles, non_draft_articles
+
+
 def status() -> None:
     res = subprocess.run(
         ["diff", "--color", "--exclude=*.br", "-q", "-r", deployed_path, dest_path],
@@ -795,14 +808,7 @@ def status() -> None:
         print(f"{num_differing_files} differing files between 'deployed' and 'staged':")
         print(res.stdout)
 
-    draft_articles = []
-    non_draft_articles = []
-    for file in pages_path.rglob("*.md"):
-        metadata, _ = parse_frontmatter(file)
-        if metadata["published"] == "draft":
-            draft_articles.append(file)
-        else:
-            non_draft_articles.append(file)
+    draft_articles, non_draft_articles = get_draft_articles()
 
     num_draft_articles = len(draft_articles)
     if num_draft_articles == 0:
@@ -816,6 +822,72 @@ def status() -> None:
     print(f"{len(non_draft_articles)} published articles found.")
 
 
+def commit_untracked() -> None:
+    def exec(*args: Any, **kwargs: Any) -> tuple[str, int]:
+        kwargs.setdefault("encoding", "utf-8")
+        kwargs.setdefault("capture_output", True)
+        kwargs.setdefault("check", True)
+
+        result = subprocess.run(*args, **kwargs)
+        return result.stdout.rstrip("\n"), result.returncode
+
+    result, _ = exec(["git", "status", "-uall", "--porcelain", "-z"])
+    untracked_files = []
+    entries = result.split("\0")
+    for entry in entries:
+        if entry.startswith("??"):
+            untracked_files.append(entry[3:])
+
+    if len(untracked_files) == 0:
+        print("No untracked files to commit.")
+        return
+
+    bak_branch = "refs/heads/bak"
+    show_ref_result, returncode = exec(
+        ["git", "show-ref", "--verify", bak_branch], check=False
+    )
+    if returncode != 0:
+        print("Branch {back_branch} doesn't yet exist - it will be created")
+        parent_commit = ""
+        parent_commit_tree = None
+        commit_message = "Initial commit of untracked files"
+        extra_write_tree_args = []
+    else:
+        parent_commit = show_ref_result.split()[0]
+        parent_commit_tree, _ = exec(["git", "rev-parse", f"{parent_commit}^{{tree}}"])
+        commit_message = "Update untracked files"
+        extra_write_tree_args = ["-p", parent_commit]
+
+    # Use a temporary index in order to create a commit. Add any untracked
+    # files to the index, create a tree object based on the index state, and
+    # finally create a commit using that tree object.
+    temp_index = pathlib.Path(".drafts.gitindex.tmp")
+    atexit.register(lambda: temp_index.unlink(missing_ok=True))
+    git_env = os.environ.copy()
+    git_env["GIT_INDEX_FILE"] = str(temp_index)
+    nul_terminated_untracked_files = "\0".join(file for file in untracked_files)
+    exec(
+        ["git", "update-index", "--add", "-z", "--stdin"],
+        input=nul_terminated_untracked_files,
+        env=git_env,
+    )
+    tree_sha, _ = exec(["git", "write-tree"], env=git_env)
+    if tree_sha == parent_commit_tree:
+        print("Untracked files are unchanged vs last commit - nothing to do.")
+        return
+    commit_sha, _ = exec(
+        ["git", "commit-tree", tree_sha] + extra_write_tree_args,
+        input=commit_message,
+    )
+    exec(["git", "update-ref", bak_branch, commit_sha])
+
+    diff_stat, _ = exec(["git", "show", "--stat", "--format=", commit_sha])
+
+    print(f"Backup branch '{bak_branch}' updated successfully.")
+    print(f"Created commit {commit_sha} with the following modifications:")
+    print(diff_stat)
+
+
 # Command line handling
 
 parser = argparse.ArgumentParser(
@@ -825,6 +897,10 @@ subparsers = parser.add_subparsers(
     dest="command", help="Available commands", required=True
 )
 build_parser = subparsers.add_parser("build", help="Rebuild the site and exit")
+commit_untracked_parser = subparsers.add_parser(
+    "commit-untracked",
+    help="Commit any untracked files (e.g. drafts) directly to the 'bak' branch",
+)
 deploy_parser = subparsers.add_parser("deploy", help="Deploy the already-built files")
 diff_parser = subparsers.add_parser(
     "diff", help="Diff between current staged and deployed directories"
@@ -841,6 +917,8 @@ args = parser.parse_args()
 
 if args.command == "build":
     rebuild()
+elif args.command == "commit-untracked":
+    commit_untracked()
 elif args.command == "deploy":
     deploy()
 elif args.command == "diff":
