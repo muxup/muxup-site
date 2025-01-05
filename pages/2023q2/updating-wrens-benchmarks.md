@@ -307,8 +307,8 @@ switching between the python packages to allow testing both 3.10 and 3.11):
 #!/usr/bin/env python3
 
 # Copyright Muxup contributors.
-# Distributed under the terms of the MIT license, see LICENSE for details.
-# SPDX-License-Identifier: MIT
+# Distributed under the terms of the MIT-0 license, see LICENSE for details.
+# SPDX-License-Identifier: MIT-0
 
 import statistics
 import subprocess
@@ -417,3 +417,6 @@ do_bench("Binary Trees", "binary_trees", all_runners)
 do_bench("Recursive Fibonacci", "fib", all_runners)
 print("Output written to out.md")
 ```
+
+## Article changelog
+* 2025-01-05: (minor) Change license for benchmark script from MIT to MIT-0.

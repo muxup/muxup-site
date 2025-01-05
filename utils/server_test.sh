@@ -1,8 +1,8 @@
 #!/bin/sh
 
 # Copyright Muxup contributors.
-# Distributed under the terms of the MIT license, see LICENSE for details.
-# SPDX-License-Identifier: MIT
+# Distributed under the terms of the MIT-0 license, see LICENSE for details.
+# SPDX-License-Identifier: MIT-0
 
 BASE_URL="https://muxup.com"
 BASE_URL_WWW="https://www.muxup.com"

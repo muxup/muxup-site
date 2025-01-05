@@ -99,7 +99,7 @@ so will be maintained if navigating to different pages within the same domain
 in that tab.
 
 In terms of licensing, the implementation is so straight-forward it hardly
-feels copyrightable. Please consider it public domain, or MIT if you're more
+feels copyrightable. Please consider it public domain, or MIT-0 if you're more
 comfortable with an explicit license.
 
 ## Implementation notes
@@ -112,6 +112,7 @@ comfortable with an explicit license.
   be a good additional simplification.
 
 ## Article changelog
+* 2025-01-05: (minor) The license is now MIT-0 rather than MIT.
 * 2022-09-17: (minor) Added link to [simple-reload GitHub
   repo](https://github.com/muxup/simple-reload).
 * 2022-09-11: (minor) Removed incorrect statement about `sessionStorage` usage being

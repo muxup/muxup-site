@@ -31,7 +31,7 @@ Other:
 
 ## License
 
-All source code (including CSS) is covered by the [MIT
+All source code (including CSS) is covered by the [MIT-0
 license](https://github.com/muxup/muxup-site/blob/main/LICENSE), while all
 content in the `pages/` subdirectory and any images are licensed under the
 [Creative Commons Attribution 4.0
