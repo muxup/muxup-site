@@ -1,4 +1,5 @@
 cache/
 deployed/
+local_serve/
 staged/
 *.br

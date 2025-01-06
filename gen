@@ -55,6 +55,7 @@ favicon_svg = (
 
 pages_path = pathlib.Path("pages")
 dest_path = pathlib.Path("staged")
+local_serve_path = pathlib.Path("local_serve")
 deployed_path = pathlib.Path("deployed")
 
 
@@ -634,8 +635,12 @@ def generate_minified_js(
         return (home_future.result(), article_future.result())
 
 
-def rebuild() -> None:
+def rebuild(for_local_serve: bool = False) -> None:
     print("Starting rebuild")
+    global dest_path
+    if for_local_serve:
+        print("Building for local serve usage")
+        dest_path = local_serve_path
     if not dest_path.exists():
         dest_path.mkdir()
 
@@ -738,7 +743,7 @@ class MuxupHTTPRequestHandler(BaseHTTPRequestHandler):
         path_str = urllib.parse.unquote(urllib.parse.urlparse(self.path).path)[1:]
         if path_str == "":
             path_str = "index.html"
-        path = dest_path / path_str
+        path = local_serve_path / path_str
         if not path.is_file() and path.suffix != ".html":
             fallback_path = path.with_name(path.name + ".html")
             if not fallback_path.is_file():
@@ -776,7 +781,7 @@ def serve() -> None:
             )
             filenames = [str(p) for p in paths if p.is_file()]
             subprocess.run(
-                ["entr", "-d", "-p", "./gen", "build"],
+                ["entr", "-d", "-p", "./gen", "build", "--for-local-serve"],
                 input="\n".join(filenames),
                 encoding="utf-8",
             )
@@ -907,6 +912,11 @@ subparsers = parser.add_subparsers(
     dest="command", help="Available commands", required=True
 )
 build_parser = subparsers.add_parser("build", help="Rebuild the site and exit")
+build_parser.add_argument(
+    "--for-local-serve",
+    action="store_true",
+    help="Generate files in format appropriate for local http server",
+)
 commit_untracked_parser = subparsers.add_parser(
     "commit-untracked",
     help="Commit any untracked files (e.g. drafts) directly to the 'bak' branch",
@@ -926,7 +936,7 @@ status_parser = subparsers.add_parser(
 args = parser.parse_args()
 
 if args.command == "build":
-    rebuild()
+    rebuild(for_local_serve=args.for_local_serve)
 elif args.command == "commit-untracked":
     commit_untracked()
 elif args.command == "deploy":
