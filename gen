@@ -758,7 +758,6 @@ class MuxupHTTPRequestHandler(BaseHTTPRequestHandler):
             "Content-type", mimetypes.guess_type(path)[0] or "application/octet-stream"
         )
         self.end_headers()
-        print(path.suffix)
         if path.suffix in [".html", ".htm"]:
             text = path.read_text()
             text = text.replace(
