@@ -765,20 +765,30 @@ class MuxupHTTPRequestHandler(BaseHTTPRequestHandler):
                 shutil.copyfileobj(f, self.wfile)
 
 
-def rebuild_loop() -> None:
-    while True:
-        paths = (
-            list(pathlib.Path("fragments").rglob("*"))
-            + list(pages_path.rglob("*"))
-            + list(pathlib.Path("static").rglob("*"))
-            + [pathlib.Path("build.py")]
-        )
-        filenames = [str(p) for p in paths if p.is_file()]
-        subprocess.run(
-            ["entr", "-d", "-p", "./gen", "build"],
-            input="\n".join(filenames),
-            encoding="utf-8",
-        )
+def serve() -> None:
+    def rebuild_loop() -> None:
+        while True:
+            paths = (
+                list(pathlib.Path("fragments").rglob("*"))
+                + list(pages_path.rglob("*"))
+                + list(pathlib.Path("static").rglob("*"))
+                + [pathlib.Path("build.py")]
+            )
+            filenames = [str(p) for p in paths if p.is_file()]
+            subprocess.run(
+                ["entr", "-d", "-p", "./gen", "build"],
+                input="\n".join(filenames),
+                encoding="utf-8",
+            )
+
+    print("Launching watcher")
+    threading.Thread(target=rebuild_loop, daemon=True).start()
+    print("Starting server. See http://localhost:5500")
+    try:
+        HTTPServer(("localhost", 5500), MuxupHTTPRequestHandler).serve_forever()
+    except KeyboardInterrupt:
+        print("Ctrl-C received, shutting down server")
+        raise SystemExit
 
 
 def get_draft_articles() -> Tuple[List[pathlib.Path], List[pathlib.Path]]:
@@ -926,13 +936,6 @@ elif args.command == "diff":
 elif args.command == "help":
     parser.print_help()
 elif args.command == "serve":
-    print("Launching watcher")
-    threading.Thread(target=rebuild_loop, daemon=True).start()
-    print("Starting server. See http://localhost:5500")
-    try:
-        HTTPServer(("localhost", 5500), MuxupHTTPRequestHandler).serve_forever()
-    except KeyboardInterrupt:
-        print("Ctrl-C received, shutting down server")
-        raise SystemExit
+    serve()
 elif args.command == "status":
     status()
