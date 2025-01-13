@@ -775,7 +775,7 @@ def serve() -> None:
             )
             filenames = [str(p) for p in paths if p.is_file()]
             subprocess.run(
-                ["entr", "-d", "-p", "./gen", "build", "--for-local-serve"],
+                ["entr", "-d", "./gen", "build", "--for-local-serve"],
                 input="\n".join(filenames),
                 encoding="utf-8",
             )
