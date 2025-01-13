@@ -114,7 +114,7 @@ def compile_template(template_str: str) -> Callable[..., str]:
             expr_end = line.find("}}", expr_start)
             if expr_end == -1:
                 raise ValueError(f"Line {line_no}: Couldn't find matching }}")
-            emit_line(f"out.append(str({line[expr_start+2:expr_end]}))")
+            emit_line(f"out.append(str({line[expr_start + 2 : expr_end]}))")
             pos = expr_end + 2
     if len(stack) != 0:
         raise ValueError(f"Unclosed '{stack[-1]}'")
@@ -503,7 +503,7 @@ def build_single_page(
         favicon_svg=favicon_svg,
         pd=pd,
         minified_article_js=minified_article_js,
-        opengraph_image=f"https://v1.screenshot.11ty.dev/{urllib.parse.quote_plus(base_url+pd.permalink)}/opengraph/ar/bigger",
+        opengraph_image=f"https://v1.screenshot.11ty.dev/{urllib.parse.quote_plus(base_url + pd.permalink)}/opengraph/ar/bigger",
         css=generate_css_string("article", pd.extra_css, pd.markdown_content_as_html),
         article_meta=generate_article_meta(pd),
     )
@@ -662,7 +662,9 @@ def rebuild(for_local_serve: bool = False) -> None:
         .read_text(encoding="utf-8")
         .replace("NUM_FOOTER_IMAGES", str(num_footer_images))
     )
-    refresh_js_frag = pathlib.Path("fragments/simple-reload.js").read_text(encoding="utf-8")
+    refresh_js_frag = pathlib.Path("fragments/simple-reload.js").read_text(
+        encoding="utf-8"
+    )
     if for_local_serve:
         common_js_frag = f"{common_js_frag}\n{refresh_js_frag}"
     home_js_frag = pathlib.Path("fragments/home.js").read_text(encoding="utf-8")
