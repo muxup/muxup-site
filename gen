@@ -662,6 +662,9 @@ def rebuild(for_local_serve: bool = False) -> None:
         .read_text(encoding="utf-8")
         .replace("NUM_FOOTER_IMAGES", str(num_footer_images))
     )
+    refresh_js_frag = pathlib.Path("fragments/simple-reload.js").read_text(encoding="utf-8")
+    if for_local_serve:
+        common_js_frag = f"{common_js_frag}\n{refresh_js_frag}"
     home_js_frag = pathlib.Path("fragments/home.js").read_text(encoding="utf-8")
     article_js_frag = pathlib.Path("fragments/article.js").read_text(encoding="utf-8")
     minified_home_js, minified_article_js = generate_minified_js(
@@ -735,9 +738,6 @@ def diff() -> None:
     )
 
 
-refresh_js = pathlib.Path("fragments/simple-reload.js").read_text(encoding="utf-8")
-
-
 class MuxupHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         path_str = urllib.parse.unquote(urllib.parse.urlparse(self.path).path)[1:]
@@ -758,15 +758,8 @@ class MuxupHTTPRequestHandler(BaseHTTPRequestHandler):
             "Content-type", mimetypes.guess_type(path)[0] or "application/octet-stream"
         )
         self.end_headers()
-        if path.suffix in [".html", ".htm"]:
-            text = path.read_text()
-            text = text.replace(
-                "<head>", f'<head><script type="module">{refresh_js}</script>', 1
-            )
-            self.wfile.write(text.encode())
-        else:
-            with path.open("rb") as f:
-                shutil.copyfileobj(f, self.wfile)
+        with path.open("rb") as f:
+            shutil.copyfileobj(f, self.wfile)
 
 
 def serve() -> None:
