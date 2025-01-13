@@ -9,9 +9,6 @@
 <meta property="og:type" content="article"/>
 <meta property="og:url" content="{{base_url}}{{pd.permalink}}"/>
 <meta property="og:image" content="{{opengraph_image}}"/>
-<meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:site" content="@muxup">
-<meta property="twitter:creator" content="@asbradbury">
 <title>{{h(pd.title)}} - Muxup</title>
 <link rel="icon" sizes="any" href="data:image/svg+xml,{{favicon_svg}}">
 <meta name="description" content="{{h(pd.description)}}">

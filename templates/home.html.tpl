@@ -9,9 +9,6 @@
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="{{base_url}}"/>
 <meta property="og:image" content="{{opengraph_image}}"/>
-<meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:site" content="@muxup">
-<meta property="twitter:creator" content="@asbradbury">
 <title>Muxup - Adventures in collaborative open source development</title>
 <link rel="icon" sizes="any" href="data:image/svg+xml,{{favicon_svg}}">
 <style>
