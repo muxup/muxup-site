@@ -771,6 +771,7 @@ def serve() -> None:
                 list(pathlib.Path("fragments").rglob("*"))
                 + list(pages_path.rglob("*"))
                 + list(pathlib.Path("static").rglob("*"))
+                + list(pathlib.Path("templates").rglob("*"))
                 + [pathlib.Path("build.py")]
             )
             filenames = [str(p) for p in paths if p.is_file()]
