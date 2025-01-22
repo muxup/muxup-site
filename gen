@@ -10,7 +10,6 @@ import concurrent.futures
 import datetime
 import html
 import json
-import mimetypes
 import os
 import pathlib
 import re
@@ -21,8 +20,6 @@ import threading
 import tomllib
 import urllib.parse
 from dataclasses import dataclass
-from http import HTTPStatus
-from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Any, Callable, List, Tuple, TypeVar
 
 import mistletoe
@@ -494,7 +491,8 @@ def build_single_page(
     file: pathlib.Path, for_local_serve: bool, minified_article_js: str
 ) -> Tuple[PageData, pathlib.Path]:
     pd = parse_page(file)
-    out_path = dest_path / file.relative_to(pages_path).with_suffix(".html")
+    suffix = "" if for_local_serve else ".html"
+    out_path = dest_path / file.relative_to(pages_path).with_suffix(suffix)
     if not out_path.parent.exists():
         out_path.parent.mkdir(parents=True)
     page_content = page_template(
@@ -742,30 +740,6 @@ def diff() -> None:
     )
 
 
-class MuxupHTTPRequestHandler(BaseHTTPRequestHandler):
-    def do_GET(self) -> None:
-        path_str = urllib.parse.unquote(urllib.parse.urlparse(self.path).path)[1:]
-        if path_str == "":
-            path_str = "index.html"
-        path = local_serve_path / path_str
-        if not path.is_file() and path.suffix != ".html":
-            fallback_path = path.with_name(path.name + ".html")
-            if not fallback_path.is_file():
-                self.send_error(HTTPStatus.NOT_FOUND, "File not found")
-                return
-            path = fallback_path
-        if ".." in path.parts or not path.is_file():
-            self.send_error(HTTPStatus.NOT_FOUND, "File not found")
-            return
-        self.send_response(200)
-        self.send_header(
-            "Content-type", mimetypes.guess_type(path)[0] or "application/octet-stream"
-        )
-        self.end_headers()
-        with path.open("rb") as f:
-            shutil.copyfileobj(f, self.wfile)
-
-
 def serve(with_simple_reload: bool = False) -> None:
     def rebuild_loop() -> None:
         while True:
@@ -788,9 +762,26 @@ def serve(with_simple_reload: bool = False) -> None:
     threading.Thread(target=rebuild_loop, daemon=True).start()
     print("Starting server. See http://localhost:5500")
     try:
-        HTTPServer(("localhost", 5500), MuxupHTTPRequestHandler).serve_forever()
+        # TODO: Relying on default-mimetype is a bit of a hack. Ideally
+        # darkhttpd would support pretty URLs directly like requested in
+        # <https://github.com/emikulic/darkhttpd/issues/71>.
+        server = subprocess.Popen(
+            [
+                "darkhttpd",
+                "./local_serve",
+                "--port",
+                "5500",
+                "--addr",
+                "127.0.0.1",
+                "--default-mimetype",
+                "text/html",
+            ]
+        )
+        server.wait()
     except KeyboardInterrupt:
         print("Ctrl-C received, shutting down server")
+        server.terminate()
+        server.wait()
         raise SystemExit
 
 

@@ -12,6 +12,7 @@ information.
 Arch packages:
 
     sudo pacman -S \
+      darkhttpd \
       entr \
       flake8 \
       mypy \
