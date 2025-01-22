@@ -47,6 +47,9 @@ anything listed here.
   to replace them.
 * For simplicity I use UEFI boot and EFI stub. If you have problems with
   efibootmgr, you might want to use systemd-boot instead.
+* Generation of fallback initramfs is disabled, as Hetzner's rescue system is
+  the first port of call for any issues anyway and the fallback image has
+  grown quite large over time.
 * Disclaimer: As is hopefully obvious, the below instructions will overwrite
   anything on the hard drive of the system you're running them on.
 
@@ -58,7 +61,7 @@ for details on how to enter it. If you've previously used this server, you
 likely want to remove old `known_hosts` entries with `ssh-keygen -R
 your.server`.
 
-Now ssh in and do the following:
+Now ssh in (remembering `-lroot`) and do the following:
 
 ```sh
 wget http://mirror.hetzner.de/archlinux/iso/latest/archlinux-bootstrap-x86_64.tar.zst
@@ -145,7 +148,7 @@ arch-chroot /mnt
 
 Unfortunately I wasn't able to find a way to get ipv6 configured via DHCP on
 Hetzner's network, so we rely on hardcoding it (which seems to be [their
-recommendation](https://docs.hetzner.com/robot/dedicated-server/network/network-configuration-using-systemd-networkd/).
+recommendation](https://docs.hetzner.com/robot/dedicated-server/network/network-configuration-using-systemd-networkd/)).
 
 We set up sudo and also configure ssh to disable password-based login. A small
 swapfile is configured in order to allow the kernel to move allocated but not
@@ -161,9 +164,10 @@ ln -s /dev/null /etc/udev/rules.d/80-net-setup-link.rules # disable persistent n
 ssh-keygen -A # generate openssh host keys for the tinyssh hook to pick up
 printf "%s\n" "$PUBLIC_SSH_KEY" > /etc/tinyssh/root_key
 sed /etc/mkinitcpio.conf -i -e 's/^HOOKS=.*/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block mdadm_udev netconf tinyssh encryptssh filesystems fsck)/'
-# The call to tinyssh-convert in mkinitcpio-linux is incorrect, so do it
-# manually <https://github.com/grazzolini/mkinitcpio-tinyssh/issues/10>
-tinyssh-convert /etc/tinyssh/sshkeydir < /etc/ssh/ssh_host_ed25519_key
+
+# Disable building large fallback image that we'll never use.
+sed /etc/mkinitcpio.d/linux.preset -i -e 's/^PRESETS=.*/PRESETS=("default")/'
+
 mkinitcpio -p linux
 
 printf "efibootmgr before changes:\n==========================\n"
@@ -223,14 +227,20 @@ chmod 600 "/home/$NEW_USER/.ssh/authorized_keys"
 chown -R "$NEW_USER:users" "/home/$NEW_USER/.ssh"
 ```
 
-## Set user password and reboot
+## Set user password, configure resolv.conf, and reboot
 
 ```sh
 # The next command will ask for the user password (needed for sudo).
 passwd "$NEW_USER"
 ```
 
-Then <kbd>ctrl</kbd>+<kbd>d</kbd> twice and `reboot`.
+Then <kbd>ctrl</kbd>+<kbd>d</kbd> twice, and set a symlink for resolv.conf:
+
+```sh
+ln -sf ../run/systemd/resolve/stub-resolv.conf root.x86_64/mnt/etc/resolv.conf
+```
+
+Finally, `reboot`.
 
 ## Unlocking rootfs and logging in
 
@@ -251,3 +261,12 @@ UserKnownHostsFile ~/.ssh/known_hosts_unlock
 
 Once you've successfully entered the key to unlock the rootfs, you can just
 ssh as normal to the server.
+
+## Article changelog
+* 2025-01-14: (minor)
+  * Don't manually call tinyssh-convert now that [the mkinitcpio-tinyssh
+    package was
+    fixed](https://github.com/grazzolini/mkinitcpio-tinyssh/commit/9f2af34012aaccfc433db3402a97936f98eafc4a).
+  * Ensure we add a resolv.conf symlink (see
+    [here](https://wiki.archlinux.org/title/Systemd-resolved#DNS)).
+  * No longer generate fallback initramfs as it has become very large.
