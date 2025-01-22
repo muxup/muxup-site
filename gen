@@ -491,7 +491,7 @@ page_template = compile_template(pathlib.Path("templates/page.html.tpl").read_te
 
 
 def build_single_page(
-    file: pathlib.Path, minified_article_js: str
+    file: pathlib.Path, for_local_serve: bool, minified_article_js: str
 ) -> Tuple[PageData, pathlib.Path]:
     pd = parse_page(file)
     out_path = dest_path / file.relative_to(pages_path).with_suffix(".html")
@@ -511,12 +511,14 @@ def build_single_page(
     return pd, out_path
 
 
-def build_pages(minified_article_js: str) -> list[PageData]:
+def build_pages(for_local_serve: bool, minified_article_js: str) -> list[PageData]:
     pages_data: list[PageData] = []
 
     with concurrent.futures.ProcessPoolExecutor(max_workers=os.cpu_count()) as executor:
         futures = [
-            executor.submit(build_single_page, file, minified_article_js)
+            executor.submit(
+                build_single_page, file, for_local_serve, minified_article_js
+            )
             for file in sorted(pages_path.rglob("*.md"))
         ]
         for future in concurrent.futures.as_completed(futures):
@@ -673,7 +675,7 @@ def rebuild(for_local_serve: bool = False, with_simple_reload: bool = False) -> 
         common_js_frag, home_js_frag, article_js_frag
     )
 
-    pages_data = build_pages(minified_article_js)
+    pages_data = build_pages(for_local_serve, minified_article_js)
     build_front_page(pages_data, minified_home_js)
     build_robots_txt()
     build_sitemap_xml(pages_data)
