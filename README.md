@@ -30,6 +30,33 @@ Other:
   util-linux separately in the Arch dependency list as it's installed as a
   base package).
 
+## Rebuilding with systemd-user
+
+I have a user service running that rebuilds upon change. A small snippet of JS
+that is inserted in the "for local serving" version changes the background
+colour to a reddish pink if `/_had_error` exists (which is created if the `gen
+build` had a non-zero exit code.
+
+Create `muxup.service` in `~/.config/systemd/user`:
+
+```systemd
+[Unit]
+Description=Muxup local server
+After=network.target
+
+[Service]
+WorkingDirectory=%h/repos/muxup-site
+ExecStart=/bin/dash -c 'while sleep 0.1; do find fragments/ pages/ static/ templates/ gen | entr -n -d dash -c "rm -f local_serve/_had_error; ./gen build --for-local-serve || touch local_serve/_had_error"; done & darkhttpd ./local_serve --port 5500 --addr 127.0.0.1 --default-mimetype text/html'
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=default.target
+```
+
+Then enable with `systemctl --user enable --now muxup` and if check log output
+with `journalctl --user -u muxup`.
+
 ## License
 
 All source code (including CSS) is covered by the [MIT-0

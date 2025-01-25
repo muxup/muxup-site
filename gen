@@ -665,8 +665,13 @@ def rebuild(for_local_serve: bool = False, with_simple_reload: bool = False) -> 
     refresh_js_frag = pathlib.Path("fragments/simple-reload.js").read_text(
         encoding="utf-8"
     )
+    check_error_js_frag = pathlib.Path("fragments/check-error.js").read_text(
+        encoding="utf-8"
+    )
     if with_simple_reload:
         common_js_frag = f"{common_js_frag}\n{refresh_js_frag}"
+    if for_local_serve:
+        common_js_frag = f"{common_js_frag}\n{check_error_js_frag}"
     home_js_frag = pathlib.Path("fragments/home.js").read_text(encoding="utf-8")
     article_js_frag = pathlib.Path("fragments/article.js").read_text(encoding="utf-8")
     minified_home_js, minified_article_js = generate_minified_js(
