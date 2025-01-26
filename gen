@@ -177,7 +177,7 @@ def parse_frontmatter(file: pathlib.Path) -> Tuple[dict[str, Any], str]:
 # * Rendering markdown content as html
 # * Creating a PageData instance and filling in the necessary fields in a
 #   normalised form.
-def parse_page(file: pathlib.Path) -> PageData:
+def parse_page(file: pathlib.Path, for_local_serve: bool) -> PageData:
     metadata, markdown_content = parse_frontmatter(file)
     T = TypeVar("T")
 
@@ -225,7 +225,9 @@ def parse_page(file: pathlib.Path) -> PageData:
     description = fm_get("description", str)
     published_date, is_draft = fm_determine_published_date_and_is_draft()
     permalink = page_path_to_permalink(file)
-    hidden_from_home_and_rss = fm_get_opt("hidden_from_home_and_rss", bool) or is_draft
+    hidden_from_home_and_rss = fm_get_opt("hidden_from_home_and_rss", bool) or (
+        is_draft and not for_local_serve
+    )
     extra_css = fm_get_opt("extra_css", str) or ""
     path_part = file.parts[1]
     yyyyqq_dir = None
@@ -490,7 +492,7 @@ page_template = compile_template(pathlib.Path("templates/page.html.tpl").read_te
 def build_single_page(
     file: pathlib.Path, for_local_serve: bool, minified_article_js: str
 ) -> Tuple[PageData, pathlib.Path]:
-    pd = parse_page(file)
+    pd = parse_page(file, for_local_serve)
     suffix = "" if for_local_serve else ".html"
     out_path = dest_path / file.relative_to(pages_path).with_suffix(suffix)
     if not out_path.parent.exists():

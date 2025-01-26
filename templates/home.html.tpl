@@ -30,7 +30,9 @@ See also: <a href="https://github.com/muxup">GitHub</a>, <a href="https://bsky.a
 $ for pd in sorted_filtered_pages_for_cards
 <a class="card" href="{{pd.permalink}}">
 <h2 class="card-title"><span class="highlight-title">{{h(pd.title)}}</span></h2>
-$ if pd.yyyyqq_dir
+$ if pd.is_draft
+<p class="card-date">DRAFT</p>
+$ elif pd.yyyyqq_dir
 <p class="card-date">{{pd.yyyyqq_dir.upper()}}</p>
 $ endif
 <p class="card-description">{{h(pd.description)}}</p>
