@@ -251,6 +251,9 @@ arguably more common), so I've included some examples of that below:
   David Chisnall provided some [observations based on porting code to CHERI
   that relies on the kind of tricks described in this
   post](https://lobste.rs/s/5417dx/storing_data_pointers#c_j12qr0).
+* Sometime after this article was published, Troy Hinckley put together a
+  really interesting blog post [benchmarking different pointer tagging
+  schemes](https://coredumped.dev/2024/09/09/what-is-the-best-pointer-tagging-method/).
 
 ## Fin
 
@@ -264,6 +267,8 @@ subreddits](https://old.reddit.com/r/cpp/duplicates/184n4bd/storing_data_in_poin
 or [on Mastodon](https://fosstodon.org/@asb/111478289261238134).
 
 ## Article changelog
+* 2025-01-28: (minor) Add link to Troy Hinkcley's blog post benchmarking
+  pointer tagging schemes.
 * 2023-12-02: (minor)
   * Reference Brian T. Kelley's blog providing a more up-to-date description
     of "pointer tagging" in Objective-C. [Spotted on
