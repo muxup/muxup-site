@@ -272,7 +272,7 @@ def check_link_target(target: str, src_file: pathlib.Path) -> None:
     if not target.startswith("/"):
         raise SystemExit(f"Post {src_file} contains relative link '{target}'.")
     if not pathlib.Path(target[1:]).is_file():
-        raise SystemExit(f"Post {src_file} links to {target}, which doesn't exit.")
+        raise SystemExit(f"Post {src_file} links to {target}, which doesn't exist.")
     return
 
 
