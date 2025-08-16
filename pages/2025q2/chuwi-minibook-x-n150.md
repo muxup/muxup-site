@@ -351,6 +351,24 @@ chmod 700 "/home/asb/.ssh"
 chmod 600 "/home/asb/.ssh/authorized_keys"
 chown -R "asb:users" "/home/asb/.ssh"
 systemctl enable iwd.service systemd-networkd.service systemd-resolved.service systemd-timesyncd.service
+# We have no ethernet, but make it so if we connect it via USB-C then it works
+# out of the box and we prefer to route traffic using ethernet vs WiFi.
+cat - <<EOF > /etc/systemd/network/20-wired.network
+[Match]
+Name=eth0
+
+[Link]
+RequiredForOnline=routable
+
+[Network]
+DHCP=yes
+
+[DHCPv4]
+RouteMetric=100
+
+[IPv6AcceptRA]
+RouteMetric=100
+EOF
 cat - <<EOF > /etc/systemd/network/25-wireless.network
 [Match]
 Name=wlan0
@@ -361,6 +379,12 @@ RequiredForOnline=routable
 [Network]
 DHCP=yes
 IgnoreCarrierLoss=3s
+
+[DHCPv4]
+RouteMetric=600
+
+[IPv6AcceptRA]
+RouteMetric=600
 EOF
 pkgfile --update
 cat - <<EOF >> /etc/bash.bashrc
@@ -718,3 +742,6 @@ As Xorg hasn't had a new release in forever this requires the
 `xorg-server-git` AUR package. Unfortunately, after building this I found
 `dwm` hangs at launch and haven't put aside the time to investigate further.
 
+## Article changelog
+* 2025-08-16: (minor) Updated my reference setup instructions to include
+  configuration for when adding ethernet via an external adapter.
