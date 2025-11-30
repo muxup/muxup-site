@@ -25,6 +25,13 @@
 <p>
 A space maintained by Alex Bradbury - projects, blog posts, and notes on things I've been working on.
 See also: <a href="https://github.com/muxup">GitHub</a>, <a href="https://bsky.app/profile/asbradbury.org">Bluesky</a>, <a href="https://fosstodon.org/@asb">Mastodon</a>.
+<p>
+Recent miniposts:
+<ul>
+$ for pd in sorted_filtered_minipost_pages
+<li><a href="{{pd.permalink}}">{{h(pd.title)}}</a></li>
+$ endfor
+</ul>
 </div>
 <div class="card-grid">
 $ for pd in sorted_filtered_pages_for_cards

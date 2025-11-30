@@ -141,6 +141,7 @@ class PageData:
     markdown_content_as_html: str
     hidden_from_home_and_rss: bool
     is_draft: bool
+    is_minipost: bool
     extra_css: str
     yyyyqq_dir: str | None
     last_major_update: str | None
@@ -233,12 +234,19 @@ def parse_page(file: pathlib.Path, for_local_serve: bool) -> PageData:
     yyyyqq_dir = None
     if re.fullmatch(r"\d{4}q[1-4]", path_part):
         yyyyqq_dir = path_part
+    is_minipost = file.stem.startswith("minipost-")
+    if is_minipost and not yyyyqq_dir:
+        raise SystemExit(f"{file}: Error! miniposts should be in a yyyyqq directory")
+
     (
         markdown_content_as_html,
         title,
         last_major_update,
         last_minor_update,
-    ) = render_markdown(markdown_content, file, published_date, is_draft, yyyyqq_dir)
+    ) = render_markdown(
+        markdown_content, file, published_date, is_draft, is_minipost, yyyyqq_dir
+    )
+
     return PageData(
         src_path=file,
         yyyyqq_dir=yyyyqq_dir,
@@ -250,6 +258,7 @@ def parse_page(file: pathlib.Path, for_local_serve: bool) -> PageData:
         markdown_content_as_html=markdown_content_as_html,
         hidden_from_home_and_rss=hidden_from_home_and_rss,
         is_draft=is_draft,
+        is_minipost=is_minipost,
         extra_css=extra_css,
         last_major_update=last_major_update,
         last_minor_update=last_minor_update,
@@ -315,6 +324,7 @@ def render_markdown(
     src_file: pathlib.Path,
     published_date: str,
     is_draft: bool,
+    is_minipost: bool,
     yyyyqq_dir: str | None,
 ) -> tuple[str, str, str | None, str | None]:
     if is_draft:
@@ -414,6 +424,8 @@ def render_markdown(
     with MuxupRenderer() as renderer:  # type:ignore
         doc = mistletoe.Document(content)
         title = extract_and_remove_article_title(doc)
+        if is_minipost:
+            title = f"Minipost: {title}"
         check_and_rewrite_links(doc)
         last_major_update, last_minor_update = process_changelog(doc, renderer)
         markdown_content_as_html = renderer.render(doc)
@@ -537,8 +549,12 @@ def build_front_page(pages_data: list[PageData], minified_home_js: str) -> None:
     )
     pages_data.sort(key=lambda pd: (pd.last_update(False), pd.permalink), reverse=True)
     sorted_filtered_pages_for_cards = filter(
-        lambda pd: not pd.hidden_from_home_and_rss, pages_data
+        lambda pd: not (pd.hidden_from_home_and_rss or pd.is_minipost), pages_data
     )
+    sorted_filtered_minipost_pages = filter(
+        lambda pd: not pd.hidden_from_home_and_rss and pd.is_minipost, pages_data
+    )
+
     home_template = compile_template(
         pathlib.Path("templates/home.html.tpl").read_text()
     )
@@ -549,6 +565,7 @@ def build_front_page(pages_data: list[PageData], minified_home_js: str) -> None:
         favicon_svg=favicon_svg,
         css=generate_css_string("home"),
         sorted_filtered_pages_for_cards=sorted_filtered_pages_for_cards,
+        sorted_filtered_minipost_pages=sorted_filtered_minipost_pages,
         minified_home_js=minified_home_js,
     )
 
