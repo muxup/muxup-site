@@ -55,10 +55,11 @@ consumption of ~621W while pretraining the 7B and ~649W while pretraining the
 32B, and this means that our GPUs consumed ~146MWh for the 7B and ~681MWh for
 the 32B. We'll include more detailed GPU hour information in a future version
 of the paper, including for post-training!
-</blockquote>
 
 _Ai2 Olmo 3 team [on their
-Discord](https://discord.com/channels/1241138968448340109/1441462011618922647/1441471645046014038)_
+Discord](https://discord.com/channels/1241138968448340109/1441462011618922647/1441471645046014038)._
+</blockquote>
+
 
 So that's 0.681 GWh in GPU power draw for pretraining the 32B model and
 0.146 GWh in GPU power draw for pretraining the 7B model. As noted in the
@@ -81,6 +82,9 @@ comparison let's look at a few comparisons based on the reported number:
   year](https://www.gov.wales/sites/default/files/publications/2023-11/leisure-centre-decarbonisation-guidance-note.pdf).
   I don't know if the idea of a "leisure centre" translates outside of the UK,
   but basically it's a swimming pool plus gym, squash/tennis courts etc.
+  * The linked page claims ~2 GWh of energy in gas and 0.5 GWh in electricity.
+    For the gas, to compare like with like you'd need to consider the source
+    of energy for the electricity used for Olmo training.
 * 0.681 GWh is ~0.11% of [LHC's annual 600 GWh energy
   consumption](https://www.home.cern/resources/faqs/facts-and-figures-about-lhc)
   or ~0.05% of CERN's annual consumption.
@@ -147,3 +151,7 @@ realistically trained in approximately 90 days on 4096 GPUs, accounting for
 overheads. If we assume 560 W power usage per Grace-Hopper module in this
 period, below the set power limit of 660 W, we can estimate 5 GWh power usage
 for the compute of the pretraining run."
+
+## Article changelog
+* 2025-12-02: (minor) Added clarifying note about energy via gas in the
+  leisure centre comparison.
