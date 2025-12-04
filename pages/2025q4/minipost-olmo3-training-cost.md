@@ -131,7 +131,8 @@ interesting/viable.
   even NVFP4, which would allow much more throughput for a similar energy
   budget. Nvidia have worked to demonstrate this can be effective for
   [both](https://arxiv.org/pdf/2506.08027)
-  [formats](https://arxiv.org/pdf/2509.25149).
+  [formats](https://arxiv.org/pdf/2509.25149) (see also [this work from
+  MIT](https://arxiv.org/pdf/2512.02010)).
 * Also from Nvidia, [Nemotron Elastic](https://arxiv.org/pdf/2511.16664)
   showed a model architecture that allows deriving smaller models without
   doing a separate pre-training runs.
@@ -153,5 +154,6 @@ period, below the set power limit of 660 W, we can estimate 5 GWh power usage
 for the compute of the pretraining run."
 
 ## Article changelog
+* 2025-12-04: (minor) Add link to "Four Over Six" NVFP4 training paper.
 * 2025-12-02: (minor) Added clarifying note about energy via gas in the
   leisure centre comparison.
