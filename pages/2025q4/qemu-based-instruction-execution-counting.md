@@ -24,8 +24,9 @@ information on. I submitted a [small patch
 series](https://lore.kernel.org/qemu-devel/cf5a00136738b981a12270b76572e8d502daf208.1753857212.git.asb@igalia.com/T/)
 (and [submitted it a second
 time](https://lore.kernel.org/qemu-devel/cover.1764716538.git.asb@igalia.com/)
-as it has been positively reviewed but not yet applied) addressing this and
-other minor issues found along the way.
+addressing this and other minor issues found along the way. The series has now
+been [accepted by the
+maintainer](https://lore.kernel.org/qemu-devel/87o6o3ucy6.fsf@draig.linaro.org/).
 
 To build QEMU with this patch:
 
@@ -376,3 +377,7 @@ Benchmark                       DirA            DirB   Diff (%)
 It's worth highlighting that as we're running this under user-mode emulation,
 the dynamic instruction count naturally never counts any instructions on the
 kernel side that you would see if profiling a real system.
+
+## Article changelog
+* 2025-12-15: (minor) Note that the qemu patches have now been accepted in the
+  maintainer's tree.
