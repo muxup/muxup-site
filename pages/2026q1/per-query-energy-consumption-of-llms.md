@@ -182,7 +182,7 @@ better understand.
   or the similar `--max_seq_len` parameter for trt-llm (e.g. [the b200
   config](https://github.com/InferenceMAX/InferenceMAX/blob/84320a0aadacae1114265b553830f48b56231817/benchmarks/gptoss_fp4_b200_trt_docker.sh#L65)
   which if I'm not mistaken will ultimately be set from the max_model_len
-  defined in
+  [defined in
   generate_sweep_configs.py](https://github.com/InferenceMAX/InferenceMAX/blob/84320a0aadacae1114265b553830f48b56231817/utils/matrix_logic/generate_sweep_configs.py).
   This parameter is [documented in
   vllm](https://docs.vllm.ai/en/latest/cli/serve/#-max-model-len) and [in
@@ -245,6 +245,19 @@ better understand.
   Although none of the explored settings _should_ impact the quality of output,
   it's always possible they trigger a bug and in this case it's not
   interesting to benchmark.
+* It would be helpful for reproducibility if more complete system information
+  for the benchmark runners was released. This is [being worked
+  on](https://github.com/InferenceMAX/InferenceMAX/issues/393).
+* You should of course consider whether the tested input and output sequence
+  lengths correspond to a workload you are interested in (thank you to Aaron
+  Zhao for [reminding me to mention
+  this](https://www.linkedin.com/feed/update/urn:li:activity:7414767337058242562?commentUrn=urn%3Ali%3Acomment%3A%28activity%3A7414767337058242562%2C7415321431900905472%29&dashCommentUrn=urn%3Ali%3Afsd_comment%3A%287415321431900905472%2Curn%3Ali%3Aactivity%3A7414767337058242562%29).
+  This benchmarking approach also doesn't consider caching. Both factors could
+  be highly relevant if trying to estimate energy cost for a long context chat
+  or 'agentic' flow. But I'm happy enough with the tested workloads as a
+  starting point, and my main focus here is trying to get a degree of comfort
+  with the reported numbers for the ISL/OSL combinations they've chosen to
+  test.
 
 ## Filed issues
 
@@ -572,3 +585,10 @@ sequence lengths, and a range of
 potential issues that might impact the conclusion. I think this is a useful
 yardstick / datapoint, though I'd like to get towards something that's even
 more useful and that I have more faith in.
+
+## Article changelog
+* 2026-01-09: (minor)
+  * Fix broken link.
+  * Add note that more complete system info would be helpful for
+    reproducibility.
+  * Add note about variety of input/output sequence lengths tested.
