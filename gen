@@ -34,7 +34,8 @@ from pygments.lexers import get_lexer_by_name as get_lexer
 # All paths etc are relative to the location of this script.
 os.chdir(pathlib.Path(__file__).parent)
 
-# Data definitions
+# Data definitions. Due to the use of ProcessPoolExecutor, these should not be
+# modified during script execution.
 base_url = "https://muxup.com"
 
 favicon_svg = (
@@ -51,7 +52,7 @@ favicon_svg = (
 )
 
 pages_path = pathlib.Path("pages")
-dest_path = pathlib.Path("staged")
+staged_path = pathlib.Path("staged")
 local_serve_path = pathlib.Path("local_serve")
 deployed_path = pathlib.Path("deployed")
 
@@ -502,11 +503,14 @@ page_template = compile_template(pathlib.Path("templates/page.html.tpl").read_te
 
 
 def build_single_page(
-    file: pathlib.Path, for_local_serve: bool, minified_article_js: str
+    file: pathlib.Path,
+    out_dir: pathlib.Path,
+    for_local_serve: bool,
+    minified_article_js: str,
 ) -> Tuple[PageData, pathlib.Path]:
     pd = parse_page(file, for_local_serve)
     suffix = "" if for_local_serve else ".html"
-    out_path = dest_path / file.relative_to(pages_path).with_suffix(suffix)
+    out_path = out_dir / file.relative_to(pages_path).with_suffix(suffix)
     if not out_path.parent.exists():
         out_path.parent.mkdir(parents=True)
     page_content = page_template(
@@ -523,13 +527,15 @@ def build_single_page(
     return pd, out_path
 
 
-def build_pages(for_local_serve: bool, minified_article_js: str) -> list[PageData]:
+def build_pages(
+    out_dir: pathlib.Path, for_local_serve: bool, minified_article_js: str
+) -> list[PageData]:
     pages_data: list[PageData] = []
 
     with concurrent.futures.ProcessPoolExecutor(max_workers=os.cpu_count()) as executor:
         futures = [
             executor.submit(
-                build_single_page, file, for_local_serve, minified_article_js
+                build_single_page, file, out_dir, for_local_serve, minified_article_js
             )
             for file in sorted(pages_path.rglob("*.md"))
         ]
@@ -542,8 +548,10 @@ def build_pages(for_local_serve: bool, minified_article_js: str) -> list[PageDat
     return pages_data
 
 
-def build_front_page(pages_data: list[PageData], minified_home_js: str) -> None:
-    out_path = dest_path / "index.html"
+def build_front_page(
+    pages_data: list[PageData], out_dir: pathlib.Path, minified_home_js: str
+) -> None:
+    out_path = out_dir / "index.html"
     num_card_grid_entries = sum(
         1 for pd in pages_data if not pd.hidden_from_home_and_rss
     )
@@ -572,17 +580,17 @@ def build_front_page(pages_data: list[PageData], minified_home_js: str) -> None:
     atomic_write_text(out_path, home_content)
 
 
-def build_robots_txt() -> None:
-    out_path = dest_path / "robots.txt"
+def build_robots_txt(out_dir: pathlib.Path) -> None:
+    out_path = out_dir / "robots.txt"
     template = compile_template(pathlib.Path("templates/robots.txt.tpl").read_text())
     content = template(base_url=base_url)
     atomic_write_text(out_path, content)
 
 
-def build_sitemap_xml(pages_data: list[PageData]) -> None:
+def build_sitemap_xml(pages_data: list[PageData], out_dir: pathlib.Path) -> None:
     # Simple iteration over frontmatter in order of last_updated again (but
     # unlike front page, by last minor update)
-    out_path = dest_path / "sitemap.xml"
+    out_path = out_dir / "sitemap.xml"
     template = compile_template(pathlib.Path("templates/sitemap.xml.tpl").read_text())
     filtered_pages_data = list(filter(lambda pd: not pd.is_draft, pages_data))
     filtered_pages_data.sort(
@@ -596,8 +604,8 @@ def build_sitemap_xml(pages_data: list[PageData]) -> None:
     atomic_write_text(out_path, content)
 
 
-def build_feed_xml(pages_data: list[PageData]) -> None:
-    out_path = dest_path / "feed.xml"
+def build_feed_xml(pages_data: list[PageData], out_dir: pathlib.Path) -> None:
+    out_path = out_dir / "feed.xml"
     template = compile_template(pathlib.Path("templates/feed.xml.tpl").read_text())
     pages_data.sort(key=lambda pd: (pd.last_update(False), pd.permalink), reverse=True)
     filtered_pages_data = list(
@@ -618,16 +626,16 @@ def build_feed_xml(pages_data: list[PageData]) -> None:
     atomic_write_text(out_path, content)
 
 
-def build_static_subdir() -> None:
-    tmp_dest_static_path = dest_path / "static~"
-    dest_static_path = dest_path / "static"
+def build_static_subdir(out_dir: pathlib.Path) -> None:
+    tmp_dest_static_path = out_dir / "static~"
+    dest_static_path = out_dir / "static"
     dest_static_path.mkdir(exist_ok=True)
     src_static_path = pathlib.Path("static")
     if tmp_dest_static_path.exists():
         shutil.rmtree(tmp_dest_static_path)
 
     def copy_and_track(src: str, dst: str) -> None:
-        written_dest_files.add(dest_path / src)
+        written_dest_files.add(out_dir / src)
         shutil.copy2(src, dst)
 
     shutil.copytree(src_static_path, tmp_dest_static_path, copy_function=copy_and_track)
@@ -656,15 +664,15 @@ def generate_minified_js(
 
 def rebuild(for_local_serve: bool = False, with_simple_reload: bool = False) -> None:
     print("Starting rebuild")
-    global dest_path
+    out_dir = staged_path
     if for_local_serve:
         print("Building for local serve usage")
-        dest_path = local_serve_path
-    if not dest_path.exists():
-        dest_path.mkdir()
+        out_dir = local_serve_path
+    if not out_dir.exists():
+        out_dir.mkdir()
 
     preexisting_dest_files = set()
-    for dirpath, dirnames, filenames in os.walk(dest_path):
+    for dirpath, dirnames, filenames in os.walk(out_dir):
         for fn in filenames:
             preexisting_dest_files.add(pathlib.Path(dirpath) / fn)
         for dn in dirnames:
@@ -697,18 +705,18 @@ def rebuild(for_local_serve: bool = False, with_simple_reload: bool = False) -> 
         common_js_frag, home_js_frag, article_js_frag
     )
 
-    pages_data = build_pages(for_local_serve, minified_article_js)
-    build_front_page(pages_data, minified_home_js)
-    build_robots_txt()
-    build_sitemap_xml(pages_data)
-    build_feed_xml(pages_data)
-    build_static_subdir()
+    pages_data = build_pages(out_dir, for_local_serve, minified_article_js)
+    build_front_page(pages_data, out_dir, minified_home_js)
+    build_robots_txt(out_dir)
+    build_sitemap_xml(pages_data, out_dir)
+    build_feed_xml(pages_data, out_dir)
+    build_static_subdir(out_dir)
 
     files_to_delete = preexisting_dest_files - written_dest_files
     for path in files_to_delete:
         print(f"Removing {path} as it wasn't regenerated")
         path.unlink()
-    for dirpath, dirnames, filenames in os.walk(dest_path, topdown=False):
+    for dirpath, dirnames, filenames in os.walk(out_dir, topdown=False):
         for dn in dirnames:
             path = pathlib.Path(dirpath) / dn
             if any(os.scandir(path)):
@@ -720,12 +728,12 @@ def rebuild(for_local_serve: bool = False, with_simple_reload: bool = False) -> 
 
 
 def deploy() -> None:
-    if not dest_path.is_dir():
-        raise SystemExit(f"{dest_path} folder not present")
+    if not staged_path.is_dir():
+        raise SystemExit(f"{staged_path} folder not present")
 
     if deployed_path.exists():
         shutil.rmtree(deployed_path)
-    shutil.copytree(dest_path, deployed_path)
+    shutil.copytree(staged_path, deployed_path)
 
     print("Compressing files with brotli")
     subprocess.run(
@@ -756,10 +764,10 @@ def deploy() -> None:
 
 
 def diff() -> None:
-    print(f"Diff between '{dest_path}/' and '{deployed_path}/':")
+    print(f"Diff between '{staged_path}/' and '{deployed_path}/':")
     sys.exit(
         subprocess.run(
-            ["diff", "--color", "--exclude=*.br", "-r", deployed_path, dest_path]
+            ["diff", "--color", "--exclude=*.br", "-r", deployed_path, staged_path]
         ).returncode
     )
 
@@ -823,7 +831,7 @@ def get_draft_articles() -> Tuple[List[pathlib.Path], List[pathlib.Path]]:
 
 def status() -> None:
     res = subprocess.run(
-        ["diff", "--color", "--exclude=*.br", "-q", "-r", deployed_path, dest_path],
+        ["diff", "--color", "--exclude=*.br", "-q", "-r", deployed_path, staged_path],
         capture_output=True,
         encoding="utf-8",
     )
@@ -918,59 +926,63 @@ def commit_untracked() -> None:
 
 # Command line handling
 
-parser = argparse.ArgumentParser(
-    description="muxup.com static site generator", add_help=False
-)
-subparsers = parser.add_subparsers(
-    dest="command", help="Available commands", required=True
-)
-build_parser = subparsers.add_parser("build", help="Rebuild the site and exit")
-build_parser.add_argument(
-    "--for-local-serve",
-    action="store_true",
-    help="Generate files in format appropriate for local http server",
-)
-build_parser.add_argument(
-    "--with-simple-reload",
-    action="store_true",
-    help="Inject simple-reload.js",
-)
-commit_untracked_parser = subparsers.add_parser(
-    "commit-untracked",
-    help="Commit any untracked files (e.g. drafts) directly to the 'bak' branch",
-)
-deploy_parser = subparsers.add_parser("deploy", help="Deploy the already-built files")
-diff_parser = subparsers.add_parser(
-    "diff", help="Diff between current staged and deployed directories"
-)
-help_parser = subparsers.add_parser("help", help="Show this help message")
-serve_parser = subparsers.add_parser(
-    "serve", help="Serve locally, rebuilding upon edit"
-)
-serve_parser.add_argument(
-    "--with-simple-reload",
-    action="store_true",
-    help="Inject simple-reload.js",
-)
-status_parser = subparsers.add_parser(
-    "status",
-    help="Print status of site (e.g. number of draft posts, if there's a staged vs deployed diff)",
-)
-args = parser.parse_args()
-
-if args.command == "build":
-    rebuild(
-        for_local_serve=args.for_local_serve, with_simple_reload=args.with_simple_reload
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="muxup.com static site generator", add_help=False
     )
-elif args.command == "commit-untracked":
-    commit_untracked()
-elif args.command == "deploy":
-    deploy()
-elif args.command == "diff":
-    diff()
-elif args.command == "help":
-    parser.print_help()
-elif args.command == "serve":
-    serve(with_simple_reload=args.with_simple_reload)
-elif args.command == "status":
-    status()
+    subparsers = parser.add_subparsers(
+        dest="command", help="Available commands", required=True
+    )
+    build_parser = subparsers.add_parser("build", help="Rebuild the site and exit")
+    build_parser.add_argument(
+        "--for-local-serve",
+        action="store_true",
+        help="Generate files in format appropriate for local http server",
+    )
+    build_parser.add_argument(
+        "--with-simple-reload",
+        action="store_true",
+        help="Inject simple-reload.js",
+    )
+    commit_untracked_parser = subparsers.add_parser(
+        "commit-untracked",
+        help="Commit any untracked files (e.g. drafts) directly to the 'bak' branch",
+    )
+    deploy_parser = subparsers.add_parser(
+        "deploy", help="Deploy the already-built files"
+    )
+    diff_parser = subparsers.add_parser(
+        "diff", help="Diff between current staged and deployed directories"
+    )
+    help_parser = subparsers.add_parser("help", help="Show this help message")
+    serve_parser = subparsers.add_parser(
+        "serve", help="Serve locally, rebuilding upon edit"
+    )
+    serve_parser.add_argument(
+        "--with-simple-reload",
+        action="store_true",
+        help="Inject simple-reload.js",
+    )
+    status_parser = subparsers.add_parser(
+        "status",
+        help="Print status of site (e.g. number of draft posts, if there's a staged vs deployed diff)",
+    )
+    args = parser.parse_args()
+
+    if args.command == "build":
+        rebuild(
+            for_local_serve=args.for_local_serve,
+            with_simple_reload=args.with_simple_reload,
+        )
+    elif args.command == "commit-untracked":
+        commit_untracked()
+    elif args.command == "deploy":
+        deploy()
+    elif args.command == "diff":
+        diff()
+    elif args.command == "help":
+        parser.print_help()
+    elif args.command == "serve":
+        serve(with_simple_reload=args.with_simple_reload)
+    elif args.command == "status":
+        status()
