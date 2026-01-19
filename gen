@@ -294,7 +294,7 @@ class MuxupRenderer(mistletoe.HTMLRenderer):  # type:ignore
         self.heading_slugs = set()
 
     def render_block_code(self, token: mistletoe.block_token.BlockCode) -> str:
-        code = token.children[0].content
+        code = token.children[0].content  # type: ignore
         if token.language:
             try:
                 lexer = get_lexer(token.language)
@@ -337,7 +337,7 @@ def render_markdown(
     def err(desc: str) -> None:
         raise SystemExit(f"ERROR: {src_file} {desc}")
 
-    def extract_and_remove_article_title(doc: mistletoe.Document) -> str:
+    def extract_and_remove_article_title(doc: mistletoe.Document) -> str:  # type: ignore
         if not doc.children:
             err("document is empty")
         if not isinstance(doc.children[0], mistletoe.block_token.Heading):
@@ -355,9 +355,9 @@ def render_markdown(
         del doc.children[0]
         return str(title)
 
-    def check_and_rewrite_links(doc: mistletoe.Document) -> None:
+    def check_and_rewrite_links(doc: mistletoe.Document) -> None:  # type: ignore
         # Rewrite any /pages/foo.md links to appropriate permalinks.
-        for t in mistletoe.utils.traverse(doc, klass=mistletoe.span_token.Link):
+        for t in mistletoe.utils.traverse(doc, klass=mistletoe.span_token.Link):  # type: ignore
             # TODO: check anchor links, including within the current document.
             stripped_target = strip_anchor(t.node.target)
             check_link_target(stripped_target, src_file)
@@ -367,13 +367,14 @@ def render_markdown(
                 )
 
     def process_changelog(
-        doc: mistletoe.Document, renderer: MuxupRenderer
+        doc: mistletoe.Document,  # type: ignore
+        renderer: MuxupRenderer,
     ) -> tuple[str | None, str | None]:
         # Extract changelog info if present.
         changelog_heading = None
         last_major_update = None
         last_minor_update = None
-        for t in mistletoe.utils.traverse(doc, klass=mistletoe.block_token.Heading):
+        for t in mistletoe.utils.traverse(doc, klass=mistletoe.block_token.Heading):  # type: ignore
             if changelog_heading:
                 err("changelog wasn't last heading")
             # TODO: error if changelog heading isn't the last
@@ -411,19 +412,20 @@ def render_markdown(
             else:
                 last_major_update = max(last_major_update or "", li_date)
         changelog_list.children.append(
-            mistletoe.Document(f"* {initial_changelog_entry}").children[0].children[0]
+            mistletoe.Document(f"* {initial_changelog_entry}").children[0].children[0]  # type: ignore
         )
-        doc.children[changelog_idx] = mistletoe.block_token.HTMLBlock(
+        doc.children[changelog_idx] = mistletoe.block_token.HTMLBlock(  # type: ignore
             changelog_opening_html
         )
         doc.children.insert(
-            changelog_idx + 2, mistletoe.block_token.HTMLBlock("</details>")
+            changelog_idx + 2,
+            mistletoe.block_token.HTMLBlock("</details>"),  # type: ignore
         )
         # Add list item for creation of the article.
         return (last_major_update, last_minor_update)
 
     with MuxupRenderer() as renderer:  # type:ignore
-        doc = mistletoe.Document(content)
+        doc = mistletoe.Document(content)  # type: ignore
         title = extract_and_remove_article_title(doc)
         if is_minipost:
             title = f"Minipost: {title}"
