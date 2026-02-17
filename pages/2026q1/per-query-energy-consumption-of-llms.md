@@ -106,26 +106,26 @@ split into around three pieces:
 * The frontend website you can [see at
   inferencemax.semianalysis.com](https://inferencemax.semianalysis.com/) (not
   currently open source but [planned to
-  be](https://github.com/InferenceMAX/InferenceMAX/issues/315))
+  be](https://github.com/SemiAnalysisAI/InferenceX/issues/315))
 * The [script for executing queries against the LLM serving infrastructure and
   collecting stats](https://github.com/kimbochen/bench_serving) (currently in
   a seperate repo but [planned to be incorporated into the main InferenceMAX
-  repository](https://github.com/InferenceMAX/InferenceMAX/issues/338)),
+  repository](https://github.com/SemiAnalysisAI/InferenceX/issues/338)),
 * The wrapper/runner scripts and GitHub actions workflows that live in the
   [main InferenceMAX
-  repository](https://github.com/InferenceMAX/InferenceMAX).
+  repository](https://github.com/SemiAnalysisAI/InferenceX).
   * This is actively contributed to by at least Nvidia and AMD engineers.
 
 GitHub Actions is used to orchestrate the runs, ultimately producing a zip
 file containing JSON with the statistics of each configuration (e.g.
-[here](https://github.com/InferenceMAX/InferenceMAX/actions/runs/20216709902/job/58149531774)).
+[here](https://github.com/SemiAnalysisAI/InferenceX/actions/runs/20216709902/job/58149531774)).
 The `benchmark_serving.py` script is invoked via the [`run_benchmark_serving` wrapper
 in
-`benchmark_lib.sh`](https://github.com/InferenceMAX/InferenceMAX/blob/84320a0aadacae1114265b553830f48b56231817/benchmarks/benchmark_lib.sh#L107)
+`benchmark_lib.sh`](https://github.com/SemiAnalysisAI/InferenceX/blob/84320a0aadacae1114265b553830f48b56231817/benchmarks/benchmark_lib.sh#L107)
 which hardcodes some options and passes through some others from the workflow
 YAML. The results logged by `benchmark_serving.py` are [processed in
 InferenceMAX's `process_result.py`
-helper](https://github.com/InferenceMAX/InferenceMAX/blob/84320a0aadacae1114265b553830f48b56231817/utils/process_result.py)
+helper](https://github.com/SemiAnalysisAI/InferenceX/blob/84320a0aadacae1114265b553830f48b56231817/utils/process_result.py)
 which will produce JSON in the desired output format. Together, these scripts
 provide statistics like throughput (input and output token), end to end
 latency, interactivity (output tokens per second) etc.
@@ -146,9 +146,9 @@ better understand.
 
 * One of the required arguments to the benchmark serving script is
   `--random-range-ratio`. This is set by default [to 0.8 in
-  `benchmark-tmpl.yml`](https://github.com/InferenceMAX/InferenceMAX/blob/84320a0aadacae1114265b553830f48b56231817/.github/workflows/benchmark-tmpl.yml#L56)
+  `benchmark-tmpl.yml`](https://github.com/SemiAnalysisAI/InferenceX/blob/84320a0aadacae1114265b553830f48b56231817/.github/workflows/benchmark-tmpl.yml#L56)
   and [in
-  `benchmark-multinode-tmpl.yml`](https://github.com/InferenceMAX/InferenceMAX/blob/84320a0aadacae1114265b553830f48b56231817/.github/workflows/benchmark-multinode-tmpl.yml#L49)
+  `benchmark-multinode-tmpl.yml`](https://github.com/SemiAnalysisAI/InferenceX/blob/84320a0aadacae1114265b553830f48b56231817/.github/workflows/benchmark-multinode-tmpl.yml#L49)
   and is not overridden elsewhere.
   * This argument is ultimately used in
     [`sample_random_requests`](https://github.com/kimbochen/bench_serving/blob/499c0b171b499b02a1fd546fb2326d2175a5d66e/benchmark_serving.py#L366).
@@ -178,12 +178,12 @@ better understand.
   benchmarks.
 * Many of the various scripts in the benchmarks/ subdirectory [set a
   max-model-len
-  parameter](https://github.com/InferenceMAX/InferenceMAX/blob/84320a0aadacae1114265b553830f48b56231817/benchmarks/gptoss_fp4_b200_docker.sh#L22)
+  parameter](https://github.com/SemiAnalysisAI/InferenceX/blob/84320a0aadacae1114265b553830f48b56231817/benchmarks/gptoss_fp4_b200_docker.sh#L22)
   or the similar `--max_seq_len` parameter for trt-llm (e.g. [the b200
-  config](https://github.com/InferenceMAX/InferenceMAX/blob/84320a0aadacae1114265b553830f48b56231817/benchmarks/gptoss_fp4_b200_trt_docker.sh#L65)
+  config](https://github.com/SemiAnalysisAI/InferenceX/blob/84320a0aadacae1114265b553830f48b56231817/benchmarks/gptoss_fp4_b200_trt_docker.sh#L65)
   which if I'm not mistaken will ultimately be set from the max_model_len
   [defined in
-  generate_sweep_configs.py](https://github.com/InferenceMAX/InferenceMAX/blob/84320a0aadacae1114265b553830f48b56231817/utils/matrix_logic/generate_sweep_configs.py).
+  generate_sweep_configs.py](https://github.com/SemiAnalysisAI/InferenceX/blob/84320a0aadacae1114265b553830f48b56231817/utils/matrix_logic/generate_sweep_configs.py).
   This parameter is [documented in
   vllm](https://docs.vllm.ai/en/latest/cli/serve/#-max-model-len) and [in
   TensortRT-LLM](https://nvidia.github.io/TensorRT-LLM/1.0.0rc2/commands/trtllm-serve.html#cmdoption-trtllm-serve-serve-max_seq_len)
@@ -200,11 +200,11 @@ better understand.
   `benchmark_serving.py`](https://github.com/kimbochen/bench_serving/blob/499c0b171b499b02a1fd546fb2326d2175a5d66e/benchmark_serving.py#L546)
   based on the total number of tokens divided by the duration of the
   benchmark. This is then normalised on a per-GPU basis [in
-  process_result.py](https://github.com/InferenceMAX/InferenceMAX/blob/84320a0aadacae1114265b553830f48b56231817/utils/process_result.py#L90).
+  process_result.py](https://github.com/SemiAnalysisAI/InferenceX/blob/84320a0aadacae1114265b553830f48b56231817/utils/process_result.py#L90).
   No problems here, I just wanted to clarify the source of the figure.
 * In terms of the source of the input tokens themselves, we can see that
   [`--dataset-name random` is always passed to
-  `benchmark_serving.py`](https://github.com/InferenceMAX/InferenceMAX/blob/84320a0aadacae1114265b553830f48b56231817/benchmarks/benchmark_lib.sh#L222).
+  `benchmark_serving.py`](https://github.com/SemiAnalysisAI/InferenceX/blob/84320a0aadacae1114265b553830f48b56231817/benchmarks/benchmark_lib.sh#L222).
   This leads to
   [`sample_random_requests`](https://github.com/kimbochen/bench_serving/blob/499c0b171b499b02a1fd546fb2326d2175a5d66e/benchmark_serving.py#L366)
   being called, which will pick random token ids and create a list of tokens
@@ -225,7 +225,7 @@ better understand.
 * The --num-prompts parameter controls the total number of requests that are
   issued. The benchmark script is written so it will wait for all of these to
   complete (either successfully or unsuccessfully). This is
-  [typically](https://github.com/InferenceMAX/InferenceMAX/blob/84320a0aadacae1114265b553830f48b56231817/benchmarks/gptoss_fp4_h100_slurm.sh#L51)
+  [typically](https://github.com/SemiAnalysisAI/InferenceX/blob/84320a0aadacae1114265b553830f48b56231817/benchmarks/gptoss_fp4_h100_slurm.sh#L51)
   set to the concurrency times 10, but some benchmark setups set it higher
   (presumably as the default figure finishes too quickly for good results).
 * In terms of how requests are submitted with a certain level of concurrency:
@@ -241,13 +241,13 @@ better understand.
 * There are no tests that the configuration is serving the model with the
   expected quality currently, but there's an [issue tracking at least adding a
   simple quality
-  benchmark](https://github.com/InferenceMAX/InferenceMAX/issues/123).
+  benchmark](https://github.com/SemiAnalysisAI/InferenceX/issues/123).
   Although none of the explored settings _should_ impact the quality of output,
   it's always possible they trigger a bug and in this case it's not
   interesting to benchmark.
 * It would be helpful for reproducibility if more complete system information
   for the benchmark runners was released. This is [being worked
-  on](https://github.com/InferenceMAX/InferenceMAX/issues/393).
+  on](https://github.com/SemiAnalysisAI/InferenceX/issues/393).
 * You should of course consider whether the tested input and output sequence
   lengths correspond to a workload you are interested in (thank you to Aaron
   Zhao for [reminding me to mention
@@ -265,7 +265,7 @@ I ended up filing the following issues upstream:
 
 * FIXED [Token throughput per MW is described as reflecting the generated tokens but
   is actually processed+generated
-  tokens](https://github.com/InferenceMAX/InferenceMAX/issues/293)
+  tokens](https://github.com/SemiAnalysisAI/InferenceX/issues/293)
   * The companion [article introducing
     InferenceMAX](https://newsletter.semianalysis.com/p/inferencemax-open-source-inference)
     has previously defined throughput as the rate at which the GPU
@@ -282,7 +282,7 @@ I ended up filing the following issues upstream:
     (i.e. output __plus__ the much faster to process input tokens).
 * [Presented input/output token throughput per GPU for disaggregated setups
   not usefully comparable to standard multi-gpu
-  setups](https://github.com/InferenceMAX/InferenceMAX/issues/299)
+  setups](https://github.com/SemiAnalysisAI/InferenceX/issues/299)
   * In disaggregated setups you have some number of GPUs dedicated to prefill
     (processing input tokens) and some number dedicated to decode (generating
     output tokens). In this case, the reported input/output throughput figures
@@ -294,7 +294,7 @@ I ended up filing the following issues upstream:
     decode respectively.
 * [Standard deviatation of interactivity (std_intvty) in result json is
   incorrectly
-  calculated](https://github.com/InferenceMAX/InferenceMAX/issues/300)
+  calculated](https://github.com/SemiAnalysisAI/InferenceX/issues/300)
   * Not a big issue as the figure isn't used anywhere. Interactivity
     (tokens/second) metrics are calculated from the recorded time per output
     token. `1000/$tpot_metric` is correct for the mean, median, and p99 figures
@@ -302,12 +302,12 @@ I ended up filing the following issues upstream:
     standard deviation for time per output token will result in a huge
     standard deviation being computed for interactivity.
 * FIXED [Reference kW figures no longer shown in frontend for each
-  GPU](https://github.com/InferenceMAX/InferenceMAX/issues/349)
+  GPU](https://github.com/SemiAnalysisAI/InferenceX/issues/349)
   * At some point updates to the frontend logic meant that the per-GPU kW
     figures used in calculating the token throughput per utility MW were no
     longer displayed. This has now been fixed.
 * [How will full workflow run output be retained beyond 90
-  days](https://github.com/InferenceMAX/InferenceMAX/issues/350)
+  days](https://github.com/SemiAnalysisAI/InferenceX/issues/350)
   * The benchmark frontend helpfully links to the GitHub Actions run that
     generated the displayed results and has a datepicker to view previous
     results. Clicking through to GitHub means you can download the original
@@ -319,16 +319,16 @@ I ended up filing the following issues upstream:
     It would be good to have a mechanism so that this information is backed up
     rather than lost.
 * [Contents of CONFIG_DIR path as used in launch_gb200-nv.sh is
-  undisclosed](https://github.com/InferenceMAX/InferenceMAX/issues/365)
+  undisclosed](https://github.com/SemiAnalysisAI/InferenceX/issues/365)
   * Most benchmark configuration lives in the main repository, but
     unfortunately one of the Nvidia DeepSeek R1 configurations [relies on
     a config dir that's not publicly
-    available](https://github.com/InferenceMAX/InferenceMAX/blob/ff7dfc7365034aa84245f41c517c38618860d484/runners/launch_gb200-nv.sh#L26)
+    available](https://github.com/SemiAnalysisAI/InferenceX/blob/ff7dfc7365034aa84245f41c517c38618860d484/runners/launch_gb200-nv.sh#L26)
     meaning it can't be audited or reproduced. This is a case where tightening
     up benchmark rules and review process can hopefully avoid it happening in
     the future.
 * [Reconsider allowing setting max_model_len / max_seq_len to
-  isl+osl+tiny_margin](https://github.com/InferenceMAX/InferenceMAX/issues/359)
+  isl+osl+tiny_margin](https://github.com/SemiAnalysisAI/InferenceX/issues/359)
   * As explained above, a number of benchmarks set `max_model_len` (or for
     Nvidia's TensorRT, `--max_seq_len`) to some figure that is just above
     ISL+OSL. Although some degree of tuning is expected, to me this goes
@@ -353,7 +353,7 @@ I ended up filing the following issues upstream:
     reflect my report. I'm hopeful they will review my recent comment and
     title it back.
 * [Some reported metrics will be inflated if a serving engine sheds
-  load](https://github.com/InferenceMAX/InferenceMAX/issues/357)
+  load](https://github.com/SemiAnalysisAI/InferenceX/issues/357)
   * This covers the observation made above that failed requests are simply
     skipped. As the number of failed requests isn't tracked, it's not easy to
     see if a particular configuration may appear better (better E2E latency,
@@ -361,21 +361,21 @@ I ended up filing the following issues upstream:
     queueing.
   * The repository maintainers renamed this issue to "[feature suggestion for
     vllm/vllm benchmark_serving]" and closed it. I'm hopeful they will read my
-    [response](https://github.com/InferenceMAX/InferenceMAX/issues/357#issuecomment-3680821210)
+    [response](https://github.com/SemiAnalysisAI/InferenceX/issues/357#issuecomment-3680821210)
     and reconsider on the grounds that:
     * The benchmark_serving script isn't doing anything "wrong" necessarily.
       It is simply making an implementation choice with potential impact on
       results that the InferenceMAX harness isn't tracking.
     * The script is planned to be added to the repo soon anyway.
 * [Benchmarked ISL and OSL averages 0.9*target_length meaning results are
-  over-optimistic](https://github.com/InferenceMAX/InferenceMAX/issues/356).
+  over-optimistic](https://github.com/SemiAnalysisAI/InferenceX/issues/356).
   * This is the problem mentioned above where the introduced variance in
     input/output sequence length has an average lower than the headline rate.
     As noted, this means specifically the end to end latency figure is
     misleading, but also impacts tokens/second and throughput to the extent
     that the cost of serving a query doesn't scale with O(n).
   * This will be fixed by [PR
-    339](https://github.com/InferenceMAX/InferenceMAX/pull/339) which
+    339](https://github.com/SemiAnalysisAI/InferenceX/pull/339) which
     upstreams the `benchmark_serving.py` script and in that modified branch
     changes `sample_random_requests` to sample a range with multiplier between
     `1 - RANGE_RATIO` and `1 + RANGE_RATIO`.
@@ -426,7 +426,7 @@ This logic is wrapped up in a [simple
 script](https://gist.github.com/asb/44fe17f4f5b7abed7836481be45c5a38#file-process_results-py).
 
 There's been a recent change to [remove the 'full sweep'
-workflows](https://github.com/InferenceMAX/InferenceMAX/pull/381) in favour of
+workflows](https://github.com/SemiAnalysisAI/InferenceX/pull/381) in favour of
 only triggering a subset of runs when there is a relevant change. But I
 grabbed my results from before this happened, from a December 15th 2025 run.
 However when finalising this article I spotted Nvidia managed to land some new
@@ -458,7 +458,7 @@ a usable level of interactivity at fp8 report between 0.96-3.74 Wh/query
 substantially
 more efficient is the newer [GB200 NVL72 configuration added at the end of
 last
-year](https://github.com/InferenceMAX/InferenceMAX/commit/c040b5cf23ced2c7e23d1da03e1abae89e6426aa).
+year](https://github.com/SemiAnalysisAI/InferenceX/commit/c040b5cf23ced2c7e23d1da03e1abae89e6426aa).
 It's not totally easy to trace the configuration changes given they're
 accompanied by a reworking of the associated scripts, but as far as I can see
 the configuration ultimately used is [this file from the dynamo
@@ -587,6 +587,9 @@ yardstick / datapoint, though I'd like to get towards something that's even
 more useful and that I have more faith in.
 
 ## Article changelog
+* 2026-02-17: (minor)
+  * Changed GitHub links to point to SemiAnalysisAI/InferenceX rather than
+    InferenceMAX/InferenceMAX, as they were broken by the upstream rename.
 * 2026-01-09: (minor)
   * Fix broken link.
   * Add note that more complete system info would be helpful for
