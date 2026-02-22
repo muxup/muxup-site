@@ -58,7 +58,9 @@ deployed_path = pathlib.Path("deployed")
 
 
 # Helpers
-def compile_template(template_str: str) -> Callable[..., str]:
+def compile_template(
+    template_str: str, template_name: str = "<template>"
+) -> Callable[..., str]:
     out = []
     indent = 0
     stack = []
@@ -68,9 +70,11 @@ def compile_template(template_str: str) -> Callable[..., str]:
 
     emit_line("def _render():")
     indent += 1
+    emit_line("global _tpl_line")
     emit_line("out = []")
 
     for line_no, line in enumerate(template_str.splitlines(), start=1):
+        emit_line(f"_tpl_line = {line_no}")
         if line.startswith("$"):
             pycmd = line[1:].strip()
             keyword = pycmd.partition(" ")[0]
@@ -84,7 +88,9 @@ def compile_template(template_str: str) -> Callable[..., str]:
                 indent += 1
             elif keyword in ("elif", "else"):
                 if stack[-1] != "if":
-                    raise ValueError(f"Line {line_no}: Incorrectly nested '{keyword}'")
+                    raise ValueError(
+                        f"{template_name}:{line_no}: Incorrectly nested '{keyword}'"
+                    )
                 indent -= 1
                 emit_line(f"{pycmd}:")
                 indent += 1
@@ -92,10 +98,13 @@ def compile_template(template_str: str) -> Callable[..., str]:
                 expected = stack.pop()
                 if expected != keyword[3:]:
                     raise ValueError(
-                        f"Line {line_no}: Expected end{expected}, got {pycmd}"
+                        f"{template_name}:{line_no}: "
+                        f"Expected end{expected}, got {pycmd}"
                     )
                 if pycmd != keyword:
-                    raise ValueError(f"Line {line_no}: Unexpected text after {keyword}")
+                    raise ValueError(
+                        f"{template_name}:{line_no}: Unexpected text after {keyword}"
+                    )
                 indent -= 1
             else:
                 emit_line(f"{pycmd}")
@@ -111,18 +120,24 @@ def compile_template(template_str: str) -> Callable[..., str]:
                 emit_line(f"out.append({repr(line[pos:expr_start])})")
             expr_end = line.find("}}", expr_start)
             if expr_end == -1:
-                raise ValueError(f"Line {line_no}: Couldn't find matching }}")
+                raise ValueError(
+                    f"{template_name}:{line_no}: Couldn't find matching }}}}"
+                )
             emit_line(f"out.append(str({line[expr_start + 2 : expr_end]}))")
             pos = expr_end + 2
     if len(stack) != 0:
-        raise ValueError(f"Unclosed '{stack[-1]}'")
+        raise ValueError(f"{template_name}:{line_no}: Unclosed '{stack[-1]}'")
     emit_line('return "".join(out)')
     py_code = "\n".join(out)
-    compiled_code = compile(py_code, "<string>", "exec")
+    compiled_code = compile(py_code, template_name, "exec")
 
     def wrapper(**kwargs_as_globals: Any) -> str:
         exec(compiled_code, kwargs_as_globals)
-        return kwargs_as_globals["_render"]()  # type: ignore
+        try:
+            return kwargs_as_globals["_render"]()  # type: ignore
+        except Exception as e:
+            tpl_line = kwargs_as_globals.get("_tpl_line", "?")
+            raise type(e)(f"{template_name}:{tpl_line}: {e}") from e
 
     return wrapper
 
@@ -490,7 +505,9 @@ def atomic_write_text(path: pathlib.Path, data: str, encoding: str = "utf-8") ->
 
 # Read all pages markdown files, parse frontmatter, and generate HTML.
 
-css_template = compile_template(pathlib.Path("templates/style.css.tpl").read_text())
+css_template = compile_template(
+    pathlib.Path("templates/style.css.tpl").read_text(), "templates/style.css.tpl"
+)
 
 
 def generate_css_string(
@@ -501,7 +518,9 @@ def generate_css_string(
     )
 
 
-page_template = compile_template(pathlib.Path("templates/page.html.tpl").read_text())
+page_template = compile_template(
+    pathlib.Path("templates/page.html.tpl").read_text(), "templates/page.html.tpl"
+)
 
 
 def build_single_page(
@@ -566,7 +585,7 @@ def build_front_page(
     )
 
     home_template = compile_template(
-        pathlib.Path("templates/home.html.tpl").read_text()
+        pathlib.Path("templates/home.html.tpl").read_text(), "templates/home.html.tpl"
     )
     home_content = home_template(
         h=html.escape,
@@ -584,7 +603,9 @@ def build_front_page(
 
 def build_robots_txt(out_dir: pathlib.Path) -> None:
     out_path = out_dir / "robots.txt"
-    template = compile_template(pathlib.Path("templates/robots.txt.tpl").read_text())
+    template = compile_template(
+        pathlib.Path("templates/robots.txt.tpl").read_text(), "templates/robots.txt.tpl"
+    )
     content = template(base_url=base_url)
     atomic_write_text(out_path, content)
 
@@ -593,7 +614,10 @@ def build_sitemap_xml(pages_data: list[PageData], out_dir: pathlib.Path) -> None
     # Simple iteration over frontmatter in order of last_updated again (but
     # unlike front page, by last minor update)
     out_path = out_dir / "sitemap.xml"
-    template = compile_template(pathlib.Path("templates/sitemap.xml.tpl").read_text())
+    template = compile_template(
+        pathlib.Path("templates/sitemap.xml.tpl").read_text(),
+        "templates/sitemap.xml.tpl",
+    )
     filtered_pages_data = list(filter(lambda pd: not pd.is_draft, pages_data))
     filtered_pages_data.sort(
         key=lambda pd: (pd.last_update(), pd.permalink), reverse=True
@@ -608,7 +632,9 @@ def build_sitemap_xml(pages_data: list[PageData], out_dir: pathlib.Path) -> None
 
 def build_feed_xml(pages_data: list[PageData], out_dir: pathlib.Path) -> None:
     out_path = out_dir / "feed.xml"
-    template = compile_template(pathlib.Path("templates/feed.xml.tpl").read_text())
+    template = compile_template(
+        pathlib.Path("templates/feed.xml.tpl").read_text(), "templates/feed.xml.tpl"
+    )
     pages_data.sort(key=lambda pd: (pd.last_update(False), pd.permalink), reverse=True)
     filtered_pages_data = list(
         filter(lambda pd: not pd.hidden_from_home_and_rss, pages_data)
