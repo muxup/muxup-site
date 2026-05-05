@@ -53,10 +53,7 @@ configure_qemu_rootfs() {
   hostname=$4
 
   "$rootfs/_enter" sh -e <<EOF
-mkdir -p /etc/udev/rules.d /etc/systemd/network /etc/ssh/sshd_config.d
-
-# Use old-style interface names like 'eth0'.
-ln -sf /dev/null /etc/udev/rules.d/80-net-setup-link.rules
+mkdir -p /etc/systemd/network /etc/ssh/sshd_config.d
 
 cat > /etc/systemd/network/10-qemu.network <<'INNER'
 [Match]
@@ -104,7 +101,11 @@ configuration. You can ssh in to either the root user or `user` via ssh, using
 password `root` or `user` respectively. The commands below expose ssh via a
 unix domain socket. One potential gotcha: this unix domain socket must not
 have any `-` in its name as that collides with the splitting done for the
-`hostfwd` argument. The examples given below avoid this issue.
+`hostfwd` argument. The examples given below avoid this issue.  The boot
+commands pass `net.ifnames=0`, so the single QEMU network device is
+consistently named `eth0` and matched by the networkd config above (I found
+this more reliable than `ln -sf /dev/null
+/etc/udev/rules.d/80-net-setup-link.rules`).
 
 ## amd64 / x86-64
 
@@ -149,7 +150,7 @@ qemu-system-x86_64 \
   -kernel kernel \
   -initrd initrd \
   -nographic \
-  -append "rw root=LABEL=rootfs console=ttyS0"
+  -append "rw root=LABEL=rootfs console=ttyS0 net.ifnames=0"
 ```
 
 The above assumes you are running on a x86-64 host, hence enables KVM. If not,
@@ -197,7 +198,7 @@ qemu-system-aarch64 \
   -kernel kernel \
   -initrd initrd \
   -nographic \
-  -append "rw root=LABEL=rootfs console=ttyAMA0"
+  -append "rw root=LABEL=rootfs console=ttyAMA0 net.ifnames=0"
 ```
 
 ## armhf / 32-bit ARM
@@ -221,7 +222,7 @@ rootless-debootstrap-wrapper \
 
 configure_qemu_rootfs "$ROOTFS" ttyAMA0 trixie qemu-armhf-trixie
 printf '%s\n' virtio_mmio virtio_blk virtio_net >> "$ROOTFS/etc/initramfs-tools/modules"
-"$ROOTFS/_enter" update-initramfs -u -k all || true
+"$ROOTFS/_enter" update-initramfs -u -k all
 cp -f "$ROOTFS"/boot/vmlinuz-* "$WORK/kernel"
 cp -f "$ROOTFS"/boot/initrd.img-* "$WORK/initrd"
 fakeroot -i "$ROOTFS/.fakeroot.env" \
@@ -246,7 +247,7 @@ qemu-system-arm \
   -kernel kernel \
   -initrd initrd \
   -nographic \
-  -append "rw root=LABEL=rootfs console=ttyAMA0"
+  -append "rw root=LABEL=rootfs console=ttyAMA0 net.ifnames=0"
 ```
 
 ## riscv64
@@ -292,7 +293,7 @@ qemu-system-riscv64 \
   -kernel kernel \
   -initrd initrd \
   -nographic \
-  -append "rw root=LABEL=rootfs console=ttyS0"
+  -append "rw root=LABEL=rootfs console=ttyS0 net.ifnames=0"
 ```
 
 The above assumes you have opensbi installed in /usr/share/qemu (it is put
@@ -340,7 +341,7 @@ qemu-system-ppc64 \
   -kernel kernel \
   -initrd initrd \
   -nographic \
-  -append "rw root=LABEL=rootfs console=hvc0"
+  -append "rw root=LABEL=rootfs console=hvc0 net.ifnames=0"
 ```
 
 ## s390x (SystemZ)
@@ -384,7 +385,7 @@ qemu-system-s390x \
   -kernel kernel \
   -initrd initrd \
   -nographic \
-  -append "rw root=LABEL=rootfs console=ttysclp0"
+  -append "rw root=LABEL=rootfs console=ttysclp0 net.ifnames=0"
 ```
 
 ## ppc64 big-endian
@@ -432,7 +433,7 @@ qemu-system-ppc64 \
   -kernel kernel \
   -initrd initrd \
   -nographic \
-  -append "rw root=LABEL=rootfs console=hvc0"
+  -append "rw root=LABEL=rootfs console=hvc0 net.ifnames=0"
 ```
 
 ## loong64 / LoongArch
@@ -480,7 +481,7 @@ qemu-system-loongarch64 \
   -kernel kernel \
   -initrd initrd \
   -nographic \
-  -append "rw root=LABEL=rootfs console=ttyS0"
+  -append "rw root=LABEL=rootfs console=ttyS0 net.ifnames=0"
 ```
 
 ## Logging in
@@ -507,3 +508,8 @@ command with something like this and connect to `localhost:2222`:
 ```sh
 -netdev user,id=net,hostfwd=tcp:127.0.0.1:2222-:22
 ```
+
+## Article changelog
+* 2026-05-05: (minor)
+  * Use `net.ifnames=0` command line argument rather than `ln -sf /dev/null
+    /etc/udev/rules.d/80-net-setup-link.rules`.
