@@ -107,6 +107,19 @@ consistently named `eth0` and matched by the networkd config above (I found
 this more reliable than `ln -sf /dev/null
 /etc/udev/rules.d/80-net-setup-link.rules`).
 
+For simplicity we make use of `mkfs.ext4`'s ability to populate the image from
+a directory. Pleasingly, `mkfs.xfs` gained a similar ability in the [xfsprogs
+6.17.0 release](https://lwn.net/Articles/1042751/) in Oct 2025. If you have
+a new enough version, and you prefer an XFS rootfs over ext4 you can tweak the
+recipes below to do the following for the final image population step:
+
+```sh
+fakeroot -i "$ROOTFS/.fakeroot.env" \
+  mkfs.xfs -f -q -L rootfs \
+    -d file,name="$WORK/rootfs.img",size=30g \
+    -p "$ROOTFS",atime=0
+```
+
 ## amd64 / x86-64
 
 Build:
@@ -510,6 +523,6 @@ command with something like this and connect to `localhost:2222`:
 ```
 
 ## Article changelog
-* 2026-05-05: (minor)
-  * Use `net.ifnames=0` command line argument rather than `ln -sf /dev/null
-    /etc/udev/rules.d/80-net-setup-link.rules`.
+* 2026-05-07: (minor) Add note about how to use an XFS rootfs.
+* 2026-05-05: (minor) Use `net.ifnames=0` command line argument rather than
+  `ln -sf /dev/null /etc/udev/rules.d/80-net-setup-link.rules`.
