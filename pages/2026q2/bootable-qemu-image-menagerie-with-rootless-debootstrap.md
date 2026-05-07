@@ -52,7 +52,7 @@ configure_qemu_rootfs() {
   suite=$3
   hostname=$4
 
-  "$rootfs/_enter" sh -e <<EOF
+  "$rootfs/_enter" sh <<EOF
 mkdir -p /etc/systemd/network /etc/ssh/sshd_config.d
 
 cat > /etc/systemd/network/10-qemu.network <<'INNER'
@@ -77,13 +77,13 @@ mkdir -p /var/lib/dbus
 rm -f /var/lib/dbus/machine-id
 ln -sf /etc/machine-id /var/lib/dbus/machine-id
 
-systemctl enable systemd-networkd systemd-resolved systemd-timesyncd ssh || true
-systemctl enable serial-getty@${console}.service || true
+systemctl enable systemd-networkd systemd-resolved systemd-timesyncd ssh
+systemctl enable serial-getty@${console}.service
 
 ln -sf ../run/systemd/resolve/resolv.conf /etc/resolv.conf
 printf 'root:root\n' | chpasswd
-adduser --gecos ",,," --disabled-password user || true
-usermod -aG sudo user || true
+adduser --gecos ",,," --disabled-password user
+usermod -aG sudo user
 printf 'user:user\n' | chpasswd
 EOF
 
@@ -523,6 +523,8 @@ command with something like this and connect to `localhost:2222`:
 ```
 
 ## Article changelog
-* 2026-05-07: (minor) Add note about how to use an XFS rootfs.
+* 2026-05-07: (minor)
+  * Add note about how to use an XFS rootfs.
+  * Get rid of vestigal errexit usage in common setup script.
 * 2026-05-05: (minor) Use `net.ifnames=0` command line argument rather than
   `ln -sf /dev/null /etc/udev/rules.d/80-net-setup-link.rules`.
