@@ -57,7 +57,7 @@ mkdir -p /etc/systemd/network /etc/ssh/sshd_config.d
 
 cat > /etc/systemd/network/10-qemu.network <<'INNER'
 [Match]
-Name=eth*
+Type=ether
 
 [Network]
 DHCP=yes
@@ -138,8 +138,8 @@ rootless-debootstrap-wrapper \
   --include=linux-image-amd64,zstd,dbus,systemd-resolved,systemd-timesyncd,openssh-server,sudo
 
 configure_qemu_rootfs "$ROOTFS" ttyS0 trixie qemu-amd64-trixie
-cp -f "$ROOTFS"/boot/vmlinuz-* "$WORK/kernel"
-cp -f "$ROOTFS"/boot/initrd.img-* "$WORK/initrd"
+cp "$ROOTFS"/boot/vmlinuz-* "$WORK/kernel"
+cp "$ROOTFS"/boot/initrd.img-* "$WORK/initrd"
 fakeroot -i "$ROOTFS/.fakeroot.env" \
   mkfs.ext4 -q -L rootfs -d "$ROOTFS" "$WORK/rootfs.img" 30G
 ```
@@ -187,8 +187,8 @@ rootless-debootstrap-wrapper \
   --include=linux-image-arm64,zstd,dbus,systemd-resolved,systemd-timesyncd,openssh-server,sudo
 
 configure_qemu_rootfs "$ROOTFS" ttyAMA0 trixie qemu-arm64-trixie
-cp -f "$ROOTFS"/boot/vmlinuz-* "$WORK/kernel"
-cp -f "$ROOTFS"/boot/initrd.img-* "$WORK/initrd"
+cp "$ROOTFS"/boot/vmlinuz-* "$WORK/kernel"
+cp "$ROOTFS"/boot/initrd.img-* "$WORK/initrd"
 fakeroot -i "$ROOTFS/.fakeroot.env" \
   mkfs.ext4 -q -L rootfs -d "$ROOTFS" "$WORK/rootfs.img" 30G
 ```
@@ -236,8 +236,8 @@ rootless-debootstrap-wrapper \
 configure_qemu_rootfs "$ROOTFS" ttyAMA0 trixie qemu-armhf-trixie
 printf '%s\n' virtio_mmio virtio_blk virtio_net >> "$ROOTFS/etc/initramfs-tools/modules"
 "$ROOTFS/_enter" update-initramfs -u -k all
-cp -f "$ROOTFS"/boot/vmlinuz-* "$WORK/kernel"
-cp -f "$ROOTFS"/boot/initrd.img-* "$WORK/initrd"
+cp "$ROOTFS"/boot/vmlinuz-* "$WORK/kernel"
+cp "$ROOTFS"/boot/initrd.img-* "$WORK/initrd"
 fakeroot -i "$ROOTFS/.fakeroot.env" \
   mkfs.ext4 -q -L rootfs -d "$ROOTFS" "$WORK/rootfs.img" 30G
 ```
@@ -281,8 +281,8 @@ rootless-debootstrap-wrapper \
   --include=linux-image-riscv64,zstd,dbus,systemd-resolved,systemd-timesyncd,openssh-server,sudo
 
 configure_qemu_rootfs "$ROOTFS" ttyS0 trixie qemu-riscv64-trixie
-cp -f "$ROOTFS"/boot/vmlinux-* "$WORK/kernel"
-cp -f "$ROOTFS"/boot/initrd.img-* "$WORK/initrd"
+cp "$ROOTFS"/boot/vmlinux-* "$WORK/kernel"
+cp "$ROOTFS"/boot/initrd.img-* "$WORK/initrd"
 fakeroot -i "$ROOTFS/.fakeroot.env" \
   mkfs.ext4 -q -L rootfs -d "$ROOTFS" "$WORK/rootfs.img" 30G
 ```
@@ -330,8 +330,8 @@ rootless-debootstrap-wrapper \
   --include=linux-image-powerpc64le,zstd,dbus,systemd-resolved,systemd-timesyncd,openssh-server,sudo
 
 configure_qemu_rootfs "$ROOTFS" hvc0 trixie qemu-ppc64el-trixie
-cp -f "$ROOTFS"/boot/vmlinux-* "$WORK/kernel"
-cp -f "$ROOTFS"/boot/initrd.img-* "$WORK/initrd"
+cp "$ROOTFS"/boot/vmlinux-* "$WORK/kernel"
+cp "$ROOTFS"/boot/initrd.img-* "$WORK/initrd"
 fakeroot -i "$ROOTFS/.fakeroot.env" \
   mkfs.ext4 -q -L rootfs -d "$ROOTFS" "$WORK/rootfs.img" 30G
 ```
@@ -375,8 +375,8 @@ rootless-debootstrap-wrapper \
   --include=linux-image-s390x,zstd,dbus,systemd-resolved,systemd-timesyncd,openssh-server,sudo
 
 configure_qemu_rootfs "$ROOTFS" ttysclp0 trixie qemu-s390x-trixie
-cp -f "$ROOTFS"/boot/vmlinuz-* "$WORK/kernel"
-cp -f "$ROOTFS"/boot/initrd.img-* "$WORK/initrd"
+cp "$ROOTFS"/boot/vmlinuz-* "$WORK/kernel"
+cp "$ROOTFS"/boot/initrd.img-* "$WORK/initrd"
 fakeroot -i "$ROOTFS/.fakeroot.env" \
   mkfs.ext4 -q -L rootfs -d "$ROOTFS" "$WORK/rootfs.img" 30G
 ```
@@ -422,8 +422,8 @@ rootless-debootstrap-wrapper \
   --include=linux-image-powerpc64,zstd,dbus,systemd-resolved,systemd-timesyncd,openssh-server,sudo
 
 configure_qemu_rootfs "$ROOTFS" hvc0 sid qemu-ppc64-sid
-cp -f "$ROOTFS"/boot/vmlinux-* "$WORK/kernel"
-cp -f "$ROOTFS"/boot/initrd.img-* "$WORK/initrd"
+cp "$ROOTFS"/boot/vmlinux-* "$WORK/kernel"
+cp "$ROOTFS"/boot/initrd.img-* "$WORK/initrd"
 fakeroot -i "$ROOTFS/.fakeroot.env" \
   mkfs.ext4 -q -L rootfs -d "$ROOTFS" "$WORK/rootfs.img" 30G
 ```
@@ -470,8 +470,8 @@ rootless-debootstrap-wrapper \
   --include=linux-image-loong64,zstd,dbus,systemd-resolved,systemd-timesyncd,openssh-server,sudo
 
 configure_qemu_rootfs "$ROOTFS" ttyS0 sid qemu-loong64-sid
-cp -f "$ROOTFS"/boot/vmlinuz-* "$WORK/kernel"
-cp -f "$ROOTFS"/boot/initrd.img-* "$WORK/initrd"
+cp "$ROOTFS"/boot/vmlinuz-* "$WORK/kernel"
+cp "$ROOTFS"/boot/initrd.img-* "$WORK/initrd"
 fakeroot -i "$ROOTFS/.fakeroot.env" \
   mkfs.ext4 -q -L rootfs -d "$ROOTFS" "$WORK/rootfs.img" 30G
 ```
@@ -523,6 +523,9 @@ command with something like this and connect to `localhost:2222`:
 ```
 
 ## Article changelog
+* 2026-05-09: (minor)
+  * Tweak shell commands slightly (no `cp -f`) and use `Type=ether` for
+    systemd-networkd match.
 * 2026-05-07: (minor)
   * Add note about how to use an XFS rootfs.
   * Get rid of vestigal errexit usage in common setup script.
