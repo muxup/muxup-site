@@ -500,7 +500,15 @@ qemu-system-loongarch64 \
 ## Logging in
 
 As noted above, you can log in with `root`/`root` or `user`/`user`. The launch
-commands above will show you the QEMU terminal.
+commands above run QEMU with `-nographic` causing your terminal to be
+connected to the guest serial console. `Ctrl-c` alone won't kill the virtual
+machine, so it's helpful to know:
+
+* `Ctrl-a x` exits QEMU immediately.
+* `Ctrl-a c` switches between the guest serial console and the QEMU monitor.
+  From the monitor, `quit` exits QEMU and `system_powerdown` asks the guest to
+  shut down cleanly.
+* `Ctrl-a h` prints QEMU's help for the other `Ctrl-a` shortcuts.
 
 Once the guest is booted, you can connect via ssh to the Unix domain socket
 that forwards to guest port 22. e.g.:
@@ -523,6 +531,8 @@ command with something like this and connect to `localhost:2222`:
 ```
 
 ## Article changelog
+* 2026-05-10: (minor)
+  * Add note about serial console shortcuts.
 * 2026-05-09: (minor)
   * Tweak shell commands slightly (no `cp -f`) and use `Type=ether` for
     systemd-networkd match.
