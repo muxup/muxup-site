@@ -511,20 +511,25 @@ machine, so it's helpful to know:
 * `Ctrl-a h` prints QEMU's help for the other `Ctrl-a` shortcuts.
 
 Once the guest is booted, you can connect via ssh to the Unix domain socket
-that forwards to guest port 22. e.g.:
+that forwards to guest port 22. Assuming you're on a recent system with
+`systemd-ssh-proxy` (and the ssh config file it adds) present, this can be
+done with e.g.:
 
 ```sh
-ssh -o "ProxyCommand=socat - UNIX-CONNECT:/tmp/qemu_amd64.sock" root@vm
+ssh root@unix/tmp/qemu_amd64.sock
 ```
 
-Or with OpenBSD netcat:
+Without `systemd-ssh-proxy`, you can specify `ProxyCommand` instead:
 
 ```sh
+# For socat:
+ssh -o "ProxyCommand=socat - UNIX-CONNECT:/tmp/qemu_amd64.sock" root@vm
+# Or for OpenBSD netcat:
 ssh -o "ProxyCommand=nc -U /tmp/qemu_amd64.sock" root@vm
 ```
 
 If you'd rather use a TCP port, replace the `-netdev` part of the qemu launch
-command with something like this and connect to `localhost:2222`:
+command with something like the following and connect to `localhost:2222`:
 
 ```sh
 -netdev user,id=net,hostfwd=tcp:127.0.0.1:2222-:22
@@ -533,6 +538,7 @@ command with something like this and connect to `localhost:2222`:
 ## Article changelog
 * 2026-05-10: (minor)
   * Add note about serial console shortcuts.
+  * Use systemd-ssh-proxy.
 * 2026-05-09: (minor)
   * Tweak shell commands slightly (no `cp -f`) and use `Type=ether` for
     systemd-networkd match.
