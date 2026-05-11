@@ -535,7 +535,45 @@ command with something like the following and connect to `localhost:2222`:
 -netdev user,id=net,hostfwd=tcp:127.0.0.1:2222-:22
 ```
 
+## Alternative: SSH over vsock
+
+It's possible to avoid QEMU user-mode networking and use ssh via `AF_VSOCK`.
+This can even work without any additional image changes as
+`systemd-ssh-generator` in the guest will generate an appropriate
+socket-activated sshd service if vsock is present. On the host, you'll need to
+pick a numeric address for the vsock ('guest CID') that isn't already in use on
+the system, and change the qemu command line to add the appropriate vsock
+device with that CID assigned. The vsock device used depends on the machine
+being emulated - e.g. whether to attach on PCI or the virtio device bus.
+
+For amd64, ppc64el, ppc64, and loong64, add:
+
+```sh
+-device vhost-vsock-pci,guest-cid=42
+```
+
+For arm64, armhf, and riscv64, add:
+
+```sh
+-device vhost-vsock-device,guest-cid=42
+```
+
+For s390x, use:
+
+```sh
+-device vhost-vsock-ccw,guest-cid=42
+```
+
+Assuming your host has `systemd-ssh-proxy` and its OpenSSH config installed,
+you can connect with:
+
+```sh
+ssh root@vsock/42
+```
+
 ## Article changelog
+* 2026-05-11: (minor)
+  * Add notes on ssh over AF_VSOCK.
 * 2026-05-10: (minor)
   * Add note about serial console shortcuts.
   * Use systemd-ssh-proxy.
@@ -544,6 +582,6 @@ command with something like the following and connect to `localhost:2222`:
     systemd-networkd match.
 * 2026-05-07: (minor)
   * Add note about how to use an XFS rootfs.
-  * Get rid of vestigal errexit usage in common setup script.
+  * Get rid of vestigial errexit usage in common setup script.
 * 2026-05-05: (minor) Use `net.ifnames=0` command line argument rather than
   `ln -sf /dev/null /etc/udev/rules.d/80-net-setup-link.rules`.
