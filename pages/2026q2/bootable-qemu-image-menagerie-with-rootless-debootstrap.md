@@ -535,6 +535,12 @@ command with something like the following and connect to `localhost:2222`:
 -netdev user,id=net,hostfwd=tcp:127.0.0.1:2222-:22
 ```
 
+The systemd-provided config for use of `systemd-ssh-proxy` disables host
+identity checks, which is what you typically want with this setup. If using
+one of the `ProxyCommand` options above you may want to add `-o
+StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null` to your `ssh
+invocation.
+
 ## Alternative: SSH over vsock
 
 It's possible to avoid QEMU user-mode networking and use ssh via `AF_VSOCK`.
@@ -574,6 +580,7 @@ ssh root@vsock/42
 ## Article changelog
 * 2026-05-11: (minor)
   * Add notes on ssh over AF_VSOCK.
+  * Add note about ssh host key checking.
 * 2026-05-10: (minor)
   * Add note about serial console shortcuts.
   * Use systemd-ssh-proxy.
