@@ -43,7 +43,11 @@ mkdir -p "$HOME/debcache"
 ```
 
 Paste the following into your terminal, which will be called to do the common
-guest-side configuration.
+guest-side configuration. The main thing that's slightly non-standard in this
+setup are the systemd drop-in overrides which allow authorised SSH keys to be
+specified by teh systemd credential mechanism. If that's not something you're
+interested in doing, you can skip the parts touch `/etc/systemd/system/ssh*`
+altogether.
 
 ```sh
 configure_qemu_rootfs() {
@@ -68,6 +72,20 @@ PermitRootLogin yes
 PasswordAuthentication yes
 INNER
 rm -f /etc/ssh/ssh_host_*_key /etc/ssh/ssh_host_*_key.pub
+
+cat > /etc/systemd/system/ssh.service.d/10-ephemeral-authorized-keys.conf <<'INNER'
+[Service]
+ImportCredential=ssh.ephemeral-authorized_keys-all
+ExecStart=
+ExecStart=/usr/sbin/sshd -D \$SSHD_OPTS -o "AuthorizedKeysFile .ssh/authorized_keys" -o "AuthorizedKeysCommand /usr/bin/cat \${CREDENTIALS_DIRECTORY}/ssh.ephemeral-authorized_keys-all" -o "AuthorizedKeysCommandUser root"
+INNER
+
+cat > /etc/systemd/system/sshd-vsock@.service.d/10-ephemeral-authorized-keys.conf <<'INNER'
+[Service]
+ImportCredential=ssh.ephemeral-authorized_keys-all
+ExecStart=
+ExecStart=-/usr/sbin/sshd -i \$SSHD_OPTS -o "AuthorizedKeysFile .ssh/authorized_keys" -o "AuthorizedKeysCommand /usr/bin/cat \${CREDENTIALS_DIRECTORY}/ssh.ephemeral-authorized_keys-all" -o "AuthorizedKeysCommandUser root"
+INNER
 
 /usr/bin/systemd-firstboot --locale=C.UTF-8 --hostname=${hostname} --force
 ln -sf ../locale.conf /etc/default/locale
@@ -577,10 +595,21 @@ you can connect with:
 ssh root@vsock/42
 ```
 
+## Using an injected SSH key
+
+Images set up using the recipes above allow a public key to be specified at
+boot time using the systemd system credential mechanism. Just append the
+following to the qemu launch command and you can ssh in using that key:
+
+```sh
+-smbios "type=11,value=io.systemd.credential.binary:ssh.ephemeral-authorized_keys-all=$(base64 -w0 ~/.ssh/id_ed25519.pub)"
+```
+
 ## Article changelog
 * 2026-05-11: (minor)
   * Add notes on ssh over AF_VSOCK.
   * Add note about ssh host key checking.
+  * Add support for injecting ssh keys using systemd's credential mechanism.
 * 2026-05-10: (minor)
   * Add note about serial console shortcuts.
   * Use systemd-ssh-proxy.
