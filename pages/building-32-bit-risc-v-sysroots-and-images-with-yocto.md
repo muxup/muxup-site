@@ -18,10 +18,11 @@ For a bootable QEMU image, Debian-based recipes are [similarly
 straightforward](/pages/2026q2/bootable-qemu-image-menagerie-with-rootless-debootstrap.md).
 But we don't have the luxury of a precompiled distribution for 32-bit RISC-V
 and so we'll lean on [Yocto](https://www.yoctoproject.org/) to produce the
-needed sysroot by building from source. I cover three cases: 1) building a
-sysroot for cross-compiling projects like LLVM, 2) doing the same but in a way
-that requires fewer build steps, 3) building an image approximating my
-debootstrap image recipes.
+needed sysroot by building from source. I cover three cases:
+
+1. building a sysroot for cross-compiling projects like LLVM
+2. doing the same but in a way that requires fewer build steps
+3. building an image approximating my debootstrap image recipes.
 
 In this article I use release 6.0 ('Wrynose') and the `bitbake-setup` helper
 tool.
@@ -74,7 +75,10 @@ environment. Because there isn't a predefined machine target for riscv32 in
 avoid selecting `machine` and will address it later. Importantly, we set a
 `SSTATE_DIR` which will be used for the shared state cache, avoiding
 rebuilding packages when not necessary (I'm not totally sure when this isn't
-exposed in `bitbake-setup settings` like `dl-dir` is).
+exposed in `bitbake-setup settings` like `dl-dir` is). Another relevant
+variable is `BB_HASHSERVE_BB_DIR` which controls where the hash equivalence
+database is stored. But with current `bitbake-setup` this defaults to
+`SSTATE_DIR`, so there's no need to set it explicitly.
 
 ```sh
 ./bitbake/bin/bitbake-setup init --non-interactive \
@@ -123,7 +127,7 @@ was built. I would like to now [follow advice in the
 documentation](https://docs.yoctoproject.org/6.0/sdk-manual/appendix-obtain.html#extracting-the-root-filesystem)
 and run `runqemu-extract-sdk` on the rootfs archive (I submitted a [little
 patch
-upstream](https://lists.openembedded.org/g/openembedded-core/message/229316)
+upstream](https://lists.openembedded.org/g/openembedded-core/message/229316))
 to fix this command for .zst which was applied:
 
 ```
@@ -145,7 +149,8 @@ three finalisation steps we will perform:
   script for this, which is in our `$PATH` after sourcing
   `build/init-build-env`.
 * (Optional) Apply workaround [for a ninja
-issue](https://llvm.org/docs/HowToCrossCompileLLVM.html#working-around-a-ninja-dependency-issue) that would otherwise mean incremental builds don't work.
+  issue](https://llvm.org/docs/HowToCrossCompileLLVM.html#working-around-a-ninja-dependency-issue)
+  that would otherwise mean incremental builds don't work.
 
 ```sh
 mkdir -p "$HOME/rv32sysroot/usr/lib/gcc"
@@ -212,7 +217,7 @@ EOF
 
 The `do_deploy` function implements the sysroot preparation logic that largely
 mirrors the previous section. Otherwise, `DEPENDS` specifies the needed
-dependencies (of these, `virtual/${MLPREFIX}compilerlibs` is a bit magic -
+dependencies (of these, `virtual/${MLPREFIX}compilerlibs` is a bit magic:
 this resolves to the compiler runtime provider which pulls in things like
 `libstdc++`).
 
@@ -240,8 +245,167 @@ contains large unstripped static archives like `usr/lib/libstdc++.a`.
 
 ## Producing a featureful image bootable in QEMU
 
-Watch this space!
+We could probably quibble on the definition of "featureful" as listed in the
+subheading above. For me, this means an image that boots using systemd and you
+can ssh into, roughly approximating what you get from [my debootstrap
+recipes](/pages/2026q2/bootable-qemu-image-menagerie-with-rootless-debootstrap.md).
+But by adding other packages to the image recipe you can certainly make it
+more featureful.
+
+First, let's start to set up the build environment and directories we'll use
+for additional recipes. We use `distro/poky-altcfg` which is just [Poky with
+systemd as the init
+manager](https://git.openembedded.org/bitbake/tree/default-registry/configurations/poky-wrynose.conf.json?h=2.18).
+
+```sh
+cd yocto-work
+./bitbake/bin/bitbake-setup init --non-interactive \
+  --setup-dir-name poky-wrynose-systemd \
+  --skip-selection machine \
+  ./bitbake/default-registry/configurations/poky-wrynose.conf.json \
+  poky \
+  distro/poky-altcfg
+
+. bitbake-builds/poky-wrynose-systemd/build/init-build-env
+bitbake-config-build enable-fragment machine/qemuriscv32
+bitbake-layers create-layer --add-layer ../layers/meta-rv32-qemu-image
+
+mkdir -p \
+  ../layers/meta-rv32-qemu-image/recipes-core/images \
+  ../layers/meta-rv32-qemu-image/recipes-core/rv32-qemu-config/files
+```
+
+Some may prefer to split different aspects of image configuration into
+independent recipes, but I opt to combine it into one for simplicity (in this
+case, just configuring systemd-networkd dhcp and adding a config file that
+will enable `sudo` for our user account):
+
+```sh
+cat > ../layers/meta-rv32-qemu-image/recipes-core/rv32-qemu-config/rv32-qemu-config.bb <<'EOF'
+SUMMARY = "Configuration for RV32 systemd images"
+LICENSE = "MIT-0"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT-0;md5=f41b3a5f969eb450434cf0e4f33449b9"
+
+
+SRC_URI = " \
+    file://20-wired.network \
+    file://90-rv32-qemu \
+"
+
+RDEPENDS:${PN} = "systemd-networkd sudo"
+FILES:${PN} = " \
+    ${sysconfdir}/systemd/network/20-wired.network \
+    ${sysconfdir}/sudoers.d/90-rv32-qemu \
+"
+
+S = "${UNPACKDIR}"
+
+do_install() {
+    install -d ${D}${sysconfdir}/systemd/network
+    install -m 0644 ${S}/20-wired.network ${D}${sysconfdir}/systemd/network/20-wired.network
+
+    install -d ${D}${sysconfdir}/sudoers.d
+    install -m 0440 ${S}/90-rv32-qemu ${D}${sysconfdir}/sudoers.d/90-rv32-qemu
+}
+EOF
+
+cat > ../layers/meta-rv32-qemu-image/recipes-core/rv32-qemu-config/files/20-wired.network <<'EOF'
+[Match]
+Type=ether
+
+[Network]
+DHCP=yes
+EOF
+
+cat > ../layers/meta-rv32-qemu-image/recipes-core/rv32-qemu-config/files/90-rv32-qemu <<'EOF'
+%sudo ALL=(ALL) ALL
+EOF
+```
+
+Now, we create the image recipe that will:
+
+* Use the above config recipe as well as pull in other needed packages.
+* Add a `user` account and set passwords of `root` and `user` to `root` and
+  `user` respectively. This follows the approach in the [Yocto
+  docs](https://docs.yoctoproject.org/6.0/ref-manual/classes.html#extrausers).
+* Make it so `runqemu` will configure things so we can connect ssh in via a
+  Unix domain socket (as done in the debootstrap-based article). Alternatively
+  you can choose to set `QB_SLIRP_OPT = "-netdev
+  user,id=net0,hostfwd=tcp:127.0.0.1:2222-:22"` if you'd rather just connect
+  to `localhost:2222`.
+
+```sh
+ROOT_PASSWORD_HASH="$(printf "%q" "$(openssl passwd -6 root)")"
+USER_PASSWORD_HASH="$(printf "%q" "$(openssl passwd -6 user)")"
+
+cat > ../layers/meta-rv32-qemu-image/recipes-core/images/rv32-qemu-systemd-ssh-image.bb <<EOF
+SUMMARY = "Bootable RV32 QEMU image with systemd, networkd, and SSH access"
+LICENSE = "MIT-0"
+
+inherit image extrausers
+
+IMAGE_FSTYPES = "ext4"
+IMAGE_FEATURES = "allow-root-login"
+
+QB_DEFAULT_FSTYPE = "ext4"
+QB_CMDLINE_IP_SLIRP = "ip=none"
+QB_SLIRP_OPT = "-netdev user,id=net0,hostfwd=unix:/tmp/yoctorv32.sock-:22"
+SERIAL_CONSOLES = "115200;ttyS0"
+
+ROOT_PASSWORD_HASH = "$ROOT_PASSWORD_HASH"
+USER_PASSWORD_HASH = "$USER_PASSWORD_HASH"
+
+IMAGE_INSTALL = "packagegroup-core-boot"
+IMAGE_INSTALL += "os-release"
+IMAGE_INSTALL += "systemd-networkd"
+IMAGE_INSTALL += "systemd-serialgetty"
+IMAGE_INSTALL += "rv32-qemu-config"
+IMAGE_INSTALL += "openssh"
+IMAGE_INSTALL += "sudo"
+IMAGE_INSTALL += "bash"
+IMAGE_INSTALL += "iproute2"
+IMAGE_INSTALL += "iputils"
+IMAGE_INSTALL += "procps"
+
+EXTRA_USERS_PARAMS = " \\
+    groupadd sudo; \\
+    usermod -p '\${ROOT_PASSWORD_HASH}' root; \\
+    useradd -m -d /home/user -s /bin/bash -G sudo -p '\${USER_PASSWORD_HASH}' user; \\
+"
+EOF
+```
+
+Now write necessary configuration and build (disabling a number of distro
+features that would lead to larger build time). The following results in 4305
+build tasks on my machine:
+
+```sh
+printf 'DL_DIR = "%s"\n' "$HOME/.cache/yocto/dl" >> conf/local.conf
+printf 'SSTATE_DIR = "%s"\n' "$HOME/.cache/yocto/sstate" >> conf/local.conf
+
+cat >> conf/local.conf <<'EOF'
+PACKAGE_CLASSES = "package_ipk"
+EXTRA_IMAGE_FEATURES = ""
+IMAGE_FEATURES = ""
+
+DISTRO_FEATURES:remove = "x11 wayland opengl alsa bluetooth wifi 3g nfc pcmcia usbgadget usbhost nfs zeroconf pulseaudio gobject-introspection-data"
+SERIAL_CONSOLES = "115200;ttyS0"
+EOF
+
+bitbake rv32-qemu-systemd-ssh-image
+```
+
+Finally we can boot the image (`snapshot` means changes to the filesystem
+image won't persist, just drop this if that isn't what you desire):
+
+```sh
+DEPLOY="$PWD/tmp/deploy/images/qemuriscv32"
+rm /tmp/yoctorv32.sock
+runqemu "$DEPLOY/rv32-qemu-systemd-ssh-image-qemuriscv32.rootfs.qemuboot.conf" nographic slirp snapshot
+```
+
+And connect via ssh with something like `ssh root@unix/tmp/yoctorv32.sock`.
 
 ## Article changelog
-
+* 2026-05-18: Add second part to article, covering building a bootable image.
 * 2026-05-18: (minor) Updated to use the Wrynose Yocto release.
