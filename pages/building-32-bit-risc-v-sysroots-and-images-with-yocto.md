@@ -23,18 +23,17 @@ sysroot for cross-compiling projects like LLVM, 2) doing the same but in a way
 that requires fewer build steps, 3) building an image approximating my
 debootstrap image recipes.
 
-In this article I use release 5.3 ('Whinlatter'), which [introduced the
-`bitbake-setup` helper
-tool](https://docs.yoctoproject.org/dev/migration-guides/release-notes-5.3.html).
+In this article I use release 6.0 ('Wrynose') and the `bitbake-setup` helper
+tool.
 For documentation, I found the [Yocto quick build
-guide](https://docs.yoctoproject.org/dev/brief-yoctoprojectqs/index.html), and
+guide](https://docs.yoctoproject.org/6.0/brief-yoctoprojectqs/index.html), and
 [bitbake-setup
-docs](https://docs.yoctoproject.org/dev/brief-yoctoprojectqs/index.html), and
+docs](https://docs.yoctoproject.org/6.0/brief-yoctoprojectqs/index.html), and
 [image customisation
-guide](https://docs.yoctoproject.org/dev-manual/customizing-images.html#customizing-images)
+guide](https://docs.yoctoproject.org/6.0/dev-manual/customizing-images.html#customizing-images)
 helpful.
 
-I'm not a Yocto developer, so if you reading this and think there are other
+I'm not a Yocto developer, so if you are reading this and think there are other
 approaches to consider or alternative ways of solving the problem that are
 better, please do drop me a note!
 
@@ -71,16 +70,16 @@ slightly different package list.
 
 In this first stanza, we use `bitbake-setup` to initialise our development
 environment. Because there isn't a predefined machine target for riscv32 in
-`bitbake/default-registry/configurations/poky-whinlatter.conf.json`, we
+`bitbake/default-registry/configurations/poky-wrynose.conf.json`, we
 avoid selecting `machine` and will address it later. Importantly, we set a
 `SSTATE_DIR` which will be used for the shared state cache, avoiding
-rebuilding packages when not necessary (I'm not totaly sure when this isn't
+rebuilding packages when not necessary (I'm not totally sure when this isn't
 exposed in `bitbake-setup settings` like `dl-dir` is).
 
 ```sh
 ./bitbake/bin/bitbake-setup init --non-interactive \
   --skip-selection machine \
-  ./bitbake/default-registry/configurations/poky-whinlatter.conf.json \
+  ./bitbake/default-registry/configurations/poky-wrynose.conf.json \
   poky \
   distro/poky
 
@@ -89,11 +88,11 @@ printf 'SSTATE_DIR = "%s"\n' "$HOME/.cache/yocto/sstate" >> bitbake-builds/site.
 
 With that done, we can source the generated definitions to enter the build
 environment (note we're using the default setup directory, you can override it
-to something other than `poky-whinlatter` by using `--setup-dir-name`) and
+to something other than `poky-wrynose` by using `--setup-dir-name`) and
 use `enable-fragment` to set the qemuriscv32 machine:
 
 ```sh
-. bitbake-builds/poky-whinlatter/build/init-build-env
+. bitbake-builds/poky-wrynose/build/init-build-env
 bitbake-config-build enable-fragment machine/qemuriscv32
 ```
 
@@ -116,23 +115,19 @@ EOF
 bitbake core-image-minimal
 ```
 
-This results in 4482 build tasks and takes quite some time to complete if you
+This results in 4624 build tasks and takes quite some time to complete if you
 haven't run it before (i.e. aren't hitting in the sstate cache). The next
 section of this article explores how to produce the needed output while
 building much less, but let's finish the job and extract a rootfs from what
 was built. I would like to now [follow advice in the
-documentation](https://docs.yoctoproject.org/sdk-manual/appendix-obtain.html#extracting-the-root-filesystem)
-and do `runqemu-extract-sdk
-tmp/deploy/images/qemuriscv32/core-image-minimal-qemuriscv32.rootfs.tar.zst
-~/rv32sysroot`, except that fails because the `runqemu-extract-sdk` script
-doesn't recognise .tar.zst (I've [submitted a
-patch](https://lists.openembedded.org/g/openembedded-core/message/229316)). So
-instead we manually extract the .tar from the .tar.zst and then run the
-runqemu-extract-sdk script:
+documentation](https://docs.yoctoproject.org/6.0/sdk-manual/appendix-obtain.html#extracting-the-root-filesystem)
+and run `runqemu-extract-sdk` on the rootfs archive (I submitted a [little
+patch
+upstream](https://lists.openembedded.org/g/openembedded-core/message/229316)
+to fix this command for .zst which was applied:
 
 ```
-zstd -d -k -f tmp/deploy/images/qemuriscv32/core-image-minimal-qemuriscv32.rootfs.tar.zst
-runqemu-extract-sdk tmp/deploy/images/qemuriscv32/core-image-minimal-qemuriscv32.rootfs.tar ~/rv32sysroot
+runqemu-extract-sdk tmp/deploy/images/qemuriscv32/core-image-minimal-qemuriscv32.rootfs.tar.zst ~/rv32sysroot
 ```
 
 At this point, you have a sysroot that's _almost_ directly usable for
@@ -142,21 +137,21 @@ three finalisation steps we will perform:
 * Add an additional symlink to the tree so that upstream Clang's search
   procedure for the GCC install finds the correct directory. The combination
   of
-  [these](https://git.openembedded.org/openembedded-core/tree/meta/recipes-devtools/clang/clang/0010-clang-Define-releative-gcc-installation-dir.patch?h=whinlatter)
-  [two](https://git.openembedded.org/openembedded-core/tree/meta/recipes-devtools/clang/clang/0018-llvm-clang-Insert-anchor-for-adding-OE-distro-vendor.patch?h=whinlatter)
+  [these](https://git.openembedded.org/openembedded-core/tree/meta/recipes-devtools/clang/clang/0010-clang-Define-releative-gcc-installation-dir.patch?h=wrynose)
+  [two](https://git.openembedded.org/openembedded-core/tree/meta/recipes-devtools/clang/clang/0018-llvm-clang-Insert-anchor-for-adding-OE-distro-vendor.patch?h=wrynose)
   downstream patches which Yocto applies to its own Clang builds would make
   this unnecessary. I'm not sure if upstreaming has ever been pursued.
 * Convert all absolute symlinks to relative ones. Yocto provides a Python
   script for this, which is in our `$PATH` after sourcing
   `build/init-build-env`.
 * (Optional) Apply workaround [for a ninja
-  issue](https://llvm.org/docs/HowToCrossCompileLLVM.html#working-around-a-ninja-dependency-issue)
-  that would otherwise mean incremental builds don't work.
+issue](https://llvm.org/docs/HowToCrossCompileLLVM.html#working-around-a-ninja-dependency-issue) that would otherwise mean incremental builds don't work.
 
 ```sh
-mkdir -p "$HOME/rv32sysroot/usr/lib/gcc" && ln -s ../riscv32-poky-linux "$HOME/rv32sysroot/usr/lib/gcc/riscv32-poky-linux"
-sysroot-relativelinks.py $HOME/rv32sysroot
-ln -s usr/include $HOME/rv32sysroot/include
+mkdir -p "$HOME/rv32sysroot/usr/lib/gcc"
+ln -s ../riscv32-poky-linux "$HOME/rv32sysroot/usr/lib/gcc/riscv32-poky-linux"
+sysroot-relativelinks.py "$HOME/rv32sysroot"
+ln -s usr/include "$HOME/rv32sysroot/include"
 ```
 
 ## Producing a sysroot with fewer build steps
@@ -169,7 +164,7 @@ dependencies and contains logic to produce the sysroot.
 First, create a layer:
 
 ```sh
-. bitbake-builds/poky-whinlatter/build/init-build-env
+. bitbake-builds/poky-wrynose/build/init-build-env
 bitbake-layers create-layer --add-layer ../layers/meta-rv32-llvm-sysroot
 ```
 
@@ -187,7 +182,7 @@ INHIBIT_DEFAULT_DEPS = "1"
 EXCLUDE_FROM_WORLD = "1"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
-DEPENDS = "virtual/libc libgcc virtual/${MLPREFIX}compilerlibs zlib"
+DEPENDS = "virtual/libc libgcc virtual/${MLPREFIX}compilerlibs zlib zstd-native"
 
 inherit deploy nopackages
 
@@ -197,16 +192,19 @@ do_install[noexec] = "1"
 do_populate_sysroot[noexec] = "1"
 
 do_deploy() {
-  export_dir="${DEPLOYDIR}/${PN}-${MACHINE}"
-  rm -rf "$export_dir"
-  mkdir -p "$export_dir"
-  cp -a "${RECIPE_SYSROOT}/." "$export_dir/"
+    export_dir="${WORKDIR}/${PN}-export"
+    rm -rf "$export_dir"
+    mkdir -p "$export_dir"
+    cp -a "${RECIPE_SYSROOT}/." "$export_dir/"
 
-  sysroot-relativelinks.py "$export_dir"
+    sysroot-relativelinks.py "$export_dir"
 
-  mkdir -p "$export_dir/usr/lib/gcc"
-  ln -s ../riscv32-poky-linux "$export_dir/usr/lib/gcc/riscv32-poky-linux"
-  ln -s usr/include "$export_dir/include"
+    mkdir -p "$export_dir/usr/lib/gcc"
+    ln -s ../riscv32-poky-linux "$export_dir/usr/lib/gcc/riscv32-poky-linux"
+    ln -s usr/include "$export_dir/include"
+
+    tar -C "$export_dir" -cf - . | \
+      zstd -T0 -f -o "${DEPLOYDIR}/${PN}-${MACHINE}.tar.zst"
 }
 addtask deploy after do_prepare_recipe_sysroot before do_build
 EOF
@@ -224,8 +222,18 @@ Build the sysroot with:
 bitbake rv32-llvm-deps-sysroot
 ```
 
-This performs ~850 build tasks and will produce the sysroot at
-`tmp/deploy/images/qemuriscv32/rv32-llvm-deps-sysroot-qemuriscv32/`.
+This performs ~948 build tasks and will produce the sysroot tarball at
+`tmp/deploy/images/qemuriscv32/rv32-llvm-deps-sysroot-qemuriscv32.tar.zst`.
+
+You can use it by doing something like:
+
+```sh
+SYSROOT="$HOME/rv32depssysroot"
+rm -rf "$SYSROOT"
+mkdir -p "$SYSROOT"
+tar --zstd -C "$SYSROOT" -xf \
+  tmp/deploy/images/qemuriscv32/rv32-llvm-deps-sysroot-qemuriscv32.tar.zst
+```
 
 The sysroot is slightly larger than the one in the section above because it
 contains large unstripped static archives like `usr/lib/libstdc++.a`.
@@ -233,3 +241,7 @@ contains large unstripped static archives like `usr/lib/libstdc++.a`.
 ## Producing a featureful image bootable in QEMU
 
 Watch this space!
+
+## Article changelog
+
+* 2026-05-18: (minor) Updated to use the Wrynose Yocto release.
