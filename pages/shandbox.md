@@ -136,6 +136,38 @@ sandbox (such as `/tmp`, `/usr`, `/etc`, and similar) are used as-is.
   private keys or ssh-agent state into the sandbox. The sandbox directory must
   already have been initialised with `shandbox new`. See below.
 
+## Minimum requirements and Ubuntu compatibility
+
+Two core requirement are the ability to create a new user namespace, and a
+recent enough util-linux release (2.41 or newer should work). The earliest
+Ubuntu release known to work is 25.10 (25.04 won't work, as its util-linux is
+too old).
+
+Recent Ubuntu releases restrict unprivileged user namespaces through AppArmor,
+meaning additional settings are required. Chromium's [AppArmor user namespace
+restrictions
+notes](https://chromium.googlesource.com/chromium/src/+/main/docs/security/apparmor-userns-restrictions.md)
+describe this policy and workarounds.
+
+To change the relevant setting non-persistently:
+
+```sh
+sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+```
+
+You can alternatively add an AppArmor profile covering the path you install
+`shandbox` to. e.g. put this at `/etc/apparmor.d/shandbox` and then do `sudo
+service apparmor reload`:
+
+```apparmor
+abi <abi/4.0>,
+include <tunables/global>
+
+profile shandbox /usr/local/bin/shandbox flags=(unconfined) {
+  userns,
+}
+```
+
 ## Self-contained sandbox directories
 
 A sandbox is represented by a normal directory, defaulting to `$HOME/sandbox`.
@@ -276,6 +308,8 @@ To implement that:
   owned by `nobody` in the inner user namespace.
 
 ## Article changelog
+* 2026-05-30: (minor) Added note about Ubuntu compatibility and util-linux
+  requirements.
 * 2026-05-26: Update article to reflect a wide range of improvements to the script.
   * share-ssh functionality.
   * init hooks
